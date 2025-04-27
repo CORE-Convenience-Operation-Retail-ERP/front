@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import LoginPage from '../pages/auth/LoginPage';
 import DashboardPage from '../pages/headquarters/DashboardPage';
+import StoreLayout from "../layouts/StoreLayout";
 
 const AppRoutes = () => {
   return (
@@ -17,7 +18,10 @@ const AppRoutes = () => {
         <Route path="settings" element={<div>설정 페이지</div>} />
       </Route>
 
-      {/* 기본 리다이렉트 */}
+        <Route path="/store" element={<StoreLayout/>} ></Route>
+
+
+        {/* 기본 리다이렉트 */}
       <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   );
