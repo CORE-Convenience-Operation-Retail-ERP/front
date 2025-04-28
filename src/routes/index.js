@@ -54,16 +54,16 @@ const AppRoutes = () => {
       </Route>
 
         {/* 지점 관련 라우트*/}
-      <Route path="/store" element={<StoreLayout/>} >
-        <Route path="home" element={<HomePage/>} />
-        <Route path="inventory/current" element={<InventoryPage/>} />
-        <Route path="inventory/disposal" element={<DisposalPage/>} />
-        <Route path="order/register" element={<OrderRegisterPage/>} />
-        <Route path="order/list" element={<OrderListPage/>} />
-        <Route path="hr/employee" element={<PartTimerPage/>} />
-        <Route path="hr/schedule" element={<PartTimerSchedulePage/>} />
-        <Route path="hr/salary" element={<SalaryPage/>} />
-        <Route path="sales" element={<SalesPage/>} />
+        <Route path="/store" element={<StoreLayout/>} >
+          <Route path="home" element={<HomePage/>} />
+          <Route path="inventory/current" element={<InventoryPage/>} />
+          <Route path="inventory/disposal" element={<DisposalPage/>} />
+          <Route path="order/register" element={<OrderRegisterPage/>} />
+          <Route path="order/list" element={<OrderListPage/>} />
+          <Route path="hr/employee" element={<PartTimerPage/>} />
+          <Route path="hr/schedule" element={<PartTimerSchedulePage/>} />
+          <Route path="hr/salary" element={<SalaryPage/>} />
+          <Route path="sales" element={<SalesPage/>} />
         <Route path="stats/order" element={<StatsOrderPage/>} />
         <Route path="stats/sales" element={<StatsSalesPage/>} />
       </Route>
