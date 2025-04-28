@@ -106,12 +106,15 @@ const StyledListItem = styled(ListItem)(({ isActive }) => ({
   position: 'relative',
   zIndex: 1,
   height: '44px',
+  // Pretendard 폰트 적용 (메인 메뉴 전체)
+  fontFamily: 'Pretendard, sans-serif',
   '& .MuiTypography-root': {
+    // Pretendard 폰트 적용 (메인 메뉴 텍스트)
+    fontFamily: 'Pretendard, sans-serif',
     fontSize: '18px',
-    color: 'white',
     color: isActive ? '#1A237E' : 'white',
     transition: 'color 0.3s ease-in-out',
-    fontWeight: isActive ? 600 : 500,
+    fontWeight: isActive ? 700 : 400,
   }
 }));
 
@@ -119,16 +122,20 @@ const SubMenuList = styled(List)({
   padding: '4px 0 4px 24px',
   position: 'relative',
   zIndex: 1,
+  // Pretendard 폰트 적용 (서브 메뉴 전체)
+  fontFamily: 'Pretendard, sans-serif',
   '& .MuiListItem-root': {
     padding: '8px 24px',
     height: '36px',
     '& .MuiTypography-root': {
+      // Pretendard 폰트 적용 (서브 메뉴 텍스트)
+      fontFamily: 'Pretendard, sans-serif',
       fontSize: '14px',
       color: '#1A237E',
     },
     '&:hover': {
       '& .MuiTypography-root': {
-        fontWeight: 600,
+        fontWeight: 900,
       }
     }
   }
@@ -217,6 +224,11 @@ const Sidebar = () => {
           ))}
         </List>
       </SidebarContainer>
+      {/* 푸터 : CORE */}
+      <Box sx={{ position: 'absolute', bottom: 32, left: 0, width: '100%', textAlign: 'center' }}>
+        {/* Pretendard 폰트와 굵기 400(Regular) 적용 예시 (푸터) */}
+        <span style={{ fontFamily: 'Pretendard, sans-serif', fontWeight: 400, color: 'white', fontSize: '16px', letterSpacing: '1px' }}>&copy; CORE</span>
+      </Box>
     </StyledDrawer>
   );
 };
