@@ -9,11 +9,10 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 알림 드롭다운 제어용
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [notifications, setNotifications] = React.useState([
-    { id: 1, title: '새 공지사항이 등록되었습니다.' },
-    { id: 2, title: '연차 신청이 도착했습니다.' },
+    { id: 1, title: '새 공지사항이 등록되었습니다.', isRead: false },
+    { id: 2, title: '연차 신청이 도착했습니다.', isRead: false },
   ]);
   const open = Boolean(anchorEl);
 
@@ -34,13 +33,21 @@ const Header = () => {
     setAnchorEl(null);
   };
 
+  // 알림 클릭 시 해당 알림을 읽음 처리하는 함수
+  const handleNotificationRead = (id) => {
+    setNotifications(prevNotifications =>
+      prevNotifications.map(notification =>
+        notification.id === id ? { ...notification, isRead: true } : notification
+      )
+    );
+    handleNotificationClose();
+  };
+
   return (
     <AppBar position="fixed" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #eee' }}>
       <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64 }}>
-        {/* 좌측 여백 */}
-        <Box sx={{ width: 700 }} />
+        <Box sx={{ width: 300 }} />
 
-        {/* 가운데 로고 */}
         <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
           <img
             src="/core_logo.png"
@@ -50,11 +57,10 @@ const Header = () => {
           />
         </Box>
 
-        {/* 우측 아이콘들 */}
         <Box sx={{ width: 300, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1.5 }}>
-          {/* 알림 아이콘 */}
+          {/* 알림 아이콘 및 뱃지 */}
           <IconButton onClick={handleNotificationClick}>
-            <Badge badgeContent={notifications.length} color="error">
+            <Badge badgeContent={notifications.filter(n => !n.isRead).length} color="error">
               <NotificationsIcon sx={{ color: 'black' }} />
             </Badge>
           </IconButton>
@@ -65,13 +71,13 @@ const Header = () => {
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           >
             {notifications.map((notification) => (
-              <MenuItem key={notification.id} onClick={handleNotificationClose}>
+              // 알림 목록 클릭 시 읽음 처리
+              <MenuItem key={notification.id} onClick={() => handleNotificationRead(notification.id)}>
                 {notification.title}
               </MenuItem>
             ))}
           </Menu>
 
-          {/* 프로필 이미지 */}
           <Box
             component="img"
             src="/profile_default.png"
@@ -86,24 +92,22 @@ const Header = () => {
             onClick={() => navigate('/headquarters/hr/my-page')}
           />
 
-          {/* 사용자 이름 */}
           <Box
             sx={{
               cursor: 'pointer',
-              '&:hover': { textDecoration: 'underline' }
+              '&:hover': { textDecoration: 'underline' },
+              color: 'black'
             }}
             onClick={() => navigate('/headquarters/hr/my-page')}
           >
             홍길동님
           </Box>
 
-          {/* 로그아웃 버튼 */}
           <LogoutIcon
-            sx={{ cursor: 'pointer' }}
+            sx={{ cursor: 'pointer', color: 'black' }}
             onClick={handleLogout}
           />
 
-          {/* Store 이동 버튼 */}
           <Button color="inherit" onClick={() => navigate('/store')}>
             Store
           </Button>
