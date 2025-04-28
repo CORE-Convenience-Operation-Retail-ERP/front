@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import StoreHeader from '../../components/store/StoreHeader';
+import StoreHeader from '../../../components/store/common/StoreHeader';
 
 function HeaderContainer() {
     const [userInfo, setUserInfo] = useState({
