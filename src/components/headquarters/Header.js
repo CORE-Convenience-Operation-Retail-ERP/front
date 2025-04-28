@@ -15,13 +15,13 @@ const Header = () => {
     <AppBar position="fixed" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #eee' }}>
       <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64 }}>
         {/* 좌측 여백 */}
-        <Box sx={{ width: 200 }} />
+        <Box sx={{ width: 300 }} />
         {/* 가운데 로고 */}
         <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
           <img
             src="/core_logo.png" // public 폴더에 core_logo.png로 저장
             alt="CORE"
-            style={{ height: 48, cursor: 'pointer' }}
+            style={{ height: 30, cursor: 'pointer' }}
             onClick={handleLogoClick}
           />
         </Box>

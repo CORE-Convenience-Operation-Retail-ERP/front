@@ -104,3 +104,14 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 } 
+
+.MuiTooltip-tooltip {
+  border: 2px solid #222 !important;
+  box-shadow: none !important;
+  background: white !important;
+  color: #1A237E !important;
+}
+.MuiTooltip-popper {
+  box-shadow: none !important;
+  filter: none !important;
+}

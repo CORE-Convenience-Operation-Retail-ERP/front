@@ -6,7 +6,8 @@ import {
   ListItemText, 
   Collapse,
   Box,
-  styled
+  styled,
+  Tooltip
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,7 +18,8 @@ const menuItems = [
     subMenus: [
       { text: '전체 제품 관리', path: '/headquarters/products/all' },
       { text: '상세 제품 관리', path: '/headquarters/products/detail' }
-    ]
+    ],
+    hoverBoxBottom: { bottom: -25, width: 80, height: 20 },
   },
   {
     text: '인사 관리',
@@ -26,7 +28,8 @@ const menuItems = [
       { text: '사원 목록', path: '/headquarters/hr/employees' },
       { text: '사원 정보 관리', path: '/headquarters/hr/employee-management' },
       { text: '마이 페이지', path: '/headquarters/hr/my-page' },
-    ]
+    ],
+    hoverBoxBottom: { bottom: -50, width: 81, height: 30 },
   },
   {
     text: '지점 관리',
@@ -37,7 +40,8 @@ const menuItems = [
       { text: '지점 매출 분석', path: '/headquarters/branches/sales-analysis' },
       { text: '재고 모니터링', path: '/headquarters/branches/inventory' },
       { text: '지점 통계', path: '/headquarters/branches/statistics' }
-    ]
+    ],
+    hoverBoxBottom: { bottom: -88, width: 85, height: 40 },
   },
   {
     text: '게시판',
@@ -46,7 +50,8 @@ const menuItems = [
       { text: '공지 사항', path: '/headquarters/board/notice' },
       { text: '건의 사항', path: '/headquarters/board/suggestions' },
       { text: '점포 문의 사항', path: '/headquarters/board/store-inquiries' }
-    ]
+    ],
+    hoverBoxBottom: { bottom: -45, width: 80, height: 25 },
   }
 ];
 
@@ -63,7 +68,7 @@ const StyledDrawer = styled(Drawer)({
 
 const SidebarContainer = styled(Box)({
   height: '100vh',
-  background: '#A8D8F0',
+  background: '#1EACB5',
   borderRadius: '0 50px 50px 0',
   padding: '120px 0 40px 0',
   position: 'relative',
@@ -79,6 +84,36 @@ const SidebarContainer = styled(Box)({
     borderRadius: '0 50px 50px 0',
     zIndex: -1,
   }
+});
+
+const HoverCornerBox = styled('div')({
+  position: 'absolute',
+  left: 100,
+  top: '-20px',
+  width: '80px',
+  height: '20px',
+  background: 'transparent',
+  borderRadius: '0 0 50px 0',
+  boxShadow: '10px 5px 0 0 white',
+  zIndex: 2,
+  pointerEvents: 'none',
+  transition: 'opacity 2s',
+  overflow: 'visible',
+});
+
+const HoverCornerBoxBottom = styled('div')({
+  position: 'absolute',
+  left: 100,
+  bottom: '-20px',
+  width: '80px',
+  height: '20px',
+  background: 'transparent',
+  borderRadius: '0 50px 0 0',
+  boxShadow: '10px -5px 0 0 white',
+  zIndex: 2,
+  pointerEvents: 'none',
+  transition: 'opacity 0.9s',
+  overflow: 'visible',
 });
 
 const MenuContainer = styled(Box)(({ isActive, hasSubmenu, submenuHeight }) => ({
@@ -106,12 +141,16 @@ const StyledListItem = styled(ListItem)(({ isActive }) => ({
   position: 'relative',
   zIndex: 1,
   height: '44px',
+  fontFamily: 'Pretendard, sans-serif',
+  '&:hover': {
+    backgroundColor: 'transparent', // ← hover 시 배경색 투명
+  },
   // Pretendard 폰트 적용 (메인 메뉴 전체)
   fontFamily: 'Pretendard, sans-serif',
   '& .MuiTypography-root': {
     // Pretendard 폰트 적용 (메인 메뉴 텍스트)
     fontFamily: 'Pretendard, sans-serif',
-    fontSize: '18px',
+    fontSize: '21px',
     color: isActive ? '#1A237E' : 'white',
     transition: 'color 0.3s ease-in-out',
     fontWeight: isActive ? 700 : 400,
@@ -148,6 +187,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [hoveredMenu, setHoveredMenu] = useState(null);
   const [submenuHeights, setSubmenuHeights] = useState({});
+  const [submenuOpened, setSubmenuOpened] = useState({});
 
   // 서브메뉴 예상 높이 계산 함수
   const getExpectedSubmenuHeight = (item) => {
@@ -167,6 +207,9 @@ const Sidebar = () => {
   };
 
   const handleMenuLeave = () => {
+    if (hoveredMenu !== null) {
+      setSubmenuOpened(prev => ({ ...prev, [hoveredMenu]: false }));
+    }
     setHoveredMenu(null);
   };
 
@@ -198,15 +241,34 @@ const Sidebar = () => {
               hasSubmenu={item.subMenus.length > 0}
               submenuHeight={submenuHeights[index] || 0}
             >
+              {/*
+                항상 HoverCornerBox를 렌더링하고,
+                hoveredMenu === index일 때만 opacity: 1, 아니면 opacity: 0
+              */}
+              <HoverCornerBox
+                style={{
+                  opacity: hoveredMenu === index ? 1 : 0,
+                  transition: hoveredMenu === index ? 'opacity 0.9s' : 'opacity 0.3s'
+                }}
+              />
+              <HoverCornerBoxBottom
+                style={{
+                  opacity: submenuOpened[index] ? 1 : 0,
+                  transition: submenuOpened[index]
+                    ? 'opacity 0.5s'
+                    : 'opacity 0s',
+                  bottom: item.hoverBoxBottom?.bottom,
+                  width: item.hoverBoxBottom?.width,
+                  height: item.hoverBoxBottom?.height
+                }}
+              />
               <StyledListItem button isActive={hoveredMenu === index}>
                 <ListItemText primary={item.text} />
               </StyledListItem>
               <Collapse
                 in={hoveredMenu === index}
                 timeout={300}
-                onEntered={(node) => {
-                  updateSubmenuHeight(index, node.scrollHeight);
-                }}
+                onEntered={() => setSubmenuOpened(prev => ({ ...prev, [index]: true }))}
               >
                 <SubMenuList>
                   {item.subMenus.map((subItem) => (
@@ -226,8 +288,41 @@ const Sidebar = () => {
       </SidebarContainer>
       {/* 푸터 : CORE */}
       <Box sx={{ position: 'absolute', bottom: 32, left: 0, width: '100%', textAlign: 'center' }}>
-        {/* Pretendard 폰트와 굵기 400(Regular) 적용 예시 (푸터) */}
-        <span style={{ fontFamily: 'Pretendard, sans-serif', fontWeight: 400, color: 'white', fontSize: '16px', letterSpacing: '1px' }}>&copy; CORE</span>
+        <Tooltip
+          title={
+            <Box sx={{ p: 1, bgcolor: 'white', color: '#1A237E', borderRadius: 2, fontSize: 14 }}>
+              <span style={{ fontWeight: 700 }}>CORE ERP 시스템 v1.0</span><br />
+              문의   : core@company.com<br />
+              전화   : 1234-5678<br />
+              주소   : 서울특별시 강남구 테헤란로 123<br />
+              운영시간: 월-금 09:00-18:00
+            </Box>
+          }
+          placement="top"
+          enterDelay={200}
+          sx={{
+            '& .MuiTooltip-tooltip': {
+              border: '2px solid #222',
+              boxShadow: 'none',
+              backgroundColor: 'white',
+              color: '#1A237E',
+            },
+            '& .MuiTooltip-arrow': {
+              color: 'white',
+            }
+          }}
+        >
+          <span style={{
+            fontFamily: 'Pretendard, sans-serif',
+            fontWeight: 400,
+            color: 'white',
+            fontSize: '16px',
+            letterSpacing: '1px',
+            cursor: 'pointer'
+          }}>
+            &copy; CORE
+          </span>
+        </Tooltip>
       </Box>
     </StyledDrawer>
   );
