@@ -15,6 +15,20 @@ import SalaryPage from "../pages/store/SalaryPage";
 import StatsOrderPage from "../pages/store/StatsOrderPage";
 import StatsSalesPage from "../pages/store/StatsSalesPage";
 import SalesPage from "../pages/store/SalesPage";
+import HeadquartersLayout from '../layouts/HeadquartersLayout';
+import ProductsAllPage from '../pages/headquarters/ProductsAllPage';
+import ProductsDetailPage from '../pages/headquarters/ProductsDetailPage';
+import EmployeesListPage from '../pages/headquarters/EmployeesListPage';
+import EmployeeManagementPage from '../pages/headquarters/EmployeeManagementPage';
+import MyPage from '../pages/headquarters/MyPage';
+import BranchesListPage from '../pages/headquarters/BranchesListPage';
+import BranchesManagementPage from '../pages/headquarters/BranchesManagementPage';
+import BranchesSalesAnalysisPage from '../pages/headquarters/BranchesSalesAnalysisPage';
+import BranchesStockMonitoringPage from '../pages/headquarters/BranchesStockMonitoringPage';
+import BranchesStatisticsPage from '../pages/headquarters/BranchesStatisticsPage';
+import BoardNoticePage from '../pages/headquarters/BoardNoticePage';
+import BoardSuggestionsPage from '../pages/headquarters/BoardSuggestionsPage';
+import BoardStoreInquiriesPage from '../pages/headquarters/BoardStoreInquiriesPage';
 
 const AppRoutes = () => {
   return (
@@ -22,11 +36,21 @@ const AppRoutes = () => {
       <Route path="/login" element={<LoginPage />} />
       
       {/* 본사 관련 라우트 */}
-      <Route path="/headquarters" element={<MainLayout />}>
+      <Route path="/headquarters/*" element={<HeadquartersLayout />}>
+        <Route path="products/all" element={<ProductsAllPage />} />
+        <Route path="products/detail" element={<ProductsDetailPage />} />
+        <Route path="hr/employees" element={<EmployeesListPage />} />
+        <Route path="hr/employee-management" element={<EmployeeManagementPage />} />
+        <Route path="hr/my-page" element={<MyPage />} />
+        <Route path="branches/list" element={<BranchesListPage />} />
+        <Route path="branches/management" element={<BranchesManagementPage />} />
+        <Route path="branches/sales-analysis" element={<BranchesSalesAnalysisPage />} />
+        <Route path="branches/stock-monitering" element={<BranchesStockMonitoringPage />} />
+        <Route path="branches/statistics" element={<BranchesStatisticsPage />} />
+        <Route path="board/notice" element={<BoardNoticePage />} />
+        <Route path="board/suggestions" element={<BoardSuggestionsPage />} />
+        <Route path="board/store-inquiries" element={<BoardStoreInquiriesPage />} />
         <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="employees" element={<div>직원 관리 페이지</div>} />
-        <Route path="sales" element={<div>매출 관리 페이지</div>} />
-        <Route path="settings" element={<div>설정 페이지</div>} />
       </Route>
 
         {/* 지점 관련 라우트*/}

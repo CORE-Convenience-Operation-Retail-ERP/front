@@ -44,7 +44,7 @@ const Header = () => {
   };
 
   return (
-    <AppBar position="fixed" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #eee' }}>
+    <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #eee' }}>
       <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64 }}>
         <Box sx={{ width: 300 }} />
 

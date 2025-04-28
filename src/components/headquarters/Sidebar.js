@@ -38,10 +38,10 @@ const menuItems = [
       { text: '지점 목록', path: '/headquarters/branches/list' },
       { text: '지점 정보 관리', path: '/headquarters/branches/management' },
       { text: '지점 매출 분석', path: '/headquarters/branches/sales-analysis' },
-      { text: '재고 모니터링', path: '/headquarters/branches/inventory' },
+      { text: '재고 모니터링', path: '/headquarters/branches/stock-monitering' },
       { text: '지점 통계', path: '/headquarters/branches/statistics' }
     ],
-    hoverBoxBottom: { bottom: -88, width: 85, height: 40 },
+    hoverBoxBottom: { bottom: -88, width: 88  , height: 40 },
   },
   {
     text: '게시판',
@@ -63,6 +63,7 @@ const StyledDrawer = styled(Drawer)({
     border: 'none',
     height: '100vh',
     marginTop: 0,
+    position: 'static', // 겹침 방지
   },
 });
 
@@ -116,9 +117,11 @@ const HoverCornerBoxBottom = styled('div')({
   overflow: 'visible',
 });
 
-const MenuContainer = styled(Box)(({ isActive, hasSubmenu, submenuHeight }) => ({
+const MenuContainer = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'isActive' && prop !== 'hasSubmenu' && prop !== 'submenuHeight'
+})(({ isActive, hasSubmenu, submenuHeight }) => ({
   position: 'relative',
-  marginBottom: '80px',
+  marginBottom: '60px',
   marginLeft: '40px',
   
   '&::before': {
@@ -136,19 +139,19 @@ const MenuContainer = styled(Box)(({ isActive, hasSubmenu, submenuHeight }) => (
   }
 }));
 
-const StyledListItem = styled(ListItem)(({ isActive }) => ({
+const StyledListItem = styled(ListItem, {
+  shouldForwardProp: (prop) => prop !== 'isActive'
+})(({ isActive }) => ({
   padding: '12px 24px',
   position: 'relative',
   zIndex: 1,
   height: '44px',
   fontFamily: 'Pretendard, sans-serif',
   '&:hover': {
-    backgroundColor: 'transparent', // ← hover 시 배경색 투명
+    backgroundColor: 'transparent',
   },
-  // Pretendard 폰트 적용 (메인 메뉴 전체)
   fontFamily: 'Pretendard, sans-serif',
   '& .MuiTypography-root': {
-    // Pretendard 폰트 적용 (메인 메뉴 텍스트)
     fontFamily: 'Pretendard, sans-serif',
     fontSize: '21px',
     color: isActive ? '#1A237E' : 'white',
@@ -161,13 +164,11 @@ const SubMenuList = styled(List)({
   padding: '4px 0 4px 24px',
   position: 'relative',
   zIndex: 1,
-  // Pretendard 폰트 적용 (서브 메뉴 전체)
   fontFamily: 'Pretendard, sans-serif',
   '& .MuiListItem-root': {
     padding: '8px 24px',
     height: '36px',
     '& .MuiTypography-root': {
-      // Pretendard 폰트 적용 (서브 메뉴 텍스트)
       fontFamily: 'Pretendard, sans-serif',
       fontSize: '14px',
       color: '#1A237E',
@@ -241,10 +242,6 @@ const Sidebar = () => {
               hasSubmenu={item.subMenus.length > 0}
               submenuHeight={submenuHeights[index] || 0}
             >
-              {/*
-                항상 HoverCornerBox를 렌더링하고,
-                hoveredMenu === index일 때만 opacity: 1, 아니면 opacity: 0
-              */}
               <HoverCornerBox
                 style={{
                   opacity: hoveredMenu === index ? 1 : 0,
