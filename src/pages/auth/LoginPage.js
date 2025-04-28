@@ -24,15 +24,21 @@ const LoginPage = () => {
     })
 
     .then(response => {
-      console.log("Response status:", response.status);  // 응답 상태 코드 확인
-      if (response.ok) {
-        console.log('로그인 성공');
-        navigate('/headquarters/dashboard'); // 로그인 성공 시 이동할 페이지
+      if (!response.ok) {
+        throw new Error('로그인 실패');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log("서버 응답:", data);
+
+      if (data.workType === 3) {
+        navigate('/store/home'); // 점주용
       } else {
-        console.error('로그인 실패');
-        alert('아이디 또는 비밀번호가 올바르지 않습니다.');
+        navigate('/headquarters/dashboard'); // 본사용
       }
     })
+
     .catch(error => {
       console.error('네트워크 오류', error);
       alert('서버와 연결할 수 없습니다.');
