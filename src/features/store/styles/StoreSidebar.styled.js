@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-
+ 
 export const Sidebar = styled.aside`
   width: 240px;
   height: 100vh;

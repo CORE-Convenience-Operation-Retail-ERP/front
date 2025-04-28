@@ -7,7 +7,9 @@ import {
     SubmenuItem,
     SidebarFooter,
     FooterLine
-} from '../../../css/store/StoreSidebar.styled';
+} from '../../../features/store/styles/StoreSidebar.styled';
+
+
 
 function StoreSidebar({ menus, hoverMenu, onMouseEnter, onMouseLeave, onNavigate }) {
     return (
