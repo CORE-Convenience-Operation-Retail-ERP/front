@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Header from '../components/common/headquarters/Header';
-import Sidebar from '../components/common/headquarters/Sidebar';
+import Header from '../components/headquarters/Header';
+import Sidebar from '../components/headquarters/Sidebar';
 
 const MainLayout = () => {
   return (

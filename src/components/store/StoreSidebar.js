@@ -7,7 +7,7 @@ import {
     SubmenuItem,
     SidebarFooter,
     FooterLine
-} from '../../../features/store/styles/StoreSidebar.styled';
+} from '../../features/store/styles/StoreSidebar.styled';
 
 
 

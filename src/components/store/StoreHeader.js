@@ -5,7 +5,7 @@ import {
     LogoutButton,
     IconWrap,
     TotalText
-} from '../../../features/store/styles/StoreHeader.styled';
+} from '../../features/store/styles/StoreHeader.styled';
 
 import { MailIcon, BellIcon, LogoutIcon } from './IconSet'; // LogoutIcon도 추가!!
 

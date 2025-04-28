@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StoreSidebar from '../../components/common/store/StoreSidebar';
+import StoreSidebar from '../../components/store/StoreSidebar';
 import {
     Home as HomeIcon,
     Inventory as InventoryIcon,
