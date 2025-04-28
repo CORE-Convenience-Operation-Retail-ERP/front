@@ -8,9 +8,35 @@ const LoginPage = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   const onSubmit = (data) => {
-    // TODO: 로그인 API 연동
-    console.log(data);
-    navigate('/headquarters/dashboard');
+    console.log("Login data:", data);  // 로그인 요청 데이터 출력
+
+
+    fetch('http://localhost:8080/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        loginId: data.loginId,
+        loginPwd: data.loginPwd,
+      }),
+      credentials: 'include', 
+    })
+
+    .then(response => {
+      console.log("Response status:", response.status);  // 응답 상태 코드 확인
+      if (response.ok) {
+        console.log('로그인 성공');
+        navigate('/headquarters/dashboard'); // 로그인 성공 시 이동할 페이지
+      } else {
+        console.error('로그인 실패');
+        alert('아이디 또는 비밀번호가 올바르지 않습니다.');
+      }
+    })
+    .catch(error => {
+      console.error('네트워크 오류', error);
+      alert('서버와 연결할 수 없습니다.');
+    });
   };
 
   return (
@@ -35,18 +61,18 @@ const LoginPage = () => {
             fullWidth
             label="아이디"
             margin="normal"
-            {...register('username', { required: '아이디를 입력해주세요' })}
-            error={!!errors.username}
-            helperText={errors.username?.message}
+            {...register('loginId', { required: '아이디를 입력해주세요' })}
+            error={!!errors.loginId}
+            helperText={errors.loginId?.message}
           />
           <TextField
             fullWidth
             type="password"
             label="비밀번호"
             margin="normal"
-            {...register('password', { required: '비밀번호를 입력해주세요' })}
-            error={!!errors.password}
-            helperText={errors.password?.message}
+            {...register('loginPwd', { required: '비밀번호를 입력해주세요' })}
+            error={!!errors.loginPwd}
+            helperText={errors.loginPwd?.message}
           />
           <Button
             fullWidth
