@@ -1,31 +1,34 @@
+import styled from 'styled-components';
 import { FiMail, FiBell, FiLogOut } from "react-icons/fi";
-import styled from "styled-components";
 
-const IconWrapper = styled.div`
-  position: relative;
-  cursor: pointer;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+// 공통 아이콘 스타일
+const iconCommonStyle = `
+  font-size: 22px;
   color: #9ca3af;
+  transition: color 0.3s ease;
 `;
 
-export const MailIcon = (props) => (
-    <IconWrapper>
-        <FiMail {...props} />
-    </IconWrapper>
-);
+// MailIcon
+export const MailIcon = styled(FiMail)`
+    ${iconCommonStyle}
 
-export const BellIcon = (props) => (
-    <IconWrapper>
-        <FiBell {...props} />
-    </IconWrapper>
-);
+    ${props => props.$hovered && `
+    color: #ffffff;
+  `}
+`;
 
-export const LogoutIcon = (props) => (
-    <IconWrapper>
-        <FiLogOut {...props} />
-    </IconWrapper>
-);
+// BellIcon
+export const BellIcon = styled(FiBell)`
+    ${iconCommonStyle}
+
+    ${props => props.$hovered && `
+    color: #facc15;
+  `}
+`;
+
+// LogoutIcon
+export const LogoutIcon = styled(FiLogOut)`
+    font-size: 22px;
+    color: ${({ $hovered }) => ($hovered ? '#fb7185' : '#9ca3af')};
+    transition: color 0.3s ease;
+`;

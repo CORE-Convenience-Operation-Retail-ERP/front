@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom'; // 🔥 location 가져오기
 import StoreSidebar from '../../../components/store/common/StoreSidebar';
 import {
     Home as HomeIcon,
@@ -43,6 +43,8 @@ const sidebarMenus = [
 function StoreSidebarContainer() {
     const [hoverMenu, setHoverMenu] = useState('');
     const navigate = useNavigate();
+    const location = useLocation(); // 🔥 현재 주소 가져오기
+    const currentPath = location.pathname; // 🔥 현재 경로
 
     const handleMouseEnter = (menuName) => {
         setHoverMenu(menuName);
@@ -56,7 +58,6 @@ function StoreSidebarContainer() {
         navigate(path);
     };
 
-
     return (
         <StoreSidebar
             menus={sidebarMenus}
@@ -64,6 +65,7 @@ function StoreSidebarContainer() {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onNavigate={handleNavigate}
+            activeMenu={currentPath}
         />
     );
 }
