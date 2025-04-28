@@ -1,4 +1,4 @@
-import OrderRegisterCon from "../../container/store/OrderRegisterCon";
+import OrderRegisterCon from "../../containers/store/OrderRegisterCon";
 
 function OrderRegisterPage() {
     return (

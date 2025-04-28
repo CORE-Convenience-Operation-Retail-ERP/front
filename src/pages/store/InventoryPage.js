@@ -1,4 +1,4 @@
-import InventoryCon from "../../container/store/InventoryCon";
+import InventoryCon from "../../containers/store/InventoryCon";
 
 function InventoryPage() {
     return (

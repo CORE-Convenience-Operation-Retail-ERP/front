@@ -1,4 +1,4 @@
-import SalesCon from "../../container/store/SalesCon";
+import SalesCon from "../../containers/store/SalesCon";
 
 function SalesPage() {
     return (

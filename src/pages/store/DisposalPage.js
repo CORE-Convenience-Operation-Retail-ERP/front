@@ -1,4 +1,4 @@
-import DisposalCon from "../../container/store/DisposalCon";
+import DisposalCon from "../../containers/store/DisposalCon";
 
 function DisposalPage() {
     return (

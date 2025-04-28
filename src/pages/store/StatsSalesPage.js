@@ -1,4 +1,4 @@
-import StatsSalesCon from "../../container/store/StatsSalesCon";
+import StatsSalesCon from "../../containers/store/StatsSalesCon";
 
 function StatsSalesPage() {
     return (

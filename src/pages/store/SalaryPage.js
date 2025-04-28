@@ -1,4 +1,4 @@
-import SalaryCon from "../../container/store/SalaryCon";
+import SalaryCon from "../../containers/store/SalaryCon";
 
 function SalaryPage() {
     return (
