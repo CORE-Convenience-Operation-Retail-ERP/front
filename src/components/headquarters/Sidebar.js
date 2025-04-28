@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Drawer, 
   List, 
@@ -9,7 +9,7 @@ import {
   styled,
   Tooltip
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const menuItems = [
   {
@@ -87,36 +87,6 @@ const SidebarContainer = styled(Box)({
   }
 });
 
-const HoverCornerBox = styled('div')({
-  position: 'absolute',
-  left: 100,
-  top: '-20px',
-  width: '80px',
-  height: '20px',
-  background: 'transparent',
-  borderRadius: '0 0 50px 0',
-  boxShadow: '10px 5px 0 0 white',
-  zIndex: 2,
-  pointerEvents: 'none',
-  transition: 'opacity 2s',
-  overflow: 'visible',
-});
-
-const HoverCornerBoxBottom = styled('div')({
-  position: 'absolute',
-  left: 100,
-  bottom: '-20px',
-  width: '80px',
-  height: '20px',
-  background: 'transparent',
-  borderRadius: '0 50px 0 0',
-  boxShadow: '10px -5px 0 0 white',
-  zIndex: 2,
-  pointerEvents: 'none',
-  transition: 'opacity 0.9s',
-  overflow: 'visible',
-});
-
 const MenuContainer = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'isActive' && prop !== 'hasSubmenu' && prop !== 'submenuHeight'
 })(({ isActive, hasSubmenu, submenuHeight }) => ({
@@ -186,15 +156,39 @@ const SUBMENU_VERTICAL_PADDING = 4; // 서브메뉴 위아래 패딩
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [hoveredMenu, setHoveredMenu] = useState(null);
   const [submenuHeights, setSubmenuHeights] = useState({});
   const [submenuOpened, setSubmenuOpened] = useState({});
+
+  // 현재 경로에 해당하는 상위 메뉴 index 찾기
+  const getActiveMenuIndex = () => {
+    for (let i = 0; i < menuItems.length; i++) {
+      if (menuItems[i].subMenus.some(sub => sub.path === location.pathname)) {
+        return i;
+      }
+    }
+    return null;
+  };
+  const activeMenuIndex = getActiveMenuIndex();
 
   // 서브메뉴 예상 높이 계산 함수
   const getExpectedSubmenuHeight = (item) => {
     if (!item.subMenus || item.subMenus.length === 0) return 0;
     return item.subMenus.length * SUBMENU_ITEM_HEIGHT + SUBMENU_VERTICAL_PADDING * 2;
   };
+
+  useEffect(() => {
+    if (activeMenuIndex !== null) {
+      const item = menuItems[activeMenuIndex];
+      const expectedHeight = getExpectedSubmenuHeight(item);
+      setSubmenuHeights(prev => ({
+        ...prev,
+        [activeMenuIndex]: expectedHeight
+      }));
+      setHoveredMenu(activeMenuIndex);
+    }
+  }, [activeMenuIndex, location.pathname]);
 
   const handleMenuHover = (index) => {
     // 미리 예상 높이로 세팅
@@ -208,9 +202,6 @@ const Sidebar = () => {
   };
 
   const handleMenuLeave = () => {
-    if (hoveredMenu !== null) {
-      setSubmenuOpened(prev => ({ ...prev, [hoveredMenu]: false }));
-    }
     setHoveredMenu(null);
   };
 
@@ -233,94 +224,104 @@ const Sidebar = () => {
     <StyledDrawer variant="permanent">
       <SidebarContainer>
         <List sx={{ padding: 0 }}>
-          {menuItems.map((item, index) => (
-            <MenuContainer
-              key={item.text}
-              onMouseEnter={() => handleMenuHover(index)}
-              onMouseLeave={handleMenuLeave}
-              isActive={hoveredMenu === index}
-              hasSubmenu={item.subMenus.length > 0}
-              submenuHeight={submenuHeights[index] || 0}
-            >
-              <HoverCornerBox
-                style={{
-                  opacity: hoveredMenu === index ? 1 : 0,
-                  transition: hoveredMenu === index ? 'opacity 0.9s' : 'opacity 0.3s'
-                }}
-              />
-              <HoverCornerBoxBottom
-                style={{
-                  opacity: submenuOpened[index] ? 1 : 0,
-                  transition: submenuOpened[index]
-                    ? 'opacity 0.5s'
-                    : 'opacity 0s',
-                  bottom: item.hoverBoxBottom?.bottom,
-                  width: item.hoverBoxBottom?.width,
-                  height: item.hoverBoxBottom?.height
-                }}
-              />
-              <StyledListItem button isActive={hoveredMenu === index}>
-                <ListItemText primary={item.text} />
-              </StyledListItem>
-              <Collapse
-                in={hoveredMenu === index}
-                timeout={300}
-                onEntered={() => setSubmenuOpened(prev => ({ ...prev, [index]: true }))}
+          {menuItems.map((item, index) => {
+            // 현재 메뉴가 활성화(hovered or 경로 일치) 상태인지
+            const isActiveMenu = hoveredMenu === index || activeMenuIndex === index;
+            return (
+              <MenuContainer
+                key={item.text}
+                onMouseEnter={() => handleMenuHover(index)}
+                onMouseLeave={handleMenuLeave}
+                isActive={isActiveMenu}
+                hasSubmenu={item.subMenus.length > 0}
+                submenuHeight={submenuHeights[index] || 0}
               >
-                <SubMenuList>
-                  {item.subMenus.map((subItem) => (
-                    <ListItem
-                      button
-                      key={subItem.text}
-                      onClick={(e) => handleSubMenuClick(subItem.path, e)}
-                    >
-                      <ListItemText primary={subItem.text} />
-                    </ListItem>
-                  ))}
-                </SubMenuList>
-              </Collapse>
-            </MenuContainer>
-          ))}
+                <StyledListItem button isActive={isActiveMenu}>
+                  <ListItemText primary={item.text} />
+                </StyledListItem>
+                <Collapse
+                  in={isActiveMenu}
+                  timeout={300}
+                  onEntered={() => setSubmenuOpened(prev => ({ ...prev, [index]: true }))}
+                >
+                  <SubMenuList>
+                    {item.subMenus.map((subItem) => {
+                      const isActiveSub = location.pathname === subItem.path;
+                      return (
+                        <ListItem
+                          button
+                          key={subItem.text}
+                          onClick={(e) => handleSubMenuClick(subItem.path, e)}
+                          sx={{
+                            borderBottom: isActiveSub ? '2px solid #1A237E' : 'none',
+                            fontWeight: isActiveSub ? 700 : 400,
+                          }}
+                        >
+                          <ListItemText
+                            primary={subItem.text}
+                            sx={{
+                              fontWeight: isActiveSub ? 700 : 400,
+                              color: isActiveSub ? '#1A237E' : undefined,
+                            }}
+                          />
+                        </ListItem>
+                      );
+                    })}
+                  </SubMenuList>
+                </Collapse>
+              </MenuContainer>
+            );
+          })}
         </List>
-      </SidebarContainer>
-      {/* 푸터 : CORE */}
-      <Box sx={{ position: 'absolute', bottom: 32, left: 0, width: '100%', textAlign: 'center' }}>
-        <Tooltip
-          title={
-            <Box sx={{ p: 1, bgcolor: 'white', color: '#1A237E', borderRadius: 2, fontSize: 14 }}>
-              <span style={{ fontWeight: 700 }}>CORE ERP 시스템 v1.0</span><br />
-              문의   : core@company.com<br />
-              전화   : 1234-5678<br />
-              주소   : 서울특별시 강남구 테헤란로 123<br />
-              운영시간: 월-금 09:00-18:00
-            </Box>
-          }
-          placement="top"
-          enterDelay={200}
+        {/* 푸터 : CORE */}
+        <Box
           sx={{
-            '& .MuiTooltip-tooltip': {
-              border: '2px solid #222',
-              boxShadow: 'none',
-              backgroundColor: 'white',
-              color: '#1A237E',
-            },
-            '& .MuiTooltip-arrow': {
-              color: 'white',
-            }
+            position: 'absolute',
+            bottom: 32,
+            left: 0,
+            width: '100%',
+            textAlign: 'center',
+            zIndex: 2,
+            pointerEvents: 'auto'
           }}
         >
-          <span style={{
-            fontFamily: 'Pretendard, sans-serif',
-            fontWeight: 400,
-            color: 'white',
-            fontSize: '16px',
-            letterSpacing: '1px',
-            cursor: 'pointer'
-          }}>
-            &copy; CORE
-          </span>
-        </Tooltip>
-      </Box>
+          <Tooltip
+            title={
+              <Box sx={{ p: 1, bgcolor: 'white', color: '#1A237E', borderRadius: 2, fontSize: 14 }}>
+                <span style={{ fontWeight: 700 }}>CORE ERP 시스템 v1.0</span><br />
+                문의   : core@company.com<br />
+                전화   : 1234-5678<br />
+                주소   : 서울특별시 강남구 테헤란로 123<br />
+                운영시간: 월-금 09:00-18:00
+              </Box>
+            }
+            placement="top"
+            enterDelay={200}
+            sx={{
+              '& .MuiTooltip-tooltip': {
+                border: '2px solid #222',
+                boxShadow: 'none',
+                backgroundColor: 'white',
+                color: '#1A237E',
+              },
+              '& .MuiTooltip-arrow': {
+                color: 'white',
+              }
+            }}
+          >
+            <span style={{
+              fontFamily: 'Pretendard, sans-serif',
+              fontWeight: 400,
+              color: 'white',
+              fontSize: '16px',
+              letterSpacing: '1px',
+              cursor: 'pointer'
+            }}>
+              &copy; CORE
+            </span>
+          </Tooltip>
+        </Box>
+      </SidebarContainer>
     </StyledDrawer>
   );
 };
