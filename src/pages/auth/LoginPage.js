@@ -33,7 +33,9 @@ const LoginPage = () => {
       console.log("서버 응답:", data);
 
       localStorage.setItem('branchName', data.branchName);
-
+      
+      // 서버에서 받은 사용자 정보 예: { id: 123, name: "김철수", ... }
+      localStorage.setItem('loginUser', JSON.stringify(data));
       if (data.workType === 3) {
         navigate('/store/home'); // 점주용
       } else {

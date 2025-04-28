@@ -3,14 +3,16 @@ import StoreHeader from '../../../components/store/common/StoreHeader';
 import axios from 'axios';
 
 function HeaderContainer() {
+    const loginUser = JSON.parse(localStorage.getItem('loginUser')) || {};
     const branchNameFromStorage = localStorage.getItem('branchName') || "";
 
     const [userInfo, setUserInfo] = useState({
-        userName: "",
+        branchName: branchNameFromStorage,
+        workType: loginUser.workType || null,
+        userName: loginUser.name || "",
         mailCount: 0,
         notificationCount: 0,
         notifications: [],
-        branchName: branchNameFromStorage
     });
 
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -34,7 +36,8 @@ function HeaderContainer() {
                         ...prev,
                         notificationCount: response.data.notificationCount || 0,
                         notifications: response.data.notifications || [],
-                        branchName: storedBranchName   
+                        branchName: localStorage.getItem('branchName') || "",
+                        workType: JSON.parse(localStorage.getItem('loginUser'))?.workType || null
                     }));
                 }
             } catch (error) {

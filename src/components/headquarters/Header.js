@@ -16,6 +16,9 @@ const Header = () => {
   ]);
   const open = Boolean(anchorEl);
 
+  const loginUser = JSON.parse(localStorage.getItem('loginUser'));
+  const userName = loginUser ? loginUser.name : "로그인 해주세요";
+
   const handleLogoClick = () => {
     navigate(location.pathname, { replace: true });
   };
@@ -100,7 +103,7 @@ const Header = () => {
             }}
             onClick={() => navigate('/headquarters/hr/my-page')}
           >
-            홍길동님
+            {userName}님
           </Box>
 
           <LogoutIcon
