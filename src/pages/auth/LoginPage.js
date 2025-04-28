@@ -93,6 +93,16 @@ const LoginPage = () => {
           >
             로그인
           </Button>
+
+          <Button
+            fullWidth
+            variant="outlined"
+            size="large"
+            sx={{ mt: 2 }}
+            onClick={() => navigate('/register')}
+          >
+            회원가입
+          </Button>
         </form>
       </Card>
     </Box>

@@ -29,11 +29,13 @@ import BranchesStatisticsPage from '../pages/headquarters/BranchesStatisticsPage
 import BoardNoticePage from '../pages/headquarters/BoardNoticePage';
 import BoardSuggestionsPage from '../pages/headquarters/BoardSuggestionsPage';
 import BoardStoreInquiriesPage from '../pages/headquarters/BoardStoreInquiriesPage';
+import RegisterPage from '../pages/auth/RegisterPage';
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       
       {/* 본사 관련 라우트 */}
       <Route path="/headquarters/*" element={<HeadquartersLayout />}>
@@ -66,6 +68,7 @@ const AppRoutes = () => {
           <Route path="sales" element={<SalesPage/>} />
         <Route path="stats/order" element={<StatsOrderPage/>} />
         <Route path="stats/sales" element={<StatsSalesPage/>} />
+
       </Route>
 
 
