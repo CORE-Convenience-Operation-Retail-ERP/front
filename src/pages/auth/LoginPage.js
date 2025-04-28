@@ -32,6 +32,8 @@ const LoginPage = () => {
     .then(data => {
       console.log("서버 응답:", data);
 
+      localStorage.setItem('branchName', data.branchName);
+
       if (data.workType === 3) {
         navigate('/store/home'); // 점주용
       } else {

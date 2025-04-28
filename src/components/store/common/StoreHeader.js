@@ -10,6 +10,9 @@ import {
 } from '../../../features/store/styles/common/StoreHeader.styled';
 
 function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
+
+    console.log("헤더 userInfo:", userInfo);
+
     const [hoveredIcon, setHoveredIcon] = useState(null); // 🔥
 
     // if (!userInfo) return null;
@@ -58,9 +61,9 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
 
                 {/* 직급 */}
                 <div style={{ fontSize: "14px", color: "#6b7280" }}>
-                    {userInfo.empRole === "ROLE_OWNER"
-                        ? `${userInfo.storeName} 점주님`
-                        : "관리자님"}
+                    {userInfo.workType === 3
+                        ? `${userInfo.branchName || "지점명 없음"} 점주`
+                        : "관리자"}
                 </div>
 
             </RightSection>
