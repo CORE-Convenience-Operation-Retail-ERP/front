@@ -9,45 +9,55 @@ const LoginPage = () => {
 
   const onSubmit = (data) => {
     console.log("Login data:", data);  // 로그인 요청 데이터 출력
-
-
+  
+    // 폼 데이터 방식으로 요청을 보냄
     fetch('http://localhost:8080/auth/login', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',  // 폼 데이터 형식으로 변경
       },
-      body: JSON.stringify({
+      body: new URLSearchParams({
         loginId: data.loginId,
         loginPwd: data.loginPwd,
       }),
-      credentials: 'include', 
+      credentials: 'include', // 세션 쿠키를 포함
     })
-
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('로그인 실패');
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log("서버 응답:", data);
-
-      localStorage.setItem('branchName', data.branchName);
-      
-      // 서버에서 받은 사용자 정보 예: { id: 123, name: "김철수", ... }
-      localStorage.setItem('loginUser', JSON.stringify(data));
-      if (data.workType === 3) {
-        navigate('/store/home'); // 점주용
-      } else {
-        navigate('/headquarters/dashboard'); // 본사용
-      }
-    })
-
-    .catch(error => {
-      console.error('네트워크 오류', error);
-      alert('서버와 연결할 수 없습니다.');
-    });
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('로그인 실패');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("서버 응답:", data);
+  
+        // branchName이 null일 경우 점주가 아니면 경고 처리
+        if (!data.branchName) {
+          alert("점주 지점명이 없습니다. 관리자에게 문의하세요.");
+          return;
+        }
+  
+        // 서버에서 받은 JWT 토큰을 로컬 스토리지에 저장
+        localStorage.setItem('branchName', data.branchName);
+        localStorage.setItem('loginUser', JSON.stringify(data));
+  
+        // 사용자 유형에 맞춰 리다이렉션
+        if (data.workType === 3) {
+          // 점주일 경우
+          navigate('/store/home');  // 점주용 홈 화면
+        } else if (data.workType === 2) {
+          // 본사 관리자일 경우
+          navigate('/headquarters/dashboard');  // 본사 대시보드 화면
+        } else {
+          alert('알 수 없는 사용자 유형입니다.');
+        }
+      })
+      .catch(error => {
+        console.error('네트워크 오류', error);
+        alert('서버와 연결할 수 없습니다.');
+      });
   };
+  
 
   return (
     <Box
