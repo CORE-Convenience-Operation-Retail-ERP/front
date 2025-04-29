@@ -20,6 +20,7 @@ import ProductsAllPage from '../pages/headquarters/ProductsAllPage';
 import ProductsDetailPage from '../pages/headquarters/ProductsDetailPage';
 import ProductsEditPage from '../pages/headquarters/ProductsEditPage';
 import EmployeesListPage from '../pages/headquarters/EmployeesListPage';
+import ProductsRegisterPage from '../pages/headquarters/ProductsRegisterPage';
 import EmployeeManagementPage from '../pages/headquarters/EmployeeManagementPage';
 import MyPage from '../pages/headquarters/MyPage';
 import BranchesListPage from '../pages/headquarters/BranchesListPage';
@@ -56,6 +57,7 @@ const AppRoutes = () => {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="products/detail/:id" element={<ProductsDetailPage />} />
         <Route path="products/edit/:id" element={<ProductsEditPage />} />
+        <Route path="products/register" element={<ProductsRegisterPage />} />
       </Route>
 
         {/* 지점 관련 라우트*/}
