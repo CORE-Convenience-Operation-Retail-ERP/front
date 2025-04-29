@@ -40,7 +40,7 @@ const AppRoutes = () => {
       {/* 본사 관련 라우트 */}
       <Route path="/headquarters/*" element={<HeadquartersLayout />}>
         <Route path="products/all" element={<ProductsAllPage />} />
-        <Route path="products/detail" element={<ProductsDetailPage />} />
+        {/* <Route path="products/detail" element={<ProductsDetailPage />} /> */}
         <Route path="hr/employees" element={<EmployeesListPage />} />
         <Route path="hr/employee-management" element={<EmployeeManagementPage />} />
         <Route path="hr/my-page" element={<MyPage />} />
@@ -53,6 +53,7 @@ const AppRoutes = () => {
         <Route path="board/suggestions" element={<BoardSuggestionsPage />} />
         <Route path="board/store-inquiries" element={<BoardStoreInquiriesPage />} />
         <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="products/detail/:id" element={<ProductsDetailPage />} />
       </Route>
 
         {/* 지점 관련 라우트*/}
