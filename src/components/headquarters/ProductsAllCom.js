@@ -15,7 +15,19 @@ const statusLabel = (status) => {
   }
 };
 
-const ProductsAllCom = ({ products, onRegister, onEdit, onDetail }) => {
+const ProductsAllCom = ({ 
+  products = [], 
+  onRegister, 
+  onEdit, 
+  onDetail,
+  currentPage = 0,
+  totalPages = 0,
+  totalItems = 0,
+  onPageChange
+}) => {
+  // products가 배열인지 확인하고, 아니면 빈 배열로 설정
+  const productList = Array.isArray(products) ? products : [];
+
   return (
     <div style={{ padding: "32px" }}>
       <h2 style={{ color: "#3a5ca8", fontWeight: "bold" }}>전체 제품 관리</h2>
@@ -34,65 +46,169 @@ const ProductsAllCom = ({ products, onRegister, onEdit, onDetail }) => {
       >
         상품 등록
       </button>
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          marginTop: "16px",
-        }}
-      >
-        <thead>
-          <tr style={{ background: "#f5f7fa" }}>
-            <th>No.</th>
-            <th>제품 명</th>
-            <th>재고</th>
-            <th>바코드</th>
-            <th>카테고리</th>
-            <th>최근입고일</th>
-            <th>공급가</th>
-            <th>제품 수정</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((p, idx) => (
-            <tr
-              key={p.productId}
-              style={{
-                textAlign: "center",
-                background: idx % 2 === 0 ? "#fff" : "#f5f7fa",
-              }}
-            >
-              <td>{idx + 1}</td>
-              <td>{p.proName}</td>
-              <td style={{ color: p.proStock < 20 ? "red" : "black" }}>
-                {p.proStock}
-              </td>
-              <td>{p.proBarcode}</td>
-              <td>{p.categoryName}</td>
-              <td>
-                {p.recentStockInDate
-                  ? p.recentStockInDate.substring(0, 10)
-                  : ""}
-              </td>
-              <td>{p.proCost?.toLocaleString()}</td>
-              <td>
-                <button style={{ marginRight: 4, border: "none", background: "none" }}>
-                  {statusLabel(p.status)}
-                </button>
-                <button
-                  style={{ marginRight: 4 }}
-                  onClick={() => onEdit(p.productId)}
-                >
-                  수정
-                </button>
-                <button onClick={() => onDetail(p.productId)}>
-                  상세 정보
-                </button>
-              </td>
+
+      {productList.length === 0 ? (
+        <div style={{ textAlign: 'center', margin: '50px 0', color: '#666' }}>
+          제품 데이터가 없거나 로딩 중입니다.
+        </div>
+      ) : (
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            marginTop: "16px",
+          }}
+        >
+          <thead>
+            <tr style={{ background: "#f5f7fa" }}>
+              <th>No.</th>
+              <th>제품 명</th>
+              <th>재고</th>
+              <th>바코드</th>
+              <th>카테고리</th>
+              <th>최근입고일</th>
+              <th>공급가</th>
+              <th>제품 수정</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {productList.map((p, idx) => (
+              <tr
+                key={p.productId}
+                style={{
+                  textAlign: "center",
+                  background: idx % 2 === 0 ? "#fff" : "#f5f7fa",
+                }}
+              >
+                <td>{idx + 1 + (currentPage * 10)}</td>
+                <td>{p.proName}</td>
+                <td style={{ color: p.proStock < 20 ? "red" : "black" }}>
+                  {p.proStock}
+                </td>
+                <td>{p.proBarcode}</td>
+                <td>{p.categoryName}</td>
+                <td>
+                  {p.recentStockInDate
+                    ? p.recentStockInDate.substring(0, 10)
+                    : ""}
+                </td>
+                <td>{p.proCost?.toLocaleString()}</td>
+                <td>
+                  {statusLabel(p.status)}
+                  <button
+                    style={{ marginRight: 4, marginLeft: 4 }}
+                    onClick={() => onEdit(p.productId)}
+                  >
+                    수정
+                  </button>
+                  <button onClick={() => onDetail(p.productId)}>
+                    상세 정보
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      
+      {/* 페이징 UI */}
+      {totalPages > 0 && (
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          marginTop: '20px',
+          gap: '10px'
+        }}>
+          <button
+            onClick={() => onPageChange(0)}
+            disabled={currentPage === 0}
+            style={{
+              padding: '5px 10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              background: currentPage === 0 ? '#f5f5f5' : '#fff',
+              cursor: currentPage === 0 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            처음
+          </button>
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 0}
+            style={{
+              padding: '5px 10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              background: currentPage === 0 ? '#f5f5f5' : '#fff',
+              cursor: currentPage === 0 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            이전
+          </button>
+          
+          {Array.from({ length: totalPages }, (_, i) => i)
+            .filter(page => {
+              if (totalPages <= 5) return true;
+              if (currentPage <= 2) return page <= 4;
+              if (currentPage >= totalPages - 3) return page >= totalPages - 5;
+              return page >= currentPage - 2 && page <= currentPage + 2;
+            })
+            .map(page => (
+              <button
+                key={page}
+                onClick={() => onPageChange(page)}
+                style={{
+                  padding: '5px 10px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  background: currentPage === page ? '#3a5ca8' : '#fff',
+                  color: currentPage === page ? '#fff' : '#000',
+                  cursor: 'pointer'
+                }}
+              >
+                {page + 1}
+              </button>
+            ))}
+          
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages - 1}
+            style={{
+              padding: '5px 10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              background: currentPage === totalPages - 1 ? '#f5f5f5' : '#fff',
+              cursor: currentPage === totalPages - 1 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            다음
+          </button>
+          <button
+            onClick={() => onPageChange(totalPages - 1)}
+            disabled={currentPage === totalPages - 1}
+            style={{
+              padding: '5px 10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              background: currentPage === totalPages - 1 ? '#f5f5f5' : '#fff',
+              cursor: currentPage === totalPages - 1 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            마지막
+          </button>
+        </div>
+      )}
+      
+      {totalItems > 0 && (
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: '10px',
+          color: '#666'
+        }}>
+          총 {totalItems}개의 제품 중 {(currentPage * 10) + 1} - {Math.min((currentPage + 1) * 10, totalItems)}번째 제품을 보고 있습니다.
+        </div>
+      )}
     </div>
   );
 };
