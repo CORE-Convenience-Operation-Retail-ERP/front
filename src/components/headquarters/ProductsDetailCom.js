@@ -4,7 +4,6 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   if (!detail) return <div>로딩중...</div>;
-  console.log("이미지 경로:", detail.proImage);
 
   return (
     <div style={{ padding: 32 }}>
@@ -17,24 +16,40 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
       <div style={{ display: "flex", alignItems: "center", marginTop: 24 }}>
         <img src={detail.proImage} alt="제품" style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 8, marginRight: 32 }} />
         <div>
-          <h1 style={{ margin: 0 }}>{detail.proName}</h1>
+        <h1 style={{ margin: 0 }}>{detail.proName}</h1>
           <div>제품 코드: {detail.productId}</div>
-          <div>카테고리: {detail.categoryName}</div>
+          <div>
+            카테고리: {detail.categoryPath ? detail.categoryPath.join(" > ") : ""}
+          </div>
           <div>바코드: {detail.proBarcode}</div>
           <div>상태: {detail.status}</div>
+          <div>
+            이벤트 기간:{" "}
+            {detail.eventStart && detail.eventEnd
+              ? `${detail.eventStart} ~ ${detail.eventEnd}`
+              : "없음"}
+          </div>
         </div>
       </div>
-      {/* 표 정보 */}
-      <div style={{ display: "flex", gap: 24, marginTop: 32 }}>
+      {/* 2x2 표 정보 */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gridTemplateRows: "1fr 1fr",
+          gap: 24,
+          marginTop: 32,
+        }}
+      >
         {/* 재고 정보 */}
-        <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, flex: 1 }}>
+        <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16 }}>
           <h3>재고 정보</h3>
           <div>총 재고: {detail.totalStock}</div>
           <div>발주 임계치: {detail.proStockLimit}</div>
           <button onClick={() => setModalOpen(true)}>점포별 재고 조회</button>
         </div>
         {/* 가격 정보 */}
-        <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, flex: 1 }}>
+        <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16 }}>
           <h3>가격 정보</h3>
           <div>공급가: {detail.proCost?.toLocaleString()}원</div>
           <div>판매가: {detail.proSellCost?.toLocaleString()}원</div>
@@ -42,48 +57,88 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
           <div>원가율: {detail.costRate?.toFixed(1)}%</div>
         </div>
         {/* 입출고 정보 */}
-        <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, flex: 1 }}>
+        <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16 }}>
           <h3>입출고 정보</h3>
           {detail.recentStockIns?.map((s, i) => (
-            <div key={i}>{s.storeName} | {s.inDate} | {s.inQuantity}개</div>
+            <div key={i}>
+              {s.storeName} | {s.inDate} | {s.inQuantity}개
+            </div>
           ))}
-          <button onClick={onInOut} style={{ marginTop: 8 }}>입출고 내역 확인</button>
+          <button onClick={onInOut} style={{ marginTop: 8 }}>
+            입출고 내역 확인
+          </button>
+        </div>
+        {/* 부가 정보 */}
+        <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16 }}>
+          <h3>부가 정보</h3>
+          {detail.productDetail ? (
+            <>
+              <div>제조사: {detail.productDetail.manufacturer}</div>
+              <div>제조사 연락처: {detail.productDetail.manuNum}</div>
+              <div>유통기한: {detail.productDetail.shelfLife}</div>
+              <div>알레르기: {detail.productDetail.allergens}</div>
+              <div>보관방법: {detail.productDetail.storageMethod}</div>
+            </>
+          ) : (
+            <div>부가 정보 없음</div>
+          )}
         </div>
       </div>
-      {/* 부가 정보 */}
-      <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, marginTop: 24 }}>
-        <h3>부가 정보</h3>
-        {detail.productDetail ? (
-          <>
-            <div>제조사: {detail.productDetail.manufacturer}</div>
-            <div>제조사 연락처: {detail.productDetail.manuNum}</div>
-            <div>유통기한: {detail.productDetail.shelfLife}</div>
-            <div>알레르기: {detail.productDetail.allergens}</div>
-            <div>보관방법: {detail.productDetail.storageMethod}</div>
-          </>
-        ) : <div>부가 정보 없음</div>}
-      </div>
       {/* 제품 상세 분석 (공간만) */}
-      <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, marginTop: 24 }}>
+      <div
+        style={{
+          border: "1px solid #ddd",
+          borderRadius: 8,
+          padding: 16,
+          marginTop: 24,
+        }}
+      >
         <h3>제품 상세 분석</h3>
-        <div style={{ height: 180, background: "#f5f5f5", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div
+          style={{
+            height: 180,
+            background: "#f5f5f5",
+            borderRadius: 8,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           (분석/차트 등 공간)
         </div>
       </div>
       {/* 점포별 재고 모달 */}
       {modalOpen && (
-        <div style={{
-          position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
-          background: "rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center"
-        }}>
-          <div style={{ background: "#fff", borderRadius: 8, padding: 32, minWidth: 320 }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 8,
+              padding: 32,
+              minWidth: 320,
+            }}
+          >
             <h3>점포별 재고</h3>
             {detail.storeStocks?.map((s, i) => (
               <div key={i} style={{ color: s.quantity <= 5 ? "red" : "black" }}>
                 {s.storeName} : {s.quantity}개
               </div>
             ))}
-            <button onClick={() => setModalOpen(false)} style={{ marginTop: 16 }}>닫기</button>
+            <button onClick={() => setModalOpen(false)} style={{ marginTop: 16 }}>
+              닫기
+            </button>
           </div>
         </div>
       )}
