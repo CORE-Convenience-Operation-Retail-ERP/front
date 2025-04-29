@@ -26,7 +26,7 @@ const sidebarMenus = [
     },
     {
         name: '인사 관리', icon: <PeopleIcon />, submenu: [
-            { name: '직원 관리', path: '/store/hr/employee' },
+            { name: '직원 관리', path: '/store/parttimer/list' },
             { name: '스케줄 관리', path: '/store/hr/schedule' },
             { name: '급여 관리', path: '/store/hr/salary' },
         ]
