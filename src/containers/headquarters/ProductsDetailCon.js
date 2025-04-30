@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ProductsDetailCom from "../../components/headquarters/ProductsDetailCom";
-import axios from "axios";
+import axios from "../../service/axiosInstance";
 
 const ProductsDetailCon = () => {
   const { id } = useParams();

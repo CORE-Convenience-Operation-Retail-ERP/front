@@ -16,12 +16,13 @@ const Header = () => {
   ]);
   const open = Boolean(anchorEl);
 
-  const loginUser = JSON.parse(localStorage.getItem('loginUser'));
-  const userName = loginUser
-  ? loginUser.workType === 3
-    ? `${loginUser.branchName || "지점명 없음"} 점주`
-    : loginUser.name
-  : "로그인 해주세요";
+  // 새 방식: JWT 토큰 기반 로그인 정보 가져오기
+  const name = localStorage.getItem('name');
+  const userRole = localStorage.getItem('userRole');  
+  // 또는 localStorage.getItem('name'); 이런 식으로 저장되었을 수 있음
+
+  // userName 설정 부분
+  const userName = name || "로그인 해주세요";
 
   const handleLogoClick = () => {
     navigate(location.pathname, { replace: true });
@@ -29,6 +30,9 @@ const Header = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('name');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('storeId');
     navigate('/login');
   };
 

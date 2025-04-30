@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ProductsEditCom from "../../components/headquarters/ProductsEditCom";
-import axios from "axios";
+import axios from "../../service/axiosInstance";
 
 const ProductsEditCon = () => {
   const { id } = useParams();

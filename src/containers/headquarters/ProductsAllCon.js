@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductsAllCom from '../../components/headquarters/ProductsAllCom';
-import axios from "axios";
+import axios from "../../service/axiosInstance";
 
 const ProductsAllCon = () => {
   const [products, setProducts] = useState([]);

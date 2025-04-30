@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import styled from 'styled-components';
-import axios from 'axios';
+import axios from '../../../service/axiosInstance';
 
 const CalendarWrapper = styled.div`
   .react-calendar {
@@ -20,11 +20,14 @@ const CalendarBox = () => {
     const [shifts, setShifts] = useState([]);
   
     useEffect(() => {
-        axios.get('/api/purchase-orders')
+        const token = localStorage.getItem('token');
+        const headers = { Authorization: `Bearer ${token}` };
+
+        axios.get('/api/purchase-orders', { headers })
             .then((res) => setOrders(res.data))
             .catch((err) => console.error('발주 조회 실패', err));
 
-        axios.get('/api/shift-schedules')
+        axios.get('/api/shift-schedules', { headers })
             .then((res) => setShifts(res.data))
             .catch((err) => console.error('근무 조회 실패', err));
     }, []);

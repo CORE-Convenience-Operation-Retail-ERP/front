@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import StoreHeader from '../../../components/store/common/StoreHeader';
-import axios from 'axios';
+import axios from '../../../service/axiosInstance';
 
 function HeaderContainer() {
     const loginUser = JSON.parse(localStorage.getItem('loginUser')) || {};
@@ -69,6 +69,10 @@ function HeaderContainer() {
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem('branchName');
+        localStorage.removeItem('loginUser');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('storeId');
+        localStorage.removeItem('name');
         window.location.href = "/login";
     };
 

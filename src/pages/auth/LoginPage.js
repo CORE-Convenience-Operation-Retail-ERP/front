@@ -1,12 +1,23 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Card, TextField, Button, Typography } from '@mui/material';
-import { useForm } from 'react-hook-form';
+import useLogin from "../../hooks/useLogin";
 
-// JWT 디코딩 함수 (Base64Url 처리 포함)
+// 개선된 JWT 디코딩 함수
 function decodeJWT(token) {
+    if (!token) {
+        console.error("토큰이 없습니다");
+        return null;
+    }
+    
     try {
-        const base64Url = token.split('.')[1];
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+            console.error("잘못된 JWT 형식입니다");
+            return null;
+        }
+        
+        const base64Url = parts[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const jsonPayload = decodeURIComponent(
             atob(base64)
@@ -14,81 +25,65 @@ function decodeJWT(token) {
                 .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
                 .join('')
         );
-        return JSON.parse(jsonPayload);
+        
+        const decoded = JSON.parse(jsonPayload);
+        console.log("디코딩된 토큰:", decoded);
+        return decoded;
     } catch (e) {
         console.error("JWT 디코딩 실패:", e);
         return null;
     }
 }
 
-const LoginPage = () => {
+export default function LoginPage() {
+  const [loginId, setLoginId] = useState("");
+  const [loginPwd, setLoginPwd] = useState("");
+  const { login, error } = useLogin();
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const onSubmit = (data) => {
-    console.log("Login data:", data);  // 로그인 요청 데이터 출력
-  
-    // 폼 데이터 방식으로 요청을 보냄
-    fetch('http://localhost:8080/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',  // 폼 데이터 형식으로 변경
-      },
-      body: new URLSearchParams({
-        loginId: data.loginId,
-        loginPwd: data.loginPwd,
-      }),
-      credentials: 'include', // 세션 쿠키를 포함
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('로그인 실패');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const user = await login(loginId, loginPwd);
+      console.log("로그인 응답:", user);
+
+      // 토큰 디코딩 및 정보 저장
+      const token = user.token;
+      if (token) {
+        const decoded = decodeJWT(token);
+        
+        if (decoded) {
+          // 디코딩된 데이터를 로컬스토리지에 저장 (클레임 이름에 맞게)
+          localStorage.setItem('name', decoded.empName || decoded.name || '');
+          localStorage.setItem('userRole', decoded.role || decoded.deptName || '');
+          
+          // storeId는 null이 가능하므로 조건부로 저장
+          if (decoded.storeId !== undefined) {
+            localStorage.setItem('storeId', decoded.storeId);
+          }
+          
+          // 디버깅을 위한 로그
+          console.log("저장된 name:", localStorage.getItem('name'));
+          console.log("저장된 storeId:", localStorage.getItem('storeId'));
+          console.log("저장된 userRole:", localStorage.getItem('userRole'));
         }
-        return response.json();
-      })
-      .then(data => {
-        console.log("서버 응답:", data);
 
-        // branchName이 null일 경우 점주가 아니면 경고 처리
-          if (!data.accessToken) {
-              alert("서버에서 토큰을 받지 못했습니다.");
-              return;
-          }
-
-        // 서버에서 받은 JWT 토큰을 로컬 스토리지에 저장
-        localStorage.setItem('branchName', data.branchName);
-        localStorage.setItem('loginUser', JSON.stringify(data));
-        localStorage.setItem('token', data.accessToken);
-
-          const decoded = decodeJWT(data.accessToken);
-          if (decoded) {
-              localStorage.setItem('userRole', decoded.role);
-              localStorage.setItem('storeId', decoded.storeId);
-              localStorage.setItem('name', decoded.name);
-          }
-
-
-        // 사용자 유형에 맞춰 리다이렉션
-        if (!data.branchName && 1 !== data.workType) {   // -> 수정 후
-              alert("점주 지점명이 없습니다. 관리자에게 문의하세요.");
-              return;
-          }
-        if (data.workType === 3) {
-          // 점주일 경우
-          navigate('/store/home');  // 점주용 홈 화면
-        } else if (data.workType === 1) {
-          // 본사 관리자일 경우
-          navigate('/headquarters/dashboard');  // 본사 대시보드 화면
+        // 권한에 따라 라우팅 (deptId 기반)
+        const deptId = decoded?.deptId || user.deptId;
+        if (deptId === 3) {
+          // 점포(3번 부서)일 경우
+          navigate("/store/home");
         } else {
-          alert('알 수 없는 사용자 유형입니다.');
+          // 본사(그 외 부서)일 경우
+          navigate("/headquarters/products/all");
         }
-      })
-      .catch(error => {
-        console.error('네트워크 오류', error);
-        alert('서버와 연결할 수 없습니다.');
-      });
+      } else {
+        alert("토큰을 받지 못했습니다. 다시 로그인해주세요.");
+      }
+    } catch (error) {
+      console.error("로그인 실패:", error);
+    }
   };
-  
 
   return (
     <Box
@@ -107,24 +102,31 @@ const LoginPage = () => {
         <Typography variant="subtitle1" align="center" color="textSecondary" sx={{ mb: 3 }}>
           본사 관리자 로그인
         </Typography>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
             label="아이디"
             margin="normal"
-            {...register('loginId', { required: '아이디를 입력해주세요' })}
-            error={!!errors.loginId}
-            helperText={errors.loginId?.message}
+            value={loginId}
+            onChange={(e) => setLoginId(e.target.value)}
+            error={!!error}
+            required
           />
           <TextField
             fullWidth
             type="password"
             label="비밀번호"
             margin="normal"
-            {...register('loginPwd', { required: '비밀번호를 입력해주세요' })}
-            error={!!errors.loginPwd}
-            helperText={errors.loginPwd?.message}
+            value={loginPwd}
+            onChange={(e) => setLoginPwd(e.target.value)}
+            error={!!error}
+            required
           />
+          {error && (
+            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+              {error}
+            </Typography>
+          )}
           <Button
             fullWidth
             type="submit"
@@ -148,6 +150,4 @@ const LoginPage = () => {
       </Card>
     </Box>
   );
-};
-
-export default LoginPage; 
+}

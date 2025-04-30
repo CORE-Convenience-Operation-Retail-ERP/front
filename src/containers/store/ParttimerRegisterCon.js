@@ -1,6 +1,6 @@
 import PartTimerRegisterCom from "../../components/store/PartTimerRegisterCom";
 import {useNavigate} from "react-router-dom";
-import axios from "axios";
+import axios from "../../service/axiosInstance";
 import { useState } from 'react';
 
 
