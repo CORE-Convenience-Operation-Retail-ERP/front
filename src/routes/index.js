@@ -32,6 +32,7 @@ import BoardNoticePage from '../pages/headquarters/BoardNoticePage';
 import BoardSuggestionsPage from '../pages/headquarters/BoardSuggestionsPage';
 import BoardStoreInquiriesPage from '../pages/headquarters/BoardStoreInquiriesPage';
 import RegisterPage from '../pages/auth/RegisterPage';
+import ParttimerRegisterPage from "../pages/store/ParttimerRegisterPage";
 
 const AppRoutes = () => {
   return (
@@ -68,6 +69,7 @@ const AppRoutes = () => {
           <Route path="order/register" element={<OrderRegisterPage/>} />
           <Route path="order/list" element={<OrderListPage/>} />
           <Route path="parttimer/list" element={<PartTimerPage/>} />
+          <Route path="parttimer/register" element={<ParttimerRegisterPage/>} />
           <Route path="hr/schedule" element={<PartTimerSchedulePage/>} />
           <Route path="hr/salary" element={<SalaryPage/>} />
           <Route path="sales" element={<SalesPage/>} />

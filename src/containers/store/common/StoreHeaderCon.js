@@ -21,6 +21,24 @@ function HeaderContainer() {
         async function fetchUserInfo() {
             try {
                 const token = localStorage.getItem('token');
+                if (token && token.split('.').length === 3) {
+                    try {
+                        const base64Url = token.split('.')[1];
+                        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                        const jsonPayload = decodeURIComponent(
+                            atob(base64)
+                                .split('')
+                                .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                                .join('')
+                        );
+                        const decoded = JSON.parse(jsonPayload);
+                        console.log("✅ 디코딩된 JWT payload:", decoded);
+                    } catch (e) {
+                        console.warn("❌ 토큰 디코딩 실패", e);
+                    }
+                } else {
+                    console.warn("❗ 올바른 토큰 형식이 아님 (split 실패 또는 null)");
+                }
                 if (!token) return;
 
                 const response = await axios.get('/api/store/notifications', {

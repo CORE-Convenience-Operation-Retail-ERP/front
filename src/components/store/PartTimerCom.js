@@ -38,12 +38,12 @@ function PartTimerCom({ data, loading, selectedIds, onCheck, onCheckAll }) {
                     <td>{pt.partName}</td>
                     <td>{pt.position || '-'}</td>
                     <td>{pt.workType || '-'}</td>
-                    <td>{pt.partPhone}</td>
+                    <td>{pt.partPhone|| '-'}</td>
                     <td>{pt.hireDate ? format(new Date(pt.hireDate), "yyyy-MM-dd") : "-"}</td>
-                    <td>{pt.hourlyWage?.toLocaleString()}원</td>
-                    <td>{pt.accountBank}</td>
-                    <td>{pt.accountNumber}</td>
-                    <td>{pt.partStatus === 1 ? '재직' : '퇴사'}</td>
+                    <td>{pt.hourlyWage?.toLocaleString()|| '-'}원</td>
+                    <td>{pt.accountBank || '-'}</td>
+                    <td>{pt.accountNumber || '-'}</td>
+                    <td>{pt.partStatus === 1 ? '재직' : '퇴사' || '-'}</td>
                     <td><button onClick={() => navigate(`/store/parttimer/${pt.partTimerId}`)}>상세</button></td>
                 </tr>
             ))}
