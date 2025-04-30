@@ -16,15 +16,17 @@ instance.interceptors.request.use(
         }
 
         const token = localStorage.getItem('token');
-        console.log('🚀 요청 토큰:', token); // 확인용 로그
+
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-
+        console.log('🚀 요청 토큰:', token);
         return config;
     },
     (error) => Promise.reject(error)
 );
+
+
 
 // // 응답 인터셉터: 인증 오류 처리
 // instance.interceptors.response.use(

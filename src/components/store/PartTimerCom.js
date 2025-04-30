@@ -33,7 +33,9 @@ function PartTimerCom({ data, loading, selectedIds, onCheck, onCheckAll }) {
             </thead>
             <tbody>
             {data.map((pt) => (
-                <tr key={pt.partTimerId}>
+                <tr key={pt.partTimerId}
+                    onClick={() => navigate(`/store/parttimer/${pt.partTimerId}`)}
+                    style={{cursor:'pointer'}}>
                     <td><input type="checkbox" checked={selectedIds.includes(pt.partTimerId)} onChange={() => onCheck(pt.partTimerId)} /></td>
                     <td>{pt.partName}</td>
                     <td>{pt.position || '-'}</td>
@@ -44,7 +46,6 @@ function PartTimerCom({ data, loading, selectedIds, onCheck, onCheckAll }) {
                     <td>{pt.accountBank || '-'}</td>
                     <td>{pt.accountNumber || '-'}</td>
                     <td>{pt.partStatus === 1 ? '재직' : '퇴사' || '-'}</td>
-                    <td><button onClick={() => navigate(`/store/parttimer/${pt.partTimerId}`)}>상세</button></td>
                 </tr>
             ))}
             </tbody>

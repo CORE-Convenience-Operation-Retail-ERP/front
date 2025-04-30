@@ -33,6 +33,8 @@ import BoardSuggestionsPage from '../pages/headquarters/BoardSuggestionsPage';
 import BoardStoreInquiriesPage from '../pages/headquarters/BoardStoreInquiriesPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import ParttimerRegisterPage from "../pages/store/ParttimerRegisterPage";
+import PartTimerOnePage from "../pages/store/PartTimerOnePage";
+import PartTimerUpdatePage from '../pages/store/PartTimerUpdatePage';
 
 const AppRoutes = () => {
   return (
@@ -70,6 +72,8 @@ const AppRoutes = () => {
           <Route path="order/list" element={<OrderListPage/>} />
           <Route path="parttimer/list" element={<PartTimerPage/>} />
           <Route path="parttimer/register" element={<ParttimerRegisterPage/>} />
+          <Route path="parttimer/:id" element={<PartTimerOnePage/>} />
+          <Route path="/store/parttimer/:id/edit" element={<PartTimerUpdatePage/>} />
           <Route path="hr/schedule" element={<PartTimerSchedulePage/>} />
           <Route path="hr/salary" element={<SalaryPage/>} />
           <Route path="sales" element={<SalesPage/>} />
