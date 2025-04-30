@@ -15,9 +15,13 @@ const Header = () => {
     { id: 2, title: '연차 신청이 도착했습니다.', isRead: false },
   ]);
   const open = Boolean(anchorEl);
-debugger;
+
   const loginUser = JSON.parse(localStorage.getItem('loginUser'));
-  const userName = loginUser ? loginUser.name : "로그인 해주세요";
+  const userName = loginUser
+  ? loginUser.workType === 3
+    ? `${loginUser.branchName || "지점명 없음"} 점주`
+    : loginUser.name
+  : "로그인 해주세요";
 
   const handleLogoClick = () => {
     navigate(location.pathname, { replace: true });
@@ -111,7 +115,7 @@ debugger;
             onClick={handleLogout}
           />
 
-          <Button color="inherit" onClick={() => navigate('/store')}>
+          <Button color="inherit" onClick={() => navigate('/store/home')}>
             Store
           </Button>
         </Box>

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import {
     Header,
     RightSection,
@@ -7,13 +9,16 @@ import {
     MailIcon,
     BellIcon,
     LogoutIcon,
+    BuildingIcon,
 } from '../../../features/store/styles/common/StoreHeader.styled';
+
 
 function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
 
     console.log("헤더 userInfo:", userInfo);
 
-    const [hoveredIcon, setHoveredIcon] = useState(null); // 🔥
+    const [hoveredIcon, setHoveredIcon] = useState(null);
+    const navigate = useNavigate();
 
     // if (!userInfo) return null;
 
@@ -24,7 +29,7 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
 
                 {/* Mail */}
                 <IconWrap
-                    hoverbg="#dbeafe" // 🔥 연파랑
+                    hoverbg="#dbeafe" // 연파랑
                     onMouseEnter={() => setHoveredIcon('mail')}
                     onMouseLeave={() => setHoveredIcon(null)}
                 >
@@ -33,16 +38,36 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
 
                 {/* Bell */}
                 <IconWrap
-                    hoverbg="#fef9c3" // 🔥 연노랑
+                    hoverbg="#fef9c3" // 연노랑
                     onMouseEnter={() => setHoveredIcon('bell')}
                     onMouseLeave={() => setHoveredIcon(null)}
                 >
                     <BellIcon $hovered={hoveredIcon === 'bell'} />
                 </IconWrap>
 
+                {/* 본사 이동 아이콘 (점주만 보임)  */}
+                {userInfo?.workType === 3 && (
+                    <IconWrap
+                        hoverbg="#ede9fe" // 연보라
+                        onMouseEnter={() => setHoveredIcon('hq')}
+                        onMouseLeave={() => setHoveredIcon(null)}
+                        onClick={() => navigate('/headquarters/dashboard')}
+                    >
+                     
+                        <BuildingIcon $hovered={hoveredIcon === 'hq'} />
+                    </IconWrap>
+                )}
+
+                 {/* 직급 */}
+                 <div style={{ fontSize: "14px", color: "#6b7280" }}>
+                    {userInfo.workType === 3
+                        ? `${userInfo.branchName || "지점명 없음"} 점주`
+                        : "관리자"}
+                </div>
+
                 {/* Logout */}
                 <IconWrap
-                    hoverbg="#ffe4e6" // 🔥 연다홍
+                    hoverbg="#ffe4e6" // 연다홍
                     onMouseEnter={() => setHoveredIcon('logout')}
                     onMouseLeave={() => setHoveredIcon(null)}
                     onClick={onLogout}
@@ -58,13 +83,6 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
                         Logout
                     </span>
                 </IconWrap>
-
-                {/* 직급 */}
-                <div style={{ fontSize: "14px", color: "#6b7280" }}>
-                    {userInfo.workType === 3
-                        ? `${userInfo.branchName || "지점명 없음"} 점주`
-                        : "관리자"}
-                </div>
 
             </RightSection>
         </Header>

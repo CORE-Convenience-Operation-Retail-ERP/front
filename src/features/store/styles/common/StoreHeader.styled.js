@@ -1,5 +1,7 @@
 import styled from 'styled-components';
-import { FiMail, FiBell, FiLogOut } from "react-icons/fi";
+import { FiMail, FiBell, FiLogOut} from "react-icons/fi";
+import { FaBuilding } from 'react-icons/fa';
+
 
 // 공통 Wrapper (hover 배경색을 props로 받음!)
 
@@ -53,6 +55,12 @@ export const MailIcon = styled(FiMail)`
 export const BellIcon = styled(FiBell)`
     font-size: 22px;
     color: ${({ $hovered }) => ($hovered ? '#facc15' : '#9ca3af')};
+    transition: color 0.2s ease;
+`;
+
+export const BuildingIcon = styled(FaBuilding)`
+    font-size: 22px;
+    color: ${({ $hovered }) => ($hovered ? '#8b5cf6' : '#9ca3af')};
     transition: color 0.2s ease;
 `;
 
