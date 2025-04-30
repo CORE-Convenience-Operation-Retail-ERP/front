@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
+import EmployeesListCon from '../../containers/headquarters/EmployeesListCon';
 
-const EmployeesListPage = () => (
-  <div>
-    <h2>사원 목록</h2>
-    <p>여기는 사원 목록 페이지입니다.</p>
-  </div>
-);
+const EmployeesListPage = () => {
+  const [search, setSearch] = useState({ empName: '' });
+
+  return (
+    <div style={{ padding: '40px 60px 0 60px', background: '#F8FAFB', minHeight: '100vh' }}>
+      {/* 헤더/사이드바는 별도 컴포넌트로 분리해서 이곳에 배치 */}
+      <EmployeesListCon />
+    </div>
+  );
+};
 
 export default EmployeesListPage; 
