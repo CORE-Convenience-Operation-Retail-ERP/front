@@ -32,7 +32,8 @@ const LoginPage = () => {
         console.log("서버 응답:", data);
   debugger;
         // branchName이 null일 경우 점주가 아니면 경고 처리
-        if (!data.branchName && 2 != data.workType) {
+        // if (!data.branchName && data.workType) {  -> 수정 전
+          if (!data.branchName && 2 !== data.workType) {   // -> 수정 후
           alert("점주 지점명이 없습니다. 관리자에게 문의하세요.");
           return;
         }
