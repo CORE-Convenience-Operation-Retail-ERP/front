@@ -15,7 +15,7 @@ const Header = () => {
     { id: 2, title: '연차 신청이 도착했습니다.', isRead: false },
   ]);
   const open = Boolean(anchorEl);
-
+debugger;
   const loginUser = JSON.parse(localStorage.getItem('loginUser'));
   const userName = loginUser ? loginUser.name : "로그인 해주세요";
 
@@ -101,7 +101,7 @@ const Header = () => {
               '&:hover': { textDecoration: 'underline' },
               color: 'black'
             }}
-            onClick={() => navigate('/headquarters/hr/my-page')}
+            onClick={() => navigate(`/headquarters/hr/my-page/${1}`)}
           >
             {userName}님
           </Box>

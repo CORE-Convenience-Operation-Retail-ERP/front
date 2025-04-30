@@ -30,9 +30,9 @@ const LoginPage = () => {
       })
       .then(data => {
         console.log("서버 응답:", data);
-  
+  debugger;
         // branchName이 null일 경우 점주가 아니면 경고 처리
-        if (!data.branchName) {
+        if (!data.branchName && 2 != data.workType) {
           alert("점주 지점명이 없습니다. 관리자에게 문의하세요.");
           return;
         }
@@ -40,7 +40,7 @@ const LoginPage = () => {
         // 서버에서 받은 JWT 토큰을 로컬 스토리지에 저장
         localStorage.setItem('branchName', data.branchName);
         localStorage.setItem('loginUser', JSON.stringify(data));
-  
+  debugger;
         // 사용자 유형에 맞춰 리다이렉션
         if (data.workType === 3) {
           // 점주일 경우
