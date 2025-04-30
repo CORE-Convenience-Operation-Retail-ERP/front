@@ -3,6 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Card, TextField, Button, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 
+// JWT 디코딩 함수 (Base64Url 처리 포함)
+function decodeJWT(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+        );
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        console.error("JWT 디코딩 실패:", e);
+        return null;
+    }
+}
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -32,17 +50,29 @@ const LoginPage = () => {
         console.log("서버 응답:", data);
 
         // branchName이 null일 경우 점주가 아니면 경고 처리
-        // if (!data.branchName && data.workType) {  -> 수정 전
-          if (!data.branchName && 1 !== data.workType) {   // -> 수정 후
-          alert("점주 지점명이 없습니다. 관리자에게 문의하세요.");
-          return;
-        }
-  
+          if (!data.accessToken) {
+              alert("서버에서 토큰을 받지 못했습니다.");
+              return;
+          }
+
         // 서버에서 받은 JWT 토큰을 로컬 스토리지에 저장
         localStorage.setItem('branchName', data.branchName);
         localStorage.setItem('loginUser', JSON.stringify(data));
+        localStorage.setItem('token', data.accessToken);
+
+          const decoded = decodeJWT(data.accessToken);
+          if (decoded) {
+              localStorage.setItem('userRole', decoded.role);
+              localStorage.setItem('storeId', decoded.storeId);
+              localStorage.setItem('name', decoded.name);
+          }
+
 
         // 사용자 유형에 맞춰 리다이렉션
+        if (!data.branchName && 1 !== data.workType) {   // -> 수정 후
+              alert("점주 지점명이 없습니다. 관리자에게 문의하세요.");
+              return;
+          }
         if (data.workType === 3) {
           // 점주일 경우
           navigate('/store/home');  // 점주용 홈 화면
