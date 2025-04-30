@@ -1,9 +1,21 @@
-// containers/store/HomeCon.js
-import HomeCom from '../../components/store/HomeCom';
+import React, { useState, useEffect } from 'react';
+import HomeCom from '../../components/store/main/HomeCom';
+
 
 const HomeCon = () => {
-  // 상태관리 없음 (props 전달 안 해도 됨)
-  return <HomeCom />;
+  const [sales, setSales] = useState(385400);
+  const [prevSales, setPrevSales] = useState(355000);
+  const [alerts, setAlerts] = useState([
+    '재고 부족 상품 3건',
+    '폐기 예정 상품 2건',
+    '입고 미완료 발주 1건'
+  ]);
+
+  const rate = ((sales - prevSales) / prevSales) * 100;
+
+  return (
+    <HomeCom sales={sales} rate={rate} alerts={alerts} />
+  );
 };
 
 export default HomeCon;

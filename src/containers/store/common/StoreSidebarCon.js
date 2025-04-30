@@ -35,7 +35,9 @@ const sidebarMenus = [
     {
         name: '통계 관리', icon: <BarChartIcon />, submenu: [
             { name: '발주 통계', path: '/store/stats/order' },
-            { name: '상품별 매출 순위', path: '/store/stats/sales' },
+            { name: '상품별 매출 순위', path: '/store/stats/product' },
+            { name: '카테고리별 매출 추이', path: '/store/stats/category' },
+            { name: '시간대별 매출 통계', path: '/store/stats/time' },
         ]
     },
 ];
@@ -43,8 +45,8 @@ const sidebarMenus = [
 function StoreSidebarContainer() {
     const [hoverMenu, setHoverMenu] = useState('');
     const navigate = useNavigate();
-    const location = useLocation(); // 🔥 현재 주소 가져오기
-    const currentPath = location.pathname; // 🔥 현재 경로
+    const location = useLocation(); // 현재 주소 가져오기
+    const currentPath = location.pathname; // 현재 경로
 
     const handleMouseEnter = (menuName) => {
         setHoverMenu(menuName);
