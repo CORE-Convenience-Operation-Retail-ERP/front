@@ -1,7 +1,7 @@
 import instance from './axiosInstance';
 
 // API 엔드포인트 기본 경로
-const BASE_URL = '/store/parttimer';
+const BASE_URL = '/api/parttimer';
 
 export const fetchPartTimers = async ({ page, size, partName, partStatus }) => {
     try {
