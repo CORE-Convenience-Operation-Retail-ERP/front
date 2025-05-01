@@ -29,6 +29,7 @@ export const searchPartTimers = async (params) => {
 
 export const fetchPartTimerById = async (id) => {
     try {
+        console.log("🔍 API로 요청하는 ID:", id);  // 이거 추가
         const response = await instance.get(`${BASE_URL}/${id}`);
         return response.data;
     } catch (error) {
