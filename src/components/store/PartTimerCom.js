@@ -28,7 +28,6 @@ function PartTimerCom({ data, loading, selectedIds, onCheck, onCheckAll }) {
                 <th>은행</th>
                 <th>계좌번호</th>
                 <th>상태</th>
-                <th>상세</th>
             </tr>
             </thead>
             <tbody>

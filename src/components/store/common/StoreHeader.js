@@ -15,7 +15,6 @@ import {
 
 function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
 
-    console.log("헤더 userInfo:", userInfo);
 
     const [hoveredIcon, setHoveredIcon] = useState(null);
     const navigate = useNavigate();
