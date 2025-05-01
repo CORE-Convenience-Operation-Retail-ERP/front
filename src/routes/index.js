@@ -28,13 +28,15 @@ import BranchesManagementPage from '../pages/headquarters/BranchesManagementPage
 import BranchesSalesAnalysisPage from '../pages/headquarters/BranchesSalesAnalysisPage';
 import BranchesStockMonitoringPage from '../pages/headquarters/BranchesStockMonitoringPage';
 import BranchesStatisticsPage from '../pages/headquarters/BranchesStatisticsPage';
-import BoardNoticePage from '../pages/headquarters/BoardNoticePage';
-import BoardSuggestionsPage from '../pages/headquarters/BoardSuggestionsPage';
-import BoardStoreInquiriesPage from '../pages/headquarters/BoardStoreInquiriesPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import ParttimerRegisterPage from "../pages/store/ParttimerRegisterPage";
 import PartTimerOnePage from "../pages/store/PartTimerOnePage";
 import PartTimerUpdatePage from '../pages/store/PartTimerUpdatePage';
+import NoticePage from '../pages/headquarters/board/NoticePage';
+import SuggestionsPage from '../pages/headquarters/board/SuggestionsPage';
+import StoreInquiriesPage from '../pages/headquarters/board/StoreInquiriesPage';
+
+
 
 const AppRoutes = () => {
   return (
@@ -54,9 +56,9 @@ const AppRoutes = () => {
         <Route path="branches/sales-analysis" element={<BranchesSalesAnalysisPage />} />
         <Route path="branches/stock-monitering" element={<BranchesStockMonitoringPage />} />
         <Route path="branches/statistics" element={<BranchesStatisticsPage />} />
-        <Route path="board/notice" element={<BoardNoticePage />} />
-        <Route path="board/suggestions" element={<BoardSuggestionsPage />} />
-        <Route path="board/store-inquiries" element={<BoardStoreInquiriesPage />} />
+        <Route path="board/notice" element={<NoticePage />} />
+        <Route path="board/suggestions" element={<SuggestionsPage />} />
+        <Route path="board/store-inquiries" element={<StoreInquiriesPage />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="products/detail/:id" element={<ProductsDetailPage />} />
         <Route path="products/edit/:id" element={<ProductsEditPage />} />

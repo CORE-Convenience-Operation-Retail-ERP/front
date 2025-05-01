@@ -3,7 +3,7 @@ import { Box, Grid, Typography } from '@mui/material';
 import MyCom from '../../components/headquarters/MyCom';
 import MyCon from '../../containers/headquarters/MyCon';
 import CalendarBox from '../../containers/headquarters/CalendarBox';
-import axios from 'axios';
+import axios from '../../service/axiosInstance';
 
 const MyPage = () => {
   const [info, setInfo] = useState(null);

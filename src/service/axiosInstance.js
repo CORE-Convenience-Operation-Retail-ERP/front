@@ -13,6 +13,28 @@ instance.interceptors.request.use(
     const token = localStorage.getItem("token");
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
+      // 디버깅용 토큰 정보 로깅
+      console.log('요청 URL:', config.url);
+      console.log('요청 메서드:', config.method);
+      console.log('인증 토큰 존재:', !!token);
+      
+      try {
+        // JWT 디코딩
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+        );
+        const decoded = JSON.parse(jsonPayload);
+        console.log('토큰 페이로드:', decoded);
+      } catch (e) {
+        console.warn('토큰 디코딩 실패:', e);
+      }
+    } else {
+      console.warn('인증 토큰이 없습니다!');
     }
     return config;
   },
