@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import StoreHeader from '../../../components/store/common/StoreHeader';
-import axios from 'axios';
+import axios from "../../../service/axiosInstance";
 
 function HeaderContainer() {
   const loginUser = JSON.parse(localStorage.getItem('loginUser')) || {};
@@ -40,7 +40,7 @@ function HeaderContainer() {
           console.warn("❗ 올바른 토큰 형식이 아님 (split 실패 또는 null)");
         }
 
-        const response = await instance.get('/api/store/notifications');
+        const response = await axios.get('/api/store/notifications');
 
         if (response.data) {
           setUserInfo(prev => ({
@@ -71,7 +71,7 @@ function HeaderContainer() {
 
   const removeNotification = async (index) => {
     try {
-      await instance.delete(`/api/store/notifications/${index}`);
+      await axios.delete(`/api/store/notifications/${index}`);
       setUserInfo(prev => ({
         ...prev,
         notificationCount: prev.notificationCount - 1,

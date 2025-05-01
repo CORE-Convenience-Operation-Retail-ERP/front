@@ -1,6 +1,6 @@
 // src/components/headquarters/ProductsRegisterCom.js
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../service/axiosInstance";
 
 const initialState = {
   proName: "",
