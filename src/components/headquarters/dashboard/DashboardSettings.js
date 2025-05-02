@@ -13,7 +13,8 @@ const widgetOptions = [
   { id: 'notice', title: '공지사항' },
   { id: 'alert', title: '알림' },
   { id: 'storeRank', title: '지점 매출 순위' },
-  { id: 'categoryRank', title: '카테고리별 매출 순위' }
+  { id: 'categoryRank', title: '카테고리별 매출 순위' },
+  { id: 'board', title: '게시판' }
 ];
 
 const DashboardSettings = ({ open, handleClose, layouts, setLayouts }) => {

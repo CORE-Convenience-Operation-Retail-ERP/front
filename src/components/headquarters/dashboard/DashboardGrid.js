@@ -12,6 +12,7 @@ import NoticeWidget from './widgets/NoticeWidget';
 import AlertWidget from './widgets/AlertWidget';
 import StoreRankWidget from './widgets/StoreRankWidget';
 import CategoryRankWidget from './widgets/CategoryRankWidget';
+import BoardWidget from './widgets/BoardWidget';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -22,7 +23,8 @@ const widgets = {
   notice: NoticeWidget,
   alert: AlertWidget,
   storeRank: StoreRankWidget,
-  categoryRank: CategoryRankWidget
+  categoryRank: CategoryRankWidget,
+  board: BoardWidget
 };
 
 const DashboardGrid = () => {
@@ -58,13 +60,16 @@ const DashboardGrid = () => {
     }
   };
 
-  // 설정 모드 토글
-  const toggleEditMode = () => {
-    setEditMode(!editMode);
-    // 편집 모드를 종료할 때 레이아웃 저장
+  // 설정 버튼 클릭 핸들러
+  const handleSettingsClick = () => {
     if (editMode) {
+      // 편집 모드 종료
+      setEditMode(false);
       const userId = localStorage.getItem('empId');
       layouts && localStorage.setItem(`dashboard-layout-${userId}`, JSON.stringify(layouts));
+    } else {
+      // 설정 창 열기
+      setSettingsOpen(true);
     }
   };
 
@@ -74,28 +79,35 @@ const DashboardGrid = () => {
       lg: [
         { i: 'sales', x: 0, y: 0, w: 1, h: 1 },
         { i: 'popular', x: 1, y: 0, w: 1, h: 1 },
-        { i: 'notice', x: 0, y: 1, w: 1, h: 1 },
+        { i: 'board', x: 0, y: 1, w: 1, h: 1 },
         { i: 'alert', x: 1, y: 1, w: 1, h: 1 }
       ],
       md: [
         { i: 'sales', x: 0, y: 0, w: 1, h: 1 },
         { i: 'popular', x: 1, y: 0, w: 1, h: 1 },
-        { i: 'notice', x: 0, y: 1, w: 1, h: 1 },
+        { i: 'board', x: 0, y: 1, w: 1, h: 1 },
         { i: 'alert', x: 1, y: 1, w: 1, h: 1 }
       ],
       sm: [
         { i: 'sales', x: 0, y: 0, w: 1, h: 1 },
         { i: 'popular', x: 1, y: 0, w: 1, h: 1 },
-        { i: 'notice', x: 0, y: 1, w: 1, h: 1 },
+        { i: 'board', x: 0, y: 1, w: 1, h: 1 },
         { i: 'alert', x: 1, y: 1, w: 1, h: 1 }
       ],
       xs: [
         { i: 'sales', x: 0, y: 0, w: 1, h: 1 },
         { i: 'popular', x: 0, y: 1, w: 1, h: 1 },
-        { i: 'notice', x: 0, y: 2, w: 1, h: 1 },
+        { i: 'board', x: 0, y: 2, w: 1, h: 1 },
         { i: 'alert', x: 0, y: 3, w: 1, h: 1 }
       ]
     };
+  };
+
+  // 설정 창에서 저장 후 편집 모드로 전환
+  const handleSettingsClose = () => {
+    setSettingsOpen(false);
+    // 설정 창을 닫은 후 자동으로 편집 모드 활성화
+    setEditMode(true);
   };
 
   return (
@@ -107,7 +119,7 @@ const DashboardGrid = () => {
         right: '20px', 
         zIndex: 1100
       }}>
-        <Tooltip title={editMode ? "설정 완료" : "위젯 위치 변경"}>
+        <Tooltip title={editMode ? "설정 완료" : "위젯 설정"}>
           <Box sx={{ position: 'relative' }}>
             {editMode && (
               <Typography 
@@ -130,7 +142,7 @@ const DashboardGrid = () => {
               </Typography>
             )}
             <IconButton 
-              onClick={toggleEditMode}
+              onClick={handleSettingsClick}
               sx={{ 
                 bgcolor: editMode ? 'success.light' : 'white', 
                 color: editMode ? 'white' : 'primary.main',
@@ -177,7 +189,7 @@ const DashboardGrid = () => {
       
       <DashboardSettings 
         open={settingsOpen} 
-        handleClose={() => setSettingsOpen(false)}
+        handleClose={handleSettingsClose}
         layouts={layouts}
         setLayouts={setLayouts}
       />
