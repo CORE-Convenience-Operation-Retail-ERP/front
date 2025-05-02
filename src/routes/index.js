@@ -50,6 +50,7 @@ const AppRoutes = () => {
         {/* <Route path="products/detail" element={<ProductsDetailPage />} /> */}
         <Route path="hr/employees" element={<EmployeesListPage />} />
         <Route path="hr/employee-management" element={<EmployeeManagementPage />} />
+        <Route path="hr/employee-management/:empId" element={<EmployeeManagementPage />} />
         <Route path="hr/my-page" element={<MyPage />} />
         <Route path="branches/list" element={<BranchesListPage />} />
         <Route path="branches/management" element={<BranchesManagementPage />} />

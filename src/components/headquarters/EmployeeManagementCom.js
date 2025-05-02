@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -17,8 +17,8 @@ import {
 } from '@mui/material';
 
 const EmployeeManagementCom = ({ employee, departments, onSave, loading, error }) => {
-  // 초기 상태 설정 (실제로는 컨테이너에서 props로 받아와야 함)
-  const [formData, setFormData] = useState(employee || {
+  // 초기 상태 설정
+  const [formData, setFormData] = useState({
     empId: '',
     empName: '',
     deptCode: '',
@@ -29,6 +29,45 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error }
     hireDate: '',
     empImg: null
   });
+
+  // employee prop이 변경될 때 formData 업데이트
+  useEffect(() => {
+    if (employee) {
+      console.log('Received employee data:', employee);
+      
+      // 상태값이 숫자인 경우 문자열로 변환
+      let empStatusText = employee.empStatus || '재직';
+      
+      // 숫자인 경우 변환
+      if (['1', '2', '3'].includes(empStatusText)) {
+        switch (empStatusText) {
+          case '1':
+            empStatusText = '재직';
+            break;
+          case '2':
+            empStatusText = '휴직';
+            break;
+          case '3':
+            empStatusText = '퇴사';
+            break;
+          default:
+            empStatusText = '재직';
+        }
+      }
+      
+      setFormData({
+        empId: employee.empId || '',
+        empName: employee.empName || '',
+        deptCode: employee.deptCode || '',
+        empStatus: empStatusText,
+        empPhone: employee.empPhone || '',
+        empExt: employee.empExt || '',
+        empEmail: employee.empEmail || '',
+        hireDate: employee.hireDate || '',
+        empImg: employee.empImg || null
+      });
+    }
+  }, [employee]);
 
   // 입력 변경 처리
   const handleChange = (e) => {
@@ -183,23 +222,23 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error }
                   <InputLabel>부서</InputLabel>
                   <Select
                     name="deptCode"
-                    value={formData.deptCode}
+                    value={formData.deptCode || ''}
                     label="부서"
                     onChange={handleChange}
                     required
                   >
-                    {departments?.map(dept => (
-                      <MenuItem key={dept.deptCode} value={dept.deptCode}>
-                        {dept.deptName}
-                      </MenuItem>
-                    )) || (
-                      <>
-                        <MenuItem value="HQ_BR">인사팀</MenuItem>
-                        <MenuItem value="HQ_HRM">경영지원팀</MenuItem>
-                        <MenuItem value="HQ_DEV">개발팀</MenuItem>
-                        <MenuItem value="HQ_FIN">재무팀</MenuItem>
-                      </>
-                    )}
+                    {departments?.length > 0 ? 
+                      departments.map(dept => (
+                        <MenuItem key={dept.deptCode} value={dept.deptCode}>
+                          {dept.deptName}
+                        </MenuItem>
+                      )) : 
+                      [
+                        <MenuItem key="HQ_HRM" value="HQ_HRM">인사팀</MenuItem>,
+                        <MenuItem key="HQ_BR" value="HQ_BR">지점관리팀</MenuItem>,
+                        <MenuItem key="HQ_PRO" value="HQ_PRO">상품관리팀</MenuItem>
+                      ]
+                    }
                   </Select>
                 </FormControl>
               </Grid>
@@ -208,7 +247,7 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error }
                   <InputLabel>상태</InputLabel>
                   <Select
                     name="empStatus"
-                    value={formData.empStatus}
+                    value={formData.empStatus || '재직'}
                     label="상태"
                     onChange={handleChange}
                     required

@@ -5,7 +5,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import { InputBase, IconButton, Paper, ToggleButton, ToggleButtonGroup, FormControl, FormLabel, FormGroup, Chip } from '@mui/material';
+import { InputBase, IconButton, Paper, FormControl, FormLabel, FormGroup, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 // 검색어 하이라이트 함수
@@ -54,7 +54,11 @@ const EmployeesListCom = ({
   // 사원정보 관리 페이지로 이동
   const handleNavigateToEmployeeManagement = () => {
     onCloseModal();
-    navigate('/headquarters/hr/employee-management');
+    if (selectedEmployee && selectedEmployee.empId) {
+      navigate(`/headquarters/hr/employee-management/${selectedEmployee.empId}`);
+    } else {
+      navigate('/headquarters/hr/employee-management');
+    }
   };
   
   // 사원 등록 페이지로 이동
