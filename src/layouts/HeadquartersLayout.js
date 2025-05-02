@@ -17,8 +17,7 @@ const HeadquartersLayout = () => (
         sx={{
           mt: '5px', // 헤더 높이만큼 위에 여백 확보
           p: 3,      // 본문에 패딩 적용
-          minHeight: 'calc(100vh - 64px)', // 스크롤 생기지 않게 조정
-          background: '#f9f9f9' // 선택적 배경색 설정
+          minHeight: 'calc(100vh - 64px)' // 스크롤 생기지 않게 조정
         }}
       >
         <Outlet /> {/* 하위 라우트 페이지들이 이 위치에 렌더링됨 */}

@@ -10,17 +10,17 @@ const MyCom = ({ info }) => {
     <Paper elevation={1} sx={{ borderRadius: 2, p: 3, height: '100%' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
         {/* 프로필 이미지 */}
-        <Avatar
+          <Avatar
           src={info?.empImg}
-          alt="프로필"
-          sx={{
+            alt="프로필"
+            sx={{
             width: 160,
             height: 160,
             mb: 2,
-            border: '4px solid #f0f7ff',
+              border: '4px solid #f0f7ff',
             boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-          }}
-        />
+            }}
+          />
         
         {/* 이름과 직급/부서 */}
         <Typography variant="h5" fontWeight="bold">
@@ -30,7 +30,7 @@ const MyCom = ({ info }) => {
           {info?.empRole} | {info?.deptName}
         </Typography>
       </Box>
-      
+
       {/* 구분선 - 너무 길지 않게 설정 */}
       {/* ===== 구분선 시작 ===== */}
       <Divider sx={{ width: '60%', mx: 'auto', mb: 3 }} />
@@ -45,7 +45,7 @@ const MyCom = ({ info }) => {
             <Typography variant="body1" fontWeight="medium">
               {info?.empPhone}
             </Typography>
-          </Box>
+        </Box>
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -54,8 +54,8 @@ const MyCom = ({ info }) => {
             <Typography variant="body2" color="text.secondary">이메일:</Typography>
             <Typography variant="body1" fontWeight="medium">
               {info?.empEmail}
-            </Typography>
-          </Box>
+          </Typography>
+        </Box>
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>

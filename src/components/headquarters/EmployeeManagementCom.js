@@ -16,7 +16,7 @@ import {
   Alert
 } from '@mui/material';
 
-const EmployeeManagementCom = ({ employee, departments, onSave, loading, error }) => {
+const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, employeeType }) => {
   // 초기 상태 설정
   const [formData, setFormData] = useState({
     empId: '',
@@ -123,7 +123,7 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error }
           paddingBottom: 1
         }}
       >
-        사원 정보 관리
+        {employeeType === '본사' ? '사원 정보 관리' : '점주 정보 관리'}
       </Typography>
 
       {/* 오류 메시지 */}
@@ -195,7 +195,7 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error }
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="사번"
+                  label={employeeType === '본사' ? "사번" : "점주번호"}
                   name="empId"
                   value={formData.empId}
                   onChange={handleChange}
@@ -208,7 +208,7 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error }
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="이름"
+                  label={employeeType === '본사' ? "이름" : "점주명"}
                   name="empName"
                   value={formData.empName}
                   onChange={handleChange}
@@ -365,4 +365,4 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error }
   );
 };
 
-export default EmployeeManagementCom;
+export default EmployeeManagementCom; 

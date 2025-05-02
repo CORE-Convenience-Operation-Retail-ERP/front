@@ -13,7 +13,7 @@ const MyCon = ({ info, type }) => {
   const renderAttendanceInfo = () => (
     <Paper 
       elevation={1} 
-      sx={{ 
+            sx={{
         borderRadius: 2, 
         p: 3, 
         height: '100%', 
@@ -52,8 +52,8 @@ const MyCon = ({ info, type }) => {
         </Box>
         
         <Box sx={{ 
-          width: 120, 
-          height: 120, 
+              width: 120,
+              height: 120,
           borderRadius: '50%', 
           border: '8px solid #4a90e2', 
           display: 'flex', 
@@ -91,7 +91,7 @@ const MyCon = ({ info, type }) => {
         p: 3, 
         height: '100%', 
         borderTop: '5px solid #3a5ca8' 
-      }}
+            }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <PaymentsIcon color="primary" sx={{ mr: 1 }} />
@@ -144,8 +144,8 @@ const MyCon = ({ info, type }) => {
             <Typography variant="body2">연차 신청서.xls</Typography>
           </Box>
         )}
-      </Box>
-    </Paper>
+        </Box>
+      </Paper>
   );
   
   return type === 'attendance' ? renderAttendanceInfo() : renderSalaryInfo();

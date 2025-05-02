@@ -4,7 +4,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { InputBase, IconButton, Paper, FormControl, FormLabel, FormGroup, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
@@ -28,7 +27,8 @@ const highlightText = (text, searchTerm) => {
 const EmployeesListCom = ({
   departments, employees, search, onSearch, filters, toggleStatusFilter, onSortChange,
   onDetail, modalOpen, selectedEmployee, onCloseModal,
-  page, setPage, totalCount, rowsPerPage, loading, error
+  page, setPage, totalCount, rowsPerPage, loading, error,
+  employeeType, onEmployeeTypeChange
 }) => {
   
   const navigate = useNavigate();
@@ -59,11 +59,6 @@ const EmployeesListCom = ({
     } else {
       navigate('/headquarters/hr/employee-management');
     }
-  };
-  
-  // 사원 등록 페이지로 이동
-  const handleNavigateToAddEmployee = () => {
-    navigate('/headquarters/hr/employee-management');
   };
   
   return (
@@ -118,7 +113,7 @@ const EmployeesListCom = ({
         </Paper>
       </Box>
       
-      {/* "전체 사원 목록" 텍스트와 사원 등록 버튼 */}
+      {/* 타입 선택 버튼과 제목, 사원 등록 버튼 */}
       <Box mb={3} sx={{
         display: 'flex',
         alignItems: 'center',
@@ -131,26 +126,44 @@ const EmployeesListCom = ({
           color: '#2563A6',
           letterSpacing: '-1px',
         }}>
-          전체 사원 목록
+          {employeeType === '본사' ? '본사 사원 목록' : '점주 목록'}
         </Typography>
         
-        {/* 사원 등록 버튼 */}
-        <Button
-          variant="contained"
-          startIcon={<PersonAddIcon />}
-          onClick={handleNavigateToAddEmployee}
-          sx={{
-            px: 3,
-            py: 1,
-            borderRadius: '20px',
-            backgroundColor: '#2563A6',
-            '&:hover': {
-              backgroundColor: '#1E5187',
-            }
-          }}
-        >
-          사원 등록
-        </Button>
+        {/* 본사/점주 토글 버튼 - 오른쪽으로 이동 */}
+        <Box sx={{ display: 'flex' }}>
+          <Button
+            variant={employeeType === '본사' ? 'contained' : 'outlined'}
+            onClick={() => onEmployeeTypeChange('본사')}
+            sx={{
+              borderRadius: '20px 0 0 20px',
+              backgroundColor: employeeType === '본사' ? '#2563A6' : 'transparent',
+              color: employeeType === '본사' ? 'white' : '#2563A6',
+              borderColor: '#2563A6',
+              '&:hover': {
+                backgroundColor: employeeType === '본사' ? '#1E5187' : 'rgba(37, 99, 166, 0.1)',
+              },
+              px: 2
+            }}
+          >
+            본사
+          </Button>
+          <Button
+            variant={employeeType === '점주' ? 'contained' : 'outlined'}
+            onClick={() => onEmployeeTypeChange('점주')}
+            sx={{
+              borderRadius: '0 20px 20px 0',
+              backgroundColor: employeeType === '점주' ? '#2563A6' : 'transparent',
+              color: employeeType === '점주' ? 'white' : '#2563A6',
+              borderColor: '#2563A6',
+              '&:hover': {
+                backgroundColor: employeeType === '점주' ? '#1E5187' : 'rgba(37, 99, 166, 0.1)',
+              },
+              px: 2
+            }}
+          >
+            점주
+          </Button>
+        </Box>
       </Box>
       
       {/* 상태 필터 */}
@@ -211,78 +224,173 @@ const EmployeesListCom = ({
       {/* 테이블(필터바+목록) 중앙 정렬 및 좌우 여백 */}
       {!loading && !error && employees.length > 0 && (
         <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto' }}>
-          <Table size="small" sx={{ background: '#F8FAFB', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)', mx: 'auto' }}>
-            <TableHead>
-              <TableRow>
-                {[
-                  { id: 'empId', label: '사번' },
-                  { id: 'empName', label: '이름' },
-                  { id: 'deptName', label: '부서' },
-                  { id: 'empStatus', label: '상태' },
-                  { id: 'hireDate', label: '입사일' }
-                ].map((column, idx) => (
-                  <TableCell
-                    key={column.id}
-                    align="center"
-                    sx={{
-                      fontWeight: 'bold',
-                      fontSize: 18,
-                      color: '#2563A6',
-                      borderBottom: 'none',
-                      borderRight: idx < 4 ? '1px solid #E0E7EF' : undefined,
-                      bgcolor: '#F8FAFB',
-                      px: 2,
-                      cursor: column.id !== 'empStatus' ? 'pointer' : 'default'
-                    }}
-                    onClick={() => column.id !== 'empStatus' && onSortChange(column.id)}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                      {column.label}
-                      {column.id !== 'empStatus' && (
-                        filters.sort === column.id ? (
-                          filters.order === 'asc' ? 
-                            <ArrowUpwardIcon fontSize="small" /> : 
-                            <ArrowDownwardIcon fontSize="small" />
-                        ) : (
-                          <span style={{ opacity: 0.3 }}>↕</span>
-                        )
-                      )}
-                    </Box>
-                  </TableCell>
-                ))}
-                <TableCell sx={{ borderBottom: 'none', bgcolor: '#F8FAFB' }}></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {employees.map(emp => (
-                <TableRow key={emp.empId}>
-                  <TableCell align="center">{search ? highlightText(emp.empId, search) : emp.empId}</TableCell>
-                  <TableCell align="center">{search ? highlightText(emp.empName, search) : emp.empName}</TableCell>
-                  <TableCell align="center">{search ? highlightText(emp.deptName, search) : emp.deptName}</TableCell>
-                  <TableCell align="center">{emp.empStatus}</TableCell>
-                  <TableCell align="center">{emp.hireDate}</TableCell>
-                  <TableCell align="center">
-                    <Button 
-                      size="small" 
-                      variant="outlined" 
-                      onClick={() => onDetail(emp.empId)}
-                      sx={{ 
-                        borderRadius: '20px',
+          {/* 본사 사원 테이블 */}
+          {employeeType === '본사' ? (
+            <Table size="small" sx={{ background: '#F8FAFB', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)', mx: 'auto' }}>
+              <TableHead>
+                <TableRow>
+                  {[
+                    { id: 'empId', label: '사번' },
+                    { id: 'empName', label: '이름' },
+                    { id: 'deptName', label: '부서' },
+                    { id: 'empStatus', label: '상태' },
+                    { id: 'hireDate', label: '입사일' }
+                  ].map((column, idx) => (
+                    <TableCell
+                      key={column.id}
+                      align="center"
+                      sx={{
+                        fontWeight: 'bold',
+                        fontSize: 18,
                         color: '#2563A6',
-                        borderColor: '#2563A6',
-                        '&:hover': {
-                          backgroundColor: '#e8f0f7',
-                          borderColor: '#2563A6',
-                        }
+                        borderBottom: 'none',
+                        borderRight: idx < 4 ? '1px solid #E0E7EF' : undefined,
+                        bgcolor: '#F8FAFB',
+                        px: 2,
+                        cursor: column.id !== 'empStatus' ? 'pointer' : 'default'
                       }}
+                      onClick={() => column.id !== 'empStatus' && onSortChange(column.id)}
                     >
-                      상세보기
-                    </Button>
-                  </TableCell>
+                      {column.label}
+                      {filters.sort === column.id && (
+                        filters.order === 'asc' ? 
+                          <ArrowUpwardIcon sx={{ fontSize: '0.9rem', ml: 0.5 }} /> : 
+                          <ArrowDownwardIcon sx={{ fontSize: '0.9rem', ml: 0.5 }} />
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {employees.map((row) => (
+                  <TableRow 
+                    key={row.empId}
+                    hover
+                    onClick={() => onDetail(row.empId)}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: '#F0F5FF',
+                      }
+                    }}
+                  >
+                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
+                      {highlightText(row.empId, search)}
+                    </TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
+                      {highlightText(row.empName, search)}
+                    </TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
+                      {highlightText(row.deptName, search)}
+                    </TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
+                      <Chip 
+                        label={row.empStatus} 
+                        sx={{ 
+                          backgroundColor: 
+                            row.empStatus === '재직' ? '#D0EBFF' :
+                            row.empStatus === '휴직' ? '#FFCC80' :
+                            '#FFAFAF',
+                          color: 
+                            row.empStatus === '재직' ? '#1D5795' :
+                            row.empStatus === '휴직' ? '#B36A00' :
+                            '#A02929',
+                          fontWeight: 'bold',
+                          px: 1
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell align="center" sx={{ py: 2.5 }}>
+                      {row.hireDate}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            /* 점주 테이블 */
+            <Table size="small" sx={{ background: '#F8FAFB', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)', mx: 'auto' }}>
+              <TableHead>
+                <TableRow>
+                  {[
+                    { id: 'empId', label: '점주번호' },
+                    { id: 'empName', label: '점주명' },
+                    { id: 'storeName', label: '점포명' },
+                    { id: 'empStatus', label: '상태' },
+                    { id: 'hireDate', label: '계약일' }
+                  ].map((column, idx) => (
+                    <TableCell
+                      key={column.id}
+                      align="center"
+                      sx={{
+                        fontWeight: 'bold',
+                        fontSize: 18,
+                        color: '#2563A6',
+                        borderBottom: 'none',
+                        borderRight: idx < 4 ? '1px solid #E0E7EF' : undefined,
+                        bgcolor: '#F8FAFB',
+                        px: 2,
+                        cursor: column.id !== 'empStatus' ? 'pointer' : 'default'
+                      }}
+                      onClick={() => column.id !== 'empStatus' && onSortChange(column.id)}
+                    >
+                      {column.label}
+                      {filters.sort === column.id && (
+                        filters.order === 'asc' ? 
+                          <ArrowUpwardIcon sx={{ fontSize: '0.9rem', ml: 0.5 }} /> : 
+                          <ArrowDownwardIcon sx={{ fontSize: '0.9rem', ml: 0.5 }} />
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {employees.map((row) => (
+                  <TableRow 
+                    key={row.empId}
+                    hover
+                    onClick={() => onDetail(row.empId)}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: '#F0F5FF',
+                      }
+                    }}
+                  >
+                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
+                      {highlightText(row.empId, search)}
+                    </TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
+                      {highlightText(row.empName, search)}
+                    </TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
+                      {highlightText(row.storeName || row.deptName, search)}
+                    </TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
+                      <Chip 
+                        label={row.empStatus} 
+                        sx={{ 
+                          backgroundColor: 
+                            row.empStatus === '재직' ? '#D0EBFF' :
+                            row.empStatus === '휴직' ? '#FFCC80' :
+                            '#FFAFAF',
+                          color: 
+                            row.empStatus === '재직' ? '#1D5795' :
+                            row.empStatus === '휴직' ? '#B36A00' :
+                            '#A02929',
+                          fontWeight: 'bold',
+                          px: 1
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell align="center" sx={{ py: 2.5 }}>
+                      {row.hireDate}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
 
           {/* Pagination */}
           <Box display="flex" justifyContent="center" mt={3} mb={2}>

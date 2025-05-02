@@ -17,6 +17,8 @@ const EmployeesListCon = () => {
     order: 'asc',
     status: [] // 상태 필터 (재직, 휴직, 퇴사)
   });
+  // 사원 유형 필터 (본사/점주)
+  const [employeeType, setEmployeeType] = useState('점주');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,15 +36,21 @@ const EmployeesListCon = () => {
       try {
         const response = await axios.get('/api/employees');
         
-        // 본사 데이터만 필터링 (empId 15 이하인 데이터만)
-        const filteredData = response.data.filter(emp => emp.empId <= 15);
+        console.log("서버에서 받은 원본 데이터:", response.data);
+        // 점주/본사 데이터를 구분하기 위한 필터링 로직
+        const filteredData = response.data.filter(emp => {
+          // empRole이 '점주'인 사원만 가져오거나 (점주 모드)
+          // empRole이 '본사', '인사팀', '경영지원팀' 등 점주가 아닌 사원만 가져옴 (본사 모드)
+          return employeeType === '점주' 
+            ? emp.empRole === '점주' || emp.empRole === 'STORE'
+            : emp.empRole === '본사' || emp.empRole === 'HQ' || 
+              emp.empRole?.startsWith('HQ_') || !emp.empRole?.includes('STORE');
+        });
         
-        // 백엔드에서 이미 가공된 데이터를 저장
+        console.log(`${employeeType} 필터링 후 데이터:`, filteredData);
+        
+        // 원본 데이터 저장 (필터링은 나중에 처리)
         setEmployees(filteredData);
-        
-        // 초기 필터링된 데이터 설정
-        setFilteredEmployees(filteredData);
-        setTotalCount(filteredData.length);
         setLoading(false);
       } catch (err) {
         console.error('사원 데이터 로딩 실패:', err);
@@ -52,7 +60,7 @@ const EmployeesListCon = () => {
     };
 
     fetchEmployees();
-  }, []);
+  }, [employeeType]); // employeeType이 변경될 때마다 데이터를 다시 가져옴
 
   // 부서 데이터 가져오기
   useEffect(() => {
@@ -69,13 +77,21 @@ const EmployeesListCon = () => {
     fetchDepartments();
   }, []);
   
+  // 사원 유형 변경 핸들러
+  const handleEmployeeTypeChange = (type) => {
+    setEmployeeType(type);
+    setPage(1); // 타입이 변경되면 첫 페이지로 이동
+    // 타입이 변경되면 필터링 로직이 useEffect에서 자동으로 실행됨
+  };
+  
   // 검색어와 필터 변경시 데이터 필터링
   useEffect(() => {
     if (!employees.length) return;
     
-    // 1. 검색어로 필터링
-    let filtered = employees;
+    // 사원 유형 필터링은 이미 fetchEmployees에서 처리되므로 제거
+    let filtered = [...employees];
     
+    // 1. 검색어로 필터링
     if (search.searchTerm) {
       const term = search.searchTerm.toLowerCase();
       filtered = filtered.filter(emp => 
@@ -186,6 +202,8 @@ const EmployeesListCon = () => {
       rowsPerPage={rowsPerPage}
       loading={loading}
       error={error}
+      employeeType={employeeType}
+      onEmployeeTypeChange={handleEmployeeTypeChange}
     />
   );
 };

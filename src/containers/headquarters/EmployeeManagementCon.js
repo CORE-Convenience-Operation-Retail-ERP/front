@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import EmployeeManagementCom from '../../components/headquarters/EmployeeManagementCom';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../service/axiosInstance';
 
 const EmployeeManagementCon = () => {
   const { empId } = useParams(); // URL에서 사원 ID 가져오기
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // URL에서 쿼리 파라미터 파싱
+  const queryParams = new URLSearchParams(location.search);
+  const type = queryParams.get('type') || '본사'; // 기본값은 '본사'
   
   const [employee, setEmployee] = useState(null);
   const [departments, setDepartments] = useState([]);
@@ -190,7 +195,9 @@ const EmployeeManagementCon = () => {
     // 상태값 문자열을 숫자로 변환
     const convertedData = {
       ...formData,
-      empStatus: convertStatusToNumber(formData.empStatus)
+      empStatus: convertStatusToNumber(formData.empStatus),
+      // 사원 유형(본사/점주)에 따라 empRole 설정
+      empRole: type
     };
     
     console.log("변환 후 전송할 데이터:", convertedData);
@@ -240,6 +247,7 @@ const EmployeeManagementCon = () => {
       onSave={handleSave}
       loading={loading}
       error={error}
+      employeeType={type} // 사원 유형(본사/점주) 전달
     />
   );
 };
