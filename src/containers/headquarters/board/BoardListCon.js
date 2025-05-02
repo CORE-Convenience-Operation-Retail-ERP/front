@@ -17,7 +17,8 @@ const BoardListCon = ({ boardType }) => {
 
   // 사용자 권한 확인
   useEffect(() => {
-    const role = localStorage.getItem('userRole');
+    // 두 가지 가능한 키로 권한을 확인 (userRole 또는 role)
+    const role = localStorage.getItem('role') || localStorage.getItem('userRole');
     console.log('현재 사용자 권한:', role); // 디버깅용 로그 추가
     
     // 로컬스토리지의 모든 데이터 확인 (디버깅용)
@@ -43,6 +44,13 @@ const BoardListCon = ({ boardType }) => {
           );
           const decoded = JSON.parse(jsonPayload);
           console.log('토큰에서 추출한 정보:', decoded);
+          
+          // 토큰에서 role 정보 사용 (localStorage에 없을 경우)
+          if (!role && decoded.role) {
+            console.log('토큰에서 권한 정보 사용:', decoded.role);
+            setUserRole(decoded.role);
+            return;
+          }
         }
       }
     } catch (e) {
@@ -73,9 +81,12 @@ const BoardListCon = ({ boardType }) => {
 
   // 관리자 권한 확인 (HQ_BR, HQ_BR_M, MASTER만 게시글 관리 가능)
   const canManage = () => {
-    return userRole === 'ROLE_HQ_BR' || 
-           userRole === 'ROLE_HQ_BR_M' || 
-           userRole === 'ROLE_MASTER';
+    console.log('권한 확인 - 현재 역할:', userRole);
+    const hasPermission = userRole === 'ROLE_HQ_BR' || 
+                          userRole === 'ROLE_HQ_BR_M' || 
+                          userRole === 'ROLE_MASTER';
+    console.log('권한 확인 결과:', hasPermission);
+    return hasPermission;
   };
 
   // 게시글 등록 모달 오픈
@@ -146,6 +157,8 @@ const BoardListCon = ({ boardType }) => {
           {error}
         </Alert>
       )}
+
+      
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>

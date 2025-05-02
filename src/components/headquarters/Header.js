@@ -17,11 +17,11 @@ const Header = () => {
   const open = Boolean(anchorEl);
 
   // 새 방식: JWT 토큰 기반 로그인 정보 가져오기
-  const name = localStorage.getItem('name');
-  const userRole = localStorage.getItem('userRole');  
+  const name = localStorage.getItem('empName');
+  const userRole = localStorage.getItem('role');  
   // 또는 localStorage.getItem('name'); 이런 식으로 저장되었을 수 있음
 
-  // userName 설정 부분
+  // userName 설정 부분 
   const userName = name || "로그인 해주세요";
 
   const handleLogoClick = () => {

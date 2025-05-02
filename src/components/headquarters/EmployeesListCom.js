@@ -1,9 +1,12 @@
 import React from 'react';
 import { Box, Table, TableHead, TableRow, TableCell, TableBody, Button, Modal, Typography, Fade, Pagination, CircularProgress } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import { InputBase, IconButton, Paper, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { InputBase, IconButton, Paper, ToggleButton, ToggleButtonGroup, FormControl, FormLabel, FormGroup, Chip } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 // 검색어 하이라이트 함수
 const highlightText = (text, searchTerm) => {
@@ -28,6 +31,8 @@ const EmployeesListCom = ({
   page, setPage, totalCount, rowsPerPage, loading, error
 }) => {
   
+  const navigate = useNavigate();
+  
   // 상태 필터 옵션들
   const statusOptions = [
     { value: '재직', label: '재직', color: '#3B6FAE' },
@@ -39,6 +44,22 @@ const EmployeesListCom = ({
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     // 검색어가 이미 상태에 설정된 상태임
+  };
+  
+  // 검색어 초기화 핸들러
+  const handleClearSearch = () => {
+    onSearch('');
+  };
+  
+  // 사원정보 관리 페이지로 이동
+  const handleNavigateToEmployeeManagement = () => {
+    onCloseModal();
+    navigate('/headquarters/hr/employee-management');
+  };
+  
+  // 사원 등록 페이지로 이동
+  const handleNavigateToAddEmployee = () => {
+    navigate('/headquarters/hr/employee-management');
   };
   
   return (
@@ -74,6 +95,15 @@ const EmployeesListCom = ({
             onChange={(e) => onSearch(e.target.value)}
             inputProps={{ 'aria-label': '검색' }}
           />
+          {search && (
+            <IconButton
+              onClick={handleClearSearch}
+              sx={{ p: '10px', color: '#55D6DF' }}
+              aria-label="clear"
+            >
+              <ClearIcon />
+            </IconButton>
+          )}
           <IconButton
             type="submit"
             sx={{ p: '10px', color: '#55D6DF' }}
@@ -84,7 +114,7 @@ const EmployeesListCom = ({
         </Paper>
       </Box>
       
-      {/* "전체 사원 목록" 텍스트와 상태 필터 버튼 */}
+      {/* "전체 사원 목록" 텍스트와 사원 등록 버튼 */}
       <Box mb={3} sx={{
         display: 'flex',
         alignItems: 'center',
@@ -100,46 +130,57 @@ const EmployeesListCom = ({
           전체 사원 목록
         </Typography>
         
-        {/* 상태 필터 토글 버튼 */}
-        <ToggleButtonGroup
-          value={filters.status}
-          onChange={(e, newValues) => {
-            // 여기서는 사용하지 않고 각 버튼의 onClick에서 처리
+        {/* 사원 등록 버튼 */}
+        <Button
+          variant="contained"
+          startIcon={<PersonAddIcon />}
+          onClick={handleNavigateToAddEmployee}
+          sx={{
+            px: 3,
+            py: 1,
+            borderRadius: '20px',
+            backgroundColor: '#2563A6',
+            '&:hover': {
+              backgroundColor: '#1E5187',
+            }
           }}
-          aria-label="상태 필터"
-          size="small"
         >
-          {statusOptions.map(option => (
-            <ToggleButton 
-              key={option.value} 
-              value={option.value}
-              onClick={() => toggleStatusFilter(option.value)}
-              selected={filters.status.includes(option.value)}
-              sx={{
-                mx: 0.5,
-                px: 2,
-                py: 0.5,
-                fontSize: 14,
-                borderRadius: '16px',
-                border: `1px solid ${option.color}`,
-                color: filters.status.includes(option.value) ? '#fff' : option.color,
-                backgroundColor: filters.status.includes(option.value) ? option.color : 'transparent',
-                '&:hover': {
-                  backgroundColor: filters.status.includes(option.value) ? option.color : `${option.color}22`,
-                },
-                '&.Mui-selected': {
-                  backgroundColor: option.color,
-                  color: 'white',
+          사원 등록
+        </Button>
+      </Box>
+      
+      {/* 상태 필터 */}
+      <Box mb={3} sx={{
+        display: 'flex',
+        alignItems: 'center',
+        px: 5
+      }}>
+        <FormControl component="fieldset">
+          <FormGroup row>
+            <FormLabel component="legend" sx={{ mr: 2, fontSize: 16, fontWeight: 'bold', color: '#2563A6', lineHeight: '42px' }}>
+              상태:
+            </FormLabel>
+            {statusOptions.map(option => (
+              <Chip
+                key={option.value}
+                label={option.label}
+                onClick={() => toggleStatusFilter(option.value)}
+                sx={{
+                  mx: 0.5,
+                  px: 1,
+                  fontSize: 14,
+                  borderRadius: '16px',
+                  border: `1px solid ${option.color}`,
+                  color: filters.status.includes(option.value) ? '#fff' : option.color,
+                  backgroundColor: filters.status.includes(option.value) ? option.color : 'transparent',
                   '&:hover': {
-                    backgroundColor: option.color,
-                  }
-                }
-              }}
-            >
-              {option.label}
-            </ToggleButton>
-          ))}
-        </ToggleButtonGroup>
+                    backgroundColor: filters.status.includes(option.value) ? option.color : `${option.color}22`,
+                  },
+                }}
+              />
+            ))}
+          </FormGroup>
+        </FormControl>
       </Box>
       
       {/* 로딩 표시 */}
@@ -336,6 +377,7 @@ const EmployeesListCom = ({
             <Box mt={3} width="100%" display="flex" justifyContent="center">
               <Button
                 variant="contained"
+                onClick={handleNavigateToEmployeeManagement}
                 sx={{
                   minWidth: 120,
                   borderRadius: '20px',

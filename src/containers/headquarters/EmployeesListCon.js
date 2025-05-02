@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import EmployeesListCom from '../../components/headquarters/EmployeesListCom';
 import axios from '../../service/axiosInstance';
+import { useNavigate } from 'react-router-dom';
 
 const EmployeesListCon = () => {
+  // 라우터 네비게이션
+  const navigate = useNavigate();
+  
   // 상태 관리
   const [departments, setDepartments] = useState([]);
   const [employees, setEmployees] = useState([]);

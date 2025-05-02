@@ -1,10 +1,11 @@
 import React from 'react';
+import EmployeeManagementCon from '../../containers/headquarters/EmployeeManagementCon';
+import { Box } from '@mui/material';
 
 const EmployeeManagementPage = () => (
-  <div>
-    <h2>사원 정보 관리</h2>
-    <p>여기는 사원 정보 관리 페이지입니다.</p>
-  </div>
+  <Box sx={{ padding: 3 }}>
+    <EmployeeManagementCon />
+  </Box>
 );
 
 export default EmployeeManagementPage; 

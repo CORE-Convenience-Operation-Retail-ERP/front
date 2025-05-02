@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
   Paper, Collapse, Box, Typography, Button, Chip,
-  IconButton
+  IconButton, Pagination, Stack
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -150,6 +150,22 @@ const BoardList = ({
     3: '점포 문의사항'
   };
   
+  // 페이징 관련 상태
+  const postsPerPage = 10;
+  const [page, setPage] = useState(1);
+  const totalPages = Math.ceil(posts.length / postsPerPage);
+  
+  // 현재 페이지에 해당하는 posts만 필터링
+  const displayedPosts = posts.slice(
+    (page - 1) * postsPerPage,
+    page * postsPerPage
+  );
+  
+  // 페이지 변경 핸들러
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
+  
   return (
     <Box sx={{ width: '100%' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
@@ -179,8 +195,8 @@ const BoardList = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {posts.length > 0 ? (
-              posts.map((post) => (
+            {displayedPosts.length > 0 ? (
+              displayedPosts.map((post) => (
                 <BoardRow 
                   key={post.postId} 
                   post={post} 
@@ -200,6 +216,20 @@ const BoardList = ({
           </TableBody>
         </Table>
       </TableContainer>
+      
+      {/* 페이지네이션 */}
+      {posts.length > 0 && (
+        <Stack spacing={2} alignItems="center" sx={{ mt: 3, mb: 3 }}>
+          <Pagination 
+            count={totalPages} 
+            page={page} 
+            onChange={handlePageChange} 
+            color="primary" 
+            showFirstButton 
+            showLastButton
+          />
+        </Stack>
+      )}
     </Box>
   );
 };
