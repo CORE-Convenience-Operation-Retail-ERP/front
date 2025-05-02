@@ -47,29 +47,13 @@ export default function LoginPage() {
       const user = await login(loginId, loginPwd);
       console.log("로그인 응답:", user);
 
-      // 토큰 디코딩 및 정보 저장
+      // 토큰 디코딩 (이제 토큰 디코딩 정보는 참조만 하고 로컬스토리지 저장은 useLogin.js에서 처리)
       const token = user.token;
       if (token) {
         const decoded = decodeJWT(token);
         
-        if (decoded) {
-          // 디코딩된 데이터를 로컬스토리지에 저장 (클레임 이름에 맞게)
-          localStorage.setItem('name', decoded.empName || decoded.name || '');
-          localStorage.setItem('userRole', decoded.role || decoded.deptName || '');
-          
-          // storeId는 null이 가능하므로 조건부로 저장
-          if (decoded.storeId !== undefined) {
-            localStorage.setItem('storeId', decoded.storeId);
-          }
-          
-          // 디버깅을 위한 로그
-          console.log("저장된 name:", localStorage.getItem('name'));
-          console.log("저장된 storeId:", localStorage.getItem('storeId'));
-          console.log("저장된 userRole:", localStorage.getItem('userRole'));
-        }
-
         // 권한에 따라 라우팅 (deptId 기반)
-        const deptId = decoded?.deptId || user.deptId;
+        const deptId = user.deptId;
         if (deptId === 3) {
           // 점포(3번 부서)일 경우
           navigate("/store/home");
