@@ -64,7 +64,7 @@ const Header = () => {
             src="/core_logo.png"
             alt="CORE"
             style={{ height: 30, cursor: 'pointer' }}
-            onClick={handleLogoClick}
+            onClick={() => navigate('/headquarters/dashboard')}
           />
         </Box>
 

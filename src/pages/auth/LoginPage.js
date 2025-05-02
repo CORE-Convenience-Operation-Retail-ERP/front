@@ -59,7 +59,7 @@ export default function LoginPage() {
           navigate("/store/home");
         } else {
           // 본사(그 외 부서)일 경우
-          navigate("/headquarters/products/all");
+          navigate("/headquarters/dashboard");
         }
       } else {
         alert("토큰을 받지 못했습니다. 다시 로그인해주세요.");
