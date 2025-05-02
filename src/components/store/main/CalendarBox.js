@@ -18,19 +18,19 @@ const CalendarBox = () => {
     const [value, setValue] = useState(new Date());
     const [orders, setOrders] = useState([]);
     const [shifts, setShifts] = useState([]);
-  
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` };
-
-        axios.get('/api/purchase-orders', { headers })
-            .then((res) => setOrders(res.data))
-            .catch((err) => console.error('발주 조회 실패', err));
-
-        axios.get('/api/shift-schedules', { headers })
-            .then((res) => setShifts(res.data))
-            .catch((err) => console.error('근무 조회 실패', err));
-    }, []);
+    //
+    // useEffect(() => {
+    //     const token = localStorage.getItem('token');
+    //     const headers = { Authorization: `Bearer ${token}` };
+    //
+    //     axios.get('/api/purchase-orders', { headers })
+    //         .then((res) => setOrders(res.data))
+    //         .catch((err) => console.error('발주 조회 실패', err));
+    //
+    //     axios.get('/api/shift-schedules', { headers })
+    //         .then((res) => setShifts(res.data))
+    //         .catch((err) => console.error('근무 조회 실패', err));
+    // // }, []);
   
 
     const toDateStr = (date) => new Date(date).toLocaleDateString('sv-SE');

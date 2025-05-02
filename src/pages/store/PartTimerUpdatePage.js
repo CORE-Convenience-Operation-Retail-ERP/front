@@ -1,4 +1,4 @@
-import PartTimerUpdateCon from "../../containers/store/PartTimerUpdateCon"
+import PartTimerUpdateCon from "../../containers/store/partTimer/PartTimerUpdateCon"
 
 function PartTimerUpdatePage(){
     return(

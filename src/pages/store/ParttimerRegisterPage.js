@@ -1,4 +1,4 @@
-import ParttimerRegisterCon from "../../containers/store/ParttimerRegisterCon";
+import ParttimerRegisterCon from "../../containers/store/partTimer/ParttimerRegisterCon";
 
 function ParttimerRegisterPage(){
     return(

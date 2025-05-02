@@ -9,7 +9,7 @@ import {
     ImgPreview,
     ButtonGroup,
     ActionButton,
-  } from '../../features/store/styles/partTimer/StorePartTimerOne.styled';
+  } from '../../../features/store/styles/partTimer/StorePartTimerOne.styled';
 
 function PartTimerUpdateCom({ form, onChange, onDateChange, onSubmit }){
 return(

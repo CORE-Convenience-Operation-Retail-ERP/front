@@ -1,10 +1,10 @@
-import PartTimerOneCom from "../../components/store/PartTimerOneCom";
+import PartTimerOneCom from "../../../components/store/partTimer/PartTimerOneCom";
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   fetchPartTimerById,
   updatePartTimer
-} from '../../service/store/PartTimeService.js';
+} from '../../../service/store/PartTimeService.js';
 
 function PartTimerOneCon(){
     const { id } = useParams();
@@ -20,7 +20,10 @@ function PartTimerOneCon(){
         try {
           console.log("요청하는 아르바이트 ID:", id);
           const data = await fetchPartTimerById(id);
-          setForm(data);
+
+          data.partImg = data.partImg ? `http://localhost:8080${data.partImg}` : null;
+
+            setForm(data);
           setLoading(false);
         } catch (err) {
           alert('상세 정보를 불러오지 못했습니다.');

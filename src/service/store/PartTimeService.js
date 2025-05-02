@@ -1,4 +1,5 @@
 import instance from '../axiosInstance';
+import formDataAxios from '../formDataAxios';
 
 // API 엔드포인트 기본 경로
 const BASE_URL = '/api/store/parttimer';
@@ -29,7 +30,7 @@ export const searchPartTimers = async (params) => {
 
 export const fetchPartTimerById = async (id) => {
     try {
-        console.log("🔍 API로 요청하는 ID:", id);  // 이거 추가
+        console.log("🔍 API로 요청하는 ID:", id);
         const response = await instance.get(`${BASE_URL}/${id}`);
         return response.data;
     } catch (error) {
@@ -38,9 +39,9 @@ export const fetchPartTimerById = async (id) => {
     }
 };
 
-export const createPartTimer = async (data) => {
+export const createPartTimer = async (formData) => {
     try {
-        const response = await instance.post(BASE_URL, data);
+        const response = await formDataAxios.post(BASE_URL, formData);
         return response.data;
     } catch (error) {
         console.error('파트타이머 등록 실패:', error);
@@ -48,9 +49,9 @@ export const createPartTimer = async (data) => {
     }
 };
 
-export const updatePartTimer = async (id, data) => {
+export const updatePartTimer = async (id, formData) => {
     try {
-        const response = await instance.put(`${BASE_URL}/${id}`, data);
+        const response = await formDataAxios.put(`${BASE_URL}/${id}`, formData);
         return response.data;
     } catch (error) {
         console.error('파트타이머 수정 실패:', error);

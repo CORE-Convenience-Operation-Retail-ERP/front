@@ -1,10 +1,10 @@
-import PartTimerCom from "../../components/store/PartTimerCom";
+import PartTimerCom from "../../../components/store/partTimer/PartTimerCom";
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
-import {fetchPartTimers} from "../../service/store/PartTimeService";
-import {deletePartTimer} from "../../service/store/PartTimeService";
-import SearchBar from "../../components/store/common/StoreSerchBar";
-import Pagination from "../../components/store/common/Pagination";
+import {fetchPartTimers} from "../../../service/store/PartTimeService";
+import {deletePartTimer} from "../../../service/store/PartTimeService";
+import SearchBar from "../../../components/store/common/StoreSerchBar";
+import Pagination from "../../../components/store/common/Pagination";
 
 function PartTimerCon(){
     const navigate = useNavigate();

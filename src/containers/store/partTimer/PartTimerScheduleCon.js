@@ -1,4 +1,4 @@
-import PartTimerScheduleCom from "../../components/store/PartTimerScheduleCom";
+import PartTimerScheduleCom from "../../../components/store/partTimer/PartTimerScheduleCom";
 
 function PartTimerScheduleCon(){
     return(

@@ -1,4 +1,4 @@
-import PartTimerCon from "../../containers/store/PartTimerCon";
+import PartTimerCon from "../../containers/store/partTimer/PartTimerCon";
 
 function PartTimerPage() {
 

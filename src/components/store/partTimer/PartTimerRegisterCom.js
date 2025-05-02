@@ -1,21 +1,36 @@
 import React from 'react';
-import { FormWrap, Label, Input, Select, DateInput, FileInput, SubmitButton } from '../../features/store/styles/common/StoreParttimer.styled';
+import {
+    FormWrap,
+    Label,
+    Input,
+    Select,
+    FileInput,
+    SubmitButton
+} from '../../../features/store/styles/partTimer/StorePatTimerRegister.styled';
+import CustomCalendar from '../../../components/store/common/CustomCalendar';
 
-function PartTimerRegisterCom({ form, onChange, onDateChange, onSubmit }){
-    return(
+function PartTimerRegisterCom({ form, onChange, onDateChange, onSubmit }) {
+    return (
         <FormWrap>
             <Label>이름</Label>
-            <Input name="partName" value={form.partName} onChange={onChange} />
+            <Input name="partName" value={form.partName} onChange={onChange} placeholder="이름" />
 
             <Label>직책</Label>
-            <Select name="position" value={form.position} onChange={onChange}>
+            <Select name="position" value={form.position} onChange={onChange}placeholder="직책">
                 <option value="">직책 선택</option>
                 <option value="알바">알바</option>
+                <option value="매니저">매니저</option>
                 <option value="점장">점장</option>
             </Select>
 
             <Label>근무 형태</Label>
-            <Input name="workType" value={form.workType} onChange={onChange} />
+            <Select name="workType" value={form.workType} onChange={onChange} >
+            <option value="">근무시간 선택</option>
+            <option value="평일주간">평일주간</option>
+            <option value="평일야간">평일야간</option>
+            <option value="주말주간">주말주간</option>
+            <option value="주말야간">주말야간</option>
+            </Select>
 
             <Label>성별</Label>
             <Select name="partGender" value={form.partGender} onChange={onChange}>
@@ -25,26 +40,23 @@ function PartTimerRegisterCom({ form, onChange, onDateChange, onSubmit }){
             </Select>
 
             <Label>전화번호</Label>
-            <Input name="partPhone" value={form.partPhone} onChange={onChange} />
+            <Input name="partPhone" value={form.partPhone} onChange={onChange} placeholder="010-1234-5678"/>
 
             <Label>주소</Label>
-            <Input name="partAddress" value={form.partAddress} onChange={onChange} />
+            <Input name="partAddress" value={form.partAddress} onChange={onChange} placeholder="주소"/>
 
             <Label>생년월일</Label>
-            <DateInput
+            <CustomCalendar
                 selected={form.birthDate}
                 onChange={(date) => onDateChange('birthDate', date)}
-                dateFormat="yyyy-MM-dd"
+                placeholder="생년월일 선택"
             />
 
             <Label>입사일</Label>
-            <DateInput
+            <CustomCalendar
                 selected={form.hireDate}
                 onChange={(date) => onDateChange('hireDate', date)}
-                showTimeSelect
-                timeFormat="HH:mm"
-                timeIntervals={30}
-                dateFormat="yyyy-MM-dd HH:mm"
+                placeholder="입사일 선택"
             />
 
             <Label>급여 형태</Label>
@@ -55,13 +67,18 @@ function PartTimerRegisterCom({ form, onChange, onDateChange, onSubmit }){
             </Select>
 
             <Label>시급</Label>
-            <Input name="hourlyWage" value={form.hourlyWage} onChange={onChange} />
+            <Input name="hourlyWage" value={form.hourlyWage} onChange={onChange} placeholder="시급"/>
 
             <Label>은행</Label>
-            <Input name="accountBank" value={form.accountBank} onChange={onChange} />
+            <Select name="accountBank" value={form.accountBank || ''} onChange={onChange}>
+                <option value="">선택</option>
+                <option value={1}>국민</option>
+                <option value={2}>하나</option>
+                <option value={3}>신한</option>
+            </Select>
 
             <Label>계좌번호</Label>
-            <Input name="accountNumber" value={form.accountNumber} onChange={onChange} />
+            <Input name="accountNumber" value={form.accountNumber} onChange={onChange} placeholder="계좌번호"/>
 
             <Label>재직 상태</Label>
             <Select name="partStatus" value={form.partStatus} onChange={onChange}>

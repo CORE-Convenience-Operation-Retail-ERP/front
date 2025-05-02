@@ -1,7 +1,7 @@
-import PartTimerUpdateCom from "../../components/store/PartTimerUpdateCom"
+import PartTimerUpdateCom from "../../../components/store/partTimer/PartTimerUpdateCom"
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { fetchPartTimerById, updatePartTimer } from '../../service/store/PartTimeService';
+import { fetchPartTimerById, updatePartTimer } from '../../../service/store/PartTimeService';
 
 function PartTimerUpdateCon(){
 

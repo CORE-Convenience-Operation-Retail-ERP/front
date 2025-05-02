@@ -8,7 +8,7 @@ import {
     ImgPreview,
     ButtonGroup,
     ActionButton
-  } from '../../features/store/styles/partTimer/StorePartTimerOne.styled';
+  } from '../../../features/store/styles/partTimer/StorePartTimerOne.styled';
 
 function PartTimerOneCom({ form, onEdit, onResign }){
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ function PartTimerOneCom({ form, onEdit, onResign }){
   
         {/* 프로필 이미지 */}
         {form.partImg && (
-          <ImgPreview src={form.partImg} alt="프로필" />
+            <ImgPreview src={form.partImg} alt="프로필" />
         )}
   
         <InfoRow>
