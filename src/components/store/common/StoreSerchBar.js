@@ -1,54 +1,64 @@
 import { useState } from 'react';
 import {
-    SearchWrap,
-    Input,
-    CriteriaSelect,
-    ValueSelect,
-    Button
+  SearchWrap,
+  Input,
+  CriteriaSelect,
+  ValueSelect,
+  Button
 } from '../../../features/store/styles/common/StoreSearchBar.styled';
 
-function StoreSearchBar({ onSearch }) {
-    const [criteria, setCriteria] = useState('partName');
-    const [value, setValue] = useState('');
+function StoreSearchBar({ filterOptions, onSearch }) {
+  const [criteria, setCriteria] = useState(filterOptions[0]?.key || '');
+  const [value, setValue] = useState('');
 
-    const handleSearch = () => {
-        const searchParams = {
-            partName: criteria === 'partName' ? value : null,
-            position: criteria === 'position' ? value : null,
-            partStatus: criteria === 'partStatus' && value !== '' ? Number(value) : null
-        };
-        onSearch(searchParams);
+  const selectedOption = filterOptions.find(opt => opt.key === criteria);
+
+  const handleSearch = () => {
+    const searchParams = {
+      [criteria]: selectedOption.type === 'number' ? Number(value) : value
     };
+    onSearch(searchParams);
+  };
 
-    return (
-        <SearchWrap>
-            <CriteriaSelect value={criteria} onChange={(e) => {
-                setCriteria(e.target.value);
-                setValue('');
-            }}>
-                <option value="partName">이름</option>
-                <option value="position">직책</option>
-                <option value="partStatus">상태</option>
-            </CriteriaSelect>
+  return (
+    <SearchWrap>
+      {/* 검색 기준 드롭다운 */}
+      <CriteriaSelect
+        value={criteria}
+        onChange={(e) => {
+          setCriteria(e.target.value);
+          setValue('');
+        }}
+      >
+        {filterOptions.map(opt => (
+          <option key={opt.key} value={opt.key}>{opt.label}</option>
+        ))}
+      </CriteriaSelect>
 
-            {criteria === 'partStatus' ? (
-                <ValueSelect value={value} onChange={(e) => setValue(e.target.value)}>
-                    <option value="">전체</option>
-                    <option value="1">재직</option>
-                    <option value="0">퇴사</option>
-                </ValueSelect>
-            ) : (
-                <Input
-                    type="text"
-                    placeholder="검색어를 입력하세요"
-                    value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                />
-            )}
+      {/* 검색 입력 방식 결정 */}
+      {selectedOption.type === 'select' ? (
+        <ValueSelect value={value} onChange={(e) => setValue(e.target.value)}>
+          {selectedOption.options.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </ValueSelect>
+      ) : (
+        <Input
+          type={selectedOption.type || 'text'}
+          placeholder={selectedOption.placeholder || '검색어 입력'}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleSearch();
+            }
+          }}
+        />
+      )}
 
-            <Button onClick={handleSearch}>검색</Button>
-        </SearchWrap>
-    );
+      <Button onClick={handleSearch}>검색</Button>
+    </SearchWrap>
+  );
 }
 
 export default StoreSearchBar;

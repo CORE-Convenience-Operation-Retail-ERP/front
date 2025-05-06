@@ -68,3 +68,13 @@ export const deletePartTimer = async (id) => {
         throw error;
     }
 };
+
+export const fetchAllPartTimers = async () => {
+    try {
+        const response = await instance.get('/api/store/parttimer/dropdown');
+        return response.data;
+    } catch (error) {
+        console.error('파트타이머 전체 목록 조회 실패:', error);
+        throw error;
+    }
+};

@@ -5,13 +5,13 @@ import LoginPage from '../pages/auth/LoginPage';
 import DashboardPage from '../pages/headquarters/DashboardPage';
 import StoreLayout from "../layouts/StoreLayout";
 import HomePage from "../pages/store/HomePage";
-import InventoryPage from "../pages/store/InventoryPage";
-import DisposalPage from "../pages/store/DisposalPage";
-import OrderRegisterPage from "../pages/store/OrderRegisterPage";
-import OrderListPage from "../pages/store/OrderListPage";
-import PartTimerPage from "../pages/store/PartTimerPage";
+import StockAdjusPage from "../pages/store/stock/StockAdjustPage";
+import DisposalPage from "../pages/store/disposal/DisposalPage";
+import OrderRegisterPage from "../pages/store/order/OrderRegisterPage";
+import OrderListPage from "../pages/store/order/OrderListPage";
+import PartTimerPage from "../pages/store/partTimer/PartTimerPage";
 import PartTimerSchedulePage from "../pages/store/PartTimerSchedulePage";
-import SalaryPage from "../pages/store/SalaryPage";
+import SalaryPage from "../pages/store/salary/SalaryPage";
 import StatsOrderPage from "../pages/store/StatsOrderPage";
 import StatsSalesPage from "../pages/store/StatsSalesPage";
 import SalesPage from "../pages/store/SalesPage";
@@ -29,12 +29,17 @@ import BranchesSalesAnalysisPage from '../pages/headquarters/BranchesSalesAnalys
 import BranchesStockMonitoringPage from '../pages/headquarters/BranchesStockMonitoringPage';
 import BranchesStatisticsPage from '../pages/headquarters/BranchesStatisticsPage';
 import RegisterPage from '../pages/auth/RegisterPage';
-import ParttimerRegisterPage from "../pages/store/ParttimerRegisterPage";
-import PartTimerOnePage from "../pages/store/PartTimerOnePage";
-import PartTimerUpdatePage from '../pages/store/PartTimerUpdatePage';
+import ParttimerRegisterPage from "../pages/store/partTimer/ParttimerRegisterPage";
+import PartTimerOnePage from "../pages/store/partTimer/PartTimerOnePage";
+import PartTimerUpdatePage from '../pages/store/partTimer/PartTimerUpdatePage';
 import NoticePage from '../pages/headquarters/board/NoticePage';
 import SuggestionsPage from '../pages/headquarters/board/SuggestionsPage';
 import StoreInquiriesPage from '../pages/headquarters/board/StoreInquiriesPage';
+import SalaryBreakdownPage from '../pages/store/salary/SalaryBreakdownPage';
+import StockListPage from '../pages/store/stock/StockListPage';
+import StockInHistoryPage from '../pages/store/stock/StockInHistoryPage';
+import AdjustLogPage from '../pages/store/stock/AdjustLogPage';
+import OrderHistoryPage from '../pages/store/order/OrderHistoryPage';
 
 
 
@@ -69,16 +74,27 @@ const AppRoutes = () => {
         {/* 지점 관련 라우트*/}
         <Route path="/store" element={<StoreLayout/>} >
           <Route path="home" element={<HomePage/>} />
-          <Route path="inventory/current" element={<InventoryPage/>} />
+
+          <Route path="stock/list" element={<StockListPage/>} />              
+          <Route path="stock/in-history" element={<StockInHistoryPage/>} />  
+          <Route path="stock/manual-adjust" element={<StockAdjusPage/>} />  
+          <Route path="stock/adjust-log" element={<AdjustLogPage/>} />       
+          
           <Route path="inventory/disposal" element={<DisposalPage/>} />
+          
           <Route path="order/register" element={<OrderRegisterPage/>} />
           <Route path="order/list" element={<OrderListPage/>} />
+          <Route path="order/detail/:id" element={<OrderHistoryPage/>} />
+
           <Route path="parttimer/list" element={<PartTimerPage/>} />
           <Route path="parttimer/register" element={<ParttimerRegisterPage/>} />
           <Route path="parttimer/:id" element={<PartTimerOnePage/>} />
           <Route path="/store/parttimer/:id/edit" element={<PartTimerUpdatePage/>} />
-          <Route path="hr/schedule" element={<PartTimerSchedulePage/>} />
+          
           <Route path="hr/salary" element={<SalaryPage/>} />
+          <Route path="hr/schedule" element={<PartTimerSchedulePage/>} />
+          <Route path="hr/salary/:id/detail" element={<SalaryBreakdownPage/>} />
+          
           <Route path="sales" element={<SalesPage/>} />
         <Route path="stats/order" element={<StatsOrderPage/>} />
         <Route path="stats/sales" element={<StatsSalesPage/>} />

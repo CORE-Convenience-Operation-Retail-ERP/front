@@ -77,10 +77,14 @@ function PartTimerCon(){
     };
 
     // 👉 검색창 입력
-    const handleSearch = (name, role) => {
-        setSearchParams({ partName: name, partStatus: role });
-        setPage(0); // 검색하면 첫페이지로 초기화
-    };
+    const handleSearch = (params) => {
+        setSearchParams({
+          partName: params.partName || '',
+          position: params.position || '',
+          partStatus: params.partStatus !== undefined ? params.partStatus : null
+        });
+        setPage(0); // 검색 시 첫 페이지로
+      };
 
     // 👉 등록 버튼 클릭
     const handleRegister = () => {
@@ -89,11 +93,27 @@ function PartTimerCon(){
 
     return (
         <div>
-            <SearchBar onSearch={handleSearch} />
+            <SearchBar
+            filterOptions={[
+                { key: "partName", label: "이름", type: "text" },
+                { key: "position", label: "직책", type: "text" },
+                {
+                key: "partStatus",
+                label: "상태",
+                type: "select",
+                options: [
+                    { value: "", label: "전체" },
+                    { value: "1", label: "재직" },
+                    { value: "0", label: "퇴사" }
+                ]
+                }
+            ]}
+            onSearch={handleSearch}
+            />
             <div style={{ margin: '10px 0' }}>
                 <button onClick={handleRegister}>Register</button>
                 <button onClick={handleDelete} style={{ marginLeft: '10px' }}>Delete</button>
-            </div>
+        </div>
             <PartTimerCom
                 data={partTimers}
                 loading={loading}
