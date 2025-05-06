@@ -27,7 +27,9 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, 
     empExt: '',
     empEmail: '',
     hireDate: '',
-    empImg: null
+    empImg: null,
+    empAddr: '',
+    storeTel: ''
   });
 
   // employee prop이 변경될 때 formData 업데이트
@@ -64,7 +66,9 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, 
         empExt: employee.empExt || '',
         empEmail: employee.empEmail || '',
         hireDate: employee.hireDate || '',
-        empImg: employee.empImg || null
+        empImg: employee.empImg || null,
+        empAddr: employee.empAddr || '',
+        storeTel: employee.storeTel || ''
       });
     }
   }, [employee]);
@@ -217,32 +221,34 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, 
                   required
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>부서</InputLabel>
-                  <Select
-                    name="deptCode"
-                    value={formData.deptCode || ''}
-                    label="부서"
-                    onChange={handleChange}
-                    required
-                  >
-                    {departments?.length > 0 ? 
-                      departments.map(dept => (
-                        <MenuItem key={dept.deptCode} value={dept.deptCode}>
-                          {dept.deptName}
-                        </MenuItem>
-                      )) : 
-                      [
-                        <MenuItem key="HQ_HRM" value="HQ_HRM">인사팀</MenuItem>,
-                        <MenuItem key="HQ_BR" value="HQ_BR">지점관리팀</MenuItem>,
-                        <MenuItem key="HQ_PRO" value="HQ_PRO">상품관리팀</MenuItem>
-                      ]
-                    }
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
+              {employeeType === '본사' ? (
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>부서</InputLabel>
+                    <Select
+                      name="deptCode"
+                      value={formData.deptCode || ''}
+                      label="부서"
+                      onChange={handleChange}
+                      required
+                    >
+                      {departments?.length > 0 ? 
+                        departments.map(dept => (
+                          <MenuItem key={dept.deptCode} value={dept.deptCode}>
+                            {dept.deptName}
+                          </MenuItem>
+                        )) : 
+                        [
+                          <MenuItem key="HQ_HRM" value="HQ_HRM">인사팀</MenuItem>,
+                          <MenuItem key="HQ_BR" value="HQ_BR">지점관리팀</MenuItem>,
+                          <MenuItem key="HQ_PRO" value="HQ_PRO">상품관리팀</MenuItem>
+                        ]
+                      }
+                    </Select>
+                  </FormControl>
+                </Grid>
+              ) : null}
+              <Grid item xs={12} sm={employeeType === '본사' ? 6 : 12}>
                 <FormControl fullWidth size="small">
                   <InputLabel>상태</InputLabel>
                   <Select
@@ -274,24 +280,68 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, 
               연락처 정보
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              {employeeType === '본사' ? (
+                // 본사 직원용 연락처 필드
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="휴대전화"
+                      name="empPhone"
+                      value={formData.empPhone}
+                      onChange={handleChange}
+                      variant="outlined"
+                      size="small"
+                      placeholder="010-0000-0000"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="내선번호"
+                      name="empExt"
+                      value={formData.empExt}
+                      onChange={handleChange}
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                </>
+              ) : (
+                // 점주용 연락처 필드
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="점주 연락처"
+                      name="empPhone"
+                      value={formData.empPhone}
+                      onChange={handleChange}
+                      variant="outlined"
+                      size="small"
+                      placeholder="010-0000-0000"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="지점 연락처"
+                      name="storeTel"
+                      value={formData.storeTel || ''}
+                      onChange={handleChange}
+                      variant="outlined"
+                      size="small"
+                      placeholder="02-0000-0000"
+                    />
+                  </Grid>
+                </>
+              )}
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="휴대전화"
-                  name="empPhone"
-                  value={formData.empPhone}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
-                  placeholder="010-0000-0000"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="내선번호"
-                  name="empExt"
-                  value={formData.empExt}
+                  label="주소"
+                  name="empAddr"
+                  value={formData.empAddr}
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
@@ -322,13 +372,13 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, 
                 color: '#2563A6'
               }}
             >
-              입사 정보
+              {employeeType === '본사' ? '입사 정보' : '계약 정보'}
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="입사일"
+                  label={employeeType === '본사' ? "입사일" : "계약일"}
                   name="hireDate"
                   type="date"
                   value={formData.hireDate}

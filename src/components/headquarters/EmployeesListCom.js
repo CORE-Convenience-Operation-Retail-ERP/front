@@ -55,9 +55,9 @@ const EmployeesListCom = ({
   const handleNavigateToEmployeeManagement = () => {
     onCloseModal();
     if (selectedEmployee && selectedEmployee.empId) {
-      navigate(`/headquarters/hr/employee-management/${selectedEmployee.empId}`);
+      navigate(`/headquarters/hr/employee-management/${selectedEmployee.empId}?type=${employeeType}`);
     } else {
-      navigate('/headquarters/hr/employee-management');
+      navigate(`/headquarters/hr/employee-management?type=${employeeType}`);
     }
   };
   
@@ -345,7 +345,7 @@ const EmployeesListCom = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {employees.map((row) => (
+                {employees.map((row, index) => (
                   <TableRow 
                     key={row.empId}
                     hover
@@ -358,7 +358,9 @@ const EmployeesListCom = ({
                     }}
                   >
                     <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
-                      {highlightText(row.empId, search)}
+                      {employeeType === '본사' ? 
+                        highlightText(row.empId, search) : 
+                        highlightText(row.rowNum, search)}
                     </TableCell>
                     <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
                       {highlightText(row.empName, search)}
@@ -444,6 +446,9 @@ const EmployeesListCom = ({
                       border: '1px solid #eee'
                     }}
                   />
+                  <Typography fontWeight="bold" fontSize={16}>
+                    {employeeType === '본사' ? `사번: ${selectedEmployee.empId}` : `점주번호: ${selectedEmployee.rowNum || '?'}`}
+                  </Typography>
                 </Box>
                 {/* 정보 필드 */}
                 <Box sx={{ flex: 2, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
@@ -452,23 +457,32 @@ const EmployeesListCom = ({
                     <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>{selectedEmployee?.empName || '-'}</Typography>
                   </Box>
                   <Box>
-                    <Typography fontWeight="bold" fontSize={14}>부서</Typography>
-                    <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>{selectedEmployee?.deptName || '-'}</Typography>
+                    <Typography fontWeight="bold" fontSize={14}>{employeeType === '본사' ? '부서' : '점포명'}</Typography>
+                    <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>
+                      {employeeType === '본사' ? selectedEmployee?.deptName || '-' : selectedEmployee?.storeName || '-'}
+                    </Typography>
                   </Box>
                   <Box>
                     <Typography fontWeight="bold" fontSize={14}>연락처</Typography>
                     <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>{selectedEmployee?.empPhone || '-'}</Typography>
                   </Box>
-                  <Box>
-                    <Typography fontWeight="bold" fontSize={14}>내선번호</Typography>
-                    <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>{selectedEmployee?.empExt || '-'}</Typography>
-                  </Box>
+                  {employeeType === '본사' ? (
+                    <Box>
+                      <Typography fontWeight="bold" fontSize={14}>내선번호</Typography>
+                      <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>{selectedEmployee?.empExt || '-'}</Typography>
+                    </Box>
+                  ) : (
+                    <Box>
+                      <Typography fontWeight="bold" fontSize={14}>매장 전화번호</Typography>
+                      <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>{selectedEmployee?.storeTel || '-'}</Typography>
+                    </Box>
+                  )}
                   <Box>
                     <Typography fontWeight="bold" fontSize={14}>이메일</Typography>
                     <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>{selectedEmployee?.empEmail || '-'}</Typography>
                   </Box>
                   <Box>
-                    <Typography fontWeight="bold" fontSize={14}>입사일</Typography>
+                    <Typography fontWeight="bold" fontSize={14}>{employeeType === '본사' ? '입사일' : '계약일'}</Typography>
                     <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>{selectedEmployee?.hireDate || '-'}</Typography>
                   </Box>
                   <Box>
@@ -476,9 +490,29 @@ const EmployeesListCom = ({
                     <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>{selectedEmployee?.empStatus || '-'}</Typography>
                   </Box>
                   <Box>
-                    <Typography fontWeight="bold" fontSize={14}>재직일수</Typography>
+                    <Typography fontWeight="bold" fontSize={14}>{employeeType === '본사' ? '재직일수' : '계약일수'}</Typography>
                     <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>{selectedEmployee?.daysWorked || '-'}</Typography>
                   </Box>
+                  {employeeType === '본사' ? (
+                    <Box sx={{ gridColumn: '1 / span 2' }}>
+                      <Typography fontWeight="bold" fontSize={14}>주소</Typography>
+                      <Typography 
+                        sx={{ 
+                          bgcolor: '#f0f7ff', 
+                          p: 1, 
+                          borderRadius: 1,
+                          border: '1px solid #d0e0ff'
+                        }}
+                      >
+                        {selectedEmployee?.empAddr || '-'}
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ gridColumn: '1 / span 2' }}>
+                      <Typography fontWeight="bold" fontSize={14}>매장 주소</Typography>
+                      <Typography sx={{ bgcolor: '#f7fafd', p: 1, borderRadius: 1 }}>{selectedEmployee?.storeAddr || '-'}</Typography>
+                    </Box>
+                  )}
                 </Box>
               </Box>
             ) : (
