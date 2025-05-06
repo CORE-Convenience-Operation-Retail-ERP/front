@@ -41,3 +41,34 @@ export const HighlightId = styled.span`
   font-weight: bold;
   color: #2563eb;
 `;
+export const Btn = styled.button`
+  padding: 8px 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+
+  &.btn-partial {
+    background-color: #ffcc00;
+    color: black;
+  }
+
+  &.btn-complete {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  &.btn-cancel {
+    background-color: #f44336;
+    color: white;
+  }
+
+  &.btn-back {
+    background-color: #9e9e9e;
+    color: white;
+  }
+
+  &:hover {
+    opacity: 0.85;
+  }
+`;
