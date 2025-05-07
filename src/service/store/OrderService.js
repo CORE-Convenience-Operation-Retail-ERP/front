@@ -42,12 +42,17 @@ export const fetchOrderProductList = async ({ page = 0, size = 10 }) => {
   }
 };
 
-// ✅ [7] 부분 입고 처리
-export const completePartialItems = async (orderId, partialItems) => {
-  return await axios.post(`/api/order/${orderId}/partial-complete`, partialItems);
+// ✅ [7] 부분 입고 처리 - 쿼리스트링 + JSON 분리 방식
+export const completePartialItems = async (orderId, partTimerId, itemList) => {
+  return await axios.post(
+      `/api/order/${orderId}/partial-complete?partTimerId=${partTimerId}`,
+      itemList
+  );
 };
 
-// ✅ [8] 전체 입고 처리
-export const completeOrder = (orderId) => {
-  return axios.post(`/api/order/${orderId}/complete`);
+// ✅ [8] 전체 입고 처리 - 쿼리스트링으로 파라미터 전달
+export const completeOrder = async (orderId, partTimerId) => {
+  return await axios.post(
+      `/api/order/${orderId}/complete?partTimerId=${partTimerId}`
+  );
 };

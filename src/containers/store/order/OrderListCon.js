@@ -20,6 +20,14 @@ function OrderListCon() {
     }
   };
 
+  const getOrderStatusLabel = (status) => {
+    switch (status) {
+      case 1: return "입고완료";
+      case 2: return "부분입고중";
+      default: return "대기중";
+    }
+  };
+
   useEffect(() => {
     loadOrders();
   }, [page]);
@@ -30,7 +38,7 @@ function OrderListCon() {
 
   return (
     <>
-      <OrderListCom orderList={orders} onRowClick={handleNavigate}/>
+      <OrderListCom orderList={orders} onRowClick={handleNavigate} getOrderStatusLabel={getOrderStatusLabel}/>
       <Pagination
         currentPage={page}
         totalPages={totalPages}

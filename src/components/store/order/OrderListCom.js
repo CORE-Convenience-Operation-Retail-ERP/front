@@ -6,7 +6,7 @@ import {
     HighlightId,
   } from '../../../features/store/styles/order/Order.styled';
 
-function OrderListCom({ orderList, onRowClick }) {
+function OrderListCom({ orderList, onRowClick, getOrderStatusLabel }) {
     return (
       <OrderTable>
         <OrderHead>
@@ -14,6 +14,7 @@ function OrderListCom({ orderList, onRowClick }) {
             <OrderTh>발주번호</OrderTh>
             <OrderTh>총 수량</OrderTh>
             <OrderTh>총 금액</OrderTh>
+            <OrderTh>입고 일자</OrderTh>
             <OrderTh>상태</OrderTh>
           </tr>
         </OrderHead>
@@ -27,7 +28,9 @@ function OrderListCom({ orderList, onRowClick }) {
               <OrderTd><HighlightId>{order.orderId}</HighlightId></OrderTd>
               <OrderTd>{order.totalQuantity}</OrderTd>
               <OrderTd>{order.totalAmount.toLocaleString()}원</OrderTd>
-              <OrderTd>{order.orderStatus === 0 ? '요청됨' : '입고완료'}</OrderTd>
+              <OrderTd>{new Date(order.orderDate).toLocaleString()}</OrderTd>
+                <OrderTd>{getOrderStatusLabel(order.orderStatus)}</OrderTd>
+
             </tr>
           ))}
         </tbody>
