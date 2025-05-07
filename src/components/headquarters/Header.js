@@ -30,9 +30,13 @@ const Header = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('name');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('storeId');
+  localStorage.removeItem('empId');
+  localStorage.removeItem('deptId');
+  localStorage.removeItem('empName');
+  localStorage.removeItem('deptName');
+  localStorage.removeItem('role');
+  localStorage.removeItem('storeId');
+  localStorage.removeItem('storeName');
     navigate('/login');
   };
 

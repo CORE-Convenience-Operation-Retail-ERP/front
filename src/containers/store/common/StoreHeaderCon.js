@@ -60,8 +60,15 @@ function HeaderContainer() {
   // }, [branchNameFromStorage]);
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem('branchName');
+      localStorage.removeItem('token');
+      localStorage.removeItem('empId');
+      localStorage.removeItem('deptId');
+      localStorage.removeItem('empName');
+      localStorage.removeItem('deptName');
+      localStorage.removeItem('role');
+      localStorage.removeItem('storeId');
+      localStorage.removeItem('storeName');
+      localStorage.removeItem('branchName');
         window.location.href = "/login";
     };
 

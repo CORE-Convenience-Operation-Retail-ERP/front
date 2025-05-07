@@ -1,7 +1,22 @@
 import React, { useState } from "react";
 import "./RegisterStyle.css";
 
-const RegisterCom = ({ formData, onChange, onSubmit, error, loading, onFileChange, onCheckEmail, isEmailChecked }) => {
+const RegisterCom = ({ 
+  formData, 
+  onChange, 
+  onSubmit, 
+  error, 
+  loading, 
+  onFileChange, 
+  onCheckEmail, 
+  isEmailChecked,
+  verificationCode,
+  onVerificationCodeChange,
+  sendVerificationEmail,
+  verifyEmail,
+  isVerificationSent,
+  isEmailVerified
+}) => {
   const [birthAndGender, setBirthAndGender] = useState("");
   
   const handleBirthAndGenderChange = (e) => {
@@ -66,6 +81,8 @@ const RegisterCom = ({ formData, onChange, onSubmit, error, loading, onFileChang
                   onChange={onChange}
                   required
                   placeholder="example@email.com"
+                  disabled={isEmailChecked}
+                  className="form-input"
                 />
                 <button 
                   type="button" 
@@ -76,8 +93,56 @@ const RegisterCom = ({ formData, onChange, onSubmit, error, loading, onFileChang
                   {isEmailChecked ? "확인완료" : "중복확인"}
                 </button>
               </div>
-              {isEmailChecked && (
-                <small className="input-help success">사용 가능한 이메일입니다.</small>
+              
+              {isEmailChecked && !isVerificationSent && !isEmailVerified && (
+                <div className="verification-section">
+                  <button 
+                    type="button"
+                    className="verification-button primary-button"
+                    onClick={sendVerificationEmail}
+                    disabled={loading}
+                  >
+                    {loading ? "발송 중..." : "인증 메일 발송"}
+                  </button>
+                </div>
+              )}
+              
+              {isVerificationSent && !isEmailVerified && (
+                <div className="verification-code-section">
+                  <div className="input-with-button">
+                    <input
+                      type="text"
+                      placeholder="인증 코드 6자리 입력"
+                      value={verificationCode}
+                      onChange={onVerificationCodeChange}
+                      maxLength="6"
+                      className="form-input"
+                    />
+                    <button 
+                      type="button"
+                      className="verification-button primary-button"
+                      onClick={verifyEmail}
+                      disabled={loading || !verificationCode}
+                    >
+                      {loading ? "확인 중..." : "인증 확인"}
+                    </button>
+                  </div>
+                  <button 
+                    type="button"
+                    className="resend-button secondary-button"
+                    onClick={sendVerificationEmail}
+                    disabled={loading}
+                  >
+                    {loading ? "발송 중..." : "인증 메일 재발송"}
+                  </button>
+                </div>
+              )}
+              
+              {isEmailVerified && (
+                <div className="verification-success">
+                  <span className="success-icon">✓</span>
+                  <span className="success-message">이메일 인증이 완료되었습니다.</span>
+                </div>
               )}
             </div>
             
@@ -210,7 +275,7 @@ const RegisterCom = ({ formData, onChange, onSubmit, error, loading, onFileChang
           
           <button 
             type="submit" 
-            disabled={loading} 
+            disabled={loading || !isEmailVerified} 
             className="submit-button"
           >
             {loading ? "처리 중..." : "회원가입"}

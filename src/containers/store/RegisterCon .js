@@ -21,14 +21,20 @@ const RegisterCon = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isEmailChecked, setIsEmailChecked] = useState(false);
+  const [isVerificationSent, setIsVerificationSent] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
   const navigate = useNavigate();
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    // 이메일이 변경되면 중복 확인 상태 초기화
+    // 이메일이 변경되면 중복 확인 및 인증 상태 초기화
     if (name === "loginId") {
       setIsEmailChecked(false);
+      setIsVerificationSent(false);
+      setIsEmailVerified(false);
+      setVerificationCode("");
     }
     
     setFormData((prevData) => ({
@@ -75,6 +81,72 @@ const RegisterCon = () => {
     }
   };
   
+  // 인증 이메일 발송
+  const sendVerificationEmail = async () => {
+    if (!formData.loginId || !formData.loginId.includes('@')) {
+      setError("유효한 이메일 주소를 입력해주세요.");
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // 인증 이메일 발송 API 호출
+      const response = await axios.post("/api/auth/send-verification-email", {
+        email: formData.loginId
+      });
+      
+      if (response.data && response.data.success) {
+        setIsVerificationSent(true);
+        setError(null);
+        alert("인증 이메일이 발송되었습니다. 이메일을 확인해주세요.");
+      } else {
+        setError(response.data.message || "인증 이메일 발송에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("인증 이메일 발송 실패:", error);
+      setError(error.response?.data?.message || "인증 이메일 발송 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // 인증 코드 입력 핸들러
+  const onVerificationCodeChange = (e) => {
+    setVerificationCode(e.target.value);
+  };
+  
+  // 인증 코드 확인
+  const verifyEmail = async () => {
+    if (!verificationCode) {
+      setError("인증 코드를 입력해주세요.");
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // 인증 코드 확인 API 호출
+      const response = await axios.post("/api/auth/verify-email", {
+        email: formData.loginId,
+        code: verificationCode
+      });
+      
+      if (response.data && response.data.success) {
+        setIsEmailVerified(true);
+        setError(null);
+        alert("이메일 인증이 완료되었습니다.");
+      } else {
+        setError(response.data.message || "인증 코드가 일치하지 않습니다.");
+      }
+    } catch (error) {
+      console.error("이메일 인증 실패:", error);
+      setError(error.response?.data?.message || "이메일 인증 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   const onFileChange = (e) => {
     setFile(e.target.files[0]);
   };
@@ -96,6 +168,11 @@ const RegisterCon = () => {
     
     if (!isEmailChecked) {
       setError("이메일 중복 확인을 해주세요.");
+      return;
+    }
+    
+    if (!isEmailVerified) {
+      setError("이메일 인증을 완료해주세요.");
       return;
     }
     
@@ -168,6 +245,12 @@ const RegisterCon = () => {
       isEmailChecked={isEmailChecked}
       error={error} 
       loading={loading} 
+      verificationCode={verificationCode}
+      onVerificationCodeChange={onVerificationCodeChange}
+      sendVerificationEmail={sendVerificationEmail}
+      verifyEmail={verifyEmail}
+      isVerificationSent={isVerificationSent}
+      isEmailVerified={isEmailVerified}
     />
   );
 };
