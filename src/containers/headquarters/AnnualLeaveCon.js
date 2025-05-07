@@ -49,19 +49,102 @@ const AnnualLeaveCon = () => {
   // 현재 로그인한 사용자 정보 가져오기 - 수정
   const getUserId = () => {
     try {
+      console.log('===== 사용자 ID 조회 시작 =====');
+      
+      // 로컬 스토리지 전체 확인 (디버깅용)
+      console.log('로컬 스토리지 내용:');
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        try {
+          if (key.includes('user') || key.includes('User') || key.includes('emp') || key.includes('Emp')) {
+            console.log(`${key}: ${localStorage.getItem(key)}`);
+          }
+        } catch (e) {
+          console.log(`${key}: [값 가져오기 오류]`);
+        }
+      }
+      
+      // 방법 1: loginUser 객체 확인
       const loginUserStr = localStorage.getItem('loginUser');
       if (loginUserStr) {
-        const loginUser = JSON.parse(loginUserStr);
-        console.log('로그인 사용자 정보:', loginUser);
-        // empId나 id 필드 확인
-        if (loginUser.empId) return loginUser.empId;
-        if (loginUser.id) return loginUser.id;
+        try {
+          const loginUser = JSON.parse(loginUserStr);
+          console.log('로그인 사용자 정보:', loginUser);
+          
+          // empId 필드 확인 (다양한 필드명 시도)
+          if (loginUser.empId) {
+            console.log('empId 필드 발견:', loginUser.empId);
+            return loginUser.empId;
+          }
+          
+          if (loginUser.emp_id) {
+            console.log('emp_id 필드 발견:', loginUser.emp_id);
+            return loginUser.emp_id;
+          }
+          
+          if (loginUser.id) {
+            console.log('id 필드 발견:', loginUser.id);
+            return loginUser.id;
+          }
+          
+          if (loginUser.userId) {
+            console.log('userId 필드 발견:', loginUser.userId);
+            return loginUser.userId;
+          }
+          
+          if (loginUser.user_id) {
+            console.log('user_id 필드 발견:', loginUser.user_id);
+            return loginUser.user_id;
+          }
+        } catch (e) {
+          console.error('loginUser 파싱 오류:', e);
+        }
       }
-      console.warn('사용자 ID를 찾을 수 없습니다. 기본값 사용');
-      return 1; // 기본값 (테스트 환경에서만 사용)
+      
+      // 방법 2: 다른 스토리지 키 확인
+      const empIdStr = localStorage.getItem('empId');
+      if (empIdStr) {
+        console.log('empId 키 발견:', empIdStr);
+        return parseInt(empIdStr, 10);
+      }
+      
+      const userIdStr = localStorage.getItem('userId');
+      if (userIdStr) {
+        console.log('userId 키 발견:', userIdStr);
+        return parseInt(userIdStr, 10);
+      }
+      
+      const idStr = localStorage.getItem('id');
+      if (idStr) {
+        console.log('id 키 발견:', idStr);
+        return parseInt(idStr, 10);
+      }
+      
+      console.warn('사용자 ID를 찾을 수 없습니다.');
+      
+      // 세션 스토리지도 확인
+      if (window.sessionStorage) {
+        console.log('세션 스토리지 확인 중...');
+        const sessionEmpId = sessionStorage.getItem('empId');
+        if (sessionEmpId) {
+          console.log('세션 스토리지에서 empId 발견:', sessionEmpId);
+          return parseInt(sessionEmpId, 10);
+        }
+      }
+      
+      // URL에서 파라미터 확인
+      const urlParams = new URLSearchParams(window.location.search);
+      const empIdParam = urlParams.get('empId');
+      if (empIdParam) {
+        console.log('URL 파라미터에서 empId 발견:', empIdParam);
+        return parseInt(empIdParam, 10);
+      }
+      
+      console.error('모든 방법으로 사용자 ID를 찾지 못했습니다. 기본값 사용 안함');
+      return null; // 기본값 사용하지 않음 (서버에서 오류 발생하도록)
     } catch (error) {
-      console.error('사용자 ID 조회 오류:', error);
-      return 1;
+      console.error('사용자 ID 조회 중 오류 발생:', error);
+      return null; // 오류 발생 시 기본값 사용하지 않음
     }
   };
   
@@ -345,12 +428,19 @@ const AnnualLeaveCon = () => {
     handleApproveOrReject(reqId, 2);
   };
   
-  // 연차 승인/반려 공통 처리 함수
-  const handleApproveOrReject = (reqId, status) => {
+   // 연차 승인/반려 공통 처리 함수
+   const handleApproveOrReject = (reqId, status) => {
     setIsProcessing(true);
     setApproveError('');
     
     const approverEmpId = getUserId();
+    
+    // 사용자 ID가 없는 경우
+    if (!approverEmpId) {
+      setApproveError('승인자 정보를 찾을 수 없습니다. 로그아웃 후 다시 로그인해 주세요.');
+      setIsProcessing(false);
+      return;
+    }
     
     // URL 파라미터 방식으로 변경
     axios.post(`/api/hr/annual-leave/change-status?reqId=${reqId}&approverEmpId=${approverEmpId}&newStatus=${status}&note=${encodeURIComponent(approveComment || '')}`)
@@ -386,6 +476,13 @@ const AnnualLeaveCon = () => {
     
     const approverEmpId = getUserId();
     
+    // 사용자 ID가 없는 경우
+    if (!approverEmpId) {
+      setApproveError('사용자 정보를 찾을 수 없습니다. 로그아웃 후 다시 로그인해 주세요.');
+      setIsProcessing(false);
+      return;
+    }
+    
     if (!approveComment.trim()) {
       setApproveError('코멘트를 입력해주세요.');
       setIsProcessing(false);
@@ -418,7 +515,7 @@ const AnnualLeaveCon = () => {
         setIsProcessing(false);
       });
   };
-  
+   
   // 연차 신청 제출 - 수정
   const handleSubmit = () => {
     if (!validateForm()) return;
@@ -431,6 +528,13 @@ const AnnualLeaveCon = () => {
     // 로그인 사용자 정보 확인
     const currentUserId = getUserId();
     console.log('현재 사용자 ID (연차 신청용):', currentUserId);
+    
+    // 사용자 ID가 없는 경우 오류 표시 및 제출 중단
+    if (!currentUserId) {
+      setSubmitError('사용자 정보를 찾을 수 없습니다. 로그아웃 후 다시 로그인해 주세요.');
+      setSubmitting(false);
+      return;
+    }
     
     // 백엔드 API 형식에 맞게 데이터 구조 변경
     const requestData = {
