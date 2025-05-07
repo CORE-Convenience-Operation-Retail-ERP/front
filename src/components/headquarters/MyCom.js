@@ -76,16 +76,7 @@ const MyCom = ({ info }) => {
           </Box>
         </Box>
 
-        {/* 급여 내역 버튼 */}
-        <Button
-          variant="outlined"
-          startIcon={<AccountBalanceWalletIcon />}
-          onClick={() => navigate('/headquarters/hr/my-salary')}
-          fullWidth
-          sx={{ mt: 2 }}
-        >
-          급여 내역 보기
-        </Button>
+        
       </Box>
     </Paper>
   );

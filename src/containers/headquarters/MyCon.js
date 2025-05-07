@@ -648,6 +648,14 @@ const MyCon = forwardRef(({ info, type }, ref) => {
           <PaymentsIcon sx={{ color: '#2563A6', mr: 1 }} />
           <Typography variant="h6" fontWeight="bold">급여 내역</Typography>
         </Box>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => navigate('/headquarters/hr/my-salary')}
+          startIcon={<PaymentsIcon />}
+        >
+          급여내역
+        </Button>
       </Box>
       <Divider sx={{ mb: 3 }} />
       

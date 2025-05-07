@@ -82,8 +82,8 @@ function MySalaryCon() {
                                         <TableCell align="right">{formatCurrency(salary.netSalary)}</TableCell>
                                         <TableCell>{formatDate(salary.payDate)}</TableCell>
                                         <TableCell align="center">
-                                            {salary.payStatus === 1 ? '지급완료' : 
-                                             salary.payStatus === 2 ? '지급실패' : '대기'}
+                                            {salary.payStatus === 1 ? '지급대기' : 
+                                             salary.payStatus === 2 ? '지급완료' : '대기'}
                                         </TableCell>
                                     </TableRow>
                                 ))}
