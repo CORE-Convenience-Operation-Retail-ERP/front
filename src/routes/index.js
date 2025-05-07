@@ -41,8 +41,7 @@ import StockListPage from '../pages/store/stock/StockListPage';
 import StockInHistoryPage from '../pages/store/stock/StockInHistoryPage';
 import AdjustLogPage from '../pages/store/stock/AdjustLogPage';
 import OrderHistoryPage from '../pages/store/order/OrderHistoryPage';
-
-
+import MySalaryPage from '../pages/headquarters/MySalaryPage';
 
 const AppRoutes = () => {
   return (
@@ -53,11 +52,11 @@ const AppRoutes = () => {
       {/* 본사 관련 라우트 */}
       <Route path="/headquarters/*" element={<HeadquartersLayout />}>
         <Route path="products/all" element={<ProductsAllPage />} />
-        {/* <Route path="products/detail" element={<ProductsDetailPage />} /> */}
         <Route path="hr/employees" element={<EmployeesListPage />} />
         <Route path="hr/employee-management" element={<EmployeeManagementPage />} />
         <Route path="hr/employee-management/:empId" element={<EmployeeManagementPage />} />
         <Route path="hr/my-page" element={<MyPage />} />
+        <Route path="hr/my-salary" element={<MySalaryPage />} />
         <Route path="hr/annual-leave" element={<AnnualLeavePage />} />
         <Route path="branches/list" element={<BranchesListPage />} />
         <Route path="branches/management" element={<BranchesManagementPage />} />
@@ -73,38 +72,30 @@ const AppRoutes = () => {
         <Route path="products/register" element={<ProductsRegisterPage />} />
       </Route>
 
-        {/* 지점 관련 라우트*/}
-        <Route path="/store" element={<StoreLayout/>} >
-          <Route path="home" element={<HomePage/>} />
-
-          <Route path="stock/list" element={<StockListPage/>} />              
-          <Route path="stock/in-history" element={<StockInHistoryPage/>} />  
-          <Route path="stock/manual-adjust" element={<StockAdjusPage/>} />  
-          <Route path="stock/adjust-log" element={<AdjustLogPage/>} />       
-          
-          <Route path="inventory/disposal" element={<DisposalPage/>} />
-          
-          <Route path="order/register" element={<OrderRegisterPage/>} />
-          <Route path="order/list" element={<OrderListPage/>} />
-          <Route path="order/detail/:id" element={<OrderHistoryPage/>} />
-
-          <Route path="parttimer/list" element={<PartTimerPage/>} />
-          <Route path="parttimer/register" element={<ParttimerRegisterPage/>} />
-          <Route path="parttimer/:id" element={<PartTimerOnePage/>} />
-          <Route path="/store/parttimer/:id/edit" element={<PartTimerUpdatePage/>} />
-          
-          <Route path="hr/salary" element={<SalaryPage/>} />
-          <Route path="hr/schedule" element={<PartTimerSchedulePage/>} />
-          <Route path="hr/salary/:id/detail" element={<SalaryBreakdownPage/>} />
-          
-          <Route path="sales" element={<SalesPage/>} />
+      {/* 지점 관련 라우트*/}
+      <Route path="/store" element={<StoreLayout/>} >
+        <Route path="home" element={<HomePage/>} />
+        <Route path="stock/list" element={<StockListPage/>} />              
+        <Route path="stock/in-history" element={<StockInHistoryPage/>} />  
+        <Route path="stock/manual-adjust" element={<StockAdjusPage/>} />  
+        <Route path="stock/adjust-log" element={<AdjustLogPage/>} />       
+        <Route path="inventory/disposal" element={<DisposalPage/>} />
+        <Route path="order/register" element={<OrderRegisterPage/>} />
+        <Route path="order/list" element={<OrderListPage/>} />
+        <Route path="order/detail/:id" element={<OrderHistoryPage/>} />
+        <Route path="parttimer/list" element={<PartTimerPage/>} />
+        <Route path="parttimer/register" element={<ParttimerRegisterPage/>} />
+        <Route path="parttimer/:id" element={<PartTimerOnePage/>} />
+        <Route path="/store/parttimer/:id/edit" element={<PartTimerUpdatePage/>} />
+        <Route path="hr/salary" element={<SalaryPage/>} />
+        <Route path="hr/schedule" element={<PartTimerSchedulePage/>} />
+        <Route path="hr/salary/:id/detail" element={<SalaryBreakdownPage/>} />
+        <Route path="sales" element={<SalesPage/>} />
         <Route path="stats/order" element={<StatsOrderPage/>} />
         <Route path="stats/sales" element={<StatsSalesPage/>} />
-
       </Route>
 
-
-        {/* 기본 리다이렉트 */}
+      {/* 기본 리다이렉트 */}
       <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   );

@@ -1,11 +1,15 @@
 import React from 'react';
-import { Box, Typography, Paper, Divider, Avatar } from '@mui/material';
+import { Box, Typography, Paper, Divider, Avatar, Button } from '@mui/material';
 import PhoneIcon from '@mui/icons-material/Phone';
 import HomeIcon from '@mui/icons-material/Home';
 import EmailIcon from '@mui/icons-material/Email';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import { useNavigate } from 'react-router-dom';
 
 const MyCom = ({ info }) => {
+  const navigate = useNavigate();
+
   return (
     <Paper elevation={3} sx={{ borderRadius: 2, p: 3, mb: 3, height: 'calc(100% - 24px)' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
@@ -71,6 +75,17 @@ const MyCom = ({ info }) => {
             </Typography>
           </Box>
         </Box>
+
+        {/* 급여 내역 버튼 */}
+        <Button
+          variant="outlined"
+          startIcon={<AccountBalanceWalletIcon />}
+          onClick={() => navigate('/headquarters/hr/my-salary')}
+          fullWidth
+          sx={{ mt: 2 }}
+        >
+          급여 내역 보기
+        </Button>
       </Box>
     </Paper>
   );
