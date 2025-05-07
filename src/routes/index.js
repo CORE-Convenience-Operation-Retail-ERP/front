@@ -23,6 +23,7 @@ import EmployeesListPage from '../pages/headquarters/EmployeesListPage';
 import ProductsRegisterPage from '../pages/headquarters/ProductsRegisterPage';
 import EmployeeManagementPage from '../pages/headquarters/EmployeeManagementPage';
 import MyPage from '../pages/headquarters/MyPage';
+import AnnualLeavePage from '../pages/headquarters/AnnualLeavePage';
 import BranchesListPage from '../pages/headquarters/BranchesListPage';
 import BranchesManagementPage from '../pages/headquarters/BranchesManagementPage';
 import BranchesSalesAnalysisPage from '../pages/headquarters/BranchesSalesAnalysisPage';
@@ -57,6 +58,7 @@ const AppRoutes = () => {
         <Route path="hr/employee-management" element={<EmployeeManagementPage />} />
         <Route path="hr/employee-management/:empId" element={<EmployeeManagementPage />} />
         <Route path="hr/my-page" element={<MyPage />} />
+        <Route path="hr/annual-leave" element={<AnnualLeavePage />} />
         <Route path="branches/list" element={<BranchesListPage />} />
         <Route path="branches/management" element={<BranchesManagementPage />} />
         <Route path="branches/sales-analysis" element={<BranchesSalesAnalysisPage />} />

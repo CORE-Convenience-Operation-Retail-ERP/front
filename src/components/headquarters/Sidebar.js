@@ -28,8 +28,9 @@ const menuItems = [
       { text: '사원 목록', path: '/headquarters/hr/employees' },
       { text: '사원 정보 관리', path: '/headquarters/hr/employee-management' },
       { text: '마이 페이지', path: '/headquarters/hr/my-page' },
+      { text: '연차 신청 관리', path: '/headquarters/hr/annual-leave' },
     ],
-    hoverBoxBottom: { bottom: -50, width: 81, height: 30 },
+    hoverBoxBottom: { bottom: -65, width: 81, height: 35 },
   },
   {
     text: '지점 관리',
