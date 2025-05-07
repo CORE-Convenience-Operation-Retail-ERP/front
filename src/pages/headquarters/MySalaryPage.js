@@ -34,12 +34,12 @@ const MySalaryPage = () => {
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+    return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '80vh', bgcolor: '#f8f9fa', py: 5 }}>
-      <Paper elevation={3} sx={{ width: '100%', maxWidth: 900, p: 4, borderRadius: 3, mt: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '80vh', bgcolor: '#f8f9fa', py: 5, width: '100%' }}>
+      <Paper elevation={3} sx={{ width: '100%', p: 4, borderRadius: 3, mt: 2, boxSizing: 'border-box' }}>
         <Typography variant="h5" fontWeight="bold" align="center" gutterBottom>
           나의 급여 내역
         </Typography>
@@ -51,7 +51,7 @@ const MySalaryPage = () => {
             <CircularProgress />
           </Box>
         ) : (
-          <TableContainer>
+          <TableContainer sx={{ width: '100%' }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -82,7 +82,7 @@ const MySalaryPage = () => {
                       <TableCell align="right" sx={{ minWidth: 120 }}>{salary.deductExtra ? formatCurrency(salary.deductExtra) : '-'}</TableCell>
                       <TableCell align="right">{formatCurrency(salary.netSalary)}</TableCell>
                       <TableCell align="center">{formatDate(salary.payDate)}</TableCell>
-                      <TableCell align="center" sx={{ minWidth: 110 }}>{salary.payStatus === 1 ? '지급완료' : salary.payStatus === 2 ? '지급실패' : '대기'}</TableCell>
+                      <TableCell align="center" sx={{ minWidth: 110 }}>{salary.payStatus === 1 ? '지급대기' : salary.payStatus === 2 ? '지급완료' : '대기'}</TableCell>
                     </TableRow>
                   ))
                 )}
