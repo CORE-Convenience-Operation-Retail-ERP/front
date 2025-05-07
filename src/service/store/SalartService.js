@@ -1,6 +1,5 @@
 import axios from "../axiosInstance"; // 경로는 실제 인스턴스 파일 경로로 수정
 
-// 1. 급여 리스트 조회 (월별 or 연도별)
 // 1. 급여 리스트 조회 (월별 or 연도별 + 페이징)
 export async function fetchSalaryList({ 
     name = '', 

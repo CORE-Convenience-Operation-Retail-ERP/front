@@ -17,6 +17,15 @@ function OrderHistoryCon() {
   const [partTimers, setPartTimers] = useState([]);
   const [selectedPartTimerId, setSelectedPartTimerId] = useState(null);
 
+
+  // ▶ 아이템과 남은 수량을 반환하는 유틸
+const getItemAndRemainingQty = (itemId) => {
+  const item = items.find((i) => i.itemId === itemId);
+  if (!item) return { item: null, remainingQty: 0 };
+  const remainingQty = item.orderQuantity - item.receivedQuantity;
+  return { item, remainingQty };
+};
+
   // ▶ 알바 목록 불러오기
   useEffect(() => {
     fetchAllPartTimers()
@@ -31,29 +40,31 @@ function OrderHistoryCon() {
         .catch(() => alert("상세 내역 조회 실패"));
   }, [orderId]);
 
-  // ▶ 개별 항목 선택 토글
   const handleToggleItem = (itemId, defaultQty = null) => {
-    const item = items.find((i) => i.itemId === itemId);
-    const remainingQty = item.orderQuantity - item.receivedQuantity;
-
+    const { remainingQty } = getItemAndRemainingQty(itemId);
     setPartialItems((prev) => {
       const exists = prev.find((i) => i.itemId === itemId);
       return exists
-          ? prev.filter((i) => i.itemId !== itemId)
-          : [...prev, { itemId, inQuantity: defaultQty ?? remainingQty, reason: "" }];
+        ? prev.filter((i) => i.itemId !== itemId)
+        : [...prev, { itemId, inQuantity: defaultQty ?? remainingQty, reason: "" }];
     });
   };
-
-  // ▶ 수량 입력
+  
   const handleChangeQuantity = (itemId, value) => {
     const parsed = parseInt(value, 10);
-    setPartialItems((prev) =>
-        prev.map((i) =>
-            i.itemId === itemId
-                ? { ...i, inQuantity: isNaN(parsed) ? 0 : parsed }
-                : i
-        )
-    );
+    const inQuantity = isNaN(parsed) ? 0 : parsed;
+    const { remainingQty } = getItemAndRemainingQty(itemId);
+  
+    setPartialItems((prev) => {
+      const exists = prev.find((i) => i.itemId === itemId);
+      if (exists) {
+        return prev.map((i) =>
+          i.itemId === itemId ? { ...i, inQuantity } : i
+        );
+      } else {
+        return [...prev, { itemId, inQuantity, reason: "" }];
+      }
+    });
   };
 
   // ▶ 사유 입력
@@ -92,7 +103,7 @@ function OrderHistoryCon() {
       return;
     }
 
-    // ✅ 이미 전체 입고 완료된 항목이면 차단
+    //  이미 전체 입고 완료된 항목이면 차단
     const allCompleted = items.every(item => item.orderQuantity === item.receivedQuantity);
     if (allCompleted) {
       alert("이미 입고가 완료된 발주입니다.");

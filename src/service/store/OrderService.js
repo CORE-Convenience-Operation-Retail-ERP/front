@@ -56,3 +56,8 @@ export const completeOrder = async (orderId, partTimerId) => {
       `/api/order/${orderId}/complete?partTimerId=${partTimerId}`
   );
 };
+
+// ✅ [9] 발주 수정 (항목 삭제 후 재등록 방식)
+export const updateOrder = async (orderId, payload) => {
+  return await axios.put(`/api/order/update/${orderId}`, payload);
+};

@@ -36,9 +36,18 @@ function OrderListCon() {
     navigate(`/store/order/detail/${orderId}`);
   };
 
+  const handleEdit = (orderId) => {
+    navigate(`/store/order/update/${orderId}`);
+  };
+
   return (
     <>
-      <OrderListCom orderList={orders} onRowClick={handleNavigate} getOrderStatusLabel={getOrderStatusLabel}/>
+      <OrderListCom 
+        orderList={orders} 
+        onRowClick={handleNavigate} 
+        getOrderStatusLabel={getOrderStatusLabel}
+        onEditClick={handleEdit}
+      />
       <Pagination
         currentPage={page}
         totalPages={totalPages}

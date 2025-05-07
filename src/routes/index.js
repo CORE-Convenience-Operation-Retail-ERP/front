@@ -42,6 +42,7 @@ import StockInHistoryPage from '../pages/store/stock/StockInHistoryPage';
 import AdjustLogPage from '../pages/store/stock/AdjustLogPage';
 import OrderHistoryPage from '../pages/store/order/OrderHistoryPage';
 import MySalaryPage from '../pages/headquarters/MySalaryPage';
+import OrederUpdatePage from '../pages/store/order/OrderUpdatePage';
 
 const AppRoutes = () => {
   return (
@@ -83,6 +84,7 @@ const AppRoutes = () => {
         <Route path="order/register" element={<OrderRegisterPage/>} />
         <Route path="order/list" element={<OrderListPage/>} />
         <Route path="order/detail/:id" element={<OrderHistoryPage/>} />
+        <Route path="order/update/:id" element={<OrederUpdatePage/>} />
         <Route path="parttimer/list" element={<PartTimerPage/>} />
         <Route path="parttimer/register" element={<ParttimerRegisterPage/>} />
         <Route path="parttimer/:id" element={<PartTimerOnePage/>} />
