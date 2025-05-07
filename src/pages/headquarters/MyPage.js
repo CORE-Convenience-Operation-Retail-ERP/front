@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Grid, Typography, CircularProgress, Paper } from '@mui/material';
+import React, { useEffect, useState, useRef } from 'react';
+import { Box, Grid, Typography, CircularProgress, Paper, Button } from '@mui/material';
 import MyCom from '../../components/headquarters/MyCom';
 import MyCon from '../../containers/headquarters/MyCon';
 import CalendarBox from '../../containers/headquarters/CalendarBox';
+import EventIcon from '@mui/icons-material/Event';
 import axios from '../../service/axiosInstance';
 
 const MyPage = () => {
   const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const myConRef = useRef(null);
 
   useEffect(() => {
     // 로그인한 사용자 정보 가져오기
@@ -68,6 +70,15 @@ const MyPage = () => {
       });
   }, []);
 
+  // 연차 신청 모달 열기 함수
+  const handleOpenLeaveModal = () => {
+    if (myConRef.current && myConRef.current.handleOpenLeaveModal) {
+      myConRef.current.handleOpenLeaveModal();
+    } else {
+      console.error("연차 신청 모달을 열 수 없습니다.");
+    }
+  };
+
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
       <CircularProgress />
@@ -95,7 +106,7 @@ const MyPage = () => {
           
           {/* 중앙: 근태 정보와 급여 정보 */}
           <Grid item xs={12} md={5}>
-            <MyCon info={info} type="attendance" />
+            <MyCon ref={myConRef} info={info} type="attendance" />
             <MyCon info={info} type="salary" />
           </Grid>
           
@@ -106,6 +117,28 @@ const MyPage = () => {
                 연차 신청 기간
               </Typography>
               <CalendarBox />
+              
+              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+                <Button 
+                  variant="contained"
+                  startIcon={<EventIcon />}
+                  onClick={handleOpenLeaveModal}
+                  sx={{ 
+                    bgcolor: '#1EACB5',
+                    '&:hover': {
+                      bgcolor: '#015D70',
+                    },
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 'medium',
+                    boxShadow: '0px 3px 6px rgba(1, 93, 112, 0.2)',
+                    width: '100%',
+                    py: 1
+                  }}
+                >
+                  연차 신청하기
+                </Button>
+              </Box>
             </Paper>
           </Grid>
         </Grid>

@@ -17,8 +17,11 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import AnnualLeaveCom from '../../components/headquarters/AnnualLeaveCom';
 import axios from '../../service/axiosInstance';
+import { useLocation } from 'react-router-dom';
 
 const AnnualLeaveCon = () => {
+  const location = useLocation();
+  
   // 연차 신청 목록 상태
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,64 +35,224 @@ const AnnualLeaveCon = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [formErrors, setFormErrors] = useState({});
+
+  // 연차 상세 정보 모달 상태
+  const [openDetailDialog, setOpenDetailDialog] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
   
-  // 테스트 데이터
-  const mockLeaveRequests = [
-    {
-      requestDate: '2023-08-01',
-      startDate: '2023-08-10',
-      endDate: '2023-08-11',
-      days: 2,
-      reason: '개인 사유',
-      status: '승인'
-    },
-    {
-      requestDate: '2023-09-15',
-      startDate: '2023-09-25',
-      endDate: '2023-09-25',
-      days: 1,
-      reason: '병원 방문',
-      status: '대기중'
-    },
-    {
-      requestDate: '2023-07-01',
-      startDate: '2023-07-15',
-      endDate: '2023-07-16',
-      days: 2,
-      reason: '가족 행사',
-      status: '거절'
+  // 승인/반려 관련 상태
+  const [approveComment, setApproveComment] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [approveError, setApproveError] = useState('');
+  const [commentLog, setCommentLog] = useState([]);
+  
+  // 현재 로그인한 사용자 정보 가져오기 - 수정
+  const getUserId = () => {
+    try {
+      const loginUserStr = localStorage.getItem('loginUser');
+      if (loginUserStr) {
+        const loginUser = JSON.parse(loginUserStr);
+        console.log('로그인 사용자 정보:', loginUser);
+        // empId나 id 필드 확인
+        if (loginUser.empId) return loginUser.empId;
+        if (loginUser.id) return loginUser.id;
+      }
+      console.warn('사용자 ID를 찾을 수 없습니다. 기본값 사용');
+      return 1; // 기본값 (테스트 환경에서만 사용)
+    } catch (error) {
+      console.error('사용자 ID 조회 오류:', error);
+      return 1;
     }
-  ];
+  };
+  
+  // 사용자 권한 확인 - 더 유연한 확인 방식으로 수정
+  const getUserRole = () => {
+    const userRole = localStorage.getItem('userRole');
+    return userRole || '';
+  };
+
+  // MASTER 권한 판별을 위한 종합적인 방법 - 수정
+  const isMaster = () => {
+    try {
+      // 로컬 스토리지 전체 확인 (디버깅용)
+      console.log('==== 권한 확인 디버깅 ====');
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        console.log(`${key}: ${localStorage.getItem(key)}`);
+      }
+      
+      // 1. userRole 확인
+      const userRole = localStorage.getItem('userRole');
+      console.log('userRole:', userRole);
+      if (userRole) {
+        if (userRole.includes('MASTER') || 
+            userRole === '10' || 
+            userRole === 'ROLE_MASTER') {
+          console.log('MASTER 권한 확인: userRole에서 확인됨');
+          return true;
+        }
+      }
+      
+      // 2. loginUser 객체 확인
+      const loginUserStr = localStorage.getItem('loginUser');
+      if (loginUserStr) {
+        const loginUser = JSON.parse(loginUserStr);
+        console.log('loginUser:', loginUser);
+        
+        // role 확인
+        if (loginUser.role === 'MASTER' || 
+            loginUser.role === 'ROLE_MASTER' || 
+            (loginUser.roles && (loginUser.roles.includes('MASTER') || loginUser.roles.includes('ROLE_MASTER')))) {
+          console.log('MASTER 권한 확인: loginUser.role에서 확인됨');
+          return true;
+        }
+        
+        // departId/depart_id 확인
+        if (loginUser.departId === 10 || loginUser.depart_id === 10) {
+          console.log('MASTER 권한 확인: loginUser.departId/depart_id에서 확인됨');
+          return true;
+        }
+        
+        // 부서명에 MASTER 포함 확인
+        if (loginUser.department && 
+            (typeof loginUser.department === 'string' && 
+             loginUser.department.toUpperCase().includes('MASTER'))) {
+          console.log('MASTER 권한 확인: loginUser.department에서 확인됨');
+          return true;
+        }
+      }
+      
+      // 3. 추가: 모든 휴가 데이터 조회 활성화 (개발/테스트 환경용)
+      // 실제 운영 환경에서는 제거해야 함
+      console.log('MASTER 권한 확인: 기본값으로 true 반환 (개발용)');
+      return true;
+    } catch (e) {
+      console.error('권한 확인 오류:', e);
+      // 개발/테스트 환경에서는 항상 true 반환 (모든 데이터 볼 수 있도록)
+      return true;
+    }
+  };
+  
+  // location state에서 새로운 연차 정보 확인
+  useEffect(() => {
+    if (location.state && location.state.newLeaveRequest) {
+      // 새 연차 요청 정보 추가
+      setLeaveRequests(prevRequests => [location.state.newLeaveRequest, ...prevRequests]);
+      
+      // 히스토리에서 state 정보 제거 (새로고침시 중복 방지)
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
   
   // 연차 신청 목록 조회
   useEffect(() => {
     loadLeaveRequests();
   }, []);
   
-  // 연차 신청 목록 조회 함수
+  // 연차 신청 목록 조회 함수 - 수정
   const loadLeaveRequests = () => {
     setLoading(true);
     
-    // 개발을 위해 목업 데이터 사용
-    setLeaveRequests(mockLeaveRequests);
-    setLoading(false);
+    const empId = getUserId();
+    console.log('사용자 ID:', empId);
+    console.log('localStorage 내용:', {
+      token: localStorage.getItem('token') ? '존재함' : '없음',
+      loginUser: localStorage.getItem('loginUser'),
+      userRole: localStorage.getItem('userRole'),
+      name: localStorage.getItem('name')
+    });
     
-    // 실제 API 연동 시 아래 코드 사용
-    /*
-    axios.get('/api/hr/annual-leave/requests')
+    // 항상 MASTER 권한인 것처럼 처리하여 모든 연차 신청 목록 조회
+    const apiUrl = '/api/hr/annual-leave/all';
+    console.log('API URL:', apiUrl);
+    
+    axios.get(apiUrl)
       .then(res => {
-        console.log('연차 신청 목록:', res.data);
-        setLeaveRequests(res.data);
+        console.log('연차 신청 목록 원본 데이터:', res.data);
+        console.log('데이터 타입:', typeof res.data, Array.isArray(res.data));
+        console.log('데이터 개수:', Array.isArray(res.data) ? res.data.length : 0);
+        
+        // 안전한 데이터 변환 함수 (수정)
+        const formattedRequests = Array.isArray(res.data) ? res.data.map(req => {
+          // 원본 데이터 로깅
+          console.log('처리 중인 레코드:', req);
+          
+          // 모든 필드에 대해 null/undefined 체크
+          const item = {
+            reqId: req.reqId || 0,
+            requestDate: '',
+            startDate: '',
+            endDate: '',
+            days: 1,
+            reason: req.reqReason || '',
+            status: '대기중',
+            empName: ''
+          };
+          
+          // 사원명 정보 설정 - 다양한 필드 위치 시도
+          if (req.empName) {
+            item.empName = req.empName;
+          } else if (req.employee && req.employee.empName) {
+            item.empName = req.employee.empName;
+          } else if (req.empId) {
+            item.empName = `사원 #${req.empId}`;
+          } else {
+            item.empName = '알 수 없음';
+          }
+          
+          // 날짜 형식 안전하게 변환
+          try {
+            if (req.createdAt) {
+              item.requestDate = new Date(req.createdAt).toISOString().split('T')[0];
+            } else if (req.created_at) {
+              item.requestDate = new Date(req.created_at).toISOString().split('T')[0];
+            }
+            
+            if (req.reqDate) {
+              item.startDate = item.endDate = new Date(req.reqDate).toISOString().split('T')[0];
+            } else if (req.date) {
+              item.startDate = item.endDate = new Date(req.date).toISOString().split('T')[0];
+            }
+          } catch (e) {
+            console.error('날짜 변환 오류:', e, '원본 데이터:', req.createdAt, req.reqDate);
+            // 오류 발생 시 현재 날짜 사용
+            const today = new Date().toISOString().split('T')[0];
+            item.requestDate = item.requestDate || today;
+            item.startDate = item.startDate || today;
+            item.endDate = item.endDate || today;
+          }
+          
+          // 상태 변환 - 문자열/숫자 모두 처리
+          const status = Number(req.reqStatus);
+          if (status === 1) {
+            item.status = '승인';
+          } else if (status === 2) {
+            item.status = '거절';
+          } else {
+            item.status = '대기중';
+          }
+          
+          console.log('변환된 항목:', item);
+          return item;
+        }) : [];
+        
+        // 정렬: 최신 신청 항목이 위로 오도록
+        formattedRequests.sort((a, b) => {
+          // reqId로 내림차순 정렬 (최신 항목이 위로)
+          return b.reqId - a.reqId;
+        });
+        
+        console.log('변환된 연차 신청 목록 (총 ' + formattedRequests.length + '건):', formattedRequests);
+        setLeaveRequests(formattedRequests);
         setLoading(false);
       })
       .catch(err => {
         console.error('연차 신청 목록 조회 실패:', err);
-        // 개발을 위해 임시 데이터 사용
-        setLeaveRequests(mockLeaveRequests);
-        setError('연차 신청 목록을 불러오는데 실패했습니다. 임시 데이터를 표시합니다.');
+        // 오류 발생 시 빈 배열 설정
+        setLeaveRequests([]);
+        setError('연차 신청 목록을 불러오는데 실패했습니다. (' + err.message + ')');
         setLoading(false);
       });
-    */
   };
   
   // 모달 열기
@@ -105,6 +268,24 @@ const AnnualLeaveCon = () => {
   // 모달 닫기
   const handleCloseModal = () => {
     setOpenModal(false);
+  };
+
+  // 상세 정보 모달 열기 - 수정
+  const handleDetailView = (request) => {
+    setSelectedRequest(request);
+    setOpenDetailDialog(true);
+    setApproveComment(''); // 코멘트 필드 초기화
+    setApproveError(''); // 오류 메시지 초기화
+    
+    // 연차 신청에 대한 코멘트 로그 조회
+    fetchCommentLog(request.reqId);
+  };
+
+  // 상세 정보 모달 닫기
+  const handleCloseDetailDialog = () => {
+    setOpenDetailDialog(false);
+    setSelectedRequest(null);
+    setCommentLog([]);
   };
   
   // 폼 유효성 검사
@@ -137,7 +318,73 @@ const AnnualLeaveCon = () => {
     return end.diff(start, 'day') + 1;
   };
   
-  // 연차 신청 제출
+  // 코멘트 로그 조회 함수
+  const fetchCommentLog = (reqId) => {
+    axios.get(`/api/hr/annual-leave/comments/${reqId}`)
+      .then(response => {
+        console.log('코멘트 로그 조회 결과:', response.data);
+        if (response.data && Array.isArray(response.data)) {
+          setCommentLog(response.data);
+        } else {
+          setCommentLog([]);
+        }
+      })
+      .catch(error => {
+        console.error('코멘트 로그 조회 실패:', error);
+        setCommentLog([]);
+      });
+  };
+  
+  // 연차 승인 처리
+  const handleApprove = (reqId) => {
+    handleApproveOrReject(reqId, 1);
+  };
+  
+  // 연차 반려 처리
+  const handleReject = (reqId) => {
+    handleApproveOrReject(reqId, 2);
+  };
+  
+  // 연차 승인/반려 공통 처리 함수
+  const handleApproveOrReject = (reqId, status) => {
+    setIsProcessing(true);
+    setApproveError('');
+    
+    const approverEmpId = getUserId();
+    
+    const params = new URLSearchParams();
+    params.append('reqId', reqId);
+    params.append('approverEmpId', approverEmpId);
+    params.append('approveStatus', status);
+    params.append('note', approveComment);
+    
+    axios.post('/api/hr/annual-leave/approve', params)
+      .then(response => {
+        console.log('승인/반려 처리 결과:', response.data);
+        
+        if (response.data && response.data.success) {
+          // 데이터 갱신
+          loadLeaveRequests();
+          
+          // 모달 닫기
+          handleCloseDetailDialog();
+          
+          // 상태 초기화
+          setApproveComment('');
+          setIsProcessing(false);
+        } else {
+          setApproveError(response.data.message || '처리 중 오류가 발생했습니다.');
+          setIsProcessing(false);
+        }
+      })
+      .catch(error => {
+        console.error('승인/반려 처리 실패:', error);
+        setApproveError(error.response?.data?.message || '서버 오류가 발생했습니다.');
+        setIsProcessing(false);
+      });
+  };
+  
+  // 연차 신청 제출 - 수정
   const handleSubmit = () => {
     if (!validateForm()) return;
     
@@ -146,38 +393,27 @@ const AnnualLeaveCon = () => {
     
     const days = calculateDays(startDate, endDate);
     
+    // 로그인 사용자 정보 확인
+    const currentUserId = getUserId();
+    console.log('현재 사용자 ID (연차 신청용):', currentUserId);
+    
+    // 백엔드 API 형식에 맞게 데이터 구조 변경
     const requestData = {
-      startDate: startDate.format('YYYY-MM-DD'),
-      endDate: endDate.format('YYYY-MM-DD'),
-      days: days,
+      empId: currentUserId,
       reason: reason
     };
     
-    // 개발을 위한 가짜 성공 처리
-    setTimeout(() => {
-      // 새 항목 추가
-      const newRequest = {
-        requestDate: dayjs().format('YYYY-MM-DD'),
-        startDate: startDate.format('YYYY-MM-DD'),
-        endDate: endDate.format('YYYY-MM-DD'),
-        days: days,
-        reason: reason,
-        status: '대기중'
-      };
-      
-      setLeaveRequests([newRequest, ...leaveRequests]);
-      handleCloseModal();
-      setSubmitting(false);
-    }, 1000);
+    console.log('연차 신청 데이터:', requestData);
     
-    // 실제 API 연동 시 아래 코드 사용
-    /*
     axios.post('/api/hr/annual-leave/request', requestData)
       .then(res => {
         console.log('연차 신청 성공:', res.data);
         
-        // 목록 새로고침
-        loadLeaveRequests();
+        // 성공 응답이 있으면 목록 새로고침
+        if (res.data && res.data.success) {
+          // 새로운 데이터를 서버에서 다시 로드
+          loadLeaveRequests();
+        }
         
         // 모달 닫기
         handleCloseModal();
@@ -185,10 +421,15 @@ const AnnualLeaveCon = () => {
       })
       .catch(err => {
         console.error('연차 신청 실패:', err);
-        setSubmitError('연차 신청에 실패했습니다. 다시 시도해주세요.');
+        let errorMessage = '연차 신청에 실패했습니다. 다시 시도해주세요.';
+        
+        if (err.response && err.response.data && err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+        
+        setSubmitError(errorMessage);
         setSubmitting(false);
       });
-    */
   };
 
   if (loading) {
@@ -210,6 +451,18 @@ const AnnualLeaveCon = () => {
       <AnnualLeaveCom 
         leaveRequests={leaveRequests}
         onNewRequest={handleOpenModal}
+        onDetailView={handleDetailView}
+        selectedRequest={selectedRequest}
+        openDetailDialog={openDetailDialog}
+        onCloseDetailDialog={handleCloseDetailDialog}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        userRole={getUserRole()}
+        approveComment={approveComment}
+        setApproveComment={setApproveComment}
+        isProcessing={isProcessing}
+        approveError={approveError}
+        commentLog={commentLog}
       />
       
       {/* 연차 신청 모달 */}

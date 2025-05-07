@@ -17,6 +17,7 @@ instance.interceptors.request.use(
       console.log('요청 URL:', config.url);
       console.log('요청 메서드:', config.method);
       console.log('인증 토큰 존재:', !!token);
+      console.log('인증 토큰:', token);
       
       try {
         // JWT 디코딩
@@ -30,6 +31,7 @@ instance.interceptors.request.use(
         );
         const decoded = JSON.parse(jsonPayload);
         console.log('토큰 페이로드:', decoded);
+        console.log('사용자 권한:', decoded.role || decoded.roles || decoded.authorities || '권한 정보 없음');
       } catch (e) {
         console.warn('토큰 디코딩 실패:', e);
       }
@@ -48,16 +50,29 @@ instance.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("loginUser");
-      localStorage.removeItem("branchName");
-      localStorage.removeItem("userRole");
-      localStorage.removeItem("storeId");
-      localStorage.removeItem("name");
+    if (error.response) {
+      console.log('응답 에러 상태:', error.response.status);
+      console.log('응답 에러 데이터:', error.response.data);
+      console.log('응답 에러 헤더:', error.response.headers);
       
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      if (error.response.status === 403) {
+        console.log('접근 권한이 없음 (403 Forbidden)');
+        console.log('현재 사용자 정보:', localStorage.getItem('loginUser'));
+        console.log('현재 역할:', localStorage.getItem('userRole'));
+      }
+      
+      if (error.response.status === 401) {
+        console.log('인증되지 않음 (401 Unauthorized)');
+        localStorage.removeItem("token");
+        localStorage.removeItem("loginUser");
+        localStorage.removeItem("branchName");
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("storeId");
+        localStorage.removeItem("name");
+        
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
       }
     }
     return Promise.reject(error);

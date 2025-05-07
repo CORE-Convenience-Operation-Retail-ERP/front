@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Typography, 
@@ -11,104 +11,491 @@ import {
   TableContainer, 
   TableHead, 
   TableRow,
-  Chip
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  TextField,
+  Card,
+  CardContent,
+  Stack,
+  Grid,
+  Alert,
+  CircularProgress,
+  Tooltip
 } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import AddIcon from '@mui/icons-material/Add';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import CommentIcon from '@mui/icons-material/Comment';
+import { styled } from '@mui/system';
 
-const AnnualLeaveCom = ({ leaveRequests, onNewRequest }) => {
+// 스타일이 적용된 테이블 셀
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  fontWeight: 'bold',
+  backgroundColor: '#F8FAFC',
+  color: '#334155',
+  fontSize: '0.875rem',
+  border: 'none',
+  paddingTop: 16,
+  paddingBottom: 16,
+}));
+
+// 스타일이 적용된 테이블 데이터 셀
+const StyledTableDataCell = styled(TableCell)(({ theme }) => ({
+  border: 'none',
+  borderBottom: '1px solid #F1F5F9',
+  fontSize: '0.875rem',
+  color: '#475569',
+  verticalAlign: 'middle',
+}));
+
+// 스타일이 적용된 Paper 컴포넌트
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  borderRadius: 12,
+  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
+  overflow: 'hidden',
+}));
+
+const AnnualLeaveCom = ({ 
+  leaveRequests, 
+  onNewRequest, 
+  onDetailView, 
+  selectedRequest, 
+  openDetailDialog, 
+  onCloseDetailDialog,
+  onApprove,
+  onReject,
+  userRole,
+  approveComment,
+  setApproveComment,
+  isProcessing,
+  approveError,
+  commentLog
+}) => {
   // 상태에 따른 칩 색상 설정
   const getStatusColor = (status) => {
     switch(status) {
       case '승인':
-        return { bgcolor: '#4caf50', color: 'white' };
+        return { color: '#10B981', bgcolor: '#ECFDF5', borderColor: '#A7F3D0' };
       case '거절':
-        return { bgcolor: '#f44336', color: 'white' };
+        return { color: '#EF4444', bgcolor: '#FEF2F2', borderColor: '#FECACA' };
       case '대기중':
-        return { bgcolor: '#ff9800', color: 'white' };
+        return { color: '#F59E0B', bgcolor: '#FFFBEB', borderColor: '#FDE68A' };
       default:
-        return { bgcolor: '#e0e0e0', color: 'black' };
+        return { color: '#64748B', bgcolor: '#F8FAFC', borderColor: '#E2E8F0' };
     }
   };
 
+  // 마스터 권한 확인
+  const isMaster = userRole && (
+    userRole.includes('MASTER') || 
+    userRole === '10' || 
+    userRole === 'ROLE_MASTER'
+  );
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <EventIcon sx={{ color: '#1EACB5', mr: 1 }} />
-            <Typography variant="h6" fontWeight="bold">연차 신청 관리</Typography>
-          </Box>
-          <Button 
-            variant="contained" 
-            startIcon={<AddIcon />}
-            onClick={onNewRequest}
-            sx={{ 
-              bgcolor: '#015D70', 
-              '&:hover': { bgcolor: '#014D5E' },
-              borderRadius: '8px',
-              textTransform: 'none',
-              boxShadow: '0px 3px 6px rgba(1, 93, 112, 0.2)',
-            }}
-          >
-            연차 신청
-          </Button>
-        </Box>
-        <Divider sx={{ mb: 3 }} />
-        
-        {leaveRequests && leaveRequests.length > 0 ? (
-          <TableContainer component={Paper} elevation={0} sx={{ maxHeight: 440 }}>
-            <Table stickyHeader size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold', bgcolor: '#f5f5f5' }}>신청일</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', bgcolor: '#f5f5f5' }}>시작일</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', bgcolor: '#f5f5f5' }}>종료일</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', bgcolor: '#f5f5f5' }}>일수</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', bgcolor: '#f5f5f5' }}>사유</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', bgcolor: '#f5f5f5' }}>상태</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {leaveRequests.map((request, index) => (
-                  <TableRow key={index} hover>
-                    <TableCell>{request.requestDate}</TableCell>
-                    <TableCell>{request.startDate}</TableCell>
-                    <TableCell>{request.endDate}</TableCell>
-                    <TableCell>{request.days}</TableCell>
-                    <TableCell>{request.reason}</TableCell>
-                    <TableCell>
+    <Box sx={{ width: '100%' }}>
+      <Card 
+        elevation={0}
+        sx={{ 
+          mb: 3, 
+          bgcolor: '#F0F9FF', 
+          borderRadius: 2,
+          border: '1px solid #BAE6FD'
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={8}>
+              <Typography variant="h5" component="h1" sx={{ 
+                fontWeight: 700, 
+                color: '#0369A1',
+                mb: 1
+              }}>
+                연차 관리
+              </Typography>
+              <Typography variant="body1" sx={{ color: '#0E7490' }}>
+                직원들의 연차 신청 내역을 확인하고 승인/반려 처리할 수 있습니다.
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+              <Button 
+                variant="contained" 
+                startIcon={<AddIcon />}
+                onClick={onNewRequest}
+                sx={{ 
+                  bgcolor: '#0EA5E9',
+                  '&:hover': { bgcolor: '#0284C7' },
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1,
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                }}
+              >
+                연차 신청
+              </Button>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+      
+      <StyledPaper>
+        <TableContainer sx={{ maxHeight: 600 }}>
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <StyledTableCell>번호</StyledTableCell>
+                <StyledTableCell>신청자</StyledTableCell>
+                <StyledTableCell>신청일</StyledTableCell>
+                <StyledTableCell>연차일</StyledTableCell>
+                <StyledTableCell>일수</StyledTableCell>
+                <StyledTableCell>사유</StyledTableCell>
+                <StyledTableCell>상태</StyledTableCell>
+                <StyledTableCell align="center">관리</StyledTableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {leaveRequests.length > 0 ? (
+                leaveRequests.map((request) => (
+                  <TableRow 
+                    key={request.reqId || Math.random().toString()}
+                    hover
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: '#F8FAFC' },
+                      transition: 'background-color 0.2s ease'
+                    }}
+                  >
+                    <StyledTableDataCell onClick={() => onDetailView(request)}>
+                      {request.reqId}
+                    </StyledTableDataCell>
+                    <StyledTableDataCell onClick={() => onDetailView(request)}>
+                      {request.empName || '-'}
+                    </StyledTableDataCell>
+                    <StyledTableDataCell onClick={() => onDetailView(request)}>
+                      {request.requestDate ? new Date(request.requestDate).toLocaleDateString() : '-'}
+                    </StyledTableDataCell>
+                    <StyledTableDataCell onClick={() => onDetailView(request)}>
+                      {request.startDate ? new Date(request.startDate).toLocaleDateString() : '-'}
+                    </StyledTableDataCell>
+                    <StyledTableDataCell onClick={() => onDetailView(request)}>
+                      {request.days}
+                    </StyledTableDataCell>
+                    <StyledTableDataCell onClick={() => onDetailView(request)}>
+                      {request.reason && request.reason.length > 15 
+                        ? `${request.reason.substring(0, 15)}...` 
+                        : request.reason || '-'}
+                    </StyledTableDataCell>
+                    <StyledTableDataCell onClick={() => onDetailView(request)}>
                       <Chip 
                         label={request.status} 
-                        size="small" 
+                        size="small"
+                        variant="outlined"
                         sx={{ 
                           ...getStatusColor(request.status),
                           fontWeight: 'medium',
-                          minWidth: '70px'
+                          fontSize: '0.75rem',
+                          borderRadius: '4px',
                         }} 
                       />
-                    </TableCell>
+                    </StyledTableDataCell>
+                    <StyledTableDataCell align="center">
+                      <Stack direction="row" spacing={1} justifyContent="center">
+                        <Tooltip title="상세보기">
+                          <IconButton 
+                            size="small" 
+                            onClick={() => onDetailView(request)}
+                            sx={{ color: '#3B82F6' }}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        
+                        {isMaster && request.status === '대기중' && (
+                          <>
+                            <Tooltip title="승인">
+                              <IconButton 
+                                size="small" 
+                                onClick={() => onApprove(request.reqId)}
+                                sx={{ color: '#10B981' }}
+                              >
+                                <CheckCircleOutlineIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="반려">
+                              <IconButton 
+                                size="small" 
+                                onClick={() => onReject(request.reqId)}
+                                sx={{ color: '#EF4444' }}
+                              >
+                                <CancelOutlinedIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        )}
+                      </Stack>
+                    </StyledTableDataCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <Box sx={{ 
-            py: 4, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
-            color: 'text.secondary' 
-          }}>
-            <EventIcon sx={{ fontSize: 40, color: '#e0e0e0', mb: 1 }} />
-            <Typography variant="body1">신청한 연차 내역이 없습니다.</Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              상단의 '연차 신청' 버튼을 클릭하여 연차를 신청해주세요.
-            </Typography>
-          </Box>
-        )}
-      </Paper>
+                ))
+              ) : (
+                <TableRow>
+                  <StyledTableDataCell colSpan={8} align="center" sx={{ py: 5 }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center',
+                      color: '#94A3B8',
+                      py: 4
+                    }}>
+                      <EventIcon sx={{ fontSize: 48, color: '#CBD5E1', mb: 2 }} />
+                      <Typography variant="h6" sx={{ color: '#64748B', mb: 1 }}>
+                        신청한 연차 내역이 없습니다
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#94A3B8' }}>
+                        상단의 '연차 신청' 버튼을 클릭하여 연차를 신청해주세요
+                      </Typography>
+                    </Box>
+                  </StyledTableDataCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </StyledPaper>
+      
+      {/* 연차 신청 상세 정보 다이얼로그 */}
+      <Dialog 
+        open={openDetailDialog} 
+        onClose={onCloseDetailDialog}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          bgcolor: '#EFF6FF', 
+          color: '#1E40AF',
+          fontWeight: 700,
+          py: 3
+        }}>
+          연차 신청 상세 정보
+        </DialogTitle>
+        
+        <DialogContent sx={{ pt: 3, pb: 1 }}>
+          {selectedRequest && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, py: 1 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 500 }}>
+                      신청번호
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {selectedRequest.reqId}
+                    </Typography>
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 500 }}>
+                      신청자
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {selectedRequest.empName || '-'}
+                    </Typography>
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 500 }}>
+                      신청일
+                    </Typography>
+                    <Typography variant="body1">
+                      {selectedRequest.requestDate ? new Date(selectedRequest.requestDate).toLocaleDateString() : '-'}
+                    </Typography>
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 500 }}>
+                      연차 사용일
+                    </Typography>
+                    <Typography variant="body1">
+                      {selectedRequest.startDate ? new Date(selectedRequest.startDate).toLocaleDateString() : '-'}
+                    </Typography>
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 500 }}>
+                      일수
+                    </Typography>
+                    <Typography variant="body1">
+                      {selectedRequest.days}일
+                    </Typography>
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 500 }}>
+                      처리 상태
+                    </Typography>
+                    <Chip 
+                      label={selectedRequest.status} 
+                      size="small"
+                      variant="outlined"
+                      sx={{ 
+                        ...getStatusColor(selectedRequest.status),
+                        fontWeight: 'medium',
+                        fontSize: '0.75rem',
+                        borderRadius: '4px',
+                        width: 'fit-content'
+                      }} 
+                    />
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 500 }}>
+                      신청 사유
+                    </Typography>
+                    <Paper variant="outlined" sx={{ p: 2, bgcolor: '#F8FAFC', borderRadius: 1 }}>
+                      <Typography variant="body2">
+                        {selectedRequest.reason || '(사유 없음)'}
+                      </Typography>
+                    </Paper>
+                  </Box>
+                </Grid>
+                
+                {/* 승인/반려 코멘트 표시 영역 */}
+                {commentLog && commentLog.length > 0 && (
+                  <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
+                      <Typography variant="caption" sx={{ 
+                        color: '#64748B', 
+                        fontWeight: 500,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5
+                      }}>
+                        <CommentIcon fontSize="small" />
+                        승인/반려 코멘트
+                      </Typography>
+                      <Paper variant="outlined" sx={{ p: 2, bgcolor: '#FFFBEB', borderRadius: 1 }}>
+                        {commentLog.map((log, index) => (
+                          <Box key={index} sx={{ mb: index < commentLog.length - 1 ? 1.5 : 0 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500, color: '#92400E' }}>
+                              {log.status === 1 ? '승인' : '반려'} - {log.approverName || '담당자'}
+                            </Typography>
+                            <Typography variant="body2" sx={{ mt: 0.5, color: '#78350F' }}>
+                              {log.comment || '(코멘트 없음)'}
+                            </Typography>
+                            {index < commentLog.length - 1 && (
+                              <Divider sx={{ my: 1.5, borderColor: '#FDE68A' }} />
+                            )}
+                          </Box>
+                        ))}
+                      </Paper>
+                    </Box>
+                  </Grid>
+                )}
+                
+                {/* 마스터 권한이 있고, 대기중 상태인 경우 승인/반려 입력 필드 */}
+                {isMaster && selectedRequest.status === '대기중' && (
+                  <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
+                      <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 500 }}>
+                        승인/반려 코멘트
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        multiline
+                        rows={2}
+                        placeholder="승인 또는 반려 사유를 입력하세요..."
+                        value={approveComment}
+                        onChange={(e) => setApproveComment(e.target.value)}
+                        variant="outlined"
+                        size="small"
+                      />
+                      
+                      {approveError && (
+                        <Alert severity="error" sx={{ mt: 1, fontSize: '0.875rem' }}>
+                          {approveError}
+                        </Alert>
+                      )}
+                      
+                      <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'flex-end' }}>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          disabled={isProcessing}
+                          onClick={() => onReject(selectedRequest.reqId)}
+                          sx={{ 
+                            borderRadius: 1,
+                            color: '#EF4444',
+                            borderColor: '#FCA5A5',
+                            '&:hover': {
+                              borderColor: '#EF4444',
+                              bgcolor: '#FEF2F2'
+                            }
+                          }}
+                        >
+                          {isProcessing ? <CircularProgress size={24} /> : '반려'}
+                        </Button>
+                        <Button
+                          variant="contained"
+                          disabled={isProcessing}
+                          onClick={() => onApprove(selectedRequest.reqId)}
+                          sx={{ 
+                            borderRadius: 1,
+                            bgcolor: '#10B981',
+                            '&:hover': { bgcolor: '#059669' }
+                          }}
+                        >
+                          {isProcessing ? <CircularProgress size={24} /> : '승인'}
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
+          )}
+        </DialogContent>
+        
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button 
+            onClick={onCloseDetailDialog} 
+            variant="outlined"
+            sx={{
+              borderRadius: 1,
+              color: '#6B7280',
+              borderColor: '#D1D5DB',
+              '&:hover': {
+                borderColor: '#9CA3AF',
+                bgcolor: '#F9FAFB'
+              }
+            }}
+          >
+            닫기
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

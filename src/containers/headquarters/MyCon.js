@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Box, Typography, Paper, Divider, Grid, Button, CircularProgress, 
-  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
+  TextField } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
@@ -14,9 +15,12 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import { useNavigate } from 'react-router-dom';
 import axios from '../../service/axiosInstance';
 
-const MyCon = ({ info, type }) => {
+const MyCon = forwardRef(({ info, type }, ref) => {
+  const navigate = useNavigate();
+  
   // 근태 데이터
   const totalDays = info?.attendanceDays || 0;
   const lateDays = info?.lateCount || 0;
@@ -53,6 +57,27 @@ const MyCon = ({ info, type }) => {
     messageColor: '',
     buttonColor: ''
   });
+  
+  // 연차 신청 모달 상태
+  const [leaveModal, setLeaveModal] = useState({
+    open: false,
+    reason: '',
+    submitting: false
+  });
+  
+  // 연차 신청 모달 열기
+  const handleOpenLeaveModal = () => {
+    setLeaveModal({
+      open: true,
+      reason: '',
+      submitting: false
+    });
+  };
+  
+  // ref를 통해 함수 노출
+  useImperativeHandle(ref, () => ({
+    handleOpenLeaveModal
+  }));
   
   // 커스텀 알림창 열기 함수
   const openDialog = (options) => {
@@ -342,25 +367,61 @@ const MyCon = ({ info, type }) => {
     }
   };
   
+  // 연차 신청 모달 닫기
+  const handleCloseLeaveModal = () => {
+    setLeaveModal({
+      open: false,
+      reason: '',
+      submitting: false
+    });
+  };
+
+  // 연차 신청 처리
+  const handleLeaveRequest = () => {
+    if (!leaveModal.reason.trim()) {
+      showAlert('연차 사유를 입력해주세요.', '알림', 'warning');
+      return;
+    }
+
+    setLeaveModal(prev => ({ ...prev, submitting: true }));
+
+    // API 호출
+    axios.post('/api/hr/annual-leave/request', {
+      empId: info?.empId,
+      reason: leaveModal.reason
+    })
+    .then(res => {
+      console.log('연차 신청 응답:', res.data);
+      
+      showAlert('연차가 신청되었습니다.', '신청 완료', 'success');
+      handleCloseLeaveModal();
+      
+      // 오늘 날짜로 연차 신청 정보 생성
+      const today = new Date();
+      const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      
+      // 연차 신청 페이지로 이동하고 페이지 새로고침
+      navigate('/headquarters/hr/annual-leave');
+    })
+    .catch(err => {
+      console.error('연차 신청 실패:', err);
+      
+      let errorMessage = '연차 신청에 실패했습니다.';
+      if (err.response && err.response.data && err.response.data.message) {
+        errorMessage = err.response.data.message;
+      }
+      
+      showAlert(errorMessage, '오류', 'error');
+      setLeaveModal(prev => ({ ...prev, submitting: false }));
+    });
+  };
+  
   const renderAttendanceInfo = () => (
-    <Paper 
-      elevation={3} 
-      sx={{
-        borderRadius: 2, 
-        p: 3,
-        mb: 3
-      }}
-    >
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between',
-        mb: 2 
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <DonutLargeIcon sx={{ color: '#2563A6', mr: 1 }} />
-          <Typography variant="h6" fontWeight="bold">근태 관리</Typography>
-        </Box>
+    <Paper elevation={3} sx={{ borderRadius: 2, p: 3, mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6" fontWeight="bold">
+          근태 정보
+        </Typography>
       </Box>
       <Divider sx={{ mb: 3 }} />
       
@@ -609,7 +670,65 @@ const MyCon = ({ info, type }) => {
     </Paper>
   );
   
-  return type === 'attendance' ? renderAttendanceInfo() : renderSalaryInfo();
-};
+  return (
+    <>
+      {type === 'attendance' ? renderAttendanceInfo() : renderSalaryInfo()}
+      
+      {/* 연차 신청 모달 */}
+      <Dialog 
+        open={leaveModal.open} 
+        onClose={handleCloseLeaveModal}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ bgcolor: '#1EACB5', color: 'white', fontWeight: 'bold' }}>
+          연차 신청
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3, pb: 1 }}>
+          <TextField
+            label="연차 사유"
+            multiline
+            rows={4}
+            fullWidth
+            value={leaveModal.reason}
+            onChange={(e) => setLeaveModal(prev => ({ ...prev, reason: e.target.value }))}
+            placeholder="연차 사유를 입력해주세요"
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button 
+            onClick={handleCloseLeaveModal}
+            sx={{ 
+              color: '#777777',
+              borderRadius: '8px',
+              fontWeight: 'medium',
+              textTransform: 'none',
+              border: '1px solid #dddddd',
+              '&:hover': {
+                backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                borderColor: '#cccccc'
+              }
+            }}
+          >
+            취소
+          </Button>
+          <Button 
+            onClick={handleLeaveRequest}
+            variant="contained"
+            disabled={leaveModal.submitting}
+            sx={{ 
+              bgcolor: '#015D70', 
+              '&:hover': { bgcolor: '#014D5E' },
+              borderRadius: '8px',
+              textTransform: 'none'
+            }}
+          >
+            {leaveModal.submitting ? <CircularProgress size={24} sx={{ color: 'white' }} /> : '신청하기'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+});
 
 export default MyCon;
