@@ -352,13 +352,8 @@ const AnnualLeaveCon = () => {
     
     const approverEmpId = getUserId();
     
-    const params = new URLSearchParams();
-    params.append('reqId', reqId);
-    params.append('approverEmpId', approverEmpId);
-    params.append('approveStatus', status);
-    params.append('note', approveComment);
-    
-    axios.post('/api/hr/annual-leave/approve', params)
+    // URL 파라미터 방식으로 변경
+    axios.post(`/api/hr/annual-leave/change-status?reqId=${reqId}&approverEmpId=${approverEmpId}&newStatus=${status}&note=${encodeURIComponent(approveComment || '')}`)
       .then(response => {
         console.log('승인/반려 처리 결과:', response.data);
         
@@ -379,6 +374,46 @@ const AnnualLeaveCon = () => {
       })
       .catch(error => {
         console.error('승인/반려 처리 실패:', error);
+        setApproveError(error.response?.data?.message || '서버 오류가 발생했습니다.');
+        setIsProcessing(false);
+      });
+  };
+  
+  // 코멘트만 추가하는 함수 (상태 변경 없음)
+  const handleAddComment = (reqId) => {
+    setIsProcessing(true);
+    setApproveError('');
+    
+    const approverEmpId = getUserId();
+    
+    if (!approveComment.trim()) {
+      setApproveError('코멘트를 입력해주세요.');
+      setIsProcessing(false);
+      return;
+    }
+    
+    // URL 파라미터 방식으로 변경
+    axios.post(`/api/hr/annual-leave/add-comment?reqId=${reqId}&approverEmpId=${approverEmpId}&note=${encodeURIComponent(approveComment)}`)
+      .then(response => {
+        console.log('코멘트 추가 결과:', response.data);
+        
+        if (response.data && response.data.success) {
+          // 데이터 갱신
+          loadLeaveRequests();
+          
+          // 코멘트 목록 다시 불러오기
+          fetchCommentLog(reqId);
+          
+          // 상태 초기화
+          setApproveComment('');
+          setIsProcessing(false);
+        } else {
+          setApproveError(response.data.message || '코멘트 추가 중 오류가 발생했습니다.');
+          setIsProcessing(false);
+        }
+      })
+      .catch(error => {
+        console.error('코멘트 추가 실패:', error);
         setApproveError(error.response?.data?.message || '서버 오류가 발생했습니다.');
         setIsProcessing(false);
       });
@@ -457,6 +492,7 @@ const AnnualLeaveCon = () => {
         onCloseDetailDialog={handleCloseDetailDialog}
         onApprove={handleApprove}
         onReject={handleReject}
+        onAddComment={handleAddComment}
         userRole={getUserRole()}
         approveComment={approveComment}
         setApproveComment={setApproveComment}

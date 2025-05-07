@@ -18,9 +18,6 @@ import {
   DialogActions,
   IconButton,
   TextField,
-  Card,
-  CardContent,
-  Stack,
   Grid,
   Alert,
   CircularProgress,
@@ -70,6 +67,7 @@ const AnnualLeaveCom = ({
   onCloseDetailDialog,
   onApprove,
   onReject,
+  onAddComment,
   userRole,
   approveComment,
   setApproveComment,
@@ -100,49 +98,28 @@ const AnnualLeaveCom = ({
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Card 
-        elevation={0}
-        sx={{ 
-          mb: 3, 
-          bgcolor: '#F0F9FF', 
-          borderRadius: 2,
-          border: '1px solid #BAE6FD'
-        }}
-      >
-        <CardContent sx={{ p: 3 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={8}>
-              <Typography variant="h5" component="h1" sx={{ 
-                fontWeight: 700, 
-                color: '#0369A1',
-                mb: 1
-              }}>
-                연차 관리
-              </Typography>
-              <Typography variant="body1" sx={{ color: '#0E7490' }}>
-                직원들의 연차 신청 내역을 확인하고 승인/반려 처리할 수 있습니다.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-              <Button 
-                variant="contained" 
-                startIcon={<AddIcon />}
-                onClick={onNewRequest}
-                sx={{ 
-                  bgcolor: '#0EA5E9',
-                  '&:hover': { bgcolor: '#0284C7' },
-                  borderRadius: 2,
-                  px: 3,
-                  py: 1,
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                }}
-              >
-                연차 신청
-              </Button>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'flex-end', 
+        alignItems: 'center', 
+        mb: 2
+      }}>
+        <Button 
+          variant="contained" 
+          startIcon={<AddIcon />}
+          onClick={onNewRequest}
+          sx={{ 
+            bgcolor: '#0EA5E9',
+            '&:hover': { bgcolor: '#0284C7' },
+            borderRadius: 2,
+            px: 3,
+            py: 1,
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          }}
+        >
+          연차 신청
+        </Button>
+      </Box>
       
       <StyledPaper>
         <TableContainer sx={{ maxHeight: 600 }}>
@@ -205,7 +182,7 @@ const AnnualLeaveCom = ({
                       />
                     </StyledTableDataCell>
                     <StyledTableDataCell align="center">
-                      <Stack direction="row" spacing={1} justifyContent="center">
+                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
                         <Tooltip title="상세보기">
                           <IconButton 
                             size="small" 
@@ -216,29 +193,36 @@ const AnnualLeaveCom = ({
                           </IconButton>
                         </Tooltip>
                         
-                        {isMaster && request.status === '대기중' && (
+                        {isMaster && (
                           <>
-                            <Tooltip title="승인">
-                              <IconButton 
-                                size="small" 
-                                onClick={() => onApprove(request.reqId)}
-                                sx={{ color: '#10B981' }}
-                              >
-                                <CheckCircleOutlineIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="반려">
-                              <IconButton 
-                                size="small" 
-                                onClick={() => onReject(request.reqId)}
-                                sx={{ color: '#EF4444' }}
-                              >
-                                <CancelOutlinedIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
+                            {/* 대기중이거나 반려 상태일 때만 승인 버튼 표시 */}
+                            {(request.status === '대기중' || request.status === '거절') && (
+                              <Tooltip title="승인">
+                                <IconButton 
+                                  size="small" 
+                                  onClick={() => onApprove(request.reqId)}
+                                  sx={{ color: '#10B981' }}
+                                >
+                                  <CheckCircleOutlineIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            
+                            {/* 대기중이거나 승인 상태일 때만 반려 버튼 표시 */}
+                            {(request.status === '대기중' || request.status === '승인') && (
+                              <Tooltip title="반려">
+                                <IconButton 
+                                  size="small" 
+                                  onClick={() => onReject(request.reqId)}
+                                  sx={{ color: '#EF4444' }}
+                                >
+                                  <CancelOutlinedIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
                           </>
                         )}
-                      </Stack>
+                      </Box>
                     </StyledTableDataCell>
                   </TableRow>
                 ))
@@ -291,7 +275,8 @@ const AnnualLeaveCom = ({
         </DialogTitle>
         
         <DialogContent sx={{ pt: 3, pb: 1 }}>
-          {selectedRequest && (
+          {console.log('모달 렌더링 중:', { selectedRequest, commentLog, isMaster })}
+          {selectedRequest ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, py: 1 }}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
@@ -385,6 +370,7 @@ const AnnualLeaveCom = ({
                 {/* 승인/반려 코멘트 표시 영역 */}
                 {commentLog && commentLog.length > 0 && (
                   <Grid item xs={12}>
+                    {console.log('코멘트 로그 렌더링:', commentLog)}
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
                       <Typography variant="caption" sx={{ 
                         color: '#64748B', 
@@ -400,10 +386,15 @@ const AnnualLeaveCom = ({
                         {commentLog.map((log, index) => (
                           <Box key={index} sx={{ mb: index < commentLog.length - 1 ? 1.5 : 0 }}>
                             <Typography variant="body2" sx={{ fontWeight: 500, color: '#92400E' }}>
-                              {log.status === 1 ? '승인' : '반려'} - {log.approverName || '담당자'}
+                              {log.status === 1 ? '승인' : 
+                               log.status === 2 ? '반려' : 
+                               log.status === 0 ? '코멘트' : '기타'} - {log.approverName || '담당자'}
                             </Typography>
                             <Typography variant="body2" sx={{ mt: 0.5, color: '#78350F' }}>
                               {log.comment || '(코멘트 없음)'}
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: '#B45309' }}>
+                              {new Date(log.approvedAt).toLocaleString()}
                             </Typography>
                             {index < commentLog.length - 1 && (
                               <Divider sx={{ my: 1.5, borderColor: '#FDE68A' }} />
@@ -415,65 +406,136 @@ const AnnualLeaveCom = ({
                   </Grid>
                 )}
                 
-                {/* 마스터 권한이 있고, 대기중 상태인 경우 승인/반려 입력 필드 */}
-                {isMaster && selectedRequest.status === '대기중' && (
-                  <Grid item xs={12}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
-                      <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 500 }}>
-                        승인/반려 코멘트
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        multiline
-                        rows={2}
-                        placeholder="승인 또는 반려 사유를 입력하세요..."
-                        value={approveComment}
-                        onChange={(e) => setApproveComment(e.target.value)}
-                        variant="outlined"
-                        size="small"
-                      />
-                      
-                      {approveError && (
-                        <Alert severity="error" sx={{ mt: 1, fontSize: '0.875rem' }}>
-                          {approveError}
-                        </Alert>
+                {/* 마스터 권한이 있을 때 코멘트 입력 필드 표시 */}
+                {console.log('마스터 권한 검사:', { isMaster, userRole })}
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 500 }}>
+                      {selectedRequest.status === '대기중' ? '승인/반려 코멘트' : '코멘트 추가'}
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={2}
+                      placeholder={selectedRequest.status === '대기중' ? 
+                        "승인 또는 반려 사유를 입력하세요..." : 
+                        "코멘트를 입력하세요..."}
+                      value={approveComment}
+                      onChange={(e) => setApproveComment(e.target.value)}
+                      variant="outlined"
+                      size="small"
+                    />
+                    
+                    {approveError && (
+                      <Alert severity="error" sx={{ mt: 1, fontSize: '0.875rem' }}>
+                        {approveError}
+                      </Alert>
+                    )}
+                    
+                    <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'flex-end' }}>
+                      {/* 현재 상태가 대기중이면 승인/반려 버튼 표시 */}
+                      {selectedRequest.status === '대기중' ? (
+                        <>
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            disabled={isProcessing}
+                            onClick={() => onReject(selectedRequest.reqId)}
+                            sx={{ 
+                              borderRadius: 1,
+                              color: '#EF4444',
+                              borderColor: '#FCA5A5',
+                              '&:hover': {
+                                borderColor: '#EF4444',
+                                bgcolor: '#FEF2F2'
+                              }
+                            }}
+                          >
+                            {isProcessing ? <CircularProgress size={24} /> : '반려'}
+                          </Button>
+                          <Button
+                            variant="contained"
+                            disabled={isProcessing}
+                            onClick={() => onApprove(selectedRequest.reqId)}
+                            sx={{ 
+                              borderRadius: 1,
+                              bgcolor: '#10B981',
+                              '&:hover': { bgcolor: '#059669' }
+                            }}
+                          >
+                            {isProcessing ? <CircularProgress size={24} /> : '승인'}
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {/* 현재 상태가 승인이라면 반려로 변경 가능 */}
+                          {selectedRequest.status === '승인' && (
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              disabled={isProcessing}
+                              onClick={() => onReject(selectedRequest.reqId)}
+                              sx={{ 
+                                borderRadius: 1,
+                                color: '#EF4444',
+                                borderColor: '#FCA5A5',
+                                '&:hover': {
+                                  borderColor: '#EF4444',
+                                  bgcolor: '#FEF2F2'
+                                }
+                              }}
+                            >
+                              {isProcessing ? <CircularProgress size={24} /> : '반려로 변경'}
+                            </Button>
+                          )}
+                          
+                          {/* 현재 상태가 반려라면 승인으로 변경 가능 */}
+                          {selectedRequest.status === '거절' && (
+                            <Button
+                              variant="contained"
+                              disabled={isProcessing}
+                              onClick={() => onApprove(selectedRequest.reqId)}
+                              sx={{ 
+                                borderRadius: 1,
+                                bgcolor: '#10B981',
+                                '&:hover': { bgcolor: '#059669' }
+                              }}
+                            >
+                              {isProcessing ? <CircularProgress size={24} /> : '승인으로 변경'}
+                            </Button>
+                          )}
+                          
+                          {/* 상태와 관계없이 코멘트 추가 버튼 표시 */}
+                          <Button
+                            variant="outlined"
+                            disabled={isProcessing}
+                            onClick={() => {
+                              console.log('코멘트 추가 클릭:', selectedRequest.reqId);
+                              onAddComment(selectedRequest.reqId);
+                            }}
+                            sx={{ 
+                              borderRadius: 1,
+                              color: '#6B7280',
+                              borderColor: '#D1D5DB',
+                              '&:hover': {
+                                borderColor: '#9CA3AF',
+                                bgcolor: '#F9FAFB'
+                              }
+                            }}
+                          >
+                            {isProcessing ? <CircularProgress size={24} /> : '코멘트 추가'}
+                          </Button>
+                        </>
                       )}
-                      
-                      <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'flex-end' }}>
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          disabled={isProcessing}
-                          onClick={() => onReject(selectedRequest.reqId)}
-                          sx={{ 
-                            borderRadius: 1,
-                            color: '#EF4444',
-                            borderColor: '#FCA5A5',
-                            '&:hover': {
-                              borderColor: '#EF4444',
-                              bgcolor: '#FEF2F2'
-                            }
-                          }}
-                        >
-                          {isProcessing ? <CircularProgress size={24} /> : '반려'}
-                        </Button>
-                        <Button
-                          variant="contained"
-                          disabled={isProcessing}
-                          onClick={() => onApprove(selectedRequest.reqId)}
-                          sx={{ 
-                            borderRadius: 1,
-                            bgcolor: '#10B981',
-                            '&:hover': { bgcolor: '#059669' }
-                          }}
-                        >
-                          {isProcessing ? <CircularProgress size={24} /> : '승인'}
-                        </Button>
-                      </Box>
                     </Box>
-                  </Grid>
-                )}
+                  </Box>
+                </Grid>
               </Grid>
+            </Box>
+          ) : (
+            <Box sx={{ py: 4, textAlign: 'center' }}>
+              <CircularProgress size={40} sx={{ mb: 2 }} />
+              <Typography variant="body1">정보를 불러오는 중...</Typography>
             </Box>
           )}
         </DialogContent>
