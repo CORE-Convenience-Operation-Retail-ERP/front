@@ -456,7 +456,7 @@ const AnnualLeaveCon = () => {
       })
       .catch(err => {
         console.error('연차 신청 실패:', err);
-        let errorMessage = '연차 신청에 실패했습니다. 다시 시도해주세요.';
+        let errorMessage = '[연차 신청 실패]다시 시도해주세요.';
         
         if (err.response && err.response.data && err.response.data.message) {
           errorMessage = err.response.data.message;
