@@ -14,7 +14,6 @@ import PartTimerSchedulePage from "../pages/store/PartTimerSchedulePage";
 import SalaryPage from "../pages/store/salary/SalaryPage";
 import StatsOrderPage from "../pages/store/StatsOrderPage";
 import StatsSalesPage from "../pages/store/StatsSalesPage";
-import SalesPage from "../pages/store/SalesPage";
 import HeadquartersLayout from '../layouts/HeadquartersLayout';
 import ProductsAllPage from '../pages/headquarters/ProductsAllPage';
 import ProductsDetailPage from '../pages/headquarters/ProductsDetailPage';
@@ -43,6 +42,7 @@ import StockInHistoryPage from '../pages/store/stock/StockInHistoryPage';
 import AdjustLogPage from '../pages/store/stock/AdjustLogPage';
 import OrderHistoryPage from '../pages/store/order/OrderHistoryPage';
 import MySalaryPage from '../pages/headquarters/MySalaryPage';
+import TransactionPage from '../pages/store/TransactionPage';
 
 const AppRoutes = () => {
   return (
@@ -94,9 +94,9 @@ const AppRoutes = () => {
         <Route path="hr/salary" element={<SalaryPage/>} />
         <Route path="hr/schedule" element={<PartTimerSchedulePage/>} />
         <Route path="hr/salary/:id/detail" element={<SalaryBreakdownPage/>} />
-        <Route path="sales" element={<SalesPage/>} />
         <Route path="stats/order" element={<StatsOrderPage/>} />
         <Route path="stats/sales" element={<StatsSalesPage/>} />
+        <Route path="transactions" element={<TransactionPage />} />
       </Route>
 
       {/* 기본 리다이렉트 */}
