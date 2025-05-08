@@ -1,11 +1,12 @@
 import axios from "../axiosInstance";
 
 // 1. 재고 현황 조회
-export const fetchStoreStockList = async ({ categoryId, productName, page = 0, size = 10 }) => {
+export const fetchStoreStockList = async ({ categoryId, productName, barcode, page = 0, size = 10 }) => {
   return await axios.get("/api/store-stock", {
     params: {
       categoryId,
       productName,
+      barcode,
       page,
       size
     }

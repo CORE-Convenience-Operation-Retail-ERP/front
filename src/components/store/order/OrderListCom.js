@@ -41,7 +41,7 @@ function OrderListCom({ orderList, onRowClick, getOrderStatusLabel, onEditClick,
             </OrderTd>
             <OrderTd>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {order.orderStatus === 0 || userRole === "ROLE_HQ" && (
+                {order.orderStatus === 0  && (
                     <Btn onClick={() => onEditClick(order.orderId)}>수정</Btn>
                 )}
                 {userRole === "ROLE_HQ" && (
