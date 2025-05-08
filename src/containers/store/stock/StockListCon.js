@@ -3,43 +3,55 @@ import StockListCom from '../../../components/store/stock/StockListCom';
 import { fetchStoreStockList } from '../../../service/store/StockService';
 
 function StockListCon() {
-    const [filters, setFilters] = useState({
-        categoryId: '',
-        productName: '',
-        barcode: ''
-    });
-    const [stockList, setStockList] = useState([]);
-    const [page, setPage] = useState(0);
+  const [stockList, setStockList] = useState([]);
+  const [searchParams, setSearchParams] = useState({
+    categoryId: null,
+    productName: '',
+    barcode: '',
+    page: 0,
+    size: 10,
+  });
+  const [totalPages, setTotalPages] = useState(0);
 
-    const loadStockList = async () => {
-        const res = await fetchStoreStockList({ ...filters, page });
-        setStockList(res.data.content); // Page 객체 기준
-    };
+  useEffect(() => {
+    loadStockList();
+  }, [searchParams]);
 
-    useEffect(() => {
-        loadStockList();
-    }, [page]);
+  const loadStockList = async () => {
+    try {
+      const response = await fetchStoreStockList(searchParams);
+      setStockList(response.data.content);
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.error('재고 목록 조회 실패:', error);
+    }
+  };
 
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilters(prev => ({ ...prev, [name]: value }));
-    };
+  const handleSearchChange = (name, value) => {
+    setSearchParams(prev => ({
+      ...prev,
+      [name]: value,
+      page: 0,
+    }));
+  };
 
-    const handleSearch = () => {
-        setPage(0); // 검색 시 첫 페이지로
-        loadStockList();
-    };
+  const onPageChange = (newPage) => {
+    setSearchParams(prev => ({
+      ...prev,
+      page: newPage,
+    }));
+  };
 
-    return (
-        <>
-            <StockListCom
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onSearchClick={handleSearch}
-            />
-            {/* stockList 테이블 출력은 여기 추가 */}
-        </>
-    );
+  return (
+    <StockListCom
+      stockList={stockList}
+      searchParams={searchParams}
+      onSearchChange={handleSearchChange}
+      currentPage={searchParams.page}
+      totalPages={totalPages}
+      onPageChange={onPageChange}
+    />
+  );
 }
 
 export default StockListCon;
