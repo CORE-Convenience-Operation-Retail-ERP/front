@@ -16,7 +16,7 @@ import {
   Alert
 } from '@mui/material';
 
-const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, employeeType }) => {
+const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading, error, employeeType }) => {
   // 초기 상태 설정
   const [formData, setFormData] = useState({
     empId: '',
@@ -29,7 +29,10 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, 
     hireDate: '',
     empImg: null,
     empAddr: '',
-    storeTel: ''
+    storeTel: '',
+    empBank: 0,      // 은행 정보 추가
+    empAcount: '',   // 계좌번호 추가
+    storeId: null    // 지점 ID 추가
   });
 
   // employee prop이 변경될 때 formData 업데이트
@@ -68,7 +71,10 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, 
         hireDate: employee.hireDate || '',
         empImg: employee.empImg || null,
         empAddr: employee.empAddr || '',
-        storeTel: employee.storeTel || ''
+        storeTel: employee.storeTel || '',
+        empBank: employee.empBank || 0,
+        empAcount: employee.empAcount || '',
+        storeId: employee.storeId || null
       });
     }
   }, [employee]);
@@ -79,6 +85,34 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, 
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  // 계좌번호 입력 처리 (하이픈 자동 추가)
+  const handleAccountChange = (e) => {
+    let value = e.target.value;
+    
+    // 숫자와 하이픈만 허용
+    value = value.replace(/[^0-9-]/g, '');
+    
+    // 하이픈 제거 후 숫자만 추출
+    const numbers = value.replace(/-/g, '');
+    
+    // 계좌번호 포맷팅 (하이픈 자동 추가)
+    let formattedValue = '';
+    if (numbers.length <= 4) {
+      formattedValue = numbers;
+    } else if (numbers.length <= 8) {
+      formattedValue = `${numbers.substring(0, 4)}-${numbers.substring(4)}`;
+    } else if (numbers.length <= 12) {
+      formattedValue = `${numbers.substring(0, 4)}-${numbers.substring(4, 8)}-${numbers.substring(8)}`;
+    } else {
+      formattedValue = `${numbers.substring(0, 4)}-${numbers.substring(4, 8)}-${numbers.substring(8, 12)}-${numbers.substring(12)}`;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      empAcount: formattedValue
     }));
   };
 
@@ -261,6 +295,7 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, 
                     <MenuItem value="재직">재직</MenuItem>
                     <MenuItem value="휴직">휴직</MenuItem>
                     <MenuItem value="퇴사">퇴사</MenuItem>
+                    <MenuItem value="미승인">미승인</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -360,6 +395,123 @@ const EmployeeManagementCom = ({ employee, departments, onSave, loading, error, 
                 />
               </Grid>
             </Grid>
+
+            <Divider sx={{ my: 3 }} />
+
+            {/* 급여 계좌 정보 섹션 추가 */}
+            <Typography 
+              variant="subtitle1" 
+              sx={{ 
+                fontWeight: 'bold', 
+                mb: 2,
+                color: '#2563A6'
+              }}
+            >
+              급여 계좌 정보
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>급여 은행</InputLabel>
+                  <Select
+                    name="empBank"
+                    value={formData.empBank || 0}
+                    label="급여 은행"
+                    onChange={handleChange}
+                  >
+                    <MenuItem value={0}>선택 안함</MenuItem>
+                    <MenuItem value={1}>국민은행</MenuItem>
+                    <MenuItem value={2}>하나은행</MenuItem>
+                    <MenuItem value={3}>신한은행</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="계좌번호"
+                  name="empAcount"
+                  value={formData.empAcount}
+                  onChange={handleAccountChange}
+                  variant="outlined"
+                  size="small"
+                  placeholder="0000-0000-0000"
+                  disabled={formData.empBank === 0}
+                  inputProps={{
+                    maxLength: 20
+                  }}
+                />
+              </Grid>
+            </Grid>
+
+            {/* 점주일 경우 지점 정보 섹션 추가 */}
+            {employeeType === '점주' && (() => {
+                // 이미 지점이 할당되었는지 여부를 명확하게 확인
+                const isStoreAlreadyAssigned = employee && employee.storeId && employee.storeId > 0;
+                
+                console.log('지점 할당 여부 확인:', isStoreAlreadyAssigned, 
+                  '(employee:', employee, 
+                  ', storeId:', employee?.storeId, 
+                  ', storeName:', employee?.storeName, ')');
+
+                return (
+                  <>
+                    <Divider sx={{ my: 3 }} />
+                    <Typography 
+                      variant="subtitle1" 
+                      sx={{ 
+                        fontWeight: 'bold', 
+                        mb: 2,
+                        color: '#2563A6'
+                      }}
+                    >
+                      지점 정보
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        {isStoreAlreadyAssigned ? (
+                          // 이미 지점이 할당된 점주인 경우 지점 정보 표시 (수정 불가)
+                          <TextField
+                            fullWidth
+                            label="지점명"
+                            value={employee.storeName || ''}
+                            variant="outlined"
+                            size="small"
+                            disabled
+                            helperText="이미 지점이 할당되어 있습니다."
+                          />
+                        ) : (
+                          // 지점이 할당되지 않은 경우만 드롭다운으로 선택 가능
+                          <FormControl fullWidth size="small">
+                            <InputLabel>지점 선택</InputLabel>
+                            <Select
+                              name="storeId"
+                              value={formData.storeId || ''}
+                              label="지점 선택"
+                              onChange={handleChange}
+                            >
+                              <MenuItem value="">
+                                <em>지점 미지정</em>
+                              </MenuItem>
+                              {stores?.length > 0 ? 
+                                stores.map(store => (
+                                  <MenuItem key={store.storeId} value={store.storeId}>
+                                    {store.storeName}
+                                  </MenuItem>
+                                )) : 
+                                <MenuItem disabled value="">
+                                  <em>지점 목록이 없습니다</em>
+                                </MenuItem>
+                              }
+                            </Select>
+                          </FormControl>
+                        )}
+                      </Grid>
+                    </Grid>
+                  </>
+                );
+              })()
+            }
 
             <Divider sx={{ my: 3 }} />
 

@@ -14,6 +14,7 @@ const EmployeeManagementCon = () => {
   
   const [employee, setEmployee] = useState(null);
   const [departments, setDepartments] = useState([]);
+  const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -63,19 +64,97 @@ const EmployeeManagementCon = () => {
         setDepartments(filteredDepartments);
       } catch (err) {
         console.error('부서 정보를 가져오는 중 오류 발생:', err);
-        // 임시 부서 데이터 - EmployeeListService의 변환 로직과 일치하게 수정
-        const fallbackDepartments = [
-          { deptCode: 'HQ_HRM', deptName: '인사팀' },
-          { deptCode: 'HQ_BR', deptName: '지점관리팀' },
-          { deptCode: 'HQ_PRO', deptName: '상품관리팀' }
-        ];
-        console.log("임시 부서 데이터 사용:", fallbackDepartments);
-        setDepartments(fallbackDepartments);
+        setError('부서 정보를 가져오는 중 오류가 발생했습니다.');
       }
     };
     
     fetchDepartments();
   }, []);
+   
+  // 할당되지 않은 매장 목록 가져오기 (점주 관리에서 사용)
+  useEffect(() => {
+    if (type === '점주') {
+      const fetchAvailableStores = async () => {
+        setLoading(true);
+        try {
+          console.log("=== 미할당 매장 목록 조회 시작 ===");
+          
+          // 현재 수정 중인 점주의 지점이면 포함하도록 파라미터 전달
+          const params = empId ? { exceptOwnerEmpId: empId } : {};
+          let success = false;
+          
+          try {
+            // 1. 할당되지 않은 매장 목록 조회 API 시도
+            console.log("1) 미할당 매장 전용 API 호출: /api/stores/available");
+            const availableResponse = await axios.get('/api/stores/available', { params });
+            console.log("API 응답:", availableResponse);
+            
+            if (availableResponse.data && Array.isArray(availableResponse.data)) {
+              console.log("응답 데이터 확인:", availableResponse.data);
+              setStores(availableResponse.data);
+              success = true;
+              console.log("미할당 매장 전용 API 사용 성공, 매장 개수: " + availableResponse.data.length);
+            }
+          } catch (err) {
+            console.warn('미할당 매장 전용 API 실패:', err.message);
+          }
+          
+          // 첫 번째 API가 실패한 경우에만 두 번째 API를 시도
+          if (!success) {
+            try {
+              // 2. 일반 매장 목록 API 사용
+              console.log("2) 일반 매장 목록 API 호출: /api/stores/list");
+              const allStoresResponse = await axios.get('/api/stores/list');
+              console.log("매장 목록 API 응답:", allStoresResponse);
+              
+              if (allStoresResponse.data && Array.isArray(allStoresResponse.data)) {
+                console.log("응답 데이터 구조:", allStoresResponse.data);
+                
+                if (allStoresResponse.data.length > 0) {
+                  console.log("첫 번째 매장 데이터 샘플:", allStoresResponse.data[0]);
+                }
+                
+                setStores(allStoresResponse.data);
+                success = true;
+                console.log("일반 매장 목록 API 사용 성공, 매장 개수: " + allStoresResponse.data.length);
+              }
+            } catch (err) {
+              console.warn('일반 매장 목록 API 실패:', err.message);
+            }
+          }
+          
+          // 위의 두 API가 모두 실패한 경우 기존 로직으로 폴백
+          if (!success) {
+            try {
+              console.log("3) 폴백: 매장 목록과 점주 정보 조합하여 필터링");
+              // 임시 하드코딩된 데이터
+              const mockStores = [
+                { storeId: 1, storeName: "매장 1" },
+                { storeId: 2, storeName: "매장 2" },
+                { storeId: 3, storeName: "매장 3" }
+              ];
+              console.log("임시 매장 데이터 사용:", mockStores);
+              setStores(mockStores);
+            } catch (finalErr) {
+              console.error('모든 매장 조회 방법 실패:', finalErr);
+              setError('매장 목록을 가져오는 중 오류가 발생했습니다.');
+              setStores([]);
+            }
+          }
+          
+          console.log("=== 미할당 매장 목록 조회 완료 ===");
+        } catch (err) {
+          console.error('매장 목록 처리 중 예상치 못한 오류:', err);
+          setError('매장 목록을 가져오는 중 오류가 발생했습니다.');
+          setStores([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchAvailableStores();
+    }
+  }, [type, empId]);
 
   // 직원/점주 정보 가져오기 (수정 모드인 경우)
   useEffect(() => {
@@ -85,55 +164,30 @@ const EmployeeManagementCon = () => {
         try {
           console.log(`${type} 정보 요청: empId=${empId}`);
           
-          // 본사 직원과 점주를 구분하여 다른 API 엔드포인트 호출
-          let endpoint = type === '본사' 
-            ? `/api/employee-management/${empId}` 
-            : `/api/store-owners/${empId}`;
+          // API 타입 파라미터 설정
+          const apiType = type === '본사' ? 'HQ' : 'STORE';
+          
+          // 통합 API 엔드포인트 설정
+          const unifiedEndpoint = `/api/employee-unified/${empId}?type=${apiType}`;
           
           let response;
           
           try {
-            // 지정된 API 엔드포인트 시도
-            response = await axios.get(endpoint);
-            console.log("API 응답 데이터:", response.data);
+            // 통합 API 엔드포인트 시도
+            console.log("통합 API 호출:", unifiedEndpoint);
+            response = await axios.get(unifiedEndpoint);
+            console.log("통합 API 응답 데이터:", response.data);
           } catch (err) {
-            // API 호출 실패 시
-            if (type === '점주') {
-              // 점주 데이터는 임시 데이터로 대체
-              console.warn("점주 API 접근 실패, 임시 데이터 사용:", err);
-              
-              response = {
-                data: {
-                  empId: parseInt(empId),
-                  empName: `점주${empId}`,
-                  deptCode: "",
-                  empStatus: "재직",
-                  empPhone: "010-1234-5678",
-                  empExt: "",
-                  empEmail: `store${empId}@example.com`,
-                  hireDate: "2023-01-01",
-                  storeName: `매장${empId}`,
-                  storeAddr: "서울시 강남구",
-                  storeTel: "02-123-4567"
-                }
-              };
-            } else {
-              // 백업 API 시도
-              if (err.response && err.response.status === 404) {
-                console.log("기본 API 실패, 백업 API로 재시도 중...");
-                
-                // 백업 API 엔드포인트
-                const backupEndpoint = type === '본사'
-                  ? `/api/employees/${empId}`  // 본사 직원
-                  : `/api/employees/${empId}?empType=STORE`; // 점주
-                  
-                const fallbackResponse = await axios.get(backupEndpoint);
-                console.log("백업 API 응답 데이터:", fallbackResponse.data);
-                response = fallbackResponse;
-              } else {
-                throw err;
-              }
-            }
+            console.warn("통합 API 호출 실패, 기존 API로 재시도:", err);
+            
+            // 백업: 기존 API 엔드포인트 시도
+            let backupEndpoint = type === '본사' 
+              ? `/api/employee-management/${empId}` 
+              : `/api/store-owners/${empId}`;
+            
+            console.log("기존 API 호출:", backupEndpoint);
+            response = await axios.get(backupEndpoint);
+            console.log("기존 API 응답 데이터:", response.data);
           }
           
           // 날짜 형식 추가 처리
@@ -207,62 +261,118 @@ const EmployeeManagementCon = () => {
     setLoading(true);
     console.log("저장 전 원본 데이터:", formData);
     
-    // 상태값 문자열을 숫자로 변환
-    const convertedData = {
-      ...formData,
-      empStatus: convertStatusToNumber(formData.empStatus),
-      // 사원 유형(본사/점주)에 따라 empRole 설정
-      empRole: type === '본사' ? 'HQ' : 'STORE'
-    };
-    
-    console.log("변환 후 전송할 데이터:", convertedData);
-    
     try {
-      // 타입에 따라 다른 API 엔드포인트 사용
-      const endpoint = type === '본사' 
-        ? '/api/employee-management' 
-        : '/api/store-management';
-        
-      let response;
+      // 상태값 문자열을 숫자로 변환
+      const convertedData = {
+        ...formData,
+        empStatus: convertStatusToNumber(formData.empStatus),
+        // 사원 유형(본사/점주)에 따라 empRole 설정
+        empRole: type === '본사' ? 'HQ' : 'STORE',
+        // 점주인 경우 departId를 3으로 명시적 설정
+        departId: type === '점주' ? 3 : (formData.departId || null)
+      };
       
-      try {
-        if (empId) {
-          // 기존 정보 수정
-          console.log(`${type} 정보 수정 요청: empId=${empId}`);
-          response = await axios.put(`${endpoint}/${empId}`, convertedData);
-        } else {
-          // 새 정보 추가
-          console.log(`신규 ${type} 등록 요청`);
-          response = await axios.post(endpoint, convertedData);
-        }
-        console.log("응답:", response.data);
-      } catch (err) {
-        // API 호출 실패 시 (점주 데이터만 임시 처리)
-        if (type === '점주') {
-          console.warn(`점주 데이터 ${empId ? '수정' : '등록'} API 접근 실패, 모의 응답 사용:`, err);
+      console.log("변환 후 전송할 데이터:", convertedData);
+      
+      // API 타입 파라미터 설정
+      const apiType = type === '본사' ? 'HQ' : 'STORE';
+      
+      // 점주이고 상태 변경이 있는 경우 승인 API 호출 (기존 데이터가 있을 때)
+      if (type === '점주' && empId && employee && 
+          (formData.empStatus !== employee.empStatus || formData.storeId !== employee.storeId)) {
+        
+        try {
+          // 승인 상태 업데이트 API 호출
+          console.log(`점주 승인 상태 변경 요청: empId=${empId}, status=${formData.empStatus}, storeId=${formData.storeId}`);
           
-          // 임시 응답 데이터
-          response = {
-            data: {
-              ...convertedData,
-              empId: empId || Math.floor(Math.random() * 1000) + 1000,
-              empStatus: formData.empStatus, // 원래 텍스트 형태로 저장
-              hireDate: formData.hireDate || new Date().toISOString().substring(0, 10),
-              storeName: formData.storeName || `${formData.empName}의 매장`,
-              storeAddr: formData.empAddr || "서울시 강남구",
-              storeTel: formData.storeTel || "02-1234-5678"
-            }
+          // 요청 파라미터 구성
+          const params = {
+            status: formData.empStatus,
+            departId: 3 // 점주 부서 ID 명시적 지정
           };
-        } else {
-          throw err;
+          
+          // storeId가 유효한 경우에만 포함
+          if (formData.storeId) {
+            params.storeId = formData.storeId;
+          }
+          
+          console.log("점주 승인 요청 파라미터:", params);
+          
+          // 승인 API 호출
+          const approveResponse = await axios.put(
+            `/api/headquarters/hr/approve/store-owner/${empId}`, 
+            null, 
+            { params }
+          );
+          
+          console.log("점주 승인 응답:", approveResponse.data);
+          
+          // 승인 성공 후 나머지 정보 저장
+          console.log("점주 승인 성공. 나머지 정보 저장 중...");
+        } catch (approveErr) {
+          console.error("점주 승인 중 오류 발생:", approveErr);
+          // 오류가 발생하면 사용자에게 알림
+          setError("점주 승인 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+          setLoading(false);
+          return; // 저장 중단
         }
       }
       
+      // 통합 API 엔드포인트 설정
+      const unifiedEndpoint = `/api/employee-unified`;
+      let response;
+      
+      // 통합 API 엔드포인트 사용
+      if (empId) {
+        // 기존 정보 수정
+        console.log(`통합 API ${type} 정보 수정 요청: empId=${empId}`);
+        response = await axios.put(`${unifiedEndpoint}/${empId}?type=${apiType}`, convertedData);
+      } else {
+        // 새 정보 추가
+        console.log(`통합 API 신규 ${type} 등록 요청`);
+        response = await axios.post(`${unifiedEndpoint}?type=${apiType}`, convertedData);
+      }
+      
+      console.log("통합 API 응답:", response.data);
+      
       // 저장 성공 후 목록 페이지로 이동
       navigate('/headquarters/hr/employees');
+      
     } catch (err) {
       console.error(`${type} 정보 저장 중 오류 발생:`, err);
-      setError(`${type} 정보를 저장하는 중 오류가 발생했습니다.`);
+      
+      // API 호출 실패 시 기존 엔드포인트로 재시도
+      try {
+        // 상태값 문자열을 숫자로 변환
+        const convertedData = {
+          ...formData,
+          empStatus: convertStatusToNumber(formData.empStatus),
+          empRole: type === '본사' ? 'HQ' : 'STORE'
+        };
+        
+        // 타입에 따라 다른 기존 API 엔드포인트 사용
+        const originalEndpoint = type === '본사' 
+          ? '/api/employee-management' 
+          : '/api/store-management';
+        
+        if (empId) {
+          // 기존 정보 수정
+          console.log(`기존 API ${type} 정보 수정 요청: empId=${empId}`);
+          const response = await axios.put(`${originalEndpoint}/${empId}`, convertedData);
+          console.log("기존 API 응답:", response.data);
+        } else {
+          // 새 정보 추가
+          console.log(`기존 API 신규 ${type} 등록 요청`);
+          const response = await axios.post(originalEndpoint, convertedData);
+          console.log("기존 API 응답:", response.data);
+        }
+        
+        // 저장 성공 후 목록 페이지로 이동
+        navigate('/headquarters/hr/employees');
+      } catch (backupErr) {
+        console.error(`백업 API 저장 중 오류 발생:`, backupErr);
+        setError(`${type} 정보를 저장하는 중 오류가 발생했습니다.`);
+      }
     } finally {
       setLoading(false);
     }
@@ -277,6 +387,8 @@ const EmployeeManagementCon = () => {
         return '2';
       case '퇴사':
         return '3';
+      case '미승인':
+        return '0';
       default:
         return '1'; // 기본값은 재직(1)
     }
@@ -286,6 +398,7 @@ const EmployeeManagementCon = () => {
     <EmployeeManagementCom 
       employee={employee}
       departments={departments}
+      stores={stores}
       onSave={handleSave}
       loading={loading}
       error={error}

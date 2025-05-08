@@ -441,10 +441,10 @@ const MyCon = forwardRef(({ info, type }, ref) => {
               </Box>
             </Grid>
             <Grid item xs={6} sm={4}>
-              <Box>
+          <Box>
                 <Typography variant="caption" color="text.secondary">결근</Typography>
                 <Typography variant="h6" fontWeight="medium">{absentDays}일</Typography>
-              </Box>
+          </Box>
             </Grid>
           </Grid>
           
@@ -562,7 +562,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
       >
         <DialogTitle id="alert-dialog-title" sx={{ 
           display: 'flex', 
-          alignItems: 'center',
+          alignItems: 'center', 
           pb: 1,
           color: dialog.titleColor || '#1EACB5',
           fontWeight: 'bold',
@@ -608,7 +608,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
             onClick={dialog.onConfirm} 
             variant="contained"
             autoFocus
-            sx={{
+            sx={{ 
               backgroundColor: dialog.buttonColor || '#015D70',
               color: '#ffffff',
               borderRadius: '8px',
@@ -634,7 +634,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
       elevation={3} 
       sx={{ 
         borderRadius: 2, 
-        p: 3,
+        p: 3, 
         mb: 3
       }}
     >
@@ -646,7 +646,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <PaymentsIcon sx={{ color: '#2563A6', mr: 1 }} />
-          <Typography variant="h6" fontWeight="bold">급여 내역</Typography>
+        <Typography variant="h6" fontWeight="bold">급여 내역</Typography>
         </Box>
         <Button
           variant="outlined"
@@ -661,13 +661,13 @@ const MyCon = forwardRef(({ info, type }, ref) => {
       
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
-          <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 2 }}>
             <Typography variant="caption" color="text.secondary">급여일</Typography>
             <Typography variant="h6" fontWeight="medium">{info?.salaryDay || '-'}</Typography>
-          </Box>
+        </Box>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Box>
+        <Box>
             <Typography variant="caption" color="text.secondary">계좌/은행</Typography>
             <Typography variant="h6" fontWeight="medium">
               {info?.accountInfo || '-'}
@@ -675,7 +675,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
           </Box>
         </Grid>
       </Grid>
-    </Paper>
+      </Paper>
   );
   
   return (
