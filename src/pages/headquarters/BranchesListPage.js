@@ -1,10 +1,12 @@
 import React from 'react';
+import BranchesListCon from '../../containers/headquarters/BranchesListCon';
 
-const BranchesListPage = () => (
-  <div>
-    <h2>지점 목록</h2>
-    <p>여기는 지점 목록 페이지입니다.</p>
-  </div>
-);
+const BranchesListPage = () => {
+  return (
+    <div>
+      <BranchesListCon />
+    </div>
+  );
+};
 
 export default BranchesListPage; 

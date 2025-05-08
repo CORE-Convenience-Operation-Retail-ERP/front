@@ -25,6 +25,7 @@ import EmployeeManagementPage from '../pages/headquarters/EmployeeManagementPage
 import MyPage from '../pages/headquarters/MyPage';
 import AnnualLeavePage from '../pages/headquarters/AnnualLeavePage';
 import BranchesListPage from '../pages/headquarters/BranchesListPage';
+import BranchFormPage from '../pages/headquarters/BranchFormPage';
 import BranchesManagementPage from '../pages/headquarters/BranchesManagementPage';
 import BranchesSalesAnalysisPage from '../pages/headquarters/BranchesSalesAnalysisPage';
 import BranchesStockMonitoringPage from '../pages/headquarters/BranchesStockMonitoringPage';
@@ -60,6 +61,8 @@ const AppRoutes = () => {
         <Route path="hr/my-salary" element={<MySalaryPage />} />
         <Route path="hr/annual-leave" element={<AnnualLeavePage />} />
         <Route path="branches/list" element={<BranchesListPage />} />
+        <Route path="branches/add" element={<BranchFormPage />} />
+        <Route path="branches/edit/:storeId" element={<BranchFormPage />} />
         <Route path="branches/management" element={<BranchesManagementPage />} />
         <Route path="branches/sales-analysis" element={<BranchesSalesAnalysisPage />} />
         <Route path="branches/stock-monitering" element={<BranchesStockMonitoringPage />} />
