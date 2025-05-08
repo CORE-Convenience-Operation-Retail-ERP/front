@@ -7,7 +7,7 @@ import StoreLayout from "../layouts/StoreLayout";
 import HomePage from "../pages/store/HomePage";
 import StockAdjusPage from "../pages/store/stock/StockAdjustPage";
 import DisposalPage from "../pages/store/disposal/DisposalPage";
-import OrderRegisterPage from "../pages/store/order/OrderRegisterPage";
+import OrderFormPage from "../pages/store/order/OrderFormPage";
 import OrderListPage from "../pages/store/order/OrderListPage";
 import PartTimerPage from "../pages/store/partTimer/PartTimerPage";
 import PartTimerSchedulePage from "../pages/store/PartTimerSchedulePage";
@@ -43,7 +43,6 @@ import StockInHistoryPage from '../pages/store/stock/StockInHistoryPage';
 import AdjustLogPage from '../pages/store/stock/AdjustLogPage';
 import OrderHistoryPage from '../pages/store/order/OrderHistoryPage';
 import MySalaryPage from '../pages/headquarters/MySalaryPage';
-import OrederUpdatePage from '../pages/store/order/OrderUpdatePage';
 
 const AppRoutes = () => {
   return (
@@ -84,10 +83,10 @@ const AppRoutes = () => {
         <Route path="stock/manual-adjust" element={<StockAdjusPage/>} />  
         <Route path="stock/adjust-log" element={<AdjustLogPage/>} />       
         <Route path="inventory/disposal" element={<DisposalPage/>} />
-        <Route path="order/register" element={<OrderRegisterPage/>} />
+        <Route path="order/register" element={<OrderFormPage/>} />
         <Route path="order/list" element={<OrderListPage/>} />
         <Route path="order/detail/:id" element={<OrderHistoryPage/>} />
-        <Route path="order/update/:id" element={<OrederUpdatePage/>} />
+        <Route path="order/update/:id" element={<OrderFormPage/>} />
         <Route path="parttimer/list" element={<PartTimerPage/>} />
         <Route path="parttimer/register" element={<ParttimerRegisterPage/>} />
         <Route path="parttimer/:id" element={<PartTimerOnePage/>} />

@@ -7,7 +7,8 @@ import {
   Btn,
 } from '../../../features/store/styles/order/Order.styled';
 
-function OrderListCom({ orderList, onRowClick, getOrderStatusLabel, onEditClick }) {
+function OrderListCom({ orderList, onRowClick, getOrderStatusLabel, onEditClick, onDeleteClick,onCancleClick }) {
+  const userRole = localStorage.getItem("role");
   return (
     <OrderTable>
       <OrderHead>
@@ -17,7 +18,7 @@ function OrderListCom({ orderList, onRowClick, getOrderStatusLabel, onEditClick 
           <OrderTh>총 금액</OrderTh>
           <OrderTh>입고 일자</OrderTh>
           <OrderTh>상태</OrderTh>
-          <OrderTh>수정</OrderTh>
+          <OrderTh></OrderTh>
         </tr>
       </OrderHead>
       <tbody>
@@ -39,9 +40,17 @@ function OrderListCom({ orderList, onRowClick, getOrderStatusLabel, onEditClick 
               {getOrderStatusLabel(order.orderStatus)}
             </OrderTd>
             <OrderTd>
-              {order.orderStatus !== 1 && (
-                <Btn onClick={() => onEditClick(order.orderId)}>수정</Btn>
-              )}
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {order.orderStatus === 0 || userRole === "ROLE_HQ" && (
+                    <Btn onClick={() => onEditClick(order.orderId)}>수정</Btn>
+                )}
+                {userRole === "ROLE_HQ" && (
+                    <Btn onClick={() => onCancleClick(order.orderId)}>취소</Btn>
+                )}
+                {order.orderStatus === 0 && userRole === "ROLE_STORE" && (
+                    <Btn onClick={() => onDeleteClick(order.orderId)}>삭제</Btn>
+                )}
+              </div>
             </OrderTd>
           </tr>
         ))}
