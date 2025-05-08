@@ -13,7 +13,8 @@ import {
   Divider,
   Avatar,
   CircularProgress,
-  Alert
+  Alert,
+  FormHelperText
 } from '@mui/material';
 
 const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading, error, employeeType }) => {
@@ -447,12 +448,17 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
             {/* 점주일 경우 지점 정보 섹션 추가 */}
             {employeeType === '점주' && (() => {
                 // 이미 지점이 할당되었는지 여부를 명확하게 확인
-                const isStoreAlreadyAssigned = employee && employee.storeId && employee.storeId > 0;
+                // employee나 formData에서 storeId가 있는지 확인
+                const isStoreAlreadyAssigned = 
+                  (employee && employee.storeId && employee.storeId > 0) || 
+                  (formData.storeId && formData.storeId > 0);
                 
-                console.log('지점 할당 여부 확인:', isStoreAlreadyAssigned, 
-                  '(employee:', employee, 
-                  ', storeId:', employee?.storeId, 
-                  ', storeName:', employee?.storeName, ')');
+                console.log('점주 지점 할당 정보:', {
+                  employeeStoreId: employee?.storeId, 
+                  employeeStoreName: employee?.storeName,
+                  formDataStoreId: formData.storeId,
+                  isStoreAlreadyAssigned: isStoreAlreadyAssigned
+                });
 
                 return (
                   <>
@@ -474,11 +480,11 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
                           <TextField
                             fullWidth
                             label="지점명"
-                            value={employee.storeName || ''}
+                            value={employee?.storeName || formData.storeName || '(지정된 지점)'}
                             variant="outlined"
                             size="small"
                             disabled
-                            helperText="이미 지점이 할당되어 있습니다."
+                            helperText={`매장 ID: ${employee?.storeId || formData.storeId || '알 수 없음'} - 이 점주에게 매장이 할당되어 있습니다.`}
                           />
                         ) : (
                           // 지점이 할당되지 않은 경우만 드롭다운으로 선택 가능
@@ -499,11 +505,12 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
                                     {store.storeName}
                                   </MenuItem>
                                 )) : 
-                                <MenuItem disabled value="">
-                                  <em>지점 목록이 없습니다</em>
-                                </MenuItem>
+                                <MenuItem disabled>가용 지점이 없습니다</MenuItem>
                               }
                             </Select>
+                            <FormHelperText>
+                              {stores?.length > 0 ? '할당할 지점을 선택하세요' : '현재 할당 가능한 지점이 없습니다'}
+                            </FormHelperText>
                           </FormControl>
                         )}
                       </Grid>
