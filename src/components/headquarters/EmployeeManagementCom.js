@@ -447,18 +447,10 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
 
             {/* 점주일 경우 지점 정보 섹션 추가 */}
             {employeeType === '점주' && (() => {
-                // 이미 지점이 할당되었는지 여부를 명확하게 확인
-                // employee나 formData에서 storeId가 있는지 확인
+                // 이미 지점이 할당되었는지 여부 확인
                 const isStoreAlreadyAssigned = 
                   (employee && employee.storeId && employee.storeId > 0) || 
                   (formData.storeId && formData.storeId > 0);
-                
-                console.log('점주 지점 할당 정보:', {
-                  employeeStoreId: employee?.storeId, 
-                  employeeStoreName: employee?.storeName,
-                  formDataStoreId: formData.storeId,
-                  isStoreAlreadyAssigned: isStoreAlreadyAssigned
-                });
 
                 return (
                   <>

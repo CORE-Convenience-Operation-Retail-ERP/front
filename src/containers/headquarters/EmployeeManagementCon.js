@@ -274,17 +274,11 @@ const EmployeeManagementCon = () => {
       
       console.log("변환 후 전송할 데이터:", convertedData);
       
-      // API 타입 파라미터 설정
-      const apiType = type === '본사' ? 'HQ' : 'STORE';
-      
       // 점주이고 상태 변경이 있는 경우 승인 API 호출 (기존 데이터가 있을 때)
       if (type === '점주' && empId && employee && 
           (formData.empStatus !== employee.empStatus || formData.storeId !== employee.storeId)) {
         
         try {
-          // 승인 상태 업데이트 API 호출
-          console.log(`점주 승인 상태 변경 요청: empId=${empId}, status=${formData.empStatus}, storeId=${formData.storeId}`);
-          
           // 요청 파라미터 구성
           const params = {
             status: formData.empStatus,
@@ -296,8 +290,6 @@ const EmployeeManagementCon = () => {
             params.storeId = formData.storeId;
           }
           
-          console.log("점주 승인 요청 파라미터:", params);
-          
           // 승인 API 호출
           const approveResponse = await axios.put(
             `/api/headquarters/hr/approve/store-owner/${empId}`, 
@@ -305,10 +297,8 @@ const EmployeeManagementCon = () => {
             { params }
           );
           
-          console.log("점주 승인 응답:", approveResponse.data);
-          
           // 승인 성공 후 나머지 정보 저장
-          console.log("점주 승인 성공. 나머지 정보 저장 중...");
+          console.log("점주 승인 성공");
         } catch (approveErr) {
           console.error("점주 승인 중 오류 발생:", approveErr);
           // 오류가 발생하면 사용자에게 알림
@@ -326,10 +316,14 @@ const EmployeeManagementCon = () => {
       if (empId) {
         // 기존 정보 수정
         console.log(`통합 API ${type} 정보 수정 요청: empId=${empId}`);
+        // API 타입 파라미터 설정 (본사/점주 구분을 위한 필수 파라미터)
+        const apiType = type === '본사' ? 'HQ' : 'STORE';
         response = await axios.put(`${unifiedEndpoint}/${empId}?type=${apiType}`, convertedData);
       } else {
         // 새 정보 추가
         console.log(`통합 API 신규 ${type} 등록 요청`);
+        // API 타입 파라미터 설정 (본사/점주 구분을 위한 필수 파라미터)
+        const apiType = type === '본사' ? 'HQ' : 'STORE';
         response = await axios.post(`${unifiedEndpoint}?type=${apiType}`, convertedData);
       }
       
