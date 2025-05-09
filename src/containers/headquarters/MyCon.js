@@ -23,6 +23,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
   
   // 근태 데이터
   const totalDays = info?.attendanceDays || 0;
+  console.log("MyCon - 근무일수:", totalDays, "원본 데이터:", info?.attendanceDays, "타입:", typeof info?.attendanceDays);
   const lateDays = info?.lateCount || 0;
   const absentDays = info?.absentCount || 0;
   const annualRemain = info?.annualLeaveRemain || 0;

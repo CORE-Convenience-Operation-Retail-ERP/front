@@ -49,6 +49,7 @@ const MyPage = () => {
     axios.get("/api/hr/my-page")
       .then(res => {
         console.log("사용자 정보 응답:", res.data);
+        console.log("근무일수 확인:", res.data.attendanceDays, typeof res.data.attendanceDays);
         setInfo(res.data); 
         setLoading(false);
       })
