@@ -41,3 +41,18 @@ export const Table = styled.table`
     word-break: break-word;
   }
 `;
+
+export const DownloadButton = styled.button`
+  margin: 16px 0;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+
+  &:hover {
+    background-color: #45a049;
+  }
+`;
