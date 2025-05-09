@@ -37,7 +37,7 @@ const menuItems = [
     path: '/headquarters/branches',
     subMenus: [
       { text: '지점 목록', path: '/headquarters/branches/list' },
-      { text: '지점 정보 관리', path: '/headquarters/branches/management' },
+      { text: '지점 문의 관리', path: '/headquarters/branches/inquiry' },
       { text: '지점 매출 분석', path: '/headquarters/branches/sales-analysis' },
       { text: '재고 모니터링', path: '/headquarters/branches/stock-monitering' },
       { text: '지점 통계', path: '/headquarters/branches/statistics' }
@@ -49,8 +49,7 @@ const menuItems = [
     path: '/headquarters/board',
     subMenus: [
       { text: '공지 사항', path: '/headquarters/board/notice' },
-      { text: '건의 사항', path: '/headquarters/board/suggestions' },
-      { text: '점포 문의 사항', path: '/headquarters/board/store-inquiries' }
+      { text: '건의 사항', path: '/headquarters/board/suggestions' }
     ],
     hoverBoxBottom: { bottom: -45, width: 80, height: 25 },
   }
