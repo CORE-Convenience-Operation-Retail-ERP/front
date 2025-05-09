@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import StoreSearchBar from "../../../components/store/common/StoreSerchBar";
+import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import SalaryListCom from "../../../components/store/salary/SalaryListCom";
 import Pagination from "../../../components/store/common/Pagination";
 import {

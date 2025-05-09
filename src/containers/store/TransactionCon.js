@@ -1,28 +1,28 @@
-import React, { useState } from "react";
+import React from 'react';
+import StoreSearchBar from '../../components/store/common/StoreSearchBar';
 
-const TransactionCon = ({ onSearch }) => {
-  const [transactionId, setTransactionId] = useState("");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (transactionId) {
-      onSearch(Number(transactionId));
-      setTransactionId("");
+function TransactionCon({ onSearch }) {
+  const filterOptions = [
+    {
+      key: "transactionId",
+      label: "거래 ID",
+      type: "number",
+      placeholder: "거래 ID 입력"
+    },
+    {
+      key: "paymentMethod",
+      label: "결제수단",
+      type: "select",
+      options: [
+        { value: "CARD", label: "카드" },
+        { value: "CASH", label: "현금" }
+      ]
     }
-  };
+  ];
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
-      <input
-        type="number"
-        placeholder="거래 ID를 입력하세요"
-        value={transactionId}
-        onChange={(e) => setTransactionId(e.target.value)}
-        required
-      />
-      <button type="submit">조회</button>
-    </form>
+    <StoreSearchBar filterOptions={filterOptions} onSearch={onSearch} />
   );
-};
+}
 
 export default TransactionCon;

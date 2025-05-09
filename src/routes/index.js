@@ -96,7 +96,7 @@ const AppRoutes = () => {
         <Route path="hr/salary/:id/detail" element={<SalaryBreakdownPage/>} />
         <Route path="stats/order" element={<StatsOrderPage/>} />
         <Route path="stats/sales" element={<StatsSalesPage/>} />
-        <Route path="transactions" element={<TransactionPage />} />
+        <Route path="sales/transactions" element={<TransactionPage />} />
       </Route>
 
       {/* 기본 리다이렉트 */}

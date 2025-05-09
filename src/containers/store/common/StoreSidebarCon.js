@@ -34,7 +34,12 @@ const sidebarMenus = [
             { name: '급여 관리', path: '/store/hr/salary' },
         ]
     },
-    { name: '매출 관리', path: '/store/transactions', icon: <CreditCardIcon /> },
+    { 
+        name: '매출 관리', icon: <CreditCardIcon />, submenu : [
+            { name: '매출 정산', path: '/store/sales/summary' },
+            { name: '거래 내역', path: '/store/sales/transactions' },
+        ]
+    },
     {
         name: '통계 관리', icon: <BarChartIcon />, submenu: [
             { name: '발주 통계', path: '/store/stats/order' },
