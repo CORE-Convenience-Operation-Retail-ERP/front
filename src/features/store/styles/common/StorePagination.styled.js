@@ -27,12 +27,12 @@ export const PageNumber = styled.button`
   margin: 0 2px;
   border: none;
   border-radius: 4px;
-  background-color: ${({ active }) => (active ? '#007bff' : '#f0f0f0')};
-  color: ${({ active }) => (active ? '#fff' : '#333')};
-  font-weight: ${({ active }) => (active ? 'bold' : 'normal')};
+  background-color: ${({ $active }) => ($active ? '#007bff' : '#f0f0f0')};
+  color: ${({ $active }) => ($active ? '#fff' : '#333')};
+  font-weight: ${({ $active }) => ($active ? 'bold' : 'normal')};
   cursor: pointer;
 
   &:hover {
-    background-color: ${({ active }) => (active ? '#007bff' : '#ddd')};
+    background-color: ${({ $active }) => ($active ? '#007bff' : '#ddd')};
   }
 `;

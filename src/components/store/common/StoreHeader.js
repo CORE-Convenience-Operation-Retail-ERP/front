@@ -28,7 +28,7 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
 
                 {/* Mail */}
                 <IconWrap
-                    hoverbg="#dbeafe" // 연파랑
+                    $hoverbg="#dbeafe" // 연파랑
                     onMouseEnter={() => setHoveredIcon('mail')}
                     onMouseLeave={() => setHoveredIcon(null)}
                 >
@@ -37,7 +37,7 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
 
                 {/* Bell */}
                 <IconWrap
-                    hoverbg="#fef9c3" // 연노랑
+                    $hoverbg="#fef9c3" // 연노랑
                     onMouseEnter={() => setHoveredIcon('bell')}
                     onMouseLeave={() => setHoveredIcon(null)}
                 >
@@ -47,7 +47,7 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
                 {/* 본사 이동 아이콘 (점주만 보임)  */}
                 {userInfo?.workType === 3 && (
                     <IconWrap
-                        hoverbg="#ede9fe" // 연보라
+                        $hoverbg="#ede9fe" // 연보라
                         onMouseEnter={() => setHoveredIcon('hq')}
                         onMouseLeave={() => setHoveredIcon(null)}
                         onClick={() => navigate('/headquarters/dashboard')}
@@ -66,7 +66,7 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
 
                 {/* Logout */}
                 <IconWrap
-                    hoverbg="#ffe4e6" // 연다홍
+                    $hoverbg="#ffe4e6" // 연다홍
                     onMouseEnter={() => setHoveredIcon('logout')}
                     onMouseLeave={() => setHoveredIcon(null)}
                     onClick={onLogout}

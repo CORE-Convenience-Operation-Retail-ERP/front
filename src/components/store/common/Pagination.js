@@ -18,7 +18,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
             {pages.map((page) => (
                 <PageNumber
                     key={page}
-                    active={page === currentPage}
+                    $active={page === currentPage}
                     onClick={() => onPageChange(page)}
                 >
                     {page + 1}

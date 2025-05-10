@@ -17,7 +17,7 @@ export const IconWrap = styled.div`
     background-color: transparent;
 
     &:hover {
-        background-color: ${({ hoverbg }) => hoverbg || '#dbeafe'}; /* 🔥 props로 hoverbg 받음 */
+        background-color: ${({ $hoverbg }) => $hoverbg || '#dbeafe'}; /* 🔥 props로 $hoverbg 받음 */
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         transform: scale(1.05);
     }

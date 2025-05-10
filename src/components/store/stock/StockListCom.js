@@ -1,6 +1,6 @@
 import React from 'react';
 import Pagination from '../common/Pagination';
-import StoreSearchBar from '../../store/common/StoreSerchBar';
+import StoreSearchBar from '../../store/common/StoreSearchBar';
 import * as XLSX from 'xlsx';
 import { Wrapper, Table, DownloadButton } from '../../../features/store/styles/stock/StockList.styled';
 import {SearchWrap} from "../../../features/store/styles/common/StoreSearchBar.styled";

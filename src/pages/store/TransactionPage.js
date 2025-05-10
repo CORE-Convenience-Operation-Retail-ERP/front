@@ -16,9 +16,6 @@ const TransactionPage = () => {
     const storeId = localStorage.getItem("storeId");
     const token = localStorage.getItem("token");
 
-    console.log("🟢 storeId:", storeId);
-    console.log("🟢 accessToken:", token ? token.slice(0, 10) + "..." : "없음");
-
     const loadTransactions = async () => {
       try {
         const data = await fetchTransactionsByStore(storeId);
@@ -33,8 +30,6 @@ const TransactionPage = () => {
             isRefunded: transaction.isRefunded,
           }))
         );
-
-        console.log("📦 전체 거래 데이터:", flat);
 
         setAllTransactions(flat);
         setFilteredTransactions(flat);
@@ -52,8 +47,6 @@ const TransactionPage = () => {
 
   // 검색 처리
   const handleSearch = (params) => {
-    console.log("🔍 검색 파라미터:", params);
-
     const filtered = allTransactions.filter((row) =>
       Object.entries(params).every(([key, value]) => {
         const rowValue = row[key];
@@ -70,7 +63,6 @@ const TransactionPage = () => {
       })
     );
 
-    console.log("✅ 필터링 결과:", filtered);
     setFilteredTransactions(filtered);
     setCurrentPage(1);
   };
@@ -87,7 +79,12 @@ const TransactionPage = () => {
       <TransactionCon onSearch={handleSearch} />
 
       {/* 거래 테이블 */}
-      <TransactionTable rows={currentData} />
+      <TransactionTable 
+        rows={currentData}
+        currentPage={currentPage - 1}
+        totalPages={totalPages}
+        onPageChange={(page) => setCurrentPage(page + 1)}
+      />
 
       {/* 페이지네이션 */}
       <Pagination

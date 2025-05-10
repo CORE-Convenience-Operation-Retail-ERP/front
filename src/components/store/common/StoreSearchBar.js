@@ -14,6 +14,8 @@ function StoreSearchBar({ filterOptions, onSearch }) {
   const selectedOption = filterOptions.find(opt => opt.key === criteria);
 
   const handleSearch = () => {
+    if (!value) return; // 값이 비어있으면 검색하지 않음
+    
     const searchParams = {
       [criteria]: selectedOption.type === 'number' ? Number(value) : value
     };
@@ -37,7 +39,16 @@ function StoreSearchBar({ filterOptions, onSearch }) {
 
       {/* 검색 입력 방식 결정 */}
       {selectedOption.type === 'select' ? (
-        <ValueSelect value={value} onChange={(e) => setValue(e.target.value)}>
+        <ValueSelect 
+          value={value} 
+          onChange={(e) => {
+            setValue(e.target.value);
+            if (e.target.value) { // 값이 선택되면 바로 검색
+              onSearch({ [criteria]: e.target.value });
+            }
+          }}
+        >
+          <option value="">선택하세요</option>
           {selectedOption.options.map(opt => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
@@ -49,7 +60,7 @@ function StoreSearchBar({ filterOptions, onSearch }) {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && value) {
               handleSearch();
             }
           }}
