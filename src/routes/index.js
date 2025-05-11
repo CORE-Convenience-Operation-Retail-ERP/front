@@ -43,6 +43,7 @@ import AdjustLogPage from '../pages/store/stock/AdjustLogPage';
 import OrderHistoryPage from '../pages/store/order/OrderHistoryPage';
 import MySalaryPage from '../pages/headquarters/MySalaryPage';
 import TransactionPage from '../pages/store/TransactionPage';
+import SalesAnalysis from '../pages/headquarters/branches/SalesAnalysis';
 
 const AppRoutes = () => {
   return (
@@ -63,7 +64,7 @@ const AppRoutes = () => {
         <Route path="branches/add" element={<BranchFormPage />} />
         <Route path="branches/edit/:storeId" element={<BranchFormPage />} />
         <Route path="branches/management" element={<BranchesManagementPage />} />
-        <Route path="branches/sales-analysis" element={<BranchesSalesAnalysisPage />} />
+        <Route path="branches/sales-analysis" element={<SalesAnalysis />} />
         <Route path="branches/stock-monitering" element={<BranchesStockMonitoringPage />} />
         <Route path="branches/statistics" element={<BranchesStatisticsPage />} />
         <Route path="board/notice" element={<NoticePage />} />
@@ -96,7 +97,7 @@ const AppRoutes = () => {
         <Route path="hr/salary/:id/detail" element={<SalaryBreakdownPage/>} />
         <Route path="stats/order" element={<StatsOrderPage/>} />
         <Route path="stats/sales" element={<StatsSalesPage/>} />
-        <Route path="sales/transactions" element={<TransactionPage />} />
+        <Route path="transactions" element={<TransactionPage />} />
       </Route>
 
       {/* 기본 리다이렉트 */}
@@ -105,4 +106,4 @@ const AppRoutes = () => {
   );
 };
 
-export default AppRoutes;
+export default AppRoutes; 
