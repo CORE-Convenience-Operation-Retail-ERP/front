@@ -35,6 +35,7 @@ import PartTimerOnePage from "../pages/store/partTimer/PartTimerOnePage";
 import PartTimerUpdatePage from '../pages/store/partTimer/PartTimerUpdatePage';
 import NoticePage from '../pages/headquarters/board/NoticePage';
 import SuggestionsPage from '../pages/headquarters/board/SuggestionsPage';
+import StoreInquiryPage from '../pages/headquarters/StoreInquiryPage';
 import StoreInquiriesPage from '../pages/headquarters/board/StoreInquiriesPage';
 import SalaryBreakdownPage from '../pages/store/salary/SalaryBreakdownPage';
 import StockListPage from '../pages/store/stock/StockListPage';
@@ -70,6 +71,7 @@ const AppRoutes = () => {
         <Route path="board/notice" element={<NoticePage />} />
         <Route path="board/suggestions" element={<SuggestionsPage />} />
         <Route path="board/store-inquiries" element={<StoreInquiriesPage />} />
+        <Route path="branches/inquiry" element={<StoreInquiryPage />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="products/detail/:id" element={<ProductsDetailPage />} />
         <Route path="products/edit/:id" element={<ProductsEditPage />} />

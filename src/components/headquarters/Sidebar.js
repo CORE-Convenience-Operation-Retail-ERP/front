@@ -49,7 +49,9 @@ const menuItems = [
     path: '/headquarters/board',
     subMenus: [
       { text: '공지 사항', path: '/headquarters/board/notice' },
-      { text: '건의 사항', path: '/headquarters/board/suggestions' }
+      { text: '건의 사항', path: '/headquarters/board/suggestions' },
+      { text: '점포 문의 사항', path: '/headquarters/board/store-inquiries' }
+      
     ],
     hoverBoxBottom: { bottom: -45, width: 80, height: 25 },
   }

@@ -29,9 +29,66 @@ import {
   Grid,
   Container,
   IconButton,
-  Tooltip
+  Tooltip,
+  ThemeProvider,
+  createTheme,
+  Pagination
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
+
+// Pretendard 폰트를 사용하는 MUI 테마 생성
+const theme = createTheme({
+  typography: {
+    fontFamily: [
+      'Pretendard',
+      '-apple-system',
+      'BlinkMacSystemFont',
+      'system-ui',
+      'Roboto',
+      '"Helvetica Neue"',
+      '"Segoe UI"',
+      '"Apple SD Gothic Neo"',
+      '"Noto Sans KR"',
+      '"Malgun Gothic"',
+      'sans-serif',
+    ].join(','),
+  },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          fontFamily: 'Pretendard, sans-serif',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          borderRadius: 8,
+          fontWeight: 500,
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          fontSize: '0.875rem',
+        },
+        head: {
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 500,
+        },
+      },
+    },
+  },
+});
 
 // 날짜 형식화 함수
 const formatDate = (dateString) => {
@@ -106,7 +163,10 @@ const StoreInquiryCom = ({
   onLevelChange,
   storeRankings = [],
   showRankings = false,
-  onToggleRankings
+  onToggleRankings,
+  page = 0,
+  totalPages = 0,
+  onPageChange
 }) => {
   const [selectedType, setSelectedType] = React.useState('all');
   const [selectedStatus, setSelectedStatus] = React.useState('all');
@@ -151,7 +211,19 @@ const StoreInquiryCom = ({
   const handleSaveLevel = () => {
     if (onLevelChange && selectedInquiry && inquiryLevel !== null) {
       onLevelChange(selectedInquiry.inquiryId, inquiryLevel);
+      // 평가 저장 시 자동으로 완료 상태로 변경
+      if (onStatusChange) {
+        onStatusChange(selectedInquiry.inquiryId, 1); // 1: 완료 상태
+      }
       setDetailOpen(false); // 저장 후 다이얼로그 닫기
+    }
+  };
+  
+  // 취소/반려 처리 함수 추가
+  const handleCancelInquiry = () => {
+    if (onStatusChange && selectedInquiry) {
+      onStatusChange(selectedInquiry.inquiryId, 3); // 3: 취소/반려 상태
+      setDetailOpen(false);
     }
   };
   
@@ -163,6 +235,7 @@ const StoreInquiryCom = ({
   });
   
   return (
+    <ThemeProvider theme={theme}>
     <Container maxWidth="xl">
       <Card sx={{ mb: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.08)', borderRadius: 2 }}>
         <CardContent>
@@ -480,6 +553,27 @@ const StoreInquiryCom = ({
                   </TableBody>
                 </Table>
               </TableContainer>
+              
+              {/* 페이지네이션 컴포넌트 */}
+              {inquiries.length > 0 && totalPages > 1 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+                  <Pagination 
+                    count={totalPages} 
+                    page={page + 1} 
+                    onChange={(e, p) => onPageChange(e, p - 1)}
+                    color="primary"
+                    showFirstButton
+                    showLastButton
+                    size="large"
+                    sx={{
+                      '& .MuiPaginationItem-root': {
+                        fontWeight: 500,
+                        fontSize: '0.9rem',
+                      }
+                    }}
+                  />
+                </Box>
+              )}
             </Card>
           )}
         </>
@@ -489,7 +583,7 @@ const StoreInquiryCom = ({
       <Dialog 
         open={detailOpen} 
         onClose={handleDetailClose} 
-        maxWidth="sm" 
+        maxWidth="sm"
         fullWidth
         PaperProps={{
           sx: {
@@ -503,9 +597,10 @@ const StoreInquiryCom = ({
             <DialogTitle sx={{ 
               bgcolor: alpha(selectedInquiry.inqType === 1 ? '#f44336' : 
                              selectedInquiry.inqType === 2 ? '#4caf50' : '#2196f3', 0.1),
-              py: 2
+              py: 2,
+              textAlign: 'center'
             }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   {selectedInquiry.storeName} - 문의 상세
                 </Typography>
@@ -513,44 +608,61 @@ const StoreInquiryCom = ({
               </Box>
             </DialogTitle>
             <DialogContent dividers sx={{ p: 3 }}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      문의 번호: {selectedInquiry.inquiryId}
+              <Grid container spacing={2} justifyContent="center">
+                {/* 문의 정보 영역 - 2줄로 압축 */}
+                <Grid item xs={12} sx={{ mb: 2 }}>
+                  <Box sx={{ textAlign: 'center', mb: 1 }}>
+                    <Typography variant="body1" display="inline" sx={{ mr: 1 }}>
+                      <strong>문의 번호:</strong> {selectedInquiry.inquiryId}
                     </Typography>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      문의 일자: {formatDateTime(selectedInquiry.inqCreatedAt)}
+                    <Typography variant="body1" display="inline" sx={{ mr: 1 }}>
+                      <strong>유형:</strong> <TypeBadge type={selectedInquiry.inqType} />
                     </Typography>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      연락처: {selectedInquiry.inqPhone}
+                    <Typography variant="body1" display="inline" sx={{ mr: 1 }}>
+                      <strong>상태:</strong> <StatusBadge status={selectedInquiry.inqStatus} />
                     </Typography>
                   </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                    <Typography variant="subtitle1" fontWeight="bold" sx={{ mr: 1 }}>
-                      현재 상태:
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="body1" display="inline" sx={{ mr: 1 }}>
+                      <strong>연락처:</strong> {selectedInquiry.inqPhone}
                     </Typography>
-                    <StatusBadge status={selectedInquiry.inqStatus} />
+                    <Typography variant="body1" display="inline">
+                      <strong>문의일:</strong> {formatDateTime(selectedInquiry.inqCreatedAt)}
+                    </Typography>
                   </Box>
+                  <Divider sx={{ my: 2 }} />
                 </Grid>
                 
+                {/* 문의 내용 영역 */}
                 <Grid item xs={12}>
-                  <Divider sx={{ mb: 2, mt: 1 }} />
-                  <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, textAlign: 'center' }}>
                     문의 내용
                   </Typography>
-                  <Paper variant="outlined" sx={{ p: 2, backgroundColor: alpha('#f5f5f5', 0.5), borderRadius: 2 }}>
-                    <Typography sx={{ whiteSpace: 'pre-line' }}>{selectedInquiry.inqContent}</Typography>
+                  <Paper variant="outlined" sx={{ 
+                    p: 2, 
+                    backgroundColor: alpha('#f5f5f5', 0.5), 
+                    borderRadius: 2,
+                    minHeight: '100px',
+                    mb: 3
+                  }}>
+                    <Typography sx={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>{selectedInquiry.inqContent}</Typography>
                   </Paper>
                 </Grid>
                 
+                {/* 평가 영역 */}
                 <Grid item xs={12}>
-                  <Divider sx={{ mb: 2, mt: 1 }} />
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>지점 평가</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <FormControl sx={{ minWidth: 200, mr: 2 }}>
+                  <Divider sx={{ mb: 2 }} />
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, textAlign: 'center' }}>
+                    지점 평가
+                  </Typography>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    mb: 2,
+                    gap: 2
+                  }}>
+                    <FormControl sx={{ minWidth: '100%', maxWidth: 300 }}>
                       <InputLabel id="level-select-label">평가 등급</InputLabel>
                       <Select
                         labelId="level-select-label"
@@ -569,78 +681,59 @@ const StoreInquiryCom = ({
                         <MenuItem value={5}>5 - {selectedInquiry.inqType === 1 ? '매우 심각' : '최고 수준의 칭찬'}</MenuItem>
                       </Select>
                     </FormControl>
-                    <Button 
-                      variant="contained" 
-                      onClick={handleSaveLevel}
-                      disabled={inquiryLevel === null}
-                      sx={{ 
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        fontWeight: 500
-                      }}
-                    >
-                      평가 저장
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 2, width: '100%', justifyContent: 'center' }}>
+                      <Button 
+                        variant="contained" 
+                        color="primary"
+                        onClick={handleSaveLevel}
+                        disabled={inquiryLevel === null}
+                        sx={{ 
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 500,
+                          bgcolor: 'success.main',
+                          '&:hover': {
+                            bgcolor: 'success.dark',
+                          },
+                          minWidth: 140
+                        }}
+                      >
+                        평가 및 완료처리
+                      </Button>
+                      <Button 
+                        variant="contained" 
+                        color="error"
+                        onClick={handleCancelInquiry}
+                        sx={{ 
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 500,
+                          minWidth: 120
+                        }}
+                      >
+                        취소/반려
+                      </Button>
+                    </Box>
                   </Box>
                   <Typography variant="body2" color="text.secondary" sx={{ 
-                    p: 1, 
-                    bgcolor: alpha('#f5f5f5', 0.5), 
-                    borderRadius: 1,
-                    fontStyle: 'italic'
+                    fontStyle: 'italic', 
+                    textAlign: 'center' 
                   }}>
                     {selectedInquiry.inqType === 1 
-                      ? '* 컴플레인 평가: 1(경미)~5(매우 심각)' 
-                      : '* 칭찬 평가: 1(기본)~5(최고 수준)'}
+                      ? '* 컴플레인 평가: 1(경미)~5(매우 심각) - 평가 후 자동으로 완료 처리됩니다.' 
+                      : '* 칭찬 평가: 1(기본)~5(최고 수준) - 평가 후 자동으로 완료 처리됩니다.'}
                   </Typography>
                 </Grid>
               </Grid>
             </DialogContent>
-            <DialogActions sx={{ p: 2, justifyContent: 'space-between', bgcolor: alpha('#f5f5f5', 0.3) }}>
-              <Box>
-                <Button 
-                  variant="contained" 
-                  color="success" 
-                  sx={{ 
-                    mr: 1,
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontWeight: 500
-                  }}
-                  onClick={() => handleChangeStatus(1)}
-                >
-                  완료 처리
-                </Button>
-                <Button 
-                  variant="contained" 
-                  color="warning"
-                  sx={{ 
-                    mr: 1,
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontWeight: 500
-                  }}
-                  onClick={() => handleChangeStatus(2)}
-                >
-                  대기 상태
-                </Button>
-                <Button 
-                  variant="contained" 
-                  color="error"
-                  sx={{ 
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontWeight: 500
-                  }}
-                  onClick={() => handleChangeStatus(3)}
-                >
-                  취소/반려
-                </Button>
-              </Box>
+            <DialogActions sx={{ p: 2, justifyContent: 'center', bgcolor: alpha('#f5f5f5', 0.3) }}>
               <Button 
                 onClick={handleDetailClose}
+                variant="outlined"
                 sx={{ 
                   borderRadius: 2,
-                  textTransform: 'none'
+                  textTransform: 'none',
+                  minWidth: 100
                 }}
               >
                 닫기
@@ -650,6 +743,7 @@ const StoreInquiryCom = ({
         )}
       </Dialog>
     </Container>
+    </ThemeProvider>
   );
 };
 
