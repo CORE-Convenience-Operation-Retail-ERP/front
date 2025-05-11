@@ -8,9 +8,8 @@ import {
 } from "../../../features/store/styles/salary/SalaryList.styled";
 
 function SalaryListCom({ data = [], loading, viewMode, onRowClick }) {
-  console.log("data",data)
   if (loading) return <p>급여 데이터를 불러오는 중입니다...</p>;
-  if (!Array.isArray(data) || data.length === 0)
+  if (!Array.isArray(data) || data.length === 0) 
     return <p>표시할 급여 데이터가 없습니다.</p>;
 
   const renderMonthlyRow = (item) => (
@@ -39,7 +38,7 @@ function SalaryListCom({ data = [], loading, viewMode, onRowClick }) {
       <Thead>
         <Tr>
           <Th>이름</Th>
-          {viewMode === "monthly" ? (
+          {viewMode === "monthly" && (
             <>
               <Th>급여형태</Th>
               <Th>근무시간</Th>
@@ -48,7 +47,8 @@ function SalaryListCom({ data = [], loading, viewMode, onRowClick }) {
               <Th>실지급</Th>
               <Th>지급상태</Th>
             </>
-          ) : (
+          )}
+          {viewMode === "yearly" && (
             <>
               <Th>총 지급</Th>
               <Th>총 공제</Th>
@@ -64,9 +64,7 @@ function SalaryListCom({ data = [], loading, viewMode, onRowClick }) {
         {data.map((item, idx) => (
           <Tr
             key={item.partTimerId || idx}
-            onClick={() => {
-              console.log("✅ 클릭한 partTimerId:", item.partTimerId);
-              onRowClick(item.partTimerId)}}
+            onClick={() => onRowClick(item.partTimerId)}
             style={{ cursor: "pointer" }}
           >
             <Td>{item.name}</Td>
@@ -78,7 +76,6 @@ function SalaryListCom({ data = [], loading, viewMode, onRowClick }) {
   );
 }
 
-// 통화 포맷 함수
 function toCurrency(val) {
   return typeof val === "number" && !isNaN(val) ? `${val.toLocaleString()}원` : "-";
 }

@@ -18,7 +18,7 @@ function PartTimerRegisterCom({ form, onChange, onDateChange, onSubmit }) {
             <Label>직책</Label>
             <Select name="position" value={form.position} onChange={onChange}placeholder="직책">
                 <option value="">직책 선택</option>
-                <option value="알바">알바</option>
+                <option value="아르바이트">아르바이트</option>
                 <option value="매니저">매니저</option>
                 <option value="점장">점장</option>
             </Select>

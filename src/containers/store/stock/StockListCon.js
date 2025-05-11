@@ -1,108 +1,126 @@
 import React, { useEffect, useState } from 'react';
 import StockListCom from '../../../components/store/stock/StockListCom';
-import { fetchParentCategories, fetchChildCategories } from '../../../service/store/CategoryService';
 import { fetchStoreStockList } from '../../../service/store/StockService';
+import { fetchParentCategories, fetchChildCategories } from '../../../service/store/CategoryService';
 
 function StockListCon() {
+  // 재고 데이터
   const [stockList, setStockList] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 카테고리 옵션
   const [parentCategories, setParentCategories] = useState([]);
   const [childCategories, setChildCategories] = useState([]);
-  const [totalPages, setTotalPages] = useState(0);
+  const [grandChildCategories, setGrandChildCategories] = useState([]);
 
+  // 필터/검색 파라미터
   const [searchParams, setSearchParams] = useState({
-    parentCategoryId: null,
-    categoryId: null,
     productName: '',
     barcode: '',
+    categoryId: null,
     page: 0,
     size: 10,
   });
+  const [filters, setFilters] = useState({ parentCategoryId: '', categoryId: '', subCategoryId: '' });
 
-  // 최초 로드: 대분류, 전체 목록 불러오기
+  // 대분류 로드
   useEffect(() => {
-    const initLoad = async () => {
-      try {
-        const parentData = await fetchParentCategories();
-        setParentCategories(Array.isArray(parentData) ? parentData : []);
-      } catch (err) {
-        console.error('대분류 로드 실패:', err);
-      }
-      loadStockList(searchParams);
-    };
-    initLoad();
+    fetchParentCategories().then(data => setParentCategories(data || [])).catch(console.error);
   }, []);
 
-  // 검색 조건 변경 시 자동 목록 조회
+  // 재고 조회
   useEffect(() => {
-    loadStockList(searchParams);
-  }, [searchParams]);
-
-  // 공통 재고 목록 조회 함수
-  const loadStockList = async (params) => {
-    try {
-      const response = await fetchStoreStockList(params);
-      setStockList(response.data.content || []);
-      setTotalPages(response.data.totalPages || 0);
-    } catch (error) {
-      console.error('재고 목록 조회 실패:', error);
-    }
-  };
-
-  // 검색 조건 업데이트 + 즉시 데이터 새로고침
-  const updateSearchParams = (updates) => {
-    const newParams = { ...searchParams, ...updates, page: 0 };
-
-    if (updates.parentCategoryId !== undefined) {
-      newParams.categoryId = null;
-      if (updates.parentCategoryId) {
-        fetchChildCategories(updates.parentCategoryId)
-            .then(data => setChildCategories(Array.isArray(data) ? data : []))
-            .catch(err => console.error('중분류 로드 실패:', err));
-      } else {
-        setChildCategories([]);
+    async function load() {
+      setIsLoading(true);
+      setStockList([]);
+      try {
+        const res = await fetchStoreStockList(searchParams);
+        setStockList(res.data.content || []);
+        setTotalPages(res.data.totalPages || 0);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
       }
     }
-
-    setSearchParams(newParams);
-  };
-
-  useEffect(() => {
-    loadStockList(searchParams); // searchParams가 바뀔 때만 호출
+    load();
   }, [searchParams]);
 
-  const handlePageChange = (newPage) => {
-    const newParams = { ...searchParams, page: newPage };
-    setSearchParams(newParams);
-    loadStockList(newParams);
+  const handleSearch = params => {
+    setFilters({ parentCategoryId: '', subCategoryId: '' });
+    setSearchParams(prev => ({
+      ...prev,
+      productName: '',
+      barcode: '',
+      ...params,
+      categoryId: null,
+      page: 0
+    }));
   };
 
-  const filterOptions = [
-    { key: 'productName', label: '상품명', type: 'text', placeholder: '상품명을 입력하세요' },
-    { key: 'barcode', label: '바코드', type: 'text', placeholder: '바코드를 입력하세요' },
-    {
-      key: 'parentCategoryId',
-      label: '대분류',
-      type: 'select',
-      options: parentCategories.map(cat => ({ value: cat.id, label: cat.name }))
-    },
-    {
-      key: 'categoryId',
-      label: '중분류',
-      type: 'select',
-      options: childCategories.map(cat => ({ value: cat.id, label: cat.name }))
-    },
-  ];
+  // 대분류 선택 핸들러: 텍스트 검색 초기화
+  const handleParentChange = id => {
+    setFilters({ parentCategoryId: id, categoryId: '', subCategoryId: '' });
+    setChildCategories([]);
+    setGrandChildCategories([]);
+    setSearchParams(prev => ({
+      ...prev,
+      productName: '',
+      barcode: '',
+      categoryId: id || null,
+      page: 0
+    }));
+    if (id) fetchChildCategories(id).then(data => setChildCategories(data || [])).catch(console.error);
+  };
+
+  // 중분류 선택 핸들러
+  const handleChildChange = id => {
+    setFilters(f => ({ ...f, categoryId: id, subCategoryId: '' }));
+    setGrandChildCategories([]);
+    setSearchParams(prev => ({
+      ...prev,
+      productName: '',
+      barcode: '',
+      categoryId: id || null,
+      page: 0
+    }));
+    if (id) fetchChildCategories(id).then(data => setGrandChildCategories(data || [])).catch(console.error);
+  };
+
+  // 소분류 선택 핸들러
+  const handleSubChildChange = id => {
+    setFilters(f => ({ ...f, subCategoryId: id }));
+    setSearchParams(prev => ({
+      ...prev,
+      productName: '',
+      barcode: '',
+      categoryId: id || null,
+      page: 0
+    }));
+  };
+
+  // 페이지 변경
+  const handlePageChange = newPage => {
+    setSearchParams(prev => ({ ...prev, page: newPage }));
+  };
 
   return (
-      <StockListCom
-          stockList={stockList}
-          searchParams={searchParams}
-          onSearchChange={updateSearchParams}
-          currentPage={searchParams.page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          filterOptions={filterOptions}
-      />
+    <StockListCom
+      stockList={stockList}
+      isLoading={isLoading}
+      currentPage={searchParams.page}
+      totalPages={totalPages}
+      onPageChange={handlePageChange}
+      onSearch={handleSearch}
+      parentCategories={parentCategories}
+      childCategories={childCategories}
+      grandChildCategories={grandChildCategories}
+      filters={filters}
+      onParentChange={handleParentChange}
+      onChildChange={handleChildChange}
+      onSubChildChange={handleSubChildChange}
+    />
   );
 }
 

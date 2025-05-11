@@ -10,7 +10,7 @@ import {
     ActionButton
   } from '../../../features/store/styles/partTimer/StorePartTimerOne.styled';
 
-function PartTimerOneCom({ form, onEdit, onResign }){
+function PartTimerOneCom({ form, onEdit, onResign , onRejoin }){
   const navigate = useNavigate();
 
     return(
@@ -88,13 +88,18 @@ function PartTimerOneCom({ form, onEdit, onResign }){
         </InfoRow>
   
         <ButtonGroup>
-          <ActionButton onClick={onEdit}>수정</ActionButton>
-          {form.partStatus === 1 && (
-            <ActionButton danger onClick={onResign}>퇴사 처리</ActionButton>
-          )}
-            <ActionButton onClick={() => navigate(-1)}>목록으로</ActionButton>
+  <ActionButton onClick={onEdit}>수정</ActionButton>
 
-        </ButtonGroup>
+      {form.partStatus === 1 && (
+        <ActionButton danger onClick={onResign}>퇴사 처리</ActionButton>
+      )}
+
+      {form.partStatus === 0 && (
+        <ActionButton onClick={onRejoin}>재직 처리</ActionButton> 
+      )}
+
+  <ActionButton onClick={() => navigate(-1)}>목록으로</ActionButton>
+</ButtonGroup>
       </FormWrap>
     );
   }

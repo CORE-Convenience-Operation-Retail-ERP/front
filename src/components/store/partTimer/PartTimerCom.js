@@ -16,6 +16,8 @@ function PartTimerCom({ data, loading, selectedIds, onCheck, onCheckAll }) {
     const navigate = useNavigate();
 
     if (loading) return <p>불러오는 중...</p>;
+    if (!data || data.length === 0) return <p>검색 결과가 없습니다.</p>;
+
 
     return (
         <Table>
@@ -54,7 +56,23 @@ function PartTimerCom({ data, loading, selectedIds, onCheck, onCheckAll }) {
                         <Td>{pt.partPhone || '-'}</Td>
                         <Td>{pt.hireDate ? format(new Date(pt.hireDate), "yyyy-MM-dd") : "-"}</Td>
                         <Td>{pt.hourlyWage?.toLocaleString() || '-'}원</Td>
-                        <Td>{pt.accountBank || '-'}</Td>
+                        <Td>
+                            {(() => {
+                                switch (pt.accountBank) {
+                                    case "1":
+                                    case 1:
+                                        return "국민";
+                                    case "2":
+                                    case 2:
+                                        return "하나";
+                                    case "3":
+                                    case 3:
+                                        return "신한";
+                                    default:
+                                        return "-";
+                                }
+                            })()}
+                        </Td>                        
                         <Td>{pt.accountNumber || '-'}</Td>
                         <Td>{pt.partStatus === 1 ? '재직' : '퇴사'}</Td>
                     </Tr>

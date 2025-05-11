@@ -41,12 +41,28 @@ function PartTimerUpdateCon(){
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
-      Object.entries(form).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          formData.append(key, value);
+  
+      // 날짜 포맷 처리 (
+      const birthDateFormatted = form.birthDate
+        ? new Date(form.birthDate).toISOString().split('T')[0] 
+        : null;
+  
+      const hireDateFormatted = form.hireDate
+        ? new Date(form.hireDate).toISOString().slice(0, 19) 
+        : null;
+  
+      const updatedForm = {
+        ...form,
+        birthDate: birthDateFormatted,
+        hireDate: hireDateFormatted,
+      };
+  
+      Object.entries(updatedForm).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          formData.append(key, value instanceof Date ? value.toISOString() : value);
         }
       });
-
+  
       await updatePartTimer(id, formData);
       alert('수정 완료');
       navigate('/store/parttimer/list');

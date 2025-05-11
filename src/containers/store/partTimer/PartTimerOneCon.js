@@ -5,6 +5,9 @@ import {
   fetchPartTimerById,
   updatePartTimer
 } from '../../../service/store/PartTimeService.js';
+const now = new Date();
+const offsetMs = now.getTimezoneOffset() * 60000;  
+const localTime = new Date(now.getTime() - offsetMs); 
 
 function PartTimerOneCon(){
     const { id } = useParams();
@@ -45,24 +48,28 @@ function PartTimerOneCon(){
     const handleDateChange = (name, value) => {
       setForm({ ...form, [name]: value });
     };
+
+    
   
-    const handleResign = async () => {
+    const handleResign = async () => {   
       if (!window.confirm('퇴사 처리하시겠습니까?')) return;
-  
+    
       try {
+        const resignDateFormatted = localTime.toISOString().slice(0, 19); // yyyy-MM-ddTHH:mm:ss
+    
         const updated = {
           ...form,
           partStatus: 0,
-          resignDate: new Date()
+          resignDate: resignDateFormatted,
         };
-  
+    
         const formData = new FormData();
         Object.entries(updated).forEach(([key, value]) => {
-          if (value !== null && value !== undefined) {
-            formData.append(key, value);
+          if (value !== null && value !== undefined && value !== '') {
+            formData.append(key, value instanceof Date ? value.toISOString() : value);
           }
         });
-  
+    
         await updatePartTimer(id, formData);
         alert('퇴사 처리 완료');
         navigate('/store/parttimer/list');
@@ -71,6 +78,35 @@ function PartTimerOneCon(){
         console.error(err);
       }
     };
+
+    const handleRejoin = async () => {
+      if (!window.confirm('재직 상태로 복귀하시겠습니까?')) return;
+    
+      try {
+        const resignDateFormatted = null;
+    
+        const updated = {
+          ...form,
+          partStatus: 1,      
+          resignDate: resignDateFormatted, 
+        };
+    
+        const formData = new FormData();
+        Object.entries(updated).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== '') {
+            formData.append(key, value instanceof Date ? value.toISOString() : value);
+          }
+        });
+    
+        await updatePartTimer(id, formData);
+        alert('재직 상태로 변경되었습니다.');
+        navigate('/store/parttimer/list');
+      } catch (err) {
+        alert('재직 처리 실패');
+        console.error(err);
+      }
+    };
+    
   
     const goToEditPage = () => {
       navigate(`/store/parttimer/${id}/edit`);
@@ -85,6 +121,7 @@ function PartTimerOneCon(){
      onChange={handleChange}
      onDateChange={handleDateChange}
      onResign={handleResign}
+     onRejoin={handleRejoin}
      onEdit={goToEditPage}/>
     </>
     )

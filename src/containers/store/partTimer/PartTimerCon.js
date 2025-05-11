@@ -10,22 +10,28 @@ function PartTimerCon(){
     const navigate = useNavigate();
 
 
-    // 👉 상태 관리
+    //  상태 관리
     const [partTimers, setPartTimers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchParams, setSearchParams] = useState({ partName: '', partStatus: null });
     const [selectedIds, setSelectedIds] = useState([]);
     const [page, setPage] = useState(0);
-    const [size, setSize] = useState(10);
+    const [size] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
 
-    // 👉 데이터 로드 함수
+    //  데이터 로드 함수
     const loadPartTimers = async () => {
         setLoading(true);
         try {
             const data = await fetchPartTimers({ ...searchParams, page, size });
-            setPartTimers(data.content || []);
-            setTotalPages(data.totalPages || 1);  // 백엔드에서 totalPages 응답 가정
+    
+            if (Array.isArray(data)) {
+                setPartTimers(data);       
+                setTotalPages(1);             
+            } else {
+                setPartTimers(data.content || []);  
+                setTotalPages(data.totalPages || 1);
+            }
         } catch (error) {
             console.error('불러오기 실패:', error);
         } finally {
@@ -33,21 +39,21 @@ function PartTimerCon(){
         }
     };
 
-    // 👉 마운트 & 검색 & 페이지 이동할 때마다 reload
+    //  마운트 & 검색 & 페이지 이동할 때마다 reload
     useEffect(() => {
         (async () => {
             await loadPartTimers();
         })();
     }, [searchParams, page]);
 
-    // 👉 체크박스 개별 선택
+    //  체크박스 개별 선택
     const handleCheck = (id) => {
         setSelectedIds(prev =>
             prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
         );
     };
 
-    // 👉 전체 선택
+    //  전체 선택
     const handleCheckAll = (checked) => {
         if (checked) {
             const allIds = partTimers.map(pt => pt.partTimerId);
@@ -57,7 +63,7 @@ function PartTimerCon(){
         }
     };
 
-    // 👉 삭제 버튼 클릭
+    //  삭제 버튼 클릭
     const handleDelete = async () => {
         if (selectedIds.length === 0) {
             alert('삭제할 아르바이트를 선택하세요.');
@@ -76,27 +82,42 @@ function PartTimerCon(){
         }
     };
 
-    // 👉 검색창 입력
+    //  검색창 입력
     const handleSearch = (params) => {
+        const [key, value] = Object.entries(params)[0];
+    
         setSearchParams({
-          partName: params.partName || '',
-          position: params.position || '',
-          partStatus: params.partStatus !== undefined ? params.partStatus : null
+            partName: key === 'partName' ? value : '',
+            position: key === 'position' ? value : null,
+            partStatus: key === 'partStatus' ? value : null,
         });
-        setPage(0); // 검색 시 첫 페이지로
-      };
+    
+        setPage(0);
+    };
 
-    // 👉 등록 버튼 클릭
+    //  등록 버튼 클릭
     const handleRegister = () => {
         navigate('/store/parttimer/register');
     };
+
+    
 
     return (
         <div>
             <SearchBar
             filterOptions={[
                 { key: "partName", label: "이름", type: "text" },
-                { key: "position", label: "직책", type: "text" },
+                {
+                key: "position",
+                label: "직책",
+                type: "select",
+                options: [
+                    { value: "", label: "전체" },
+                    { value: "아르바이트", label: "아르바이트" },
+                    { value: "매니저", label: "매니저" },
+                    { value: "점장", label: "점장" }
+                ]
+                },
                 {
                 key: "partStatus",
                 label: "상태",

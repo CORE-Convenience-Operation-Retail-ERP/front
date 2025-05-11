@@ -7,8 +7,28 @@ import {
   Btn,
 } from '../../../features/store/styles/order/Order.styled';
 
-function OrderListCom({ orderList, onRowClick, getOrderStatusLabel, onEditClick, onDeleteClick,onCancleClick }) {
+function OrderListCom({ orderList, onRowClick, getOrderStatusLabel, onEditClick, onDeleteClick, onCancleClick }) {
   const userRole = localStorage.getItem("role");
+
+  const renderCell = (order, content) => (
+    <OrderTd onClick={() => onRowClick(order.orderId)}>{content}</OrderTd>
+  );
+
+  const renderActionButtons = (order) => {
+    const isPending = order.orderStatus === 0;
+    return (
+      <div style={{ display: 'flex', gap: '0.5rem' }}>
+        {isPending && <Btn onClick={() => onEditClick(order.orderId)}>수정</Btn>}
+        {userRole === "ROLE_HQ" && (
+          <Btn onClick={() => onCancleClick(order.orderId)}>취소</Btn>
+        )}
+        {isPending && userRole === "ROLE_STORE" && (
+          <Btn onClick={() => onDeleteClick(order.orderId)}>삭제</Btn>
+        )}
+      </div>
+    );
+  };
+  console.log(orderList);
   return (
     <OrderTable>
       <OrderHead>
@@ -18,40 +38,18 @@ function OrderListCom({ orderList, onRowClick, getOrderStatusLabel, onEditClick,
           <OrderTh>총 금액</OrderTh>
           <OrderTh>입고 일자</OrderTh>
           <OrderTh>상태</OrderTh>
-          <OrderTh></OrderTh>
+          <OrderTh>작업</OrderTh>
         </tr>
       </OrderHead>
       <tbody>
         {orderList.map(order => (
           <tr key={order.orderId} style={{ cursor: 'pointer' }}>
-            <OrderTd onClick={() => onRowClick(order.orderId)}>
-              <HighlightId>{order.orderId}</HighlightId>
-            </OrderTd>
-            <OrderTd onClick={() => onRowClick(order.orderId)}>
-              {order.totalQuantity}
-            </OrderTd>
-            <OrderTd onClick={() => onRowClick(order.orderId)}>
-              {order.totalAmount.toLocaleString()}원
-            </OrderTd>
-            <OrderTd onClick={() => onRowClick(order.orderId)}>
-              {new Date(order.orderDate).toLocaleString()}
-            </OrderTd>
-            <OrderTd onClick={() => onRowClick(order.orderId)}>
-              {getOrderStatusLabel(order.orderStatus)}
-            </OrderTd>
-            <OrderTd>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {order.orderStatus === 0  && (
-                    <Btn onClick={() => onEditClick(order.orderId)}>수정</Btn>
-                )}
-                {userRole === "ROLE_HQ" && (
-                    <Btn onClick={() => onCancleClick(order.orderId)}>취소</Btn>
-                )}
-                {order.orderStatus === 0 && userRole === "ROLE_STORE" && (
-                    <Btn onClick={() => onDeleteClick(order.orderId)}>삭제</Btn>
-                )}
-              </div>
-            </OrderTd>
+            {renderCell(order, <HighlightId>{order.orderId}</HighlightId>)}
+            {renderCell(order, order.totalQuantity)}
+            {renderCell(order, `${order.totalAmount?.toLocaleString() || 0}원`)}
+            {renderCell(order, order.orderDate ? new Date(order.orderDate).toLocaleString() : '-')}
+            {renderCell(order, getOrderStatusLabel(order.orderStatus))}
+            <OrderTd>{renderActionButtons(order)}</OrderTd>
           </tr>
         ))}
       </tbody>

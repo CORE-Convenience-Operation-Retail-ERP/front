@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import SalaryListCom from "../../../components/store/salary/SalaryListCom";
 import Pagination from "../../../components/store/common/Pagination";
@@ -10,7 +11,6 @@ import {
   ButtonGroup,
   ViewToggleButton,
 } from "../../../features/store/styles/salary/SalaryList.styled";
-import { useNavigate } from "react-router-dom";
 
 function SalaryListCon() {
   const now = new Date();
@@ -43,7 +43,7 @@ function SalaryListCon() {
   };
 
   useEffect(() => {
-      console.log("[🔥 검색 파라미터]", searchParams);
+    console.log("[🔥 검색 파라미터]", { ...searchParams, view: viewMode });
     loadSalaries();
   }, [searchParams, viewMode, page]);
 
@@ -58,8 +58,8 @@ function SalaryListCon() {
         size, 
         view: viewMode 
       });
-      setSalaries(res.data.content); // ⬅️ Page 객체 대응
-      setTotalPages(res.data.totalPages); // 추가로 페이지네이션에 쓸 값
+      setSalaries(res.data.content); // 
+      setTotalPages(res.data.totalPages); // 
     } catch (e) {
       console.error("급여 조회 실패", e);
     } finally {
@@ -69,14 +69,32 @@ function SalaryListCon() {
   
 
   const handleSearch = (params) => {
-    setSearchParams({
-      name: params.name?.trim() || null,
-      status: params.status || null,
-      year: params.year || searchParams.year,
-      month: params.month || searchParams.month,
-    });
-    setPage(0); // 검색 시 페이지 초기화
+    if (params.startDate && params.endDate) {
+      setSearchParams(prev => ({
+        ...prev,
+        startDate: params.startDate,
+        endDate: params.endDate,
+        year: null,
+        month: null,            
+      }));
+    } else if (params.date) {
+      const [year, month] = params.date.split("-");
+      setSearchParams({
+        ...searchParams,
+        year: Number(year),
+        month,
+        startDate: null,
+        endDate: null,
+      });
+    } else {
+      setSearchParams(prev => ({
+        ...prev,
+        ...params,
+      }));
+    }
+    setPage(0);
   };
+  
 
   const handleGenerate = async () => {
     const { year, month } = searchParams;
@@ -94,36 +112,23 @@ function SalaryListCon() {
 
   const handleViewChange = (mode) => {
     setViewMode(mode);
-    setPage(0); // 보기모드 바꾸면 페이지 초기화
+    setSearchParams(prev => ({
+      ...prev,
+      view: mode,
+    }));
+    setPage(0);
   };
+  
 
   const filterOptions = [
-    { key: "name", label: "이름", type: "text" },
-    {
-      key: "status",
-      label: "재직 상태",
-      type: "select",
-      options: [
-        { value: "", label: "전체" },
+    { key: "name",    label: "이름",       type: "text" },
+    { key: "status",  label: "재직 상태", type: "select", options: [
         { value: "1", label: "재직중" },
         { value: "0", label: "퇴사자" },
-      ],
+      ]
     },
-    {
-      key: "year",
-      label: "연도",
-      type: "select",
-      options: [2023, 2024, 2025].map((y) => ({ value: y, label: `${y}년` })),
-    },
-    {
-      key: "month",
-      label: "월",
-      type: "select",
-      options: Array.from({ length: 12 }, (_, i) => {
-        const m = String(i + 1).padStart(2, "0");
-        return { value: m, label: `${m}월` };
-      }),
-    },
+    { key: "date",       label: "단일 날짜",  type: "date" },
+    { key: "dateRange",  label: "기간(날짜)", type: "date-range" },
   ];
 
   return (
