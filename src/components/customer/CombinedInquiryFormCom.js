@@ -74,8 +74,8 @@ const TypeCard = styled.div`
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 2px solid ${props => props.selected ? '#4CAF50' : 'transparent'};
-  background-color: ${props => props.selected ? '#f1f8e9' : 'white'};
+  border: 2px solid ${props => props.$selected ? '#4CAF50' : 'transparent'};
+  background-color: ${props => props.$selected ? '#f1f8e9' : 'white'};
   
   &:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -297,10 +297,10 @@ const CombinedInquiryFormCom = ({ store, onSubmit, onBack, isSubmitting }) => {
         <FormGroup>
           <Label>문의 유형</Label>
           <TypesContainer>
-            {inquiryTypes.map(type => (
-              <TypeCard 
+            {inquiryTypes.map((type) => (
+              <TypeCard
                 key={type.id}
-                selected={inquiryType === type.id}
+                $selected={inquiryType === type.id}
                 onClick={() => handleInquiryTypeSelect(type.id)}
               >
                 <TypeIcon type={type.id}>{type.icon}</TypeIcon>

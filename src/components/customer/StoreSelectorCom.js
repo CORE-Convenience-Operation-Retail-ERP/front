@@ -100,12 +100,26 @@ const StoreSelectorCom = ({ onStoreSelect, onNext }) => {
   useEffect(() => {
     const fetchStores = async () => {
       try {
-        const response = await axios.get('/api/stores');
-        setStores(response.data);
-        setFilteredStores(response.data);
+        console.log('매장 목록 API 호출 시작');
+        
+        // 백엔드 서버 URL을 명시적으로 지정하고 withCredentials 옵션 추가
+        const response = await axios.get('http://localhost:8080/api/customer/inquiry/test-stores', {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true // 쿠키와 인증 정보 전송
+        });
+        
+        console.log('매장 목록 API 응답:', response.data);
+        setStores(response.data || []);
+        setFilteredStores(response.data || []);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching stores:', error);
+        // 오류 발생 시 빈 배열로 처리하여 앱이 계속 동작하도록 함
+        setStores([]);
+        setFilteredStores([]);
         setLoading(false);
       }
     };

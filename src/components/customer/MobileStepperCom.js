@@ -23,28 +23,28 @@ const StepCircle = styled.div`
   width: 35px;
   height: 35px;
   border-radius: 50%;
-  background-color: ${props => props.active ? '#4CAF50' : props.completed ? '#4CAF50' : '#e0e0e0'};
-  color: ${props => props.active || props.completed ? 'white' : '#757575'};
+  background-color: ${props => props.$active ? '#4CAF50' : props.$completed ? '#4CAF50' : '#e0e0e0'};
+  color: ${props => props.$active || props.$completed ? 'white' : '#757575'};
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 8px;
-  font-weight: ${props => props.active ? 'bold' : 'normal'};
+  font-weight: ${props => props.$active ? 'bold' : 'normal'};
   font-size: 16px;
 `;
 
 const StepLabel = styled.div`
   font-size: 14px;
-  color: ${props => props.active ? '#4CAF50' : '#757575'};
+  color: ${props => props.$active ? '#4CAF50' : '#757575'};
   text-align: center;
-  font-weight: ${props => props.active ? 'bold' : 'normal'};
+  font-weight: ${props => props.$active ? 'bold' : 'normal'};
 `;
 
 const StepConnector = styled.div`
   position: absolute;
   top: 17px;
   height: 2px;
-  background-color: ${props => props.completed ? '#4CAF50' : '#e0e0e0'};
+  background-color: ${props => props.$completed ? '#4CAF50' : '#e0e0e0'};
   width: 100%;
   left: -50%;
   z-index: 0;
@@ -61,15 +61,15 @@ const MobileStepperCom = ({ currentStep }) => {
       {steps.map((step, index) => (
         <Step key={step.step}>
           {index > 0 && (
-            <StepConnector completed={currentStep > index} />
+            <StepConnector $completed={currentStep > index} />
           )}
           <StepCircle 
-            active={currentStep === step.step} 
-            completed={currentStep > step.step}
+            $active={currentStep === step.step} 
+            $completed={currentStep > step.step}
           >
             {currentStep > step.step ? '✓' : step.step}
           </StepCircle>
-          <StepLabel active={currentStep === step.step}>
+          <StepLabel $active={currentStep === step.step}>
             {step.label}
           </StepLabel>
         </Step>

@@ -157,8 +157,14 @@ const CustomerInquiryCon = () => {
         inqStatus: 2 // 기본값: 대기(2)
       };
       
-      // API 요청
-      const response = await axios.post('/api/store-inquiries', inquiryData);
+      // 백엔드 서버 URL을 명시적으로 지정하고 withCredentials 옵션 추가
+      const response = await axios.post('http://localhost:8080/api/customer/inquiry', inquiryData, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true // 쿠키와 인증 정보 전송
+      });
       
       // 성공 시 감사 페이지 표시
       if (response.status === 200) {
