@@ -76,3 +76,9 @@ export const removeOrder = (orderId) =>
     handleRequest(() =>
         axios.delete(`/api/order/${orderId}`)
     );
+
+/** ✅ [11] 지점 목록 조회  */
+export const fetchStoreList = async () => {
+    const res = await axios.get("/api/stores");
+    return res.data; // StoreEntity 리스트 반환
+};
