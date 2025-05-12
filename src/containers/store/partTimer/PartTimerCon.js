@@ -1,7 +1,7 @@
 import PartTimerCom from "../../../components/store/partTimer/PartTimerCom";
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
-import {fetchPartTimers} from "../../../service/store/PartTimeService";
+import {fetchPartTimers, searchPartTimers} from "../../../service/store/PartTimeService";
 import {deletePartTimer} from "../../../service/store/PartTimeService";
 import SearchBar from "../../../components/store/common/StoreSearchBar";
 import Pagination from "../../../components/store/common/Pagination";
@@ -23,21 +23,27 @@ function PartTimerCon(){
     const loadPartTimers = async () => {
         setLoading(true);
         try {
-            const data = await fetchPartTimers({ ...searchParams, page, size });
+            const hasSearch = searchParams.partName || searchParams.partStatus !== null || searchParams.position;
+    
+            const data = hasSearch
+                ? await searchPartTimers({ ...searchParams, page, size })
+                : await fetchPartTimers({ ...searchParams, page, size });  // 🔥 position 추가 필요!
     
             if (Array.isArray(data)) {
-                setPartTimers(data);       
-                setTotalPages(1);             
+                setPartTimers(data);
+                setTotalPages(1);
             } else {
-                setPartTimers(data.content || []);  
+                setPartTimers(data.content || []);
                 setTotalPages(data.totalPages || 1);
             }
         } catch (error) {
-            console.error('불러오기 실패:', error);
+            console.error("파트타이머 조회 실패:", error);
         } finally {
             setLoading(false);
         }
-    };
+    };    
+    
+      
 
     //  마운트 & 검색 & 페이지 이동할 때마다 reload
     useEffect(() => {
@@ -84,6 +90,8 @@ function PartTimerCon(){
 
     //  검색창 입력
     const handleSearch = (params) => {
+        console.log("🔍 [SearchBar] 검색 요청 파라미터:", params);
+
         const [key, value] = Object.entries(params)[0];
     
         setSearchParams({

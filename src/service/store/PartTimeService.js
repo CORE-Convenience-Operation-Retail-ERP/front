@@ -4,11 +4,12 @@ import formDataAxios from '../formDataAxios';
 // API 엔드포인트 기본 경로
 const BASE_URL = '/api/store/parttimer';
 
-export const fetchPartTimers = async ({ page, size, partName, partStatus }) => {
+export const fetchPartTimers = async ({ page, size, partName, partStatus, position }) => {
     try {
         const params = { page, size };
         if (partName) params.partName = partName;
         if (partStatus !== null) params.partStatus = partStatus;
+        if (position) params.position = position;
 
         const response = await instance.get(`${BASE_URL}/list`, { params });
         return response.data;
@@ -27,6 +28,7 @@ export const searchPartTimers = async (params) => {
         throw error;
     }
 };
+
 
 export const fetchPartTimerById = async (id) => {
     try {

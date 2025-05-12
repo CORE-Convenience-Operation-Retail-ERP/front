@@ -1,7 +1,7 @@
 import React from 'react';
 import Pagination from '../common/Pagination';
 import * as XLSX from 'xlsx';
-import StoreSearchBar from '../../../components/store/common/StoreSearchBar';
+import StoreSearchBar from '../common/StoreSearchBar'; 
 import {
   Wrapper,
   FilterRow,
@@ -28,18 +28,16 @@ function StockListCom({
 }) {
   const handleDownload = () => {
     if (!stockList.length) return alert('데이터가 없습니다.');
-    const sheet = XLSX.utils.json_to_sheet(
-      stockList.map(item => ({
-        상품명: item.productName,
-        바코드: item.barcode,
-        카테고리: item.categoryName,
-        매장재고: item.storeQuantity,
-        창고재고: item.warehouseQuantity,
-        총재고: item.totalQuantity,
-        최근입고일: item.latestInDate?.split('T')[0] || '-',
-        상태: item.promoStatus
-      }))
-    );
+    const sheet = XLSX.utils.json_to_sheet(stockList.map(item => ({
+      상품명: item.productName,
+      바코드: item.barcode,
+      카테고리: item.categoryName,
+      매장재고: item.storeQuantity,
+      창고재고: item.warehouseQuantity,
+      총재고: item.totalQuantity,
+      최근입고일: item.latestInDate?.split('T')[0] || '-',
+      상태: item.promoStatus
+    })));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, sheet, '재고현황');
     XLSX.writeFile(wb, `stock_${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -48,9 +46,7 @@ function StockListCom({
   return (
     <Wrapper>
       <h2>재고 현황</h2>
-      
-        {/* 카테고리 필터 */}
-        <FilterRow>
+      <FilterRow>
         <CategorySelect value={filters.parentCategoryId} onChange={e => onParentChange(e.target.value)}>
           <option value="">대분류</option>
           {parentCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -66,7 +62,6 @@ function StockListCom({
         <DownloadButton onClick={handleDownload}>📥 엑셀</DownloadButton>
       </FilterRow>
 
-      {/* 상품명/바코드 검색 */}
       <StoreSearchBar
         filterOptions={[
           { key: 'productName', label: '상품명', type: 'text', placeholder: '상품명 입력' },
@@ -74,8 +69,7 @@ function StockListCom({
         ]}
         onSearch={onSearch}
       />
-    
-      {/* 재고 테이블 */}
+
       {isLoading ? <Spinner /> : (
         <Table>
           <thead>

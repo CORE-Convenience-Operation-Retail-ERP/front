@@ -14,19 +14,23 @@ import {
 
 function SalaryListCon() {
   const now = new Date();
-  const [searchParams, setSearchParams] = useState({
+  const initialSearchParams = {
     name: null,
     status: null,
     year: now.getFullYear(),
     month: String(now.getMonth() + 1).padStart(2, "0"),
-  });
+    startDate: null,
+    endDate: null,
+  };
 
+  const [searchParams, setSearchParams] = useState(initialSearchParams);
   const [salaries, setSalaries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState("monthly");
   const [page, setPage] = useState(0);
   const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
+
   const navigate = useNavigate();
 
   const handleRowClick = (id) => {
@@ -50,85 +54,95 @@ function SalaryListCon() {
   const loadSalaries = async () => {
     setLoading(true);
     try {
-      const res = await fetchSalaryList({ 
+      const res = await fetchSalaryList({
         ...searchParams,
         name: searchParams.name || null,
         status: searchParams.status || null,
-        page, 
-        size, 
-        view: viewMode 
+        page,
+        size,
+        view: viewMode,
       });
-      setSalaries(res.data.content); // 
-      setTotalPages(res.data.totalPages); // 
+      setSalaries(res.data.content || []);
+      setTotalPages(res.data.totalPages || 0);
     } catch (e) {
       console.error("급여 조회 실패", e);
+      alert(`급여 조회 중 오류 발생: ${e.message || "알 수 없음"}`);
     } finally {
       setLoading(false);
     }
   };
-  
 
   const handleSearch = (params) => {
     if (params.startDate && params.endDate) {
-      setSearchParams(prev => ({
-        ...prev,
-        startDate: params.startDate,
-        endDate: params.endDate,
-        year: null,
-        month: null,            
-      }));
+      setViewMode("custom");
+      setSearchParams({
+        ...initialSearchParams,
+        ...params,
+        view: "custom",
+      });
     } else if (params.date) {
       const [year, month] = params.date.split("-");
+      setViewMode("monthly");
       setSearchParams({
-        ...searchParams,
+        ...initialSearchParams,
+        view: "monthly",
         year: Number(year),
         month,
-        startDate: null,
-        endDate: null,
       });
     } else {
-      setSearchParams(prev => ({
-        ...prev,
+      setSearchParams({
+        ...initialSearchParams,
         ...params,
-      }));
+      });
     }
     setPage(0);
   };
   
-
   const handleGenerate = async () => {
     const { year, month } = searchParams;
     const confirm = window.confirm(`${year}-${month} 급여를 생성하시겠습니까?`);
     if (!confirm) return;
 
     try {
+      setLoading(true);
       await generateSalaryForMonth(year, month);
       alert("급여 생성 완료");
       loadSalaries();
     } catch (err) {
+      console.error("급여 생성 실패", err);
       alert("급여 생성 실패");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleViewChange = (mode) => {
     setViewMode(mode);
-    setSearchParams(prev => ({
-      ...prev,
-      view: mode,
-    }));
+    setSearchParams((prev) => {
+      const updated = { ...prev, view: mode };
+      if (mode === "monthly" && (!updated.month || updated.month === "")) {
+        const now = new Date();
+        updated.year = now.getFullYear();
+        updated.month = String(now.getMonth() + 1).padStart(2, "0");
+      }
+      return updated;
+    });
     setPage(0);
   };
-  
 
   const filterOptions = [
-    { key: "name",    label: "이름",       type: "text" },
-    { key: "status",  label: "재직 상태", type: "select", options: [
+    { key: "name", label: "이름", type: "text" },
+    {
+      key: "status",
+      label: "재직 상태",
+      type: "select",
+      options: [
         { value: "1", label: "재직중" },
         { value: "0", label: "퇴사자" },
-      ]
+      ],
     },
-    { key: "date",       label: "단일 날짜",  type: "date" },
-    { key: "dateRange",  label: "기간(날짜)", type: "date-range" },
+    { key: "date", label: "단일 날짜", type: "date" },
+    { key: "dateRange", label: "기간(날짜)", type: "date-range" },
   ];
 
   return (
@@ -148,7 +162,9 @@ function SalaryListCon() {
         >
           연도별 보기
         </ViewToggleButton>
-        <button onClick={handleGenerate}>급여 생성</button>
+        <button onClick={handleGenerate} disabled={loading}>
+          {loading ? "생성 중..." : "급여 생성"}
+        </button>
       </ButtonGroup>
 
       <SalaryListCom
@@ -159,7 +175,7 @@ function SalaryListCon() {
       />
 
       <Pagination
-        page={page}
+        currentPage={page}
         totalPages={totalPages}
         onPageChange={setPage}
       />

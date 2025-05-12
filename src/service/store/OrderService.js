@@ -44,10 +44,11 @@ export const updateOrderStatus = (orderId, status) =>
     );
 
 /** ✅ [6] 발주용 상품 + 재고 조회 */
-export const fetchOrderProductList = ({ page = 0, size = 10 }) =>
+export const fetchOrderProductList = (params = {}) =>
     handleRequest(() =>
-        axios.get('/api/order/products', { params: { page, size } })
+        axios.get('/api/order/products', { params })
     );
+
 
 /** ✅ [7] 부분 입고 처리 */
 export const completePartialItems = (orderId, partTimerId, itemList) =>
@@ -77,8 +78,8 @@ export const removeOrder = (orderId) =>
         axios.delete(`/api/order/${orderId}`)
     );
 
-/** ✅ [11] 지점 목록 조회  */
-export const fetchStoreList = async () => {
-    const res = await axios.get("/api/stores");
-    return res.data; // StoreEntity 리스트 반환
-};
+/** ✅ [11] 매장 목록 조회 (드롭다운용) */
+export const fetchStoreList = () => 
+    handleRequest(() => 
+        axios.get('/api/stores')
+    );

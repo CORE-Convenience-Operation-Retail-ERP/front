@@ -12,20 +12,26 @@ const handleRequest = async (apiCall) => {
     }
 };
 
+
 /** [1] 대분류 카테고리 조회 */
 export const fetchParentCategories = () =>
     handleRequest(() =>
-        axios.get('/api/categories/parents').then((res) => res.data)
+      axios
+        .get('/api/categories/parents')
+        .then(res => res.data)    // ← res.data만 반환
     );
-
-/** [2] 하위 카테고리 조회 (중분류, 소분류) */
-export const fetchChildCategories = (parentId) =>
+  
+  /** [2] 하위 카테고리 조회 (중분류, 소분류) */
+  export const fetchChildCategories = parentId =>
     handleRequest(() =>
-        axios.get(`/api/categories/children/${parentId}`)
+      axios
+        .get(`/api/categories/children/${parentId}`)
+        .then(res => res.data)    // ← res.data만 반환
     );
+  
 
-/** [3] 전체 카테고리 트리 조회 (필요시) */
-export const fetchCategoryTree = () =>
+    /** [3] 특정 대분류의 모든 하위 카테고리 ID 가져오기 */
+export const fetchAllDescendants = (parentId) =>
     handleRequest(() =>
-        axios.get('/api/categories/tree')
+        axios.get(`/api/categories/all-descendants/${parentId}`).then(res => res.data)
     );
