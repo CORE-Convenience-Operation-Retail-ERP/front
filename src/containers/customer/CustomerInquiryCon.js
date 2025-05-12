@@ -1,0 +1,260 @@
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import axios from 'axios';
+
+import MobileStepperCom from '../../components/customer/MobileStepperCom';
+import StoreSelectorCom from '../../components/customer/StoreSelectorCom';
+import CombinedInquiryFormCom from '../../components/customer/CombinedInquiryFormCom';
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+`;
+
+const Header = styled.header`
+  background-color: #4CAF50;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const HeaderTitle = styled.h1`
+  font-size: 1.5rem;
+  margin: 0;
+`;
+
+const Content = styled.main`
+  flex: 1;
+  padding: 15px;
+`;
+
+const Footer = styled.footer`
+  background-color: #f5f5f5;
+  color: #666;
+  text-align: center;
+  padding: 15px;
+  font-size: 0.8rem;
+  border-top: 1px solid #e0e0e0;
+`;
+
+// 감사 페이지 관련 스타일
+const ThankYouContainer = styled.div`
+  padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+`;
+
+const CheckIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #4CAF50;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 20px;
+  font-size: 40px;
+  animation: bounce 1.5s ease infinite;
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-20px);
+    }
+    60% {
+      transform: translateY(-10px);
+    }
+  }
+`;
+
+const ThankYouTitle = styled.h2`
+  font-size: 1.8rem;
+  color: #4CAF50;
+  margin-bottom: 20px;
+`;
+
+const ThankYouCard = styled.div`
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+`;
+
+const ThankYouText = styled.p`
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 15px;
+`;
+
+const Divider = styled.hr`
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 20px 0;
+`;
+
+const ThankYouInfo = styled.p`
+  font-size: 0.9rem;
+  color: #666;
+  margin: 5px 0;
+`;
+
+const NewInquiryButton = styled.button`
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  width: 100%;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #45a049;
+  }
+`;
+
+const CustomerInquiryCon = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedStore, setSelectedStore] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [inquiryNumber, setInquiryNumber] = useState('');
+  const [submittedDate, setSubmittedDate] = useState('');
+  
+  const handleStoreSelect = (store) => {
+    setSelectedStore(store);
+  };
+  
+  const handleNext = () => {
+    setCurrentStep(currentStep + 1);
+  };
+  
+  const handleBack = () => {
+    setCurrentStep(currentStep - 1);
+  };
+  
+  const handleSubmit = async (formData) => {
+    setIsSubmitting(true);
+    
+    try {
+      // API 요청 데이터 구성
+      const inquiryData = {
+        storeId: selectedStore.storeId,
+        inqPhone: formData.inqPhone,
+        inqContent: formData.inqContent,
+        inqType: formData.inquiryType,
+        inqStatus: 2 // 기본값: 대기(2)
+      };
+      
+      // API 요청
+      const response = await axios.post('/api/store-inquiries', inquiryData);
+      
+      // 성공 시 감사 페이지 표시
+      if (response.status === 200) {
+        // 문의번호 생성 (실제로는 API 응답에서 가져와야 함)
+        setInquiryNumber(Math.floor(Math.random() * 1000000).toString().padStart(6, '0'));
+        setSubmittedDate(new Date().toLocaleString('ko-KR'));
+        setIsSubmitted(true);
+      }
+    } catch (error) {
+      // 에러 처리
+      console.error('문의 제출 중 오류가 발생했습니다:', error);
+      alert('문의 제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setIsSubmitting(false);
+    }
+  };
+  
+  const handleReset = () => {
+    setCurrentStep(1);
+    setSelectedStore(null);
+    setIsSubmitted(false);
+    setIsSubmitting(false);
+  };
+  
+  // 현재 단계에 따라 컴포넌트 렌더링
+  const renderContent = () => {
+    // 제출 완료 후 감사 페이지 표시
+    if (isSubmitted) {
+      return (
+        <ThankYouContainer>
+          <CheckIcon>✓</CheckIcon>
+          <ThankYouTitle>문의가 성공적으로 접수되었습니다!</ThankYouTitle>
+          
+          <ThankYouCard>
+            <ThankYouText>
+              소중한 의견을 보내주셔서 감사합니다. 고객님의 문의사항을 빠르게 확인하고 처리하도록 하겠습니다.
+            </ThankYouText>
+            <ThankYouText>
+              고객센터에서 추가 정보가 필요한 경우, 입력하신 연락처로 연락드릴 수 있습니다.
+            </ThankYouText>
+            
+            <Divider />
+            
+            <ThankYouInfo>
+              <strong>문의번호:</strong> {inquiryNumber}
+            </ThankYouInfo>
+            <ThankYouInfo>
+              <strong>접수일시:</strong> {submittedDate}
+            </ThankYouInfo>
+          </ThankYouCard>
+          
+          <NewInquiryButton onClick={handleReset}>
+            새 문의 작성하기
+          </NewInquiryButton>
+        </ThankYouContainer>
+      );
+    }
+  
+    // 일반 문의 프로세스
+    switch (currentStep) {
+      case 1:
+        return (
+          <StoreSelectorCom
+            onStoreSelect={handleStoreSelect}
+            onNext={handleNext}
+          />
+        );
+      case 2:
+        return (
+          <CombinedInquiryFormCom
+            store={selectedStore}
+            onSubmit={handleSubmit}
+            onBack={handleBack}
+            isSubmitting={isSubmitting}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+  
+  return (
+    <Container>
+      <Header>
+        <HeaderTitle>매장 문의하기</HeaderTitle>
+      </Header>
+      
+      <Content>
+        {!isSubmitted && <MobileStepperCom currentStep={currentStep} />}
+        {renderContent()}
+      </Content>
+      
+      <Footer>
+        &copy; {new Date().getFullYear()} 코어마케팅 All Rights Reserved.
+      </Footer>
+    </Container>
+  );
+};
+
+export default CustomerInquiryCon; 

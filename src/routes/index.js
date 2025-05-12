@@ -45,6 +45,8 @@ import OrderHistoryPage from '../pages/store/order/OrderHistoryPage';
 import MySalaryPage from '../pages/headquarters/MySalaryPage';
 import TransactionPage from '../pages/store/TransactionPage';
 import SalesAnalysis from '../pages/headquarters/branches/SalesAnalysis';
+// 고객용 문의 페이지 import
+import CustomerInquiryPage from '../pages/customer/CustomerInquiryPage';
 
 const AppRoutes = () => {
   return (
@@ -101,6 +103,9 @@ const AppRoutes = () => {
         <Route path="stats/sales" element={<StatsSalesPage/>} />
         <Route path="transactions" element={<TransactionPage />} />
       </Route>
+
+      {/* 고객 관련 라우트 */}
+      <Route path="/customer" element={<CustomerInquiryPage />} />
 
       {/* 기본 리다이렉트 */}
       <Route path="/" element={<Navigate to="/login" replace />} />
