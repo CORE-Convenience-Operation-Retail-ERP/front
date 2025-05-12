@@ -32,12 +32,64 @@ const formatNumber = (num) => {
 const DemographicSalesChart = ({ data, type = 'age' }) => {
   const [chartType, setChartType] = React.useState(type);
 
-  if (!data || !data.chartData || !data.summary) {
+  if (!data || !data.chartData || !Array.isArray(data.chartData) || data.chartData.length === 0 || !data.summary) {
     return (
       <Card>
+        <CardHeader 
+          title={chartType === 'age' ? "연령대별 매출 분석" : "성별 매출 분석"} 
+          subheader="인구통계학적 매출 분석" 
+        />
+        <Divider />
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs 
+            value={chartType} 
+            onChange={(e, val) => setChartType(val)}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="fullWidth"
+          >
+            <Tab label="연령대별" value="age" />
+            <Tab label="성별" value="gender" />
+          </Tabs>
+        </Box>
         <CardContent>
           <Typography variant="body1" align="center">
             데이터가 없습니다.
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // 차트 데이터 유효성 검증
+  const validChartData = data.chartData.filter(item => 
+    item && item.label && typeof item.value === 'number' && 
+    item.additionalData && typeof item.additionalData.transactions === 'number'
+  );
+
+  if (validChartData.length === 0) {
+    return (
+      <Card>
+        <CardHeader 
+          title={chartType === 'age' ? "연령대별 매출 분석" : "성별 매출 분석"} 
+          subheader="인구통계학적 매출 분석" 
+        />
+        <Divider />
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs 
+            value={chartType} 
+            onChange={(e, val) => setChartType(val)}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="fullWidth"
+          >
+            <Tab label="연령대별" value="age" />
+            <Tab label="성별" value="gender" />
+          </Tabs>
+        </Box>
+        <CardContent>
+          <Typography variant="body1" align="center">
+            유효한 데이터가 없습니다.
           </Typography>
         </CardContent>
       </Card>
@@ -67,17 +119,17 @@ const DemographicSalesChart = ({ data, type = 'age' }) => {
 
   // 차트 데이터 준비
   const chartData = {
-    labels: data.chartData.map(item => item.label),
+    labels: validChartData.map(item => item.label),
     datasets: [
       {
         label: chartType === 'age' ? '연령대별 매출' : '성별 매출',
-        data: data.chartData.map(item => item.value),
-        backgroundColor: data.chartData.map(item => 
+        data: validChartData.map(item => item.value),
+        backgroundColor: validChartData.map(item => 
           chartType === 'age' 
             ? ageColors.backgroundColor 
             : (genderColors[item.label] || genderColors['기타']).backgroundColor
         ),
-        borderColor: data.chartData.map(item => 
+        borderColor: validChartData.map(item => 
           chartType === 'age' 
             ? ageColors.borderColor 
             : (genderColors[item.label] || genderColors['기타']).borderColor
@@ -107,7 +159,7 @@ const DemographicSalesChart = ({ data, type = 'age' }) => {
             return label;
           },
           afterLabel: function(context) {
-            const item = data.chartData[context.dataIndex];
+            const item = validChartData[context.dataIndex];
             const transactions = item.additionalData.transactions;
             const percentage = Math.round((item.value / data.summary.totalSales) * 100);
             
@@ -144,8 +196,8 @@ const DemographicSalesChart = ({ data, type = 'age' }) => {
   };
 
   // 최대 매출 항목 찾기
-  const maxItem = data.chartData.reduce((max, item) => 
-    item.value > max.value ? item : max, data.chartData[0]);
+  const maxItem = validChartData.reduce((max, item) => 
+    item.value > max.value ? item : max, validChartData[0]);
 
   return (
     <Card>

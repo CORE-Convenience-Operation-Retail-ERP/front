@@ -34,9 +34,14 @@ const formatNumber = (num) => {
  * 전체 통합 통계 차트 컴포넌트
  */
 const SalesOverviewChart = ({ data }) => {
-  if (!data || !data.chartData || !data.summary) {
+  if (!data || !data.chartData || !Array.isArray(data.chartData) || data.chartData.length === 0 || !data.summary) {
     return (
       <Card>
+        <CardHeader 
+          title="매출 개요" 
+          subheader="기간 내 매출 추이" 
+        />
+        <Divider />
         <CardContent>
           <Typography variant="body1" align="center">
             데이터가 없습니다.
@@ -46,13 +51,35 @@ const SalesOverviewChart = ({ data }) => {
     );
   }
 
+  // 차트 데이터 유효성 검증
+  const validChartData = data.chartData.filter(item => 
+    item && item.label && typeof item.value === 'number'
+  );
+
+  if (validChartData.length === 0) {
+    return (
+      <Card>
+        <CardHeader 
+          title="매출 개요" 
+          subheader="기간 내 매출 추이" 
+        />
+        <Divider />
+        <CardContent>
+          <Typography variant="body1" align="center">
+            유효한 데이터가 없습니다.
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // 차트 데이터 준비
   const chartData = {
-    labels: data.chartData.map(item => item.label),
+    labels: validChartData.map(item => item.label),
     datasets: [
       {
         label: '매출',
-        data: data.chartData.map(item => item.value),
+        data: validChartData.map(item => item.value),
         fill: true,
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         borderColor: 'rgba(75, 192, 192, 1)',

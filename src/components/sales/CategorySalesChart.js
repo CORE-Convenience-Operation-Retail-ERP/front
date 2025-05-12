@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, Divider, Box, Typography, Grid } from '@mui/material';
-import { Doughnut } from 'react-chartjs-2';
+import { Card, CardContent, CardHeader, Divider, Box, Typography } from '@mui/material';
+import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -24,9 +24,14 @@ const formatNumber = (num) => {
  * 카테고리별 매출 차트 컴포넌트
  */
 const CategorySalesChart = ({ data }) => {
-  if (!data || !data.chartData || !data.summary) {
+  if (!data || !data.chartData || !Array.isArray(data.chartData) || data.chartData.length === 0 || !data.summary) {
     return (
       <Card>
+        <CardHeader 
+          title="카테고리별 매출 분석" 
+          subheader="카테고리별 매출 비율" 
+        />
+        <Divider />
         <CardContent>
           <Typography variant="body1" align="center">
             데이터가 없습니다.
@@ -36,28 +41,49 @@ const CategorySalesChart = ({ data }) => {
     );
   }
 
+  // 차트 데이터 유효성 검증
+  const validChartData = data.chartData.filter(item => 
+    item && item.label && typeof item.value === 'number'
+  );
+
+  if (validChartData.length === 0) {
+    return (
+      <Card>
+        <CardHeader 
+          title="카테고리별 매출 분석" 
+          subheader="카테고리별 매출 비율" 
+        />
+        <Divider />
+        <CardContent>
+          <Typography variant="body1" align="center">
+            유효한 데이터가 없습니다.
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // 차트 색상 배열
   const backgroundColors = [
-    'rgba(255, 99, 132, 0.7)',
-    'rgba(54, 162, 235, 0.7)',
-    'rgba(255, 206, 86, 0.7)',
-    'rgba(75, 192, 192, 0.7)',
-    'rgba(153, 102, 255, 0.7)',
-    'rgba(255, 159, 64, 0.7)',
-    'rgba(201, 203, 207, 0.7)',
-    'rgba(255, 99, 71, 0.7)',
-    'rgba(50, 205, 50, 0.7)',
-    'rgba(138, 43, 226, 0.7)'
+    'rgba(75, 192, 192, 0.6)',
+    'rgba(54, 162, 235, 0.6)',
+    'rgba(255, 206, 86, 0.6)',
+    'rgba(255, 99, 132, 0.6)',
+    'rgba(153, 102, 255, 0.6)',
+    'rgba(255, 159, 64, 0.6)',
+    'rgba(201, 203, 207, 0.6)',
+    'rgba(255, 99, 71, 0.6)',
+    'rgba(50, 205, 50, 0.6)',
+    'rgba(138, 43, 226, 0.6)'
   ];
 
   // 차트 데이터 준비
   const chartData = {
-    labels: data.chartData.map(item => item.label),
+    labels: validChartData.map(item => item.label),
     datasets: [
       {
-        data: data.chartData.map(item => item.value),
-        backgroundColor: data.chartData.map((_, index) => backgroundColors[index % backgroundColors.length]),
-        borderColor: data.chartData.map((_, index) => backgroundColors[index % backgroundColors.length].replace('0.7', '1')),
+        data: validChartData.map(item => item.value),
+        backgroundColor: validChartData.map((_, index) => backgroundColors[index % backgroundColors.length]),
         borderWidth: 1
       }
     ]
@@ -73,11 +99,10 @@ const CategorySalesChart = ({ data }) => {
       tooltip: {
         callbacks: {
           label: function(context) {
-            const label = context.label || '';
             const value = context.raw;
-            const total = context.chart.getDatasetMeta(0).total;
-            const percentage = Math.round((value / total) * 100);
-            return `${label}: ${formatNumber(Math.round(value))}원 (${percentage}%)`;
+            const label = context.label || '';
+            const percentage = Math.round((value / data.summary.totalSales) * 100);
+            return `${label}: ${formatNumber(value)}원 (${percentage}%)`;
           }
         }
       }
@@ -85,54 +110,30 @@ const CategorySalesChart = ({ data }) => {
     maintainAspectRatio: false
   };
 
-  // 상위 3개 카테고리 추출
-  const topCategories = [...data.chartData]
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 3);
+  // 상위 3개 카테고리
+  const topCategories = [...validChartData].sort((a, b) => b.value - a.value).slice(0, 3);
 
   return (
     <Card>
       <CardHeader 
         title="카테고리별 매출 분석" 
-        subheader="카테고리별 매출 비중" 
+        subheader="카테고리별 매출 비율" 
       />
       <Divider />
       <CardContent>
-        <Grid container spacing={3}>
-          <Grid xs={12} md={8}>
-            <Box sx={{ height: 350 }}>
-              <Doughnut data={chartData} options={chartOptions} />
-            </Box>
-          </Grid>
-          <Grid xs={12} md={4}>
-            <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-              <Typography variant="subtitle2" gutterBottom>
-                상위 3개 카테고리
-              </Typography>
-              <Divider sx={{ my: 1 }} />
-              {topCategories.map((category, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <Typography variant="body2" sx={{ 
-                    color: backgroundColors[data.chartData.findIndex(item => item.label === category.label) % backgroundColors.length].replace('0.7', '1'),
-                    fontWeight: 'bold'
-                  }}>
-                    {index + 1}. {category.label}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {formatNumber(Math.round(category.value))}원
-                    {category.additionalData && category.additionalData.salesCount && (
-                      <span> ({formatNumber(category.additionalData.salesCount)}건)</span>
-                    )}
-                  </Typography>
-                </Box>
-              ))}
-              <Divider sx={{ my: 1 }} />
-              <Typography variant="body2" color="text.secondary">
-                총 매출: {formatNumber(Math.round(data.summary.totalSales))}원
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
+        <Box sx={{ height: 350, display: 'flex', justifyContent: 'center' }}>
+          <Pie data={chartData} options={chartOptions} />
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            <strong>상위 카테고리:</strong>
+          </Typography>
+          {topCategories.map((category, index) => (
+            <Typography key={index} variant="body2" color="text.secondary" gutterBottom>
+              {index + 1}. {category.label}: {formatNumber(Math.round(category.value))}원 ({Math.round((category.value / data.summary.totalSales) * 100)}%)
+            </Typography>
+          ))}
+        </Box>
       </CardContent>
     </Card>
   );
