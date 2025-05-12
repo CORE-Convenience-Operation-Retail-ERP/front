@@ -124,6 +124,26 @@ const NewInquiryButton = styled.button`
   }
 `;
 
+const ErrorContainer = styled.div`
+  background-color: #ffebee;
+  border-left: 4px solid #f44336;
+  padding: 12px 16px;
+  margin: 20px 0;
+  border-radius: 4px;
+`;
+
+const ErrorTitle = styled.h3`
+  color: #d32f2f;
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+`;
+
+const ErrorMessage = styled.p`
+  color: #d32f2f;
+  margin: 0;
+  font-size: 0.9rem;
+`;
+
 const CustomerInquiryCon = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedStore, setSelectedStore] = useState(null);
@@ -131,6 +151,7 @@ const CustomerInquiryCon = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [inquiryNumber, setInquiryNumber] = useState('');
   const [submittedDate, setSubmittedDate] = useState('');
+  const [apiError, setApiError] = useState(null);
   
   const handleStoreSelect = (store) => {
     setSelectedStore(store);
@@ -146,6 +167,7 @@ const CustomerInquiryCon = () => {
   
   const handleSubmit = async (formData) => {
     setIsSubmitting(true);
+    setApiError(null);
     
     try {
       // API 요청 데이터 구성
@@ -168,15 +190,23 @@ const CustomerInquiryCon = () => {
       
       // 성공 시 감사 페이지 표시
       if (response.status === 200) {
-        // 문의번호 생성 (실제로는 API 응답에서 가져와야 함)
-        setInquiryNumber(Math.floor(Math.random() * 1000000).toString().padStart(6, '0'));
+        // 문의번호와 ID 설정
+        setInquiryNumber(response.data.inquiryId ? response.data.inquiryId.toString().padStart(6, '0') : 
+                         Math.floor(Math.random() * 1000000).toString().padStart(6, '0'));
         setSubmittedDate(new Date().toLocaleString('ko-KR'));
         setIsSubmitted(true);
       }
     } catch (error) {
-      // 에러 처리
+      // 에러 처리 개선
       console.error('문의 제출 중 오류가 발생했습니다:', error);
-      alert('문의 제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+      
+      // 서버에서 받은 오류 메시지 표시
+      if (error.response && error.response.data) {
+        setApiError(error.response.data.message || '문의 제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+      } else {
+        setApiError('서버 연결에 실패했습니다. 인터넷 연결을 확인하거나 나중에 다시 시도해주세요.');
+      }
+      
       setIsSubmitting(false);
     }
   };
@@ -186,6 +216,7 @@ const CustomerInquiryCon = () => {
     setSelectedStore(null);
     setIsSubmitted(false);
     setIsSubmitting(false);
+    setApiError(null);
   };
   
   // 현재 단계에 따라 컴포넌트 렌더링
@@ -199,10 +230,10 @@ const CustomerInquiryCon = () => {
           
           <ThankYouCard>
             <ThankYouText>
-              소중한 의견을 보내주셔서 감사합니다. 고객님의 문의사항을 빠르게 확인하고 처리하도록 하겠습니다.
+              소중한 의견을 보내주셔서 감사합니다.<br/>고객님의 문의사항을 빠르게 확인하고 처리하도록 하겠습니다.
             </ThankYouText>
             <ThankYouText>
-              고객센터에서 추가 정보가 필요한 경우, 입력하신 연락처로 연락드릴 수 있습니다.
+              고객센터에서 추가 정보가 필요한 경우,<br/>입력하신 연락처로 연락드릴 수 있습니다.
             </ThankYouText>
             
             <Divider />
@@ -233,12 +264,20 @@ const CustomerInquiryCon = () => {
         );
       case 2:
         return (
-          <CombinedInquiryFormCom
-            store={selectedStore}
-            onSubmit={handleSubmit}
-            onBack={handleBack}
-            isSubmitting={isSubmitting}
-          />
+          <>
+            {apiError && (
+              <ErrorContainer>
+                <ErrorTitle>오류가 발생했습니다</ErrorTitle>
+                <ErrorMessage>{apiError}</ErrorMessage>
+              </ErrorContainer>
+            )}
+            <CombinedInquiryFormCom
+              store={selectedStore}
+              onSubmit={handleSubmit}
+              onBack={handleBack}
+              isSubmitting={isSubmitting}
+            />
+          </>
         );
       default:
         return null;
