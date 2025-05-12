@@ -238,7 +238,7 @@ const Sidebar = () => {
                 hasSubmenu={item.subMenus.length > 0}
                 submenuHeight={submenuHeights[index] || 0}
               >
-                <StyledListItem button isActive={isActiveMenu}>
+                <StyledListItem button={true} isActive={isActiveMenu}>
                   <ListItemText primary={item.text} />
                 </StyledListItem>
                 <Collapse
@@ -251,7 +251,7 @@ const Sidebar = () => {
                       const isActiveSub = location.pathname === subItem.path;
                       return (
                         <ListItem
-                          button
+                          button={true}
                           key={subItem.text}
                           onClick={(e) => handleSubMenuClick(subItem.path, e)}
                           sx={{
