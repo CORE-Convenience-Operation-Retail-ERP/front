@@ -32,9 +32,15 @@ import {
   Tooltip,
   ThemeProvider,
   createTheme,
-  Pagination
+  Pagination,
+  LinearProgress
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
+import WarningIcon from '@mui/icons-material/Warning';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import ErrorIcon from '@mui/icons-material/Error';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 
 // Pretendard 폰트를 사용하는 MUI 테마 생성
 const theme = createTheme({
@@ -106,52 +112,141 @@ const formatDateTime = (dateString) => {
 
 // 문의 유형 배지 컴포넌트
 const TypeBadge = ({ type }) => {
-  let color, label;
+  let label;
   
   switch (type) {
     case 1:
-      color = 'error';
       label = '컴플레인';
       break;
     case 2:
-      color = 'success';
       label = '칭찬';
       break;
     case 3:
-      color = 'primary';
       label = '건의/문의';
       break;
     default:
-      color = 'default';
       label = '기타';
   }
   
-  return <Chip label={label} color={color} size="small" />;
+  return (
+    <Chip 
+      label={label} 
+      size="small" 
+      sx={{ 
+        bgcolor: 'rgba(0, 0, 0, 0.08)',
+        color: 'text.primary',
+        width: '80px', // 너비 고정
+        fontWeight: 500
+      }}
+    />
+  );
 };
 
 // 상태 배지 컴포넌트
 const StatusBadge = ({ status }) => {
-  let color, label;
+  let label, bgColor;
   
   switch (status) {
     case 1:
-      color = 'success';
       label = '완료';
+      bgColor = 'rgba(46, 125, 50, 0.1)'; // 연한 녹색 배경
       break;
     case 2:
-      color = 'warning';
       label = '대기';
+      bgColor = 'rgba(237, 108, 2, 0.1)'; // 연한 주황색 배경
       break;
     case 3:
-      color = 'error';
       label = '취소/반려';
+      bgColor = 'rgba(211, 47, 47, 0.1)'; // 연한 빨간색 배경
       break;
     default:
-      color = 'default';
       label = '기타';
+      bgColor = 'rgba(0, 0, 0, 0.08)'; // 기본 회색 배경
   }
   
-  return <Chip label={label} color={color} size="small" />;
+  return (
+    <Chip 
+      label={label} 
+      size="small" 
+      sx={{ 
+        bgcolor: bgColor,
+        color: 'text.primary',
+        width: '80px', // 너비 고정
+        fontWeight: 500
+      }}
+    />
+  );
+};
+
+// 컴플레인 평가 표시 컴포넌트
+const ComplaintLevelIndicator = ({ value }) => {
+  if (!value) return <Typography variant="body2" color="text.secondary">미평가</Typography>;
+  
+  // 바 형태로 변경
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        width: '70px',
+        height: '8px',
+        bgcolor: 'rgba(0,0,0,0.08)',
+        borderRadius: '4px',
+        overflow: 'hidden'
+      }}>
+        <Box sx={{ 
+          width: `${value * 20}%`, 
+          height: '100%', 
+          bgcolor: value <= 2 ? 'warning.light' : value <= 4 ? 'warning.main' : 'error.main',
+        }} />
+      </Box>
+      <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary', fontWeight: 500 }}>
+        {value}
+      </Typography>
+    </Box>
+  );
+};
+
+// 칭찬 평가 표시 컴포넌트
+const PraiseLevelIndicator = ({ value }) => {
+  if (!value) return <Typography variant="body2" color="text.secondary">미평가</Typography>;
+  
+  // 바 형태로 변경 (밝은 그린 컬러)
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        width: '70px',
+        height: '8px',
+        bgcolor: 'rgba(0,0,0,0.08)',
+        borderRadius: '4px',
+        overflow: 'hidden'
+      }}>
+        <Box sx={{ 
+          width: `${value * 20}%`, 
+          height: '100%', 
+          bgcolor: value <= 2 ? '#81c784' : value <= 4 ? '#66bb6a' : '#4caf50', // 밝은 그린 컬러
+        }} />
+      </Box>
+      <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary', fontWeight: 500 }}>
+        {value}
+      </Typography>
+    </Box>
+  );
+};
+
+// 문의 평가 컴포넌트 (조건부 렌더링)
+const InquiryLevelIndicator = ({ inquiry }) => {
+  if (!inquiry.inqLevel) {
+    return <Typography variant="body2" color="text.secondary">미평가</Typography>;
+  }
+  
+  if (inquiry.inqType === 1) { // 컴플레인
+    return <ComplaintLevelIndicator value={inquiry.inqLevel} />;
+  } else if (inquiry.inqType === 2) { // 칭찬
+    return <PraiseLevelIndicator value={inquiry.inqLevel} />;
+  } else {
+    return <Typography variant="body2" color="text.secondary">-</Typography>;
+  }
 };
 
 const StoreInquiryCom = ({ 
@@ -161,21 +256,20 @@ const StoreInquiryCom = ({
   onTypeFilter, 
   onStatusFilter,
   onLevelChange,
+  onInquiryComplete,
   storeRankings = [],
   showRankings = false,
   onToggleRankings,
   page = 0,
   totalPages = 0,
-  onPageChange
+  onPageChange,
+  statusCounts = { waiting: 0, completed: 0, canceled: 0 }
 }) => {
   const [selectedType, setSelectedType] = React.useState('all');
   const [selectedStatus, setSelectedStatus] = React.useState('all');
   const [detailOpen, setDetailOpen] = React.useState(false);
   const [selectedInquiry, setSelectedInquiry] = React.useState(null);
   const [inquiryLevel, setInquiryLevel] = React.useState(null);
-  
-  // 대기 상태 게시글 수 계산
-  const waitingInquiriesCount = inquiries.filter(inquiry => inquiry.inqStatus === 2).length;
   
   const handleTypeChange = (newType) => {
     setSelectedType(newType);
@@ -195,6 +289,7 @@ const StoreInquiryCom = ({
   
   const handleDetailClose = () => {
     setDetailOpen(false);
+    setInquiryLevel(null);
   };
   
   const handleChangeStatus = (newStatus) => {
@@ -206,6 +301,10 @@ const StoreInquiryCom = ({
 
   const handleLevelChange = (event) => {
     setInquiryLevel(event.target.value);
+  };
+  
+  const handleSelectLevel = (level) => {
+    setInquiryLevel(level);
   };
   
   const handleSaveLevel = () => {
@@ -224,6 +323,14 @@ const StoreInquiryCom = ({
     if (onStatusChange && selectedInquiry) {
       onStatusChange(selectedInquiry.inquiryId, 3); // 3: 취소/반려 상태
       setDetailOpen(false);
+    }
+  };
+  
+  // 건의/문의 완료 처리 함수 수정
+  const handleInquiryComplete = () => {
+    if (onInquiryComplete && selectedInquiry) {
+      onInquiryComplete(selectedInquiry.inquiryId);
+      setDetailOpen(false); // 완료 처리 후 모달 닫기
     }
   };
   
@@ -281,7 +388,9 @@ const StoreInquiryCom = ({
                         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                         borderRadius: 1.5,
                         '.MuiButton-root': {
-                          borderRadius: 1.5
+                          borderRadius: 1.5,
+                          minWidth: '80px',
+                          px: 2
                         }
                       }}
                     >
@@ -293,30 +402,45 @@ const StoreInquiryCom = ({
                         전체
                       </Button>
                       <Button 
-                        color={selectedType === '1' ? 'error' : 'inherit'} 
+                        color="inherit" 
                         variant={selectedType === '1' ? 'contained' : 'outlined'}
                         onClick={() => handleTypeChange('1')}
+                        sx={{ 
+                          bgcolor: selectedType === '1' ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                          color: 'text.primary',
+                          borderColor: 'rgba(0, 0, 0, 0.23)'
+                        }}
                       >
                         컴플레인
                       </Button>
                       <Button 
-                        color={selectedType === '2' ? 'success' : 'inherit'} 
+                        color="inherit"
                         variant={selectedType === '2' ? 'contained' : 'outlined'}
                         onClick={() => handleTypeChange('2')}
+                        sx={{ 
+                          bgcolor: selectedType === '2' ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                          color: 'text.primary',
+                          borderColor: 'rgba(0, 0, 0, 0.23)'
+                        }}
                       >
                         칭찬
                       </Button>
                       <Button 
-                        color={selectedType === '3' ? 'primary' : 'inherit'} 
+                        color="inherit"
                         variant={selectedType === '3' ? 'contained' : 'outlined'}
                         onClick={() => handleTypeChange('3')}
+                        sx={{ 
+                          bgcolor: selectedType === '3' ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                          color: 'text.primary',
+                          borderColor: 'rgba(0, 0, 0, 0.23)'
+                        }}
                       >
                         건의/문의
                       </Button>
                     </ButtonGroup>
                   </Box>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: { xs: 2, md: 0 } }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 500, whiteSpace: 'nowrap', color: '#444' }}>
                       처리 상태:
                     </Typography>
@@ -327,7 +451,9 @@ const StoreInquiryCom = ({
                         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                         borderRadius: 1.5,
                         '.MuiButton-root': {
-                          borderRadius: 1.5
+                          borderRadius: 1.5,
+                          minWidth: '80px',
+                          px: 2
                         }
                       }}
                     >
@@ -339,25 +465,40 @@ const StoreInquiryCom = ({
                         전체
                       </Button>
                       <Button 
-                        color={selectedStatus === '1' ? 'success' : 'inherit'} 
+                        color="inherit"
                         variant={selectedStatus === '1' ? 'contained' : 'outlined'}
                         onClick={() => handleStatusChange('1')}
+                        sx={{ 
+                          bgcolor: selectedStatus === '1' ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                          color: 'text.primary',
+                          borderColor: 'rgba(0, 0, 0, 0.23)'
+                        }}
                       >
                         완료
                       </Button>
-                      <Badge badgeContent={waitingInquiriesCount} color="warning" sx={{ '& .MuiBadge-badge': { top: 5, right: 5 } }}>
+                      <Badge badgeContent={statusCounts.waiting} color="warning" sx={{ '& .MuiBadge-badge': { top: 5, right: 5 } }}>
                         <Button 
-                          color={selectedStatus === '2' ? 'warning' : 'inherit'} 
+                          color="inherit"
                           variant={selectedStatus === '2' ? 'contained' : 'outlined'}
                           onClick={() => handleStatusChange('2')}
+                          sx={{ 
+                            bgcolor: selectedStatus === '2' ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                            color: 'text.primary',
+                            borderColor: 'rgba(0, 0, 0, 0.23)'
+                          }}
                         >
                           대기
                         </Button>
                       </Badge>
                       <Button 
-                        color={selectedStatus === '3' ? 'error' : 'inherit'} 
+                        color="inherit"
                         variant={selectedStatus === '3' ? 'contained' : 'outlined'}
                         onClick={() => handleStatusChange('3')}
+                        sx={{ 
+                          bgcolor: selectedStatus === '3' ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                          color: 'text.primary',
+                          borderColor: 'rgba(0, 0, 0, 0.23)'
+                        }}
                       >
                         취소/반려
                       </Button>
@@ -381,13 +522,13 @@ const StoreInquiryCom = ({
               <Table>
                 <TableHead sx={{ backgroundColor: alpha('#3f51b5', 0.08) }}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>순위</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>지점명</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>컴플레인 건수</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>컴플레인 점수</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>칭찬 건수</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>칭찬 점수</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>종합 점수</TableCell>
+                    <TableCell sx={{ fontWeight: 700, textAlign: 'center' }}>순위</TableCell>
+                    <TableCell sx={{ fontWeight: 700, textAlign: 'center' }}>지점명</TableCell>
+                    <TableCell sx={{ fontWeight: 700, textAlign: 'center' }}>컴플레인 건수</TableCell>
+                    <TableCell sx={{ fontWeight: 700, textAlign: 'center' }}>컴플레인 점수</TableCell>
+                    <TableCell sx={{ fontWeight: 700, textAlign: 'center' }}>칭찬 건수</TableCell>
+                    <TableCell sx={{ fontWeight: 700, textAlign: 'center' }}>칭찬 점수</TableCell>
+                    <TableCell sx={{ fontWeight: 700, textAlign: 'center' }}>종합 점수</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -399,48 +540,102 @@ const StoreInquiryCom = ({
                           backgroundColor: index === 0 ? alpha('#ffd700', 0.2) : index === 1 ? alpha('#c0c0c0', 0.2) : index === 2 ? alpha('#cd7f32', 0.2) : alpha('#f5f5f5', 0.5)
                         }
                       }}>
-                        <TableCell>
-                          <Box sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center',
-                            fontWeight: 'bold',
-                            width: 32,
-                            height: 32,
-                            borderRadius: '50%',
-                            background: index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : alpha('#f5f5f5', 0.8),
-                            color: index < 3 ? '#000' : '#666'
-                          }}>
-                            {store.rank}
+                        <TableCell sx={{ textAlign: 'center' }}>
+                          {index < 3 ? (
+                            <Box sx={{ 
+                              display: 'inline-flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'center',
+                              fontWeight: 'bold',
+                              width: 36,
+                              height: 36,
+                              borderRadius: '50%',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                              background: index === 0 ? 'linear-gradient(135deg, #ffd700 30%, #ffec80 90%)' : 
+                                         index === 1 ? 'linear-gradient(135deg, #c0c0c0 30%, #e0e0e0 90%)' : 
+                                         'linear-gradient(135deg, #cd7f32 30%, #e0a872 90%)',
+                              color: index === 0 ? '#7a5c00' : index === 1 ? '#555' : '#5d3200'
+                            }}>
+                              {store.rank}
+                            </Box>
+                          ) : (
+                            <Typography sx={{ fontWeight: 500, color: '#666' }}>{store.rank}</Typography>
+                          )}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: index < 3 ? 600 : 400, textAlign: 'center' }}>{store.storeName}</TableCell>
+                        <TableCell sx={{ textAlign: 'center' }}>{store.complaintCount}</TableCell>
+                        <TableCell sx={{ textAlign: 'center' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {store.complaintCount > 0 ? (
+                              <>
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  width: '60px',
+                                  height: '8px',
+                                  bgcolor: 'rgba(0,0,0,0.08)',
+                                  borderRadius: '4px',
+                                  overflow: 'hidden'
+                                }}>
+                                  <Box sx={{ 
+                                    width: `${Math.min(100, (store.complaintScore / store.complaintCount / 5) * 100)}%`, 
+                                    height: '100%', 
+                                    bgcolor: (store.complaintScore / store.complaintCount) <= 2 ? 
+                                      'warning.light' : 
+                                      (store.complaintScore / store.complaintCount) <= 4 ? 
+                                        'warning.main' : 
+                                        'error.main',
+                                  }} />
+                                </Box>
+                                <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                                  ({(store.complaintScore / store.complaintCount).toFixed(1)})
+                                </Typography>
+                              </>
+                            ) : (
+                              <Typography variant="body2" color="text.secondary">-</Typography>
+                            )}
                           </Box>
                         </TableCell>
-                        <TableCell sx={{ fontWeight: index < 3 ? 600 : 400 }}>{store.storeName}</TableCell>
-                        <TableCell>{store.complaintCount}</TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Rating value={Math.min(5, store.complaintScore / store.complaintCount || 0)} readOnly max={5} size="small" />
-                            <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                              ({store.complaintScore})
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>{store.praiseCount}</TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Rating value={Math.min(5, store.praiseScore / store.praiseCount || 0)} readOnly max={5} size="small" />
-                            <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                              ({store.praiseScore})
-                            </Typography>
+                        <TableCell sx={{ textAlign: 'center' }}>{store.praiseCount}</TableCell>
+                        <TableCell sx={{ textAlign: 'center' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {store.praiseCount > 0 ? (
+                              <>
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  width: '60px',
+                                  height: '8px',
+                                  bgcolor: 'rgba(0,0,0,0.08)',
+                                  borderRadius: '4px',
+                                  overflow: 'hidden'
+                                }}>
+                                  <Box sx={{ 
+                                    width: `${Math.min(100, (store.praiseScore / store.praiseCount / 5) * 100)}%`, 
+                                    height: '100%', 
+                                    bgcolor: (store.praiseScore / store.praiseCount) <= 2 ? 
+                                      '#81c784' : 
+                                      (store.praiseScore / store.praiseCount) <= 4 ? 
+                                        '#66bb6a' : 
+                                        '#4caf50',
+                                  }} />
+                                </Box>
+                                <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                                  ({(store.praiseScore / store.praiseCount).toFixed(1)})
+                                </Typography>
+                              </>
+                            ) : (
+                              <Typography variant="body2" color="text.secondary">-</Typography>
+                            )}
                           </Box>
                         </TableCell>
                         <TableCell 
                           sx={{ 
-                            color: store.totalScore >= 0 ? 'green' : 'red',
+                            color: (100 + store.totalScore) >= 100 ? 'green' : (100 + store.totalScore) < 80 ? 'red' : '#f57c00',
                             fontWeight: 'bold',
-                            fontSize: '1.1rem'
+                            fontSize: '1.1rem',
+                            textAlign: 'center'
                           }}
                         >
-                          {store.totalScore.toFixed(1)}
+                          {(100 + store.totalScore).toFixed(1)}
                         </TableCell>
                       </TableRow>
                     ))
@@ -457,13 +652,19 @@ const StoreInquiryCom = ({
             <Box sx={{ mt: 2, p: 2, bgcolor: alpha('#f5f5f5', 0.5), borderRadius: 2 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>평가 지표 설명</Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                • <strong>컴플레인 점수</strong>: 컴플레인 심각도 평균 (1: 경미 ~ 5: 매우 심각)
+                • <strong>기본 점수</strong>: 모든 지점은 기본 점수 100점에서 시작합니다.
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                • <strong>칭찬 점수</strong>: 칭찬 수준 평균 (1: 기본 ~ 5: 최고 수준)
+                • <strong>컴플레인 점수</strong>: 컴플레인 심각도 평균 (1: 경미 ~ 5: 매우 심각) × 건수 × 가중치(1.5) 만큼 감점
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                • <strong>종합 점수</strong>: 칭찬 총점 - (컴플레인 총점 × 2) (컴플레인은 가중치 부여)
+                • <strong>칭찬 점수</strong>: 칭찬 수준 평균 (1: 기본 ~ 5: 최고 수준) × 건수 만큼 가점
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                • <strong>종합 점수</strong>: 기본 점수(100) + 칭찬 총점 - 컴플레인 감점
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1, fontStyle: 'italic', color: 'text.secondary' }}>
+                ※ 건의/문의 유형은 평가 점수에 반영되지 않습니다.
               </Typography>
               <Typography variant="body2" sx={{ fontStyle: 'italic', mt: 1, color: '#3f51b5', fontWeight: 500 }}>
                 ※ 상위 3개 지점에는 인센티브 지급 대상이 됩니다.
@@ -522,7 +723,7 @@ const StoreInquiryCom = ({
                           </TableCell>
                           <TableCell>
                             {inquiry.inqLevel ? 
-                              <Rating value={inquiry.inqLevel} readOnly max={5} size="small" /> : 
+                              <InquiryLevelIndicator inquiry={inquiry} /> : 
                               <Typography variant="body2" color="text.secondary">미평가</Typography>
                             }
                           </TableCell>
@@ -535,7 +736,9 @@ const StoreInquiryCom = ({
                                 borderRadius: 2,
                                 textTransform: 'none',
                                 fontWeight: 500,
-                                fontSize: '0.875rem'
+                                fontSize: '0.875rem',
+                                width: '100px', // 너비 고정
+                                bgcolor: 'rgba(0, 0, 0, 0.02)'
                               }}
                             >
                               상세보기
@@ -653,7 +856,7 @@ const StoreInquiryCom = ({
                 <Grid item xs={12}>
                   <Divider sx={{ mb: 2 }} />
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, textAlign: 'center' }}>
-                    지점 평가
+                    {selectedInquiry.inqType === 3 ? '문의 처리' : '지점 평가'}
                   </Typography>
                   <Box sx={{ 
                     display: 'flex', 
@@ -662,44 +865,172 @@ const StoreInquiryCom = ({
                     mb: 2,
                     gap: 2
                   }}>
-                    <FormControl sx={{ minWidth: '100%', maxWidth: 300 }}>
-                      <InputLabel id="level-select-label">평가 등급</InputLabel>
-                      <Select
-                        labelId="level-select-label"
-                        value={inquiryLevel || ''}
-                        onChange={handleLevelChange}
-                        label="평가 등급"
-                        sx={{ borderRadius: 2 }}
-                      >
-                        <MenuItem value="">
-                          <em>미평가</em>
-                        </MenuItem>
-                        <MenuItem value={1}>1 - {selectedInquiry.inqType === 1 ? '경미한 컴플레인' : '기본 칭찬'}</MenuItem>
-                        <MenuItem value={2}>2 - {selectedInquiry.inqType === 1 ? '약간 심각' : '좋은 칭찬'}</MenuItem>
-                        <MenuItem value={3}>3 - {selectedInquiry.inqType === 1 ? '중간 수준' : '높은 칭찬'}</MenuItem>
-                        <MenuItem value={4}>4 - {selectedInquiry.inqType === 1 ? '심각' : '매우 높은 칭찬'}</MenuItem>
-                        <MenuItem value={5}>5 - {selectedInquiry.inqType === 1 ? '매우 심각' : '최고 수준의 칭찬'}</MenuItem>
-                      </Select>
-                    </FormControl>
-                    <Box sx={{ display: 'flex', gap: 2, width: '100%', justifyContent: 'center' }}>
-                      <Button 
-                        variant="contained" 
-                        color="primary"
-                        onClick={handleSaveLevel}
-                        disabled={inquiryLevel === null}
-                        sx={{ 
-                          borderRadius: 2,
-                          textTransform: 'none',
-                          fontWeight: 500,
-                          bgcolor: 'success.main',
-                          '&:hover': {
-                            bgcolor: 'success.dark',
-                          },
-                          minWidth: 140
-                        }}
-                      >
-                        평가 및 완료처리
-                      </Button>
+                    {selectedInquiry.inqType !== 3 ? (
+                      // 칭찬이나 컴플레인인 경우 - 평가 UI
+                      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
+                          {selectedInquiry.inqType === 1 ? '컴플레인 심각도 평가' : '칭찬 수준 평가'}
+                        </Typography>
+                        
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 1, mb: 3, width: '100%' }}>
+                          {selectedInquiry.inqType === 1 ? (
+                            // 컴플레인 평가 버튼 그룹
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: 300 }}>
+                              <Box sx={{ display: 'flex', width: '100%', mb: 1, justifyContent: 'space-between' }}>
+                                <Typography variant="caption" sx={{ flex: 1, textAlign: 'left' }}>경미</Typography>
+                                <Typography variant="caption" sx={{ flex: 1, textAlign: 'center' }}>중간</Typography>
+                                <Typography variant="caption" sx={{ flex: 1, textAlign: 'right' }}>매우 심각</Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', width: '100%', p: 1, bgcolor: 'rgba(0,0,0,0.03)', borderRadius: 2 }}>
+                                {[1, 2, 3, 4, 5].map((level) => (
+                                  <Button
+                                    key={level}
+                                    variant="contained"
+                                    onClick={() => handleSelectLevel(level)}
+                                    sx={{ 
+                                      flex: 1,
+                                      mx: 0.5,
+                                      height: '36px',
+                                      minWidth: '36px',
+                                      p: 0,
+                                      bgcolor: level <= inquiryLevel ? 
+                                        (level <= 2 ? 'warning.light' : level <= 4 ? 'warning.main' : 'error.main') : 
+                                        'rgba(0,0,0,0.08)',
+                                      color: level <= inquiryLevel ? 'white' : 'text.secondary',
+                                      '&:hover': {
+                                        bgcolor: level <= 2 ? 'warning.light' : level <= 4 ? 'warning.main' : 'error.main',
+                                        opacity: 0.9
+                                      }
+                                    }}
+                                  >
+                                    {level}
+                                  </Button>
+                                ))}
+                              </Box>
+                              <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Typography variant="body2" sx={{ 
+                                  color: inquiryLevel ? 
+                                    (inquiryLevel <= 2 ? 'warning.dark' : inquiryLevel <= 4 ? 'warning.dark' : 'error.dark') : 
+                                    'text.secondary',
+                                  fontWeight: inquiryLevel ? 500 : 400,
+                                  fontSize: '0.8rem'
+                                }}>
+                                  {inquiryLevel ? (
+                                    inquiryLevel === 1 ? '1 - 경미한 컴플레인' :
+                                    inquiryLevel === 2 ? '2 - 약간 심각' :
+                                    inquiryLevel === 3 ? '3 - 중간 수준' :
+                                    inquiryLevel === 4 ? '4 - 심각' :
+                                    '5 - 매우 심각'
+                                  ) : '평가를 선택해주세요'}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          ) : (
+                            // 칭찬 평가 UI
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: 300 }}>
+                              <Box sx={{ display: 'flex', width: '100%', mb: 1, justifyContent: 'space-between' }}>
+                                <Typography variant="caption" sx={{ flex: 1, textAlign: 'left' }}>기본</Typography>
+                                <Typography variant="caption" sx={{ flex: 1, textAlign: 'center' }}>좋음</Typography>
+                                <Typography variant="caption" sx={{ flex: 1, textAlign: 'right' }}>최고</Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', width: '100%', p: 1, bgcolor: 'rgba(0,0,0,0.03)', borderRadius: 2 }}>
+                                {[1, 2, 3, 4, 5].map((level) => (
+                                  <Button
+                                    key={level}
+                                    variant="contained"
+                                    onClick={() => handleSelectLevel(level)}
+                                    sx={{ 
+                                      flex: 1,
+                                      mx: 0.5,
+                                      height: '36px',
+                                      minWidth: '36px',
+                                      p: 0,
+                                      bgcolor: level <= inquiryLevel ? 
+                                        (level <= 2 ? '#81c784' : level <= 4 ? '#66bb6a' : '#4caf50') : 
+                                        'rgba(0,0,0,0.08)',
+                                      color: level <= inquiryLevel ? 'white' : 'text.secondary',
+                                      '&:hover': {
+                                        bgcolor: level <= 2 ? '#81c784' : level <= 4 ? '#66bb6a' : '#4caf50',
+                                        opacity: 0.9
+                                      }
+                                    }}
+                                  >
+                                    {level}
+                                  </Button>
+                                ))}
+                              </Box>
+                              <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Typography variant="body2" sx={{ 
+                                  color: inquiryLevel ? 'success.dark' : 'text.secondary',
+                                  fontWeight: inquiryLevel ? 500 : 400,
+                                  fontSize: '0.8rem'
+                                }}>
+                                  {inquiryLevel ? (
+                                    inquiryLevel === 1 ? '1 - 기본 칭찬' :
+                                    inquiryLevel === 2 ? '2 - 좋은 칭찬' :
+                                    inquiryLevel === 3 ? '3 - 높은 칭찬' :
+                                    inquiryLevel === 4 ? '4 - 매우 높은 칭찬' :
+                                    '5 - 최고 수준의 칭찬'
+                                  ) : '평가를 선택해주세요'}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          )}
+                        </Box>
+                      </Box>
+                    ) : (
+                      // 건의/문의인 경우 - 평가 없이 처리만 가능한 안내 메시지
+                      <Box sx={{ textAlign: 'center', my: 2, p: 2, bgcolor: 'rgba(0, 0, 0, 0.03)', borderRadius: 2, width: '100%', maxWidth: 500 }}>
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          건의/문의 사항은 평가 등급이 부여되지 않습니다.
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          문의 내용에 대해 적절히 응대한 후 아래 버튼으로 처리 상태를 변경해주세요.
+                        </Typography>
+                      </Box>
+                    )}
+                    
+                    <Box sx={{ display: 'flex', gap: 2, width: '100%', justifyContent: 'center', mt: 3 }}>
+                      {selectedInquiry.inqType !== 3 ? (
+                        // 칭찬이나 컴플레인인 경우 - 평가 및 완료처리 버튼
+                        <Button 
+                          variant="contained" 
+                          color="primary"
+                          onClick={handleSaveLevel}
+                          disabled={inquiryLevel === null}
+                          sx={{ 
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 500,
+                            bgcolor: selectedInquiry.inqType === 1 ? 'rgba(255, 141, 100, 0.65)' : 'rgba(17, 148, 23, 0.65)',
+                            '&:hover': {
+                              bgcolor: selectedInquiry.inqType === 1 ? 'rgba(255, 114, 63, 0.95)' : 'rgba(17, 148, 23, 0.95)',
+                            },
+                            minWidth: 140
+                          }}
+                        >
+                          평가 및 완료
+                        </Button>
+                      ) : (
+                        // 건의/문의인 경우 - 완료처리 버튼
+                        <Button 
+                          variant="contained" 
+                          color="primary"
+                          onClick={handleInquiryComplete}
+                          sx={{ 
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 500,
+                            bgcolor: 'rgba(35, 122, 192, 0.65)',
+                            '&:hover': {
+                              bgcolor: 'rgba(35, 122, 192, 0.95)',
+                            },
+                            minWidth: 140
+                          }}
+                        >
+                          완료처리
+                        </Button>
+                      )}
                       <Button 
                         variant="contained" 
                         color="error"
@@ -708,21 +1039,27 @@ const StoreInquiryCom = ({
                           borderRadius: 2,
                           textTransform: 'none',
                           fontWeight: 500,
-                          minWidth: 120
+                          minWidth: 120,
+                          bgcolor: 'rgba(255, 49, 49, 0.65)',
+                          '&:hover': {
+                            bgcolor: 'rgba(234, 35, 35, 0.95)',
+                          }
                         }}
                       >
                         취소/반려
                       </Button>
                     </Box>
                   </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ 
-                    fontStyle: 'italic', 
-                    textAlign: 'center' 
-                  }}>
-                    {selectedInquiry.inqType === 1 
-                      ? '* 컴플레인 평가: 1(경미)~5(매우 심각) - 평가 후 자동으로 완료 처리됩니다.' 
-                      : '* 칭찬 평가: 1(기본)~5(최고 수준) - 평가 후 자동으로 완료 처리됩니다.'}
-                  </Typography>
+                  {selectedInquiry.inqType !== 3 && (
+                    <Typography variant="body2" color="text.secondary" sx={{ 
+                      fontStyle: 'italic', 
+                      textAlign: 'center' 
+                    }}>
+                      {selectedInquiry.inqType === 1 
+                        ? '* 컴플레인 평가: 1(경미)~5(매우 심각) - 평가 후 자동으로 완료 처리됩니다.' 
+                        : '* 칭찬 평가: 1(기본)~5(최고 수준) - 평가 후 자동으로 완료 처리됩니다.'}
+                    </Typography>
+                  )}
                 </Grid>
               </Grid>
             </DialogContent>

@@ -9,6 +9,7 @@ const StoreInquiryCon = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [showRankings, setShowRankings] = useState(false);
   const [storeRankings, setStoreRankings] = useState([]);
+  const [statusCounts, setStatusCounts] = useState({ waiting: 0, completed: 0, canceled: 0 });
   
   // 모든 지점 문의 조회 (페이징 처리)
   const fetchInquiries = async (pageNum = 0, type = null, status = null) => {
@@ -24,6 +25,9 @@ const StoreInquiryCon = () => {
       setInquiries(response.data.content);
       setTotalPages(response.data.totalPages);
       setPage(response.data.number);
+      
+      // 상태별 총 개수 가져오기 (페이징과 관계없이)
+      fetchStatusCounts();
     } catch (error) {
       console.error('지점 문의 데이터를 불러오는데 실패했습니다:', error);
       
@@ -40,6 +44,28 @@ const StoreInquiryCon = () => {
       alert('지점 문의 데이터를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // 상태별 문의 개수 조회
+  const fetchStatusCounts = async () => {
+    try {
+      // 대기 상태(2) 문의 개수 조회
+      const waitingResponse = await axiosInstance.get('/api/store-inquiries', { params: { status: 2 } });
+      
+      // 완료 상태(1) 문의 개수 조회 
+      const completedResponse = await axiosInstance.get('/api/store-inquiries', { params: { status: 1 } });
+      
+      // 취소/반려 상태(3) 문의 개수 조회
+      const canceledResponse = await axiosInstance.get('/api/store-inquiries', { params: { status: 3 } });
+      
+      setStatusCounts({
+        waiting: waitingResponse.data.length,
+        completed: completedResponse.data.length,
+        canceled: canceledResponse.data.length
+      });
+    } catch (error) {
+      console.error('상태별 문의 개수를 불러오는데 실패했습니다:', error);
     }
   };
   
@@ -66,6 +92,7 @@ const StoreInquiryCon = () => {
   useEffect(() => {
     fetchInquiries();
     fetchStoreRankings();
+    fetchStatusCounts();
   }, []);
   
   // 문의 상태 변경 처리
@@ -81,6 +108,8 @@ const StoreInquiryCon = () => {
         )
       );
       
+      // 상태별 개수 새로고침
+      fetchStatusCounts();
   
       // 랭킹 정보 새로고침
       fetchStoreRankings();
@@ -123,6 +152,9 @@ const StoreInquiryCon = () => {
       // 평가가 변경된 문의 목록 새로고침
       await fetchInquiries(page);
       
+      // 상태별 개수 새로고침
+      await fetchStatusCounts();
+      
       // 랭킹 정보 새로고침
       await fetchStoreRankings();
       
@@ -131,6 +163,28 @@ const StoreInquiryCon = () => {
     } catch (error) {
       console.error('문의 평가 변경에 실패했습니다:', error);
       alert('문의 평가 변경에 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // 건의/문의 완료 처리 (평가 없이)
+  const handleInquiryComplete = async (inquiryId) => {
+    setLoading(true);
+    try {
+      // 완료 상태로 변경만 수행 (평가 없음)
+      await axiosInstance.patch(`/api/store-inquiries/${inquiryId}/status`, { status: 1 });
+      
+      // 문의 목록 새로고침
+      await fetchInquiries(page);
+      
+      // 상태별 개수 새로고침
+      await fetchStatusCounts();
+      
+      alert("문의가 완료 처리되었습니다.");
+    } catch (error) {
+      console.error('문의 상태 변경에 실패했습니다:', error);
+      alert('문의 상태 변경에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -150,6 +204,8 @@ const StoreInquiryCon = () => {
       showRankings={showRankings}
       onToggleRankings={handleToggleRankings}
       onLevelChange={handleLevelChange}
+      onInquiryComplete={handleInquiryComplete}
+      statusCounts={statusCounts}
     />
   );
 };
