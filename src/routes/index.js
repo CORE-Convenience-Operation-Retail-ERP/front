@@ -47,6 +47,8 @@ import TransactionPage from '../pages/store/TransactionPage';
 import SalesAnalysis from '../pages/headquarters/branches/SalesAnalysis';
 // 고객용 문의 페이지 import
 import CustomerInquiryPage from '../pages/customer/CustomerInquiryPage';
+import InventoryHistoryPage from "../pages/store/inventory/InventoryHistoryPage";
+import InventoryRegisterPage from "../pages/store/inventory/InventoryRegisterPage";
 
 const AppRoutes = () => {
   return (
@@ -85,7 +87,9 @@ const AppRoutes = () => {
         <Route path="home" element={<HomePage/>} />
         <Route path="stock/list" element={<StockListPage/>} />              
         <Route path="stock/in-history" element={<StockInHistoryPage/>} />  
-        <Route path="stock/manual-adjust" element={<StockAdjusPage/>} />  
+        <Route path="inventory/check/history" element={<InventoryHistoryPage/>} />
+        <Route path="inventory/check/register" element={<InventoryRegisterPage/>} />
+        <Route path="stock/manual-adjust" element={<StockAdjusPage/>} />
         <Route path="stock/adjust-log" element={<AdjustLogPage/>} />       
         <Route path="inventory/disposal" element={<DisposalPage/>} />
         <Route path="order/register" element={<OrderFormPage/>} />

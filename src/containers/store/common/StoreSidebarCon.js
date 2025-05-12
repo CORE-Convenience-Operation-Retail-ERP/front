@@ -15,8 +15,8 @@ const sidebarMenus = [
     {
         name: '재고 관리', icon: <InventoryIcon />, submenu: [
         { name: '재고 현황', path: '/store/stock/list' },
-        { name: '입고 기록', path: '/store/stock/in-history' },
-        { name: '수동 조정', path: '/store/stock/manual-adjust' },
+        { name: '입출고 기록', path: '/store/stock/in-history' },
+        { name: '실사 이력', path: '/store/inventory/check/history' },
         { name: '조정 로그', path: '/store/stock/adjust-log' },
         { name: '폐기 관리', path: '/store/inventory/disposal' }, 
         ]

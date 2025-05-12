@@ -28,7 +28,6 @@ function OrderListCom({ orderList, onRowClick, getOrderStatusLabel, onEditClick,
       </div>
     );
   };
-  console.log(orderList);
   return (
     <OrderTable>
       <OrderHead>
