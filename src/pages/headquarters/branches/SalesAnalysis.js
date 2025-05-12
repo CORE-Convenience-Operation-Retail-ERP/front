@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Paper, Typography, Box, Alert, CircularProgress, Grid } from '@mui/material';
+import { Container, Paper, Typography, Box, Alert, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../service/axiosInstance';
 
@@ -10,7 +10,6 @@ import StoreSalesChart from '../../../components/sales/StoreSalesChart';
 import TimeAnalysisChart from '../../../components/sales/TimeAnalysisChart';
 import CategorySalesChart from '../../../components/sales/CategorySalesChart';
 import DemographicSalesChart from '../../../components/sales/DemographicSalesChart';
-import AgeGroupSalesChart from '../../../components/sales/AgeGroupSalesChart';
 import WeatherSalesChart from '../../../components/sales/WeatherSalesChart';
 
 // 서비스 임포트
@@ -28,31 +27,8 @@ const SalesAnalysis = () => {
     startDate: new Date('2024-04-01'),
     endDate: new Date('2024-06-30')
   });
+  const [analysisType, setAnalysisType] = useState('overview');
   const [analysisData, setAnalysisData] = useState({
-    overview: null,
-    store: null,
-    date: null,
-    time: null,
-    'demographic-age': null,
-    'demographic-gender': null,
-    category: null,
-    weather: null
-  });
-  
-  // 각 차트별 로딩 상태를 추적
-  const [chartLoading, setChartLoading] = useState({
-    overview: false,
-    store: false,
-    date: false,
-    time: false,
-    'demographic-age': false,
-    'demographic-gender': false,
-    category: false,
-    weather: false
-  });
-  
-  // 각 차트별 오류 상태를 추적
-  const [chartErrors, setChartErrors] = useState({
     overview: null,
     store: null,
     date: null,
@@ -100,10 +76,10 @@ const SalesAnalysis = () => {
     }
   }, []);
 
-  // 개별 차트 데이터 조회 함수
-  const fetchChartData = useCallback(async (type) => {
-    setChartLoading(prev => ({ ...prev, [type]: true }));
-    setChartErrors(prev => ({ ...prev, [type]: null }));
+  // 매출 분석 데이터 조회
+  const fetchAnalysisData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     
     try {
       const params = {
@@ -113,115 +89,80 @@ const SalesAnalysis = () => {
       };
       
       let response;
+      let type = analysisType;
       
-      switch (type) {
+      switch (analysisType) {
         case 'overview':
           response = await SalesAnalysisService.getOverview(params);
+          console.log('매출 데이터 응답:', response.data);
+          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
+            console.log('매출 데이터가 비어있습니다');
+            setError('해당 기간에 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
+          }
           break;
         case 'store':
           response = await SalesAnalysisService.getByStore(params);
+          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
+            setError('해당 기간에 지점별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
+          }
           break;
         case 'date':
           response = await SalesAnalysisService.getByDate(params);
+          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
+            setError('해당 기간에 날짜별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
+          }
           break;
         case 'time':
           response = await SalesAnalysisService.getByTime(params);
+          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
+            setError('해당 기간에 시간대별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
+          }
           break;
         case 'demographic-age':
           params.type = 'age';
           response = await SalesAnalysisService.getByDemographic(params);
+          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
+            setError('해당 기간에 연령대별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
+          }
           break;
         case 'demographic-gender':
           params.type = 'gender';
-          
-          // 백엔드 문제 해결 주석:
-          // 1. SalesAnalysisRepository.java의 findSalesByGender 쿼리 확인
-          //    - gender 컬럼에 실제로 'M', 'F' 값이 있는지 확인 필요
-          //    - gender 컬럼에 null이 아닌 값이 있어야 함
-          // 2. SalesAnalysisService.java의 analyzeSalesByGender 메서드 확인
-          //    - 성별 코드 변환 맵(M->MALE, F->FEMALE)이 제대로 동작하는지 확인
-          //    - 실제 DB 데이터에 맞게 코드 조정 필요
-
-          console.log('성별 데이터 API 요청 시작:', JSON.stringify(params));
-          try {
-            response = await SalesAnalysisService.getByDemographic(params);
-            console.log('성별 데이터 API 응답 성공');
-            
-            // 백엔드에서 받은 응답 구조 자세히 분석
-            if (response && response.data) {
-              console.log('응답 데이터 구조:', Object.keys(response.data));
-              
-              if (response.data.chartData) {
-                console.log('차트 데이터 개수:', response.data.chartData.length);
-                console.log('차트 데이터 첫 번째 항목:', JSON.stringify(response.data.chartData[0]));
-              } else {
-                console.warn('차트 데이터가 없습니다!');
-              }
-            } else {
-              console.warn('응답에 데이터가 없습니다!');
-            }
-          } catch (err) {
-            console.error('성별 데이터 API 오류:', err);
-            throw err;
+          response = await SalesAnalysisService.getByDemographic(params);
+          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
+            setError('해당 기간에 성별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
           }
           break;
         case 'category':
           response = await SalesAnalysisService.getByCategory(params);
+          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
+            setError('해당 기간에 카테고리별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
+          }
           break;
         case 'weather':
           response = await SalesAnalysisService.getByWeather(params);
+          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
+            setError('해당 기간에 날씨별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
+          }
           break;
         default:
-          throw new Error('알 수 없는 분석 유형');
+          type = 'overview';
+          response = await SalesAnalysisService.getOverview(params);
+          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
+            setError('해당 기간에 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
+          }
       }
       
-      if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
-        const errorMessages = {
-          'overview': '해당 기간에 매출 데이터가 없습니다.',
-          'store': '해당 기간에 지점별 매출 데이터가 없습니다.',
-          'date': '해당 기간에 날짜별 매출 데이터가 없습니다.',
-          'time': '해당 기간에 시간대별 매출 데이터가 없습니다.',
-          'demographic-age': '해당 기간에 연령대별 매출 데이터가 없습니다.',
-          'demographic-gender': '해당 기간에 성별 매출 데이터가 없습니다.',
-          'category': '해당 기간에 카테고리별 매출 데이터가 없습니다.',
-          'weather': '해당 기간에 날씨별 매출 데이터가 없습니다.'
-        };
-        setChartErrors(prev => ({ ...prev, [type]: errorMessages[type] || '데이터가 없습니다.' }));
-      } else {
-        // 백엔드에서 받은 데이터 처리
-        if (type === 'demographic-gender') {
-          console.log('메인 컴포넌트에서 성별 데이터 처리:');
-          if (response.data && response.data.chartData) {
-            console.log('라벨 값 확인:', response.data.chartData.map(item => item.label).join(', '));
-            console.log('value 값 확인:', response.data.chartData.map(item => item.value).join(', '));
-          }
-        }
-        
-        setAnalysisData(prevData => ({
-          ...prevData,
-          [type]: response.data
-        }));
-      }
+      setAnalysisData(prevData => ({
+        ...prevData,
+        [type]: response.data
+      }));
     } catch (error) {
-      console.error(`${type} 매출 분석 데이터 조회 실패:`, error);
-      setChartErrors(prev => ({ ...prev, [type]: '데이터를 가져오는데 실패했습니다.' }));
+      console.error('매출 분석 데이터 조회 실패:', error);
+      setError('매출 분석 데이터를 가져오는데 실패했습니다. 다시 시도해주세요.');
     } finally {
-      setChartLoading(prev => ({ ...prev, [type]: false }));
+      setLoading(false);
     }
-  }, [dateRange, selectedStore]);
-
-  // 모든 차트 데이터 조회
-  const fetchAllAnalysisData = useCallback(() => {
-    setLoading(true);
-    
-    // 모든 차트 타입에 대해 데이터 조회
-    const chartTypes = ['overview', 'store', 'date', 'time', 'demographic-age', 'demographic-gender', 'category', 'weather'];
-    
-    Promise.all(chartTypes.map(type => fetchChartData(type)))
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [fetchChartData]);
+  }, [analysisType, dateRange, selectedStore]);
 
   // 초기 로딩
   useEffect(() => {
@@ -235,54 +176,36 @@ const SalesAnalysis = () => {
 
   // 필터 변경 시 데이터 조회
   useEffect(() => {
-    if (selectedStore !== null) {
-      fetchAllAnalysisData();
-    }
-  }, [fetchAllAnalysisData, selectedStore]);
+    fetchAnalysisData();
+  }, [fetchAnalysisData]);
 
   // 필터 적용 핸들러
   const handleApplyFilter = () => {
-    fetchAllAnalysisData();
+    fetchAnalysisData();
   };
 
-  // 차트 컴포넌트 렌더링 함수
-  const renderChartComponent = (type, title) => {
-    const isLoading = chartLoading[type];
-    const error = chartErrors[type];
-    const data = analysisData[type];
-    
-    return (
-      <Paper sx={{ p: 2, mb: 3, height: '100%' }}>
-        <Typography variant="h6" gutterBottom>
-          {title}
-        </Typography>
-        
-        {error && (
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-        
-        {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <>
-            {type === 'overview' && data && <SalesOverviewChart data={data} />}
-            {type === 'store' && data && <StoreSalesChart data={data} />}
-            {type === 'date' && data && <SalesOverviewChart data={data} />}
-            {type === 'time' && data && <TimeAnalysisChart data={data} />}
-            {type === 'demographic-age' && data && <AgeGroupSalesChart data={data} />}
-            {type === 'demographic-gender' && data && (
-              <DemographicSalesChart data={data} />
-            )}
-            {type === 'category' && data && <CategorySalesChart data={data} />}
-            {type === 'weather' && data && <WeatherSalesChart data={data} />}
-          </>
-        )}
-      </Paper>
-    );
+  // 현재 분석 유형에 맞는 차트 렌더링
+  const renderChart = () => {
+    switch (analysisType) {
+      case 'overview':
+        return <SalesOverviewChart data={analysisData.overview} />;
+      case 'store':
+        return <StoreSalesChart data={analysisData.store} />;
+      case 'date':
+        return <SalesOverviewChart data={analysisData.date} />;
+      case 'time':
+        return <TimeAnalysisChart data={analysisData.time} />;
+      case 'demographic-age':
+        return <DemographicSalesChart data={analysisData['demographic-age']} type="age" />;
+      case 'demographic-gender':
+        return <DemographicSalesChart data={analysisData['demographic-gender']} type="gender" />;
+      case 'category':
+        return <CategorySalesChart data={analysisData.category} />;
+      case 'weather':
+        return <WeatherSalesChart data={analysisData.weather} />;
+      default:
+        return <SalesOverviewChart data={analysisData.overview} />;
+    }
   };
 
   return (
@@ -306,45 +229,18 @@ const SalesAnalysis = () => {
           setSelectedStore={setSelectedStore}
           dateRange={dateRange}
           setDateRange={setDateRange}
-          analysisType={null}
-          setAnalysisType={null}
+          analysisType={analysisType}
+          setAnalysisType={setAnalysisType}
           stores={stores}
           onApplyFilter={handleApplyFilter}
-          showAnalysisTypeSelector={false}
         />
         
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
             <CircularProgress />
-            <Typography ml={2}>모든 차트 데이터를 로딩 중입니다...</Typography>
           </Box>
         ) : (
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              {renderChartComponent('overview', '매출 개요')}
-            </Grid>
-            <Grid item xs={12} md={6}>
-              {renderChartComponent('store', '지점별 매출')}
-            </Grid>
-            <Grid item xs={12} md={6}>
-              {renderChartComponent('date', '날짜별 매출')}
-            </Grid>
-            <Grid item xs={12} md={6}>
-              {renderChartComponent('time', '시간대별 매출')}
-            </Grid>
-            <Grid item xs={12} md={6}>
-              {renderChartComponent('demographic-age', '연령대별 매출')}
-            </Grid>
-            <Grid item xs={12} md={6}>
-              {renderChartComponent('demographic-gender', '성별 매출')}
-            </Grid>
-            <Grid item xs={12} md={6}>
-              {renderChartComponent('category', '카테고리별 매출')}
-            </Grid>
-            <Grid item xs={12} md={6}>
-              {renderChartComponent('weather', '날씨별 매출')}
-            </Grid>
-          </Grid>
+          renderChart()
         )}
       </Paper>
     </Container>
