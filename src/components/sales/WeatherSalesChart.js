@@ -30,13 +30,32 @@ const formatNumber = (num) => {
 const weatherIcons = {
   '맑음': '☀️',
   '구름': '☁️',
+  '구름많음': '⛅',
+  '흐림': '☁️',
   '비': '🌧️',
+  '소나기': '🌦️',
+  '비/눈': '🌨️',
   '눈': '❄️',
   '천둥번개': '⚡',
   '안개': '🌫️',
-  '흐림': '☁️',
   '먼지': '😷',
   '기타': '🌈'
+};
+
+// 날씨별 색상 정의
+const weatherColors = {
+  '맑음': '#FFD700',    // 골드
+  '구름': '#A9A9A9',    // 다크 그레이
+  '구름많음': '#B0C4DE', // 라이트 스틸 블루
+  '흐림': '#708090',    // 슬레이트 그레이
+  '비': '#4682B4',      // 스틸 블루
+  '소나기': '#1E90FF',   // 도저 블루
+  '비/눈': '#87CEFA',    // 라이트 스카이 블루
+  '눈': '#E0FFFF',      // 라이트 시안
+  '천둥번개': '#9932CC',  // 다크 오키드
+  '안개': '#D3D3D3',     // 라이트 그레이
+  '먼지': '#CD853F',     // 페루
+  '기타': '#FFFFFF'      // 화이트
 };
 
 /**
@@ -61,11 +80,8 @@ const WeatherSalesChart = ({ data }) => {
   }
 
   // 차트 데이터 유효성 검증
-  const validChartData = data.chartData.filter(item => 
-    item && item.label && typeof item.value === 'number' &&
-    item.additionalData && typeof item.additionalData.transactions === 'number'
-  );
-
+  const validChartData = data.chartData.filter(item => item.value !== null && item.value !== undefined);
+  
   if (validChartData.length === 0) {
     return (
       <Card>
@@ -83,31 +99,16 @@ const WeatherSalesChart = ({ data }) => {
     );
   }
 
-  // 날씨별 색상 매핑
-  const weatherColors = {
-    '맑음': { backgroundColor: 'rgba(255, 206, 86, 0.6)', borderColor: 'rgba(255, 206, 86, 1)' },
-    '흐림': { backgroundColor: 'rgba(201, 203, 207, 0.6)', borderColor: 'rgba(201, 203, 207, 1)' },
-    '비': { backgroundColor: 'rgba(54, 162, 235, 0.6)', borderColor: 'rgba(54, 162, 235, 1)' },
-    '눈': { backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(201, 203, 207, 1)' },
-    '안개': { backgroundColor: 'rgba(169, 169, 169, 0.6)', borderColor: 'rgba(169, 169, 169, 1)' },
-    '폭염': { backgroundColor: 'rgba(255, 99, 132, 0.6)', borderColor: 'rgba(255, 99, 132, 1)' },
-    '한파': { backgroundColor: 'rgba(153, 102, 255, 0.6)', borderColor: 'rgba(153, 102, 255, 1)' },
-    '기타': { backgroundColor: 'rgba(201, 203, 207, 0.6)', borderColor: 'rgba(201, 203, 207, 1)' }
-  };
-
-  // 기본 색상
-  const defaultColor = { backgroundColor: 'rgba(201, 203, 207, 0.6)', borderColor: 'rgba(201, 203, 207, 1)' };
-
-  // 차트 데이터 준비
+  // 차트 데이터 구성
   const chartData = {
-    labels: validChartData.map(item => item.label),
+    labels: validChartData.map(item => `${item.label} ${weatherIcons[item.label] || ''}`),
     datasets: [
       {
-        label: '매출',
+        label: '매출액',
         data: validChartData.map(item => item.value),
-        backgroundColor: validChartData.map(item => (weatherColors[item.label] || defaultColor).backgroundColor),
-        borderColor: validChartData.map(item => (weatherColors[item.label] || defaultColor).borderColor),
-        borderWidth: 1
+        backgroundColor: validChartData.map(item => `${weatherColors[item.label] || weatherColors['기타']}80`), // 80은 알파값(투명도)
+        borderColor: validChartData.map(item => weatherColors[item.label] || weatherColors['기타']),
+        borderWidth: 1,
       },
       {
         label: '거래 건수',
@@ -119,7 +120,7 @@ const WeatherSalesChart = ({ data }) => {
         fill: false,
         yAxisID: 'transactions'
       }
-    ]
+    ],
   };
 
   // 차트 옵션

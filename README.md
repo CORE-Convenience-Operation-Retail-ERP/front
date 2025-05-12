@@ -68,3 +68,39 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `yarn build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+# CORE-ERP 프론트엔드
+
+## 기상청 API 연동 날씨별 매출 분석
+
+### 개요
+- 매출 분석 차트에서 기상청 공공데이터 API를 활용한 실제 날씨 데이터 표시
+- 기상청 '지상(종관, ASOS) 일자료 조회서비스' API를 통한 과거 날씨 데이터 활용
+- 백엔드에서 날씨 데이터를 조회하고, 프론트엔드에서는 차트로 시각화
+
+### 지원하는 날씨 상태
+- 맑음 (☀️)
+- 구름많음 (⛅)
+- 구름 (☁️)
+- 흐림 (☁️)
+- 비 (🌧️)
+- 소나기 (🌦️)
+- 비/눈 (🌨️)
+- 눈 (❄️)
+- 안개 (🌫️)
+- 먼지 (😷)
+
+### 차트 기능
+- 날씨별 매출 분석 및 거래 건수 표시
+- 날씨별 평균 매출에 대한 영향률 제공
+- 각 날씨 조건이 발생한 일수 및 비율 표시
+- 날씨별 색상과 아이콘으로 직관적인 시각화
+
+### 설정 방법
+- 백엔드 `application.properties` 파일에 기상청 API 키 설정 필요
+- 기본적으로 서울 지점(108) 기준으로 날씨 데이터 수집
+- 다른 지역의 날씨 데이터가 필요한 경우 백엔드 코드에서 지점번호 변경 필요
+
+### 주요 컴포넌트
+- `WeatherSalesChart.js`: 날씨별 매출 데이터 시각화
+- `SalesAnalysisService.js`: 백엔드 API 호출 처리

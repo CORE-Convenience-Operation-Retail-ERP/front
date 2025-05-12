@@ -41,7 +41,7 @@ class SalesAnalysisService {
     }
     
     /**
-     * 연령대/성별 매출 데이터 조회
+     * 인구통계별 매출 데이터 조회 (연령대, 성별)
      * @param {Object} params - 조회 파라미터
      * @returns {Promise} API 응답
      */
@@ -60,6 +60,7 @@ class SalesAnalysisService {
     
     /**
      * 날씨별 매출 데이터 조회
+     * 백엔드에서 기상청 API를 통해 실제 날씨 데이터를 사용하여 응답
      * @param {Object} params - 조회 파라미터
      * @returns {Promise} API 응답
      */
