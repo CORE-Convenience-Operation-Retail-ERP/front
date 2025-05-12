@@ -1,163 +1,139 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, List, ListItem, ListItemText, ListItemIcon,
-  Checkbox, Typography, Box, Divider
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions, 
+  Button, 
+  Typography, 
+  Box, 
+  FormGroup, 
+  FormControlLabel, 
+  Checkbox, 
+  Divider,
+  Alert
 } from '@mui/material';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
-// 위젯 목록
-const widgetOptions = [
-  { id: 'sales', title: '매출 현황' },
-  { id: 'popular', title: '인기 상품' },
-  { id: 'notice', title: '공지사항' },
-  { id: 'alert', title: '알림' },
-  { id: 'storeRank', title: '지점 매출 순위' },
-  { id: 'categoryRank', title: '카테고리별 매출 순위' },
-  { id: 'board', title: '게시판' }
+// 위젯 목록 정의
+const widgetsList = [
+  { id: 'storeOverview', name: '점포 & 매출 현황', description: '전체 점포수, 이번달 신규 점포수, 당일 매출, 당월 매출 현황을 보여줍니다.' },
+  { id: 'sales', name: '매출 분석', description: '일별/월별 매출 추이를 보여줍니다.' },
+  { id: 'popular', name: '인기 상품', description: '현재 가장 인기 있는 상품 TOP5를 보여줍니다.' },
+  { id: 'board', name: '최근 게시글', description: '최근 공지사항 및 게시글을 보여줍니다.' },
+  { id: 'alert', name: '알림', description: '중요 알림 및 미결제 상태를 보여줍니다.' },
+  { id: 'storeRank', name: '점포 랭킹', description: '매출 기준 상위 점포 랭킹을 보여줍니다.' },
+  { id: 'categoryRank', name: '카테고리 랭킹', description: '매출 기준 상위 카테고리 랭킹을 보여줍니다.' }
 ];
 
 const DashboardSettings = ({ open, handleClose, layouts, setLayouts }) => {
-  const [selectedWidgets, setSelectedWidgets] = useState(
-    layouts ? layouts.lg.map(item => item.i) : []
-  );
-  
-  // 선택된 위젯 목록
-  const [orderedWidgets, setOrderedWidgets] = useState(
-    layouts ? layouts.lg.map(item => item.i) : []
-  );
-  
-  // 위젯 이동 처리
-  const moveWidget = (index, direction) => {
-    if (
-      (direction === 'up' && index === 0) || 
-      (direction === 'down' && index === orderedWidgets.length - 1)
-    ) {
-      return;
+  const [selectedWidgets, setSelectedWidgets] = useState([]);
+  const [error, setError] = useState('');
+
+  // 레이아웃 정보를 기반으로 선택된 위젯 목록 설정
+  useEffect(() => {
+    if (layouts && layouts.lg) {
+      const selectedIds = layouts.lg.map(item => item.i);
+      setSelectedWidgets(selectedIds);
     }
-    
-    const newOrderedWidgets = [...orderedWidgets];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    const temp = newOrderedWidgets[index];
-    newOrderedWidgets[index] = newOrderedWidgets[targetIndex];
-    newOrderedWidgets[targetIndex] = temp;
-    
-    setOrderedWidgets(newOrderedWidgets);
-  };
-  
-  // 위젯 선택/해제 처리
-  const handleToggleWidget = (widgetId) => {
+  }, [layouts]);
+
+  // 위젯 선택 변경 핸들러
+  const handleWidgetToggle = (widgetId) => {
     if (selectedWidgets.includes(widgetId)) {
       setSelectedWidgets(selectedWidgets.filter(id => id !== widgetId));
-      setOrderedWidgets(orderedWidgets.filter(id => id !== widgetId));
     } else {
       setSelectedWidgets([...selectedWidgets, widgetId]);
-      setOrderedWidgets([...orderedWidgets, widgetId]);
     }
   };
-  
-  // 설정 저장
+
+  // 설정 저장 핸들러
   const handleSave = () => {
-    // 새 레이아웃 생성
+    if (selectedWidgets.length === 0) {
+      setError('최소 1개 이상의 위젯을 선택해주세요.');
+      return;
+    }
+
+    setError('');
+    
+    // 각 반응형 레이아웃에 대해 선택된 위젯 반영
     const newLayouts = {
-      lg: orderedWidgets.map((widgetId, index) => ({
-        i: widgetId,
-        x: index % 2,
-        y: Math.floor(index / 2),
-        w: 1,
-        h: 1
-      }))
+      lg: [],
+      md: [],
+      sm: [],
+      xs: []
     };
     
-    // 레이아웃 저장
-    setLayouts(newLayouts);
-    const userId = localStorage.getItem('empId');
-    localStorage.setItem(`dashboard-layout-${userId}`, JSON.stringify(newLayouts));
+    // 선택된 위젯을 추가하고 위치 설정
+    selectedWidgets.forEach((widgetId, index) => {
+      // 모든 위젯을 1x1 크기로 통일
+      const row = Math.floor(index / 2);
+      const col = index % 2;
+      
+      newLayouts.lg.push({ i: widgetId, x: col, y: row, w: 1, h: 1 });
+      newLayouts.md.push({ i: widgetId, x: col, y: row, w: 1, h: 1 });
+      newLayouts.sm.push({ i: widgetId, x: col, y: row, w: 1, h: 1 });
+      newLayouts.xs.push({ i: widgetId, x: 0, y: index, w: 1, h: 1 });
+    });
     
+    // 레이아웃 상태 업데이트
+    setLayouts(newLayouts);
+    
+    // 설정 창 닫기
     handleClose();
   };
-  
+
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>대시보드 설정</DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+    >
+      <DialogTitle>
+        <Typography variant="h6">대시보드 위젯 설정</Typography>
+      </DialogTitle>
       <DialogContent>
-        <Typography variant="subtitle1" gutterBottom>
-          표시할 위젯을 선택하고 순서를 변경하세요
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          대시보드에 표시할 위젯을 선택해주세요.
         </Typography>
         
-        <Box sx={{ my: 2 }}>
-          <Typography variant="subtitle2" color="primary" gutterBottom>
-            위젯 선택
-          </Typography>
-          <List>
-            {widgetOptions.map((widget) => (
-              <ListItem key={widget.id} dense>
-                <ListItemIcon>
-                  <Checkbox
-                    edge="start"
-                    checked={selectedWidgets.includes(widget.id)}
-                    onChange={() => handleToggleWidget(widget.id)}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+        )}
+        
+        <Divider sx={{ mb: 2 }} />
+        
+        <FormGroup>
+          {widgetsList.map((widget) => (
+            <Box key={widget.id} sx={{ mb: 1.5 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    checked={selectedWidgets.includes(widget.id)} 
+                    onChange={() => handleWidgetToggle(widget.id)}
+                    color="primary"
                   />
-                </ListItemIcon>
-                <ListItemText primary={widget.title} />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-        
-        <Divider sx={{ my: 2 }} />
-        
-        <Box sx={{ my: 2 }}>
-          <Typography variant="subtitle2" color="primary" gutterBottom>
-            위젯 순서 설정
-          </Typography>
-          {orderedWidgets.length > 0 ? (
-            <List>
-              {orderedWidgets.map((widgetId, index) => {
-                const widget = widgetOptions.find(w => w.id === widgetId);
-                return (
-                  <ListItem 
-                    key={widgetId}
-                    sx={{
-                      bgcolor: 'rgba(0, 0, 0, 0.04)',
-                      mb: 1,
-                      borderRadius: 1,
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <DragIndicatorIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                    <ListItemText primary={widget.title} />
-                    <Box>
-                      <Button 
-                        size="small" 
-                        onClick={() => moveWidget(index, 'up')}
-                        disabled={index === 0}
-                      >
-                        ↑
-                      </Button>
-                      <Button 
-                        size="small" 
-                        onClick={() => moveWidget(index, 'down')}
-                        disabled={index === orderedWidgets.length - 1}
-                      >
-                        ↓
-                      </Button>
-                    </Box>
-                  </ListItem>
-                );
-              })}
-            </List>
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              선택된 위젯이 없습니다.
-            </Typography>
-          )}
-        </Box>
+                }
+                label={
+                  <Box>
+                    <Typography variant="subtitle2">{widget.name}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {widget.description}
+                    </Typography>
+                  </Box>
+                }
+              />
+            </Box>
+          ))}
+        </FormGroup>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>취소</Button>
-        <Button onClick={handleSave} variant="contained" color="primary">
+        <Button 
+          onClick={handleSave} 
+          variant="contained" 
+          color="primary"
+        >
           저장
         </Button>
       </DialogActions>

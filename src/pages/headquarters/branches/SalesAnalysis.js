@@ -86,12 +86,12 @@ const SalesAnalysis = () => {
 
   // 모든 매출 분석 데이터 조회
   const fetchAllAnalysisData = useCallback(async () => {
-    const params = {
-      startDate: dateRange.startDate.toISOString(),
-      endDate: dateRange.endDate.toISOString(),
-      storeId: selectedStore
-    };
-
+      const params = {
+        startDate: dateRange.startDate.toISOString(),
+        endDate: dateRange.endDate.toISOString(),
+        storeId: selectedStore
+      };
+      
     // 개요 데이터 조회
     setLoading(prev => ({ ...prev, overview: true }));
     try {

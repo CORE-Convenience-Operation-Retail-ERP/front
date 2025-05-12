@@ -13,6 +13,7 @@ import AlertWidget from './widgets/AlertWidget';
 import StoreRankWidget from './widgets/StoreRankWidget';
 import CategoryRankWidget from './widgets/CategoryRankWidget';
 import BoardWidget from './widgets/BoardWidget';
+import StoreOverviewWidget from './widgets/StoreOverviewWidget';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -24,7 +25,8 @@ const widgets = {
   alert: AlertWidget,
   storeRank: StoreRankWidget,
   categoryRank: CategoryRankWidget,
-  board: BoardWidget
+  board: BoardWidget,
+  storeOverview: StoreOverviewWidget
 };
 
 const DashboardGrid = () => {
@@ -77,28 +79,32 @@ const DashboardGrid = () => {
   const getDefaultLayouts = () => {
     return {
       lg: [
-        { i: 'sales', x: 0, y: 0, w: 1, h: 1 },
-        { i: 'popular', x: 1, y: 0, w: 1, h: 1 },
-        { i: 'board', x: 0, y: 1, w: 1, h: 1 },
-        { i: 'alert', x: 1, y: 1, w: 1, h: 1 }
+        { i: 'storeOverview', x: 0, y: 0, w: 1, h: 1 },
+        { i: 'sales', x: 1, y: 0, w: 1, h: 1 },
+        { i: 'popular', x: 0, y: 1, w: 1, h: 1 },
+        { i: 'board', x: 1, y: 1, w: 1, h: 1 },
+        { i: 'alert', x: 0, y: 2, w: 1, h: 1 }
       ],
       md: [
-        { i: 'sales', x: 0, y: 0, w: 1, h: 1 },
-        { i: 'popular', x: 1, y: 0, w: 1, h: 1 },
-        { i: 'board', x: 0, y: 1, w: 1, h: 1 },
-        { i: 'alert', x: 1, y: 1, w: 1, h: 1 }
+        { i: 'storeOverview', x: 0, y: 0, w: 1, h: 1 },
+        { i: 'sales', x: 1, y: 0, w: 1, h: 1 },
+        { i: 'popular', x: 0, y: 1, w: 1, h: 1 },
+        { i: 'board', x: 1, y: 1, w: 1, h: 1 },
+        { i: 'alert', x: 0, y: 2, w: 1, h: 1 }
       ],
       sm: [
-        { i: 'sales', x: 0, y: 0, w: 1, h: 1 },
-        { i: 'popular', x: 1, y: 0, w: 1, h: 1 },
-        { i: 'board', x: 0, y: 1, w: 1, h: 1 },
-        { i: 'alert', x: 1, y: 1, w: 1, h: 1 }
+        { i: 'storeOverview', x: 0, y: 0, w: 1, h: 1 },
+        { i: 'sales', x: 1, y: 0, w: 1, h: 1 },
+        { i: 'popular', x: 0, y: 1, w: 1, h: 1 },
+        { i: 'board', x: 1, y: 1, w: 1, h: 1 },
+        { i: 'alert', x: 0, y: 2, w: 1, h: 1 }
       ],
       xs: [
-        { i: 'sales', x: 0, y: 0, w: 1, h: 1 },
-        { i: 'popular', x: 0, y: 1, w: 1, h: 1 },
-        { i: 'board', x: 0, y: 2, w: 1, h: 1 },
-        { i: 'alert', x: 0, y: 3, w: 1, h: 1 }
+        { i: 'storeOverview', x: 0, y: 0, w: 1, h: 1 },
+        { i: 'sales', x: 0, y: 1, w: 1, h: 1 },
+        { i: 'popular', x: 0, y: 2, w: 1, h: 1 },
+        { i: 'board', x: 0, y: 3, w: 1, h: 1 },
+        { i: 'alert', x: 0, y: 4, w: 1, h: 1 }
       ]
     };
   };
