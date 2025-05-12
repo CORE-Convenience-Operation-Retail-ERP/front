@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Paper, Typography, Box, Alert, CircularProgress } from '@mui/material';
+import { Container, Paper, Typography, Box, Alert, CircularProgress, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../service/axiosInstance';
 
@@ -19,7 +19,16 @@ const SalesAnalysis = () => {
   const navigate = useNavigate();
 
   // 상태 정의
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState({
+    overview: false,
+    store: false,
+    date: false,
+    time: false,
+    demographicAge: false,
+    demographicGender: false,
+    category: false,
+    weather: false
+  });
   const [error, setError] = useState(null);
   const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState(null);
@@ -27,14 +36,13 @@ const SalesAnalysis = () => {
     startDate: new Date('2024-04-01'),
     endDate: new Date('2024-06-30')
   });
-  const [analysisType, setAnalysisType] = useState('overview');
   const [analysisData, setAnalysisData] = useState({
     overview: null,
     store: null,
     date: null,
     time: null,
-    'demographic-age': null,
-    'demographic-gender': null,
+    demographicAge: null,
+    demographicGender: null,
     category: null,
     weather: null
   });
@@ -76,93 +84,104 @@ const SalesAnalysis = () => {
     }
   }, []);
 
-  // 매출 분석 데이터 조회
-  const fetchAnalysisData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
+  // 모든 매출 분석 데이터 조회
+  const fetchAllAnalysisData = useCallback(async () => {
+    const params = {
+      startDate: dateRange.startDate.toISOString(),
+      endDate: dateRange.endDate.toISOString(),
+      storeId: selectedStore
+    };
+
+    // 개요 데이터 조회
+    setLoading(prev => ({ ...prev, overview: true }));
     try {
-      const params = {
-        startDate: dateRange.startDate.toISOString(),
-        endDate: dateRange.endDate.toISOString(),
-        storeId: selectedStore
-      };
-      
-      let response;
-      let type = analysisType;
-      
-      switch (analysisType) {
-        case 'overview':
-          response = await SalesAnalysisService.getOverview(params);
-          console.log('매출 데이터 응답:', response.data);
-          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
-            console.log('매출 데이터가 비어있습니다');
-            setError('해당 기간에 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
-          }
-          break;
-        case 'store':
-          response = await SalesAnalysisService.getByStore(params);
-          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
-            setError('해당 기간에 지점별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
-          }
-          break;
-        case 'date':
-          response = await SalesAnalysisService.getByDate(params);
-          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
-            setError('해당 기간에 날짜별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
-          }
-          break;
-        case 'time':
-          response = await SalesAnalysisService.getByTime(params);
-          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
-            setError('해당 기간에 시간대별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
-          }
-          break;
-        case 'demographic-age':
-          params.type = 'age';
-          response = await SalesAnalysisService.getByDemographic(params);
-          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
-            setError('해당 기간에 연령대별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
-          }
-          break;
-        case 'demographic-gender':
-          params.type = 'gender';
-          response = await SalesAnalysisService.getByDemographic(params);
-          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
-            setError('해당 기간에 성별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
-          }
-          break;
-        case 'category':
-          response = await SalesAnalysisService.getByCategory(params);
-          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
-            setError('해당 기간에 카테고리별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
-          }
-          break;
-        case 'weather':
-          response = await SalesAnalysisService.getByWeather(params);
-          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
-            setError('해당 기간에 날씨별 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
-          }
-          break;
-        default:
-          type = 'overview';
-          response = await SalesAnalysisService.getOverview(params);
-          if (!response.data || !response.data.chartData || response.data.chartData.length === 0) {
-            setError('해당 기간에 매출 데이터가 없습니다. 다른 날짜 범위를 선택해주세요.');
-          }
-      }
-      
-      setAnalysisData(prevData => ({
-        ...prevData,
-        [type]: response.data
-      }));
+      const overviewResponse = await SalesAnalysisService.getOverview(params);
+      setAnalysisData(prev => ({ ...prev, overview: overviewResponse.data }));
     } catch (error) {
-      console.error('매출 분석 데이터 조회 실패:', error);
-      setError('매출 분석 데이터를 가져오는데 실패했습니다. 다시 시도해주세요.');
+      console.error('매출 개요 데이터 조회 실패:', error);
     } finally {
-      setLoading(false);
+      setLoading(prev => ({ ...prev, overview: false }));
     }
-  }, [analysisType, dateRange, selectedStore]);
+
+    // 지점별 데이터 조회
+    setLoading(prev => ({ ...prev, store: true }));
+    try {
+      const storeResponse = await SalesAnalysisService.getByStore(params);
+      setAnalysisData(prev => ({ ...prev, store: storeResponse.data }));
+    } catch (error) {
+      console.error('지점별 매출 데이터 조회 실패:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, store: false }));
+    }
+
+    // 날짜별 데이터 조회
+    setLoading(prev => ({ ...prev, date: true }));
+    try {
+      const dateResponse = await SalesAnalysisService.getByDate(params);
+      setAnalysisData(prev => ({ ...prev, date: dateResponse.data }));
+    } catch (error) {
+      console.error('날짜별 매출 데이터 조회 실패:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, date: false }));
+    }
+
+    // 시간대별 데이터 조회
+    setLoading(prev => ({ ...prev, time: true }));
+    try {
+      const timeResponse = await SalesAnalysisService.getByTime(params);
+      setAnalysisData(prev => ({ ...prev, time: timeResponse.data }));
+    } catch (error) {
+      console.error('시간대별 매출 데이터 조회 실패:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, time: false }));
+    }
+
+    // 연령대별 데이터 조회
+    setLoading(prev => ({ ...prev, demographicAge: true }));
+    try {
+      const ageParams = { ...params, type: 'age' };
+      const ageResponse = await SalesAnalysisService.getByDemographic(ageParams);
+      setAnalysisData(prev => ({ ...prev, demographicAge: ageResponse.data }));
+    } catch (error) {
+      console.error('연령대별 매출 데이터 조회 실패:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, demographicAge: false }));
+    }
+
+    // 성별별 데이터 조회
+    setLoading(prev => ({ ...prev, demographicGender: true }));
+    try {
+      const genderParams = { ...params, type: 'gender' };
+      const genderResponse = await SalesAnalysisService.getByDemographic(genderParams);
+      setAnalysisData(prev => ({ ...prev, demographicGender: genderResponse.data }));
+    } catch (error) {
+      console.error('성별별 매출 데이터 조회 실패:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, demographicGender: false }));
+    }
+
+    // 카테고리별 데이터 조회
+    setLoading(prev => ({ ...prev, category: true }));
+    try {
+      const categoryResponse = await SalesAnalysisService.getByCategory(params);
+      setAnalysisData(prev => ({ ...prev, category: categoryResponse.data }));
+    } catch (error) {
+      console.error('카테고리별 매출 데이터 조회 실패:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, category: false }));
+    }
+
+    // 날씨별 데이터 조회
+    setLoading(prev => ({ ...prev, weather: true }));
+    try {
+      const weatherResponse = await SalesAnalysisService.getByWeather(params);
+      setAnalysisData(prev => ({ ...prev, weather: weatherResponse.data }));
+    } catch (error) {
+      console.error('날씨별 매출 데이터 조회 실패:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, weather: false }));
+    }
+  }, [dateRange, selectedStore]);
 
   // 초기 로딩
   useEffect(() => {
@@ -176,36 +195,36 @@ const SalesAnalysis = () => {
 
   // 필터 변경 시 데이터 조회
   useEffect(() => {
-    fetchAnalysisData();
-  }, [fetchAnalysisData]);
+    fetchAllAnalysisData();
+  }, [fetchAllAnalysisData]);
 
   // 필터 적용 핸들러
   const handleApplyFilter = () => {
-    fetchAnalysisData();
+    fetchAllAnalysisData();
   };
 
-  // 현재 분석 유형에 맞는 차트 렌더링
-  const renderChart = () => {
-    switch (analysisType) {
-      case 'overview':
-        return <SalesOverviewChart data={analysisData.overview} />;
-      case 'store':
-        return <StoreSalesChart data={analysisData.store} />;
-      case 'date':
-        return <SalesOverviewChart data={analysisData.date} />;
-      case 'time':
-        return <TimeAnalysisChart data={analysisData.time} />;
-      case 'demographic-age':
-        return <DemographicSalesChart data={analysisData['demographic-age']} type="age" />;
-      case 'demographic-gender':
-        return <DemographicSalesChart data={analysisData['demographic-gender']} type="gender" />;
-      case 'category':
-        return <CategorySalesChart data={analysisData.category} />;
-      case 'weather':
-        return <WeatherSalesChart data={analysisData.weather} />;
-      default:
-        return <SalesOverviewChart data={analysisData.overview} />;
+  const renderLoadingOrChart = (type, ChartComponent, data, props = {}) => {
+    if (loading[type]) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 2, height: 200 }}>
+          <CircularProgress />
+        </Box>
+      );
     }
+    
+    // null 데이터 또는 chartData가 없는 경우 기본 데이터 제공
+    const safeData = data && data.chartData ? data : { 
+      chartData: [], 
+      summary: {
+        totalSales: 0,
+        totalTransactions: 0,
+        averageTransaction: 0,
+        previousPeriodSales: 0,
+        growthRate: 0
+      }
+    };
+    
+    return <ChartComponent data={safeData} {...props} />;
   };
 
   return (
@@ -229,19 +248,40 @@ const SalesAnalysis = () => {
           setSelectedStore={setSelectedStore}
           dateRange={dateRange}
           setDateRange={setDateRange}
-          analysisType={analysisType}
-          setAnalysisType={setAnalysisType}
           stores={stores}
           onApplyFilter={handleApplyFilter}
+          hideAnalysisType={true}
         />
         
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          renderChart()
-        )}
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            {renderLoadingOrChart('overview', SalesOverviewChart, analysisData.overview)}
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
+            {renderLoadingOrChart('store', StoreSalesChart, analysisData.store)}
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
+            {renderLoadingOrChart('time', TimeAnalysisChart, analysisData.time)}
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
+            {renderLoadingOrChart('demographicAge', DemographicSalesChart, analysisData.demographicAge, { type: 'age' })}
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
+            {renderLoadingOrChart('demographicGender', DemographicSalesChart, analysisData.demographicGender, { type: 'gender' })}
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
+            {renderLoadingOrChart('category', CategorySalesChart, analysisData.category)}
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
+            {renderLoadingOrChart('weather', WeatherSalesChart, analysisData.weather)}
+          </Grid>
+        </Grid>
       </Paper>
     </Container>
   );

@@ -28,10 +28,9 @@ const SalesAnalyticsFilter = ({
   setSelectedStore, 
   dateRange, 
   setDateRange, 
-  analysisType, 
-  setAnalysisType,
   stores,
-  onApplyFilter
+  onApplyFilter,
+  hideAnalysisType = false
 }) => {
   // 날짜 범위 프리셋
   const dateRangeOptions = [
@@ -39,18 +38,6 @@ const SalesAnalyticsFilter = ({
     { value: 'week', label: '최근 7일' },
     { value: 'month', label: '최근 30일' },
     { value: 'custom', label: '사용자 정의' }
-  ];
-
-  // 분석 유형 옵션
-  const analysisTypeOptions = [
-    { value: 'overview', label: '전체 통합 통계' },
-    { value: 'store', label: '지점별 통계' },
-    { value: 'date', label: '날짜별 통계' },
-    { value: 'time', label: '시간대별 통계' },
-    { value: 'demographic-age', label: '연령대별 통계' },
-    { value: 'demographic-gender', label: '성별별 통계' },
-    { value: 'category', label: '카테고리별 통계' },
-    { value: 'weather', label: '날씨별 통계' }
   ];
 
   const [selectedDateRangePreset, setSelectedDateRangePreset] = useState('month');
@@ -88,26 +75,8 @@ const SalesAnalyticsFilter = ({
         </Typography>
         
         <Grid container spacing={2} alignItems="center">
-          {/* 분석 유형 선택 */}
-          <Grid xs={12} sm={6} md={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>분석 유형</InputLabel>
-              <Select
-                value={analysisType}
-                onChange={(e) => setAnalysisType(e.target.value)}
-                label="분석 유형"
-              >
-                {analysisTypeOptions.map(option => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          
           {/* 지점 선택 */}
-          <Grid xs={12} sm={6} md={3}>
+          <Grid xs={12} sm={6} md={4}>
             <FormControl fullWidth size="small">
               <InputLabel>지점</InputLabel>
               <Select
@@ -126,7 +95,7 @@ const SalesAnalyticsFilter = ({
           </Grid>
           
           {/* 날짜 범위 선택 */}
-          <Grid xs={12} sm={6} md={2}>
+          <Grid xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>기간</InputLabel>
               <Select
@@ -166,7 +135,7 @@ const SalesAnalyticsFilter = ({
           )}
           
           {/* 필터 적용 버튼 */}
-          <Grid xs={12} md={selectedDateRangePreset === 'custom' ? 2 : 4}>
+          <Grid xs={12} md={selectedDateRangePreset === 'custom' ? 3 : 5}>
             <Button 
               variant="contained" 
               color="primary" 

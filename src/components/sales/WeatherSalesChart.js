@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, Divider, Box, Typography, Grid } from '@mui/material';
+import { Card, CardContent, CardHeader, Divider, Box, Typography } from '@mui/material';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -43,9 +43,14 @@ const weatherIcons = {
  * 날씨별 매출 분석 차트 컴포넌트
  */
 const WeatherSalesChart = ({ data }) => {
-  if (!data || !data.chartData || !data.summary) {
+  if (!data || !data.chartData || !Array.isArray(data.chartData) || data.chartData.length === 0 || !data.summary) {
     return (
       <Card>
+        <CardHeader 
+          title="날씨별 매출 분석" 
+          subheader="날씨 조건별 매출 영향" 
+        />
+        <Divider />
         <CardContent>
           <Typography variant="body1" align="center">
             데이터가 없습니다.
@@ -55,61 +60,63 @@ const WeatherSalesChart = ({ data }) => {
     );
   }
 
-  // 날씨별 색상 정의
+  // 차트 데이터 유효성 검증
+  const validChartData = data.chartData.filter(item => 
+    item && item.label && typeof item.value === 'number' &&
+    item.additionalData && typeof item.additionalData.transactions === 'number'
+  );
+
+  if (validChartData.length === 0) {
+    return (
+      <Card>
+        <CardHeader 
+          title="날씨별 매출 분석" 
+          subheader="날씨 조건별 매출 영향" 
+        />
+        <Divider />
+        <CardContent>
+          <Typography variant="body1" align="center">
+            유효한 데이터가 없습니다.
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // 날씨별 색상 매핑
   const weatherColors = {
-    '맑음': {
-      backgroundColor: 'rgba(255, 206, 86, 0.6)',
-      borderColor: 'rgba(255, 206, 86, 1)'
-    },
-    '구름': {
-      backgroundColor: 'rgba(201, 203, 207, 0.6)',
-      borderColor: 'rgba(201, 203, 207, 1)'
-    },
-    '비': {
-      backgroundColor: 'rgba(54, 162, 235, 0.6)',
-      borderColor: 'rgba(54, 162, 235, 1)'
-    },
-    '눈': {
-      backgroundColor: 'rgba(255, 255, 255, 0.6)',
-      borderColor: 'rgba(220, 220, 220, 1)'
-    },
-    '천둥번개': {
-      backgroundColor: 'rgba(153, 102, 255, 0.6)',
-      borderColor: 'rgba(153, 102, 255, 1)'
-    },
-    '안개': {
-      backgroundColor: 'rgba(168, 168, 168, 0.6)',
-      borderColor: 'rgba(168, 168, 168, 1)'
-    },
-    '기타': {
-      backgroundColor: 'rgba(255, 159, 64, 0.6)',
-      borderColor: 'rgba(255, 159, 64, 1)'
-    }
+    '맑음': { backgroundColor: 'rgba(255, 206, 86, 0.6)', borderColor: 'rgba(255, 206, 86, 1)' },
+    '흐림': { backgroundColor: 'rgba(201, 203, 207, 0.6)', borderColor: 'rgba(201, 203, 207, 1)' },
+    '비': { backgroundColor: 'rgba(54, 162, 235, 0.6)', borderColor: 'rgba(54, 162, 235, 1)' },
+    '눈': { backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(201, 203, 207, 1)' },
+    '안개': { backgroundColor: 'rgba(169, 169, 169, 0.6)', borderColor: 'rgba(169, 169, 169, 1)' },
+    '폭염': { backgroundColor: 'rgba(255, 99, 132, 0.6)', borderColor: 'rgba(255, 99, 132, 1)' },
+    '한파': { backgroundColor: 'rgba(153, 102, 255, 0.6)', borderColor: 'rgba(153, 102, 255, 1)' },
+    '기타': { backgroundColor: 'rgba(201, 203, 207, 0.6)', borderColor: 'rgba(201, 203, 207, 1)' }
   };
+
+  // 기본 색상
+  const defaultColor = { backgroundColor: 'rgba(201, 203, 207, 0.6)', borderColor: 'rgba(201, 203, 207, 1)' };
 
   // 차트 데이터 준비
   const chartData = {
-    labels: data.chartData.map(item => `${weatherIcons[item.label] || '🌈'} ${item.label}`),
+    labels: validChartData.map(item => item.label),
     datasets: [
       {
         label: '매출',
-        data: data.chartData.map(item => item.value),
-        backgroundColor: data.chartData.map(item => 
-          (weatherColors[item.label] || weatherColors['기타']).backgroundColor
-        ),
-        borderColor: data.chartData.map(item => 
-          (weatherColors[item.label] || weatherColors['기타']).borderColor
-        ),
+        data: validChartData.map(item => item.value),
+        backgroundColor: validChartData.map(item => (weatherColors[item.label] || defaultColor).backgroundColor),
+        borderColor: validChartData.map(item => (weatherColors[item.label] || defaultColor).borderColor),
         borderWidth: 1
       },
       {
         label: '거래 건수',
-        data: data.chartData.map(item => item.additionalData.transactions),
+        data: validChartData.map(item => item.additionalData.transactions),
         type: 'line',
-        fill: false,
         borderColor: 'rgba(255, 99, 132, 1)',
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
         borderWidth: 2,
+        fill: false,
         yAxisID: 'transactions'
       }
     ]
@@ -137,18 +144,6 @@ const WeatherSalesChart = ({ data }) => {
               }
             }
             return label;
-          },
-          afterLabel: function(context) {
-            if (context.dataset.label === '매출') {
-              const item = data.chartData[context.dataIndex];
-              const days = item.additionalData.days || 0;
-              
-              return [
-                `일평균 매출: ${formatNumber(Math.round(item.value / days))}원/일`,
-                `일수: ${days}일`
-              ];
-            }
-            return null;
           }
         }
       }
@@ -187,49 +182,28 @@ const WeatherSalesChart = ({ data }) => {
   };
 
   // 최고 매출 날씨 찾기
-  const maxSalesItem = data.chartData.reduce((max, item) => 
-    item.value > max.value ? item : max, data.chartData[0]);
-  
-  // 일평균 매출이 가장 높은 날씨 찾기
-  const maxDailyAvgItem = data.chartData.reduce((max, item) => {
-    const days = item.additionalData.days || 1;
-    const dailyAvg = item.value / days;
-    return dailyAvg > (max.value / (max.additionalData.days || 1)) ? item : max;
-  }, data.chartData[0]);
+  const maxSalesItem = validChartData.reduce((max, item) => 
+    item.value > max.value ? item : max, validChartData[0]);
 
   return (
     <Card>
       <CardHeader 
         title="날씨별 매출 분석" 
-        subheader="날씨 조건별 매출 비교" 
+        subheader="날씨 조건별 매출 영향" 
       />
       <Divider />
       <CardContent>
-        <Box sx={{ height: 400 }}>
+        <Box sx={{ height: 350 }}>
           <Bar data={chartData} options={chartOptions} />
         </Box>
-        <Grid container spacing={3} sx={{ mt: 2 }}>
-          <Grid xs={12} md={6}>
-            <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                <strong>총 매출 최대 날씨:</strong> {weatherIcons[maxSalesItem.label] || '🌈'} {maxSalesItem.label} ({formatNumber(Math.round(maxSalesItem.value))}원)
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                <strong>일수:</strong> {maxSalesItem.additionalData.days || 0}일
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid xs={12} md={6}>
-            <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                <strong>일평균 매출 최대 날씨:</strong> {weatherIcons[maxDailyAvgItem.label] || '🌈'} {maxDailyAvgItem.label}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                <strong>일평균 매출:</strong> {formatNumber(Math.round(maxDailyAvgItem.value / (maxDailyAvgItem.additionalData.days || 1)))}원/일
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            <strong>최고 매출 날씨:</strong> {maxSalesItem.label} ({formatNumber(Math.round(maxSalesItem.value))}원)
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            <strong>매출 영향률:</strong> {maxSalesItem.additionalData && maxSalesItem.additionalData.impactRate ? `${maxSalesItem.additionalData.impactRate > 0 ? '+' : ''}${maxSalesItem.additionalData.impactRate}%` : '측정 불가'}
+          </Typography>
+        </Box>
       </CardContent>
     </Card>
   );
