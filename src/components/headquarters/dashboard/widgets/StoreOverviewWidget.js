@@ -6,8 +6,10 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
+import { useNavigate } from 'react-router-dom';
 
 const StoreOverviewWidget = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
     // 점포 통계
@@ -51,7 +53,7 @@ const StoreOverviewWidget = () => {
   };
 
   // 카드 아이템 컴포넌트
-  const StatCard = ({ icon, label, value, growth, bgColor, loading }) => (
+  const StatCard = ({ icon, label, value, growth, bgColor, loading, onClick }) => (
     <Box 
       sx={{ 
         height: '100%',
@@ -62,8 +64,16 @@ const StoreOverviewWidget = () => {
         bgcolor: bgColor,
         p: 1,
         textAlign: 'center',
-        borderRadius: 1
+        borderRadius: 1,
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'all 0.2s',
+        '&:hover': {
+          opacity: onClick ? 0.85 : 1,
+          transform: onClick ? 'translateY(-2px)' : 'none',
+          boxShadow: onClick ? '0 4px 8px rgba(0,0,0,0.1)' : 'none'
+        }
       }}
+      onClick={onClick}
     >
       {icon}
       <Typography variant="caption" color="textSecondary" sx={{ mb: 0.3 }}>
@@ -108,6 +118,7 @@ const StoreOverviewWidget = () => {
             growth={dashboardData.totalStoresGrowth}
             bgColor="#e3f2fd"
             loading={loading}
+            onClick={() => navigate('/headquarters/branches/list')}
           />
         </Box>
         
@@ -120,6 +131,7 @@ const StoreOverviewWidget = () => {
             growth={dashboardData.newStoresGrowth}
             bgColor="#fff8e1"
             loading={loading}
+            onClick={() => navigate('/headquarters/branches/list')}
           />
         </Box>
         
@@ -132,6 +144,7 @@ const StoreOverviewWidget = () => {
             growth={dashboardData.dailySalesGrowth}
             bgColor="#e8f5e9"
             loading={loading}
+            onClick={() => navigate('/headquarters/branches/sales-analysis')}
           />
         </Box>
         
@@ -144,6 +157,7 @@ const StoreOverviewWidget = () => {
             growth={dashboardData.monthlySalesGrowth}
             bgColor="#f3e5f5"
             loading={loading}
+            onClick={() => navigate('/headquarters/branches/sales-analysis')}
           />
         </Box>
       </Box>
