@@ -71,7 +71,7 @@ const StyledDrawer = styled(Drawer)({
 
 const SidebarContainer = styled(Box)({
   height: '100vh',
-  background: '#1EACB5',
+  background: '#6FC3ED',
   borderRadius: '0 25px 25px 0',
   padding: '120px 0 40px 0',
   position: 'relative',

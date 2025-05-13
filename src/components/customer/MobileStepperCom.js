@@ -23,7 +23,7 @@ const StepCircle = styled.div`
   width: 35px;
   height: 35px;
   border-radius: 50%;
-  background-color: ${props => props.$active ? '#4CAF50' : props.$completed ? '#4CAF50' : '#e0e0e0'};
+  background-color: ${props => props.$active ? '#6FC3ED' : props.$completed ? '#6FC3ED' : '#e0e0e0'};
   color: ${props => props.$active || props.$completed ? 'white' : '#757575'};
   display: flex;
   justify-content: center;
@@ -35,7 +35,7 @@ const StepCircle = styled.div`
 
 const StepLabel = styled.div`
   font-size: 14px;
-  color: ${props => props.$active ? '#4CAF50' : '#757575'};
+  color: ${props => props.$active ? '#6FC3ED' : '#757575'};
   text-align: center;
   font-weight: ${props => props.$active ? 'bold' : 'normal'};
 `;
@@ -44,7 +44,7 @@ const StepConnector = styled.div`
   position: absolute;
   top: 17px;
   height: 2px;
-  background-color: ${props => props.$completed ? '#4CAF50' : '#e0e0e0'};
+  background-color: ${props => props.$completed ? '#6FC3ED' : '#e0e0e0'};
   width: 100%;
   left: -50%;
   z-index: 0;

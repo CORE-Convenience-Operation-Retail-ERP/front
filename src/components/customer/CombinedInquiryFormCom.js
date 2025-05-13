@@ -40,8 +40,8 @@ const Input = styled.input`
   
   &:focus {
     outline: none;
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    border-color: #6FC3ED;
+    box-shadow: 0 0 0 2px rgba(111, 195, 237, 0.2);
   }
 `;
 
@@ -63,8 +63,8 @@ const TextArea = styled.textarea`
   
   &:focus {
     outline: none;
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    border-color: #6FC3ED;
+    box-shadow: 0 0 0 2px rgba(111, 195, 237, 0.2);
   }
   
   ${props => props.$hasProfanity && `
@@ -137,8 +137,8 @@ const TypeCard = styled.div`
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 2px solid ${props => props.$selected ? '#4CAF50' : 'transparent'};
-  background-color: ${props => props.$selected ? '#f1f8e9' : 'white'};
+  border: 2px solid ${props => props.$selected ? '#6FC3ED' : 'transparent'};
+  background-color: ${props => props.$selected ? '#EDF7FE' : 'white'};
   
   &:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -157,7 +157,7 @@ const TypeIcon = styled.div`
   background-color: ${props => {
     switch(props.type) {
       case 1: return '#ff5252'; // 컴플레인 - 빨강
-      case 2: return '#4CAF50'; // 칭찬 - 초록
+      case 2: return '#6FC3ED'; // 칭찬 - 파랑
       case 3: return '#2196F3'; // 건의/문의 - 파랑
       default: return '#e0e0e0';
     }
@@ -234,12 +234,12 @@ const BackButton = styled(Button)`
 `;
 
 const SubmitButton = styled(Button)`
-  background-color: #4CAF50;
+  background-color: #6FC3ED;
   color: white;
   border: none;
   
   &:hover {
-    background-color: #45a049;
+    background-color: #5fb0da;
   }
 `;
 

@@ -1,10 +1,35 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import axios from 'axios';
 
 import MobileStepperCom from '../../components/customer/MobileStepperCom';
 import StoreSelectorCom from '../../components/customer/StoreSelectorCom';
 import CombinedInquiryFormCom from '../../components/customer/CombinedInquiryFormCom';
+
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+const bounce = keyframes`
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+`;
+
+const wobble = keyframes`
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(5deg); }
+  100% { transform: rotate(0deg); }
+`;
 
 const Container = styled.div`
   display: flex;
@@ -14,11 +39,12 @@ const Container = styled.div`
 `;
 
 const Header = styled.header`
-  background-color: #4CAF50;
+  background-color: #6FC3ED;
   color: white;
   padding: 15px;
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
 `;
 
 const HeaderTitle = styled.h1`
@@ -29,6 +55,7 @@ const HeaderTitle = styled.h1`
 const Content = styled.main`
   flex: 1;
   padding: 15px;
+  position: relative;
 `;
 
 const Footer = styled.footer`
@@ -40,43 +67,117 @@ const Footer = styled.footer`
   border-top: 1px solid #e0e0e0;
 `;
 
+// 간단한 캐릭터 스타일
+const Character = styled.div`
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: ${wobble} 3s ease-in-out infinite;
+  
+  @media (max-width: 500px) {
+    right: 10px;
+    width: 30px;
+    height: 30px;
+  }
+`;
+
+const CharacterIcon = styled.div`
+  font-size: 24px;
+  
+  @media (max-width: 500px) {
+    font-size: 20px;
+  }
+`;
+
+// 화면 하단에 표시될 도움말 캐릭터
+const HelperCharacter = styled.div`
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background-color: #6FC3ED;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  animation: ${bounce} 2s ease infinite;
+  z-index: 100;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+  
+  @media (max-width: 500px) {
+    width: 50px;
+    height: 50px;
+    font-size: 16px;
+    right: 15px;
+    bottom: 65px;
+  }
+`;
+
+const HelpTooltip = styled.div`
+  position: absolute;
+  right: 70px;
+  bottom: 30px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  max-width: 220px;
+  font-size: 14px;
+  color: #333;
+  animation: ${fadeIn} 0.3s ease;
+  
+  &:after {
+    content: '';
+    position: absolute;
+    right: -10px;
+    bottom: 15px;
+    border-width: 10px 0 10px 10px;
+    border-style: solid;
+    border-color: transparent transparent transparent white;
+  }
+`;
+
 // 감사 페이지 관련 스타일
 const ThankYouContainer = styled.div`
   padding: 20px;
   max-width: 500px;
   margin: 0 auto;
   text-align: center;
+  animation: ${fadeIn} 0.5s ease-out;
 `;
 
 const CheckIcon = styled.div`
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background-color: #4CAF50;
+  background-color: #6FC3ED;
   color: white;
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 0 auto 20px;
   font-size: 40px;
-  animation: bounce 1.5s ease infinite;
-  
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-      transform: translateY(0);
-    }
-    40% {
-      transform: translateY(-20px);
-    }
-    60% {
-      transform: translateY(-10px);
-    }
-  }
+  animation: ${bounce} 1.5s ease infinite;
 `;
 
 const ThankYouTitle = styled.h2`
   font-size: 1.8rem;
-  color: #4CAF50;
+  color: #6FC3ED;
   margin-bottom: 20px;
 `;
 
@@ -108,7 +209,7 @@ const ThankYouInfo = styled.p`
 `;
 
 const NewInquiryButton = styled.button`
-  background-color: #4CAF50;
+  background-color: #6FC3ED;
   color: white;
   border: none;
   padding: 12px 20px;
@@ -120,7 +221,7 @@ const NewInquiryButton = styled.button`
   transition: background-color 0.2s;
   
   &:hover {
-    background-color: #45a049;
+    background-color: #6FC3ED;
   }
 `;
 
@@ -144,6 +245,26 @@ const ErrorMessage = styled.p`
   font-size: 0.9rem;
 `;
 
+// 애니메이션 효과가 있는 환영 메시지
+const WelcomeMessage = styled.div`
+  background-color: #EDF7FE;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  animation: ${fadeIn} 0.8s ease;
+  
+  p {
+    color: #333;
+    margin: 5px 0;
+  }
+  
+  strong {
+    color: #6FC3ED;
+  }
+`;
+
 const CustomerInquiryCon = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedStore, setSelectedStore] = useState(null);
@@ -152,6 +273,7 @@ const CustomerInquiryCon = () => {
   const [inquiryNumber, setInquiryNumber] = useState('');
   const [submittedDate, setSubmittedDate] = useState('');
   const [apiError, setApiError] = useState(null);
+  const [showHelp, setShowHelp] = useState(false);
   
   const handleStoreSelect = (store) => {
     setSelectedStore(store);
@@ -219,6 +341,10 @@ const CustomerInquiryCon = () => {
     setApiError(null);
   };
   
+  const toggleHelp = () => {
+    setShowHelp(!showHelp);
+  };
+  
   // 현재 단계에 따라 컴포넌트 렌더링
   const renderContent = () => {
     // 제출 완료 후 감사 페이지 표시
@@ -257,10 +383,16 @@ const CustomerInquiryCon = () => {
     switch (currentStep) {
       case 1:
         return (
-          <StoreSelectorCom
-            onStoreSelect={handleStoreSelect}
-            onNext={handleNext}
-          />
+          <>
+            <WelcomeMessage>
+              <p><strong>매장에 문의할 내용</strong>이 있으신가요?</p>
+              <p>궁금한 점이나 의견을 남겨주시면 <br/> 빠르게 답변해 드리겠습니다.</p>
+            </WelcomeMessage>
+            <StoreSelectorCom
+              onStoreSelect={handleStoreSelect}
+              onNext={handleNext}
+            />
+          </>
         );
       case 2:
         return (
@@ -284,6 +416,18 @@ const CustomerInquiryCon = () => {
     }
   };
   
+  // 현재 단계에 따른 도움말 메시지
+  const getHelpMessage = () => {
+    switch (currentStep) {
+      case 1:
+        return "원하시는 매장을 선택해주세요. 검색창에 매장명이나 주소를 입력하시면 빠르게 찾을 수 있습니다.";
+      case 2:
+        return "문의 유형을 선택하고 연락처와 내용을 입력해주세요. 불편한 점이나 칭찬, 건의사항 모두 환영합니다.";
+      default:
+        return "무엇을 도와드릴까요?";
+    }
+  };
+  
   return (
     <Container>
       <Header>
@@ -294,6 +438,18 @@ const CustomerInquiryCon = () => {
         {!isSubmitted && <MobileStepperCom currentStep={currentStep} />}
         {renderContent()}
       </Content>
+      
+      {!isSubmitted && (
+        <HelperCharacter onClick={toggleHelp}>
+          도움말
+        </HelperCharacter>
+      )}
+      
+      {showHelp && (
+        <HelpTooltip>
+          {getHelpMessage()}
+        </HelpTooltip>
+      )}
       
       <Footer>
         &copy; {new Date().getFullYear()} 코어마케팅 All Rights Reserved.

@@ -29,8 +29,8 @@ const StoreCard = styled.div`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 2px solid ${props => props.selected ? '#4CAF50' : 'transparent'};
-  background-color: ${props => props.selected ? '#f1f8e9' : 'white'};
+  border: 2px solid ${props => props.selected ? '#6FC3ED' : 'transparent'};
+  background-color: ${props => props.selected ? '#EDFCFF' : 'white'};
   
   &:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -63,13 +63,13 @@ const SearchInput = styled.input`
   margin-bottom: 10px;
   &:focus {
     outline: none;
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    border-color: #6FC3ED;
+    box-shadow: 0 0 0 2px rgba(76, 129, 175, 0.2);
   }
 `;
 
 const NextButton = styled.button`
-  background-color: #4CAF50;
+  background-color: #6FC3ED;
   color: white;
   border: none;
   padding: 12px 20px;
@@ -81,7 +81,7 @@ const NextButton = styled.button`
   transition: background-color 0.2s;
   
   &:hover {
-    background-color: #45a049;
+    background-color: #6FC3ED;
   }
   
   &:disabled {
