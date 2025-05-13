@@ -1,19 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Button, Box, Badge, IconButton, Menu, MenuItem } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import axios from 'axios';
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [notifications, setNotifications] = React.useState([
-    { id: 1, title: '새 공지사항이 등록되었습니다.', isRead: false },
-    { id: 2, title: '연차 신청이 도착했습니다.', isRead: false },
-  ]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
   const open = Boolean(anchorEl);
 
   // 새 방식: JWT 토큰 기반 로그인 정보 가져오기
@@ -24,19 +23,64 @@ const Header = () => {
   // userName 설정 부분 
   const userName = name || "로그인 해주세요";
 
+  // 알림 데이터 가져오기
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  // 알림 데이터를 가져오는 함수
+  const fetchNotifications = async () => {
+    if (!userRole) return;
+    
+    setLoading(true);
+    try {
+      // 연차 신청 목록 조회 API 호출
+      const response = await axios.get('/api/hr/annual-leave/all', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      // 응답 데이터에서 알림 목록 생성
+      if (response.data) {
+        // 미처리(상태가 0)인 연차 신청만 필터링
+        const pendingLeaveRequests = response.data.filter(request => request.reqStatus === 0);
+        
+        // 알림 목록 생성
+        const leaveNotifications = pendingLeaveRequests.map(request => ({
+          id: request.reqId,
+          title: `새로운 연차신청이 등록되었습니다.`,
+          subtitle: `신청자: ${request.empName || '알 수 없음'}`,
+          type: 'LEAVE_REQUEST',
+          isRead: false,
+          createdAt: request.createdAt || new Date().toISOString(),
+          data: request
+        }));
+        
+        setNotifications(leaveNotifications);
+      }
+    } catch (error) {
+      console.error('연차 신청 알림 조회 실패:', error);
+      // 오류 발생 시 빈 알림 설정
+      setNotifications([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogoClick = () => {
     navigate(location.pathname, { replace: true });
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-  localStorage.removeItem('empId');
-  localStorage.removeItem('deptId');
-  localStorage.removeItem('empName');
-  localStorage.removeItem('deptName');
-  localStorage.removeItem('role');
-  localStorage.removeItem('storeId');
-  localStorage.removeItem('storeName');
+    localStorage.removeItem('empId');
+    localStorage.removeItem('deptId');
+    localStorage.removeItem('empName');
+    localStorage.removeItem('deptName');
+    localStorage.removeItem('role');
+    localStorage.removeItem('storeId');
+    localStorage.removeItem('storeName');
     navigate('/login');
   };
 
@@ -49,12 +93,20 @@ const Header = () => {
   };
 
   // 알림 클릭 시 해당 알림을 읽음 처리하는 함수
-  const handleNotificationRead = (id) => {
+  const handleNotificationRead = (notification) => {
+    // 알림 읽음 처리
     setNotifications(prevNotifications =>
-      prevNotifications.map(notification =>
-        notification.id === id ? { ...notification, isRead: true } : notification
+      prevNotifications.map(notif =>
+        notif.id === notification.id ? { ...notif, isRead: true } : notif
       )
     );
+    
+    // 알림 유형에 따른 다른 처리
+    if (notification.type === 'LEAVE_REQUEST') {
+      // 연차 신청 상세 페이지로 이동 (실제 URL로 수정 필요)
+      navigate(`/headquarters/hr/annual-leave/detail/${notification.id}`);
+    }
+    
     handleNotificationClose();
   };
 
@@ -85,12 +137,30 @@ const Header = () => {
             onClose={handleNotificationClose}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           >
-            {notifications.map((notification) => (
-              // 알림 목록 클릭 시 읽음 처리
-              <MenuItem key={notification.id} onClick={() => handleNotificationRead(notification.id)}>
-                {notification.title}
-              </MenuItem>
-            ))}
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <MenuItem 
+                  key={notification.id} 
+                  onClick={() => handleNotificationRead(notification)}
+                  sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'flex-start',
+                    backgroundColor: notification.isRead ? 'inherit' : '#f0f7ff',
+                    borderLeft: notification.isRead ? 'none' : '3px solid #1976d2'
+                  }}
+                >
+                  <Box sx={{ fontWeight: 'bold' }}>{notification.title}</Box>
+                  {notification.subtitle && (
+                    <Box sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
+                      {notification.subtitle}
+                    </Box>
+                  )}
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem disabled>새로운 알림이 없습니다</MenuItem>
+            )}
           </Menu>
 
           <Box
@@ -122,10 +192,6 @@ const Header = () => {
             sx={{ cursor: 'pointer', color: 'black' }}
             onClick={handleLogout}
           />
-
-          <Button color="inherit" onClick={() => navigate('/store/home')}>
-            Store
-          </Button>
         </Box>
       </Toolbar>
     </AppBar>

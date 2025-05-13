@@ -304,6 +304,11 @@ const PageButton = styled.button`
   }
 `;
 
+const NavButton = styled(PageButton)`
+  width: auto;
+  padding: 0 10px;
+`;
+
 const ChartContainer = styled.div`
   height: 300px;
   margin: 20px 0;
@@ -533,6 +538,22 @@ const BranchesStockMonitoringCom = ({
     return 'normal';
   };
   
+  // 페이지 그룹 계산을 위한 함수 추가
+  const getPageGroup = (currentPage, totalPages) => {
+    const pagePerGroup = 5; // 페이지 그룹당 표시할 페이지 수
+    const currentGroup = Math.floor(currentPage / pagePerGroup);
+    
+    const startPage = currentGroup * pagePerGroup;
+    const endPage = Math.min(startPage + pagePerGroup - 1, totalPages - 1);
+    
+    return {
+      startPage,
+      endPage,
+      hasNext: endPage < totalPages - 1,
+      hasPrev: startPage > 0
+    };
+  };
+  
   return (
     <Container>
       <PageTitle>지점별 재고 모니터링</PageTitle>
@@ -728,15 +749,39 @@ const BranchesStockMonitoringCom = ({
         {/* 페이지네이션 */}
         {stockList.totalPages > 1 && (
           <Pagination>
-            {Array.from({ length: stockList.totalPages }, (_, i) => i).map(page => (
-              <PageButton
-                key={page}
-                active={(page === stockList.number).toString()}
-                onClick={() => handlePageChange(page)}
-              >
-                {page + 1}
-              </PageButton>
-            ))}
+            {(() => {
+              const { startPage, endPage, hasNext, hasPrev } = getPageGroup(stockList.number, stockList.totalPages);
+              
+              return (
+                <>
+                  {hasPrev && (
+                    <NavButton
+                      onClick={() => handlePageChange(startPage - 1)}
+                    >
+                      &lt;
+                    </NavButton>
+                  )}
+                  
+                  {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(page => (
+                    <PageButton
+                      key={page}
+                      active={(page === stockList.number).toString()}
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page + 1}
+                    </PageButton>
+                  ))}
+                  
+                  {hasNext && (
+                    <NavButton
+                      onClick={() => handlePageChange(endPage + 1)}
+                    >
+                      &gt;
+                    </NavButton>
+                  )}
+                </>
+              );
+            })()}
           </Pagination>
         )}
       </Card>
