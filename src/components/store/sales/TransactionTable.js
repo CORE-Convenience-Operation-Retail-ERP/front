@@ -89,27 +89,25 @@ const TransactionTable = ({ rows = [], currentPage = 0, totalPages = 1, onPageCh
           <h2>거래내역</h2>
           <table className="transaction-table">
             <thead>
-              <tr>
-                <th>거래ID</th>
-                <th>카테고리</th>
-                <th>상품명</th>
-                <th>결제일시</th>
-                <th>수량</th>
-                <th>결제수단</th>
-                <th>단가</th>
-                <th>할인액</th>
-                <th>수익</th>
-                <th>총 결제액</th>
-                <th>환불여부</th>
-              </tr>
+                <tr>
+                    <th>상품명</th>
+                    <th>결제일시</th>
+                    <th>카테고리</th>
+                    <th>수량</th>
+                    <th>결제수단</th>
+                    <th>단가</th>
+                    <th>할인액</th>
+                    <th>수익</th>
+                    <th>총 결제액</th>
+                    <th>환불여부</th>
+                </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
                 <tr key={`${row.transactionId}-${row.salesDetailId}`}>
-                  <td>{row.transactionId}</td>
-                  <td>{row.category || "-"}</td>
                   <td>{row.productName || "-"}</td>
                   <td>{new Date(row.paidAt).toLocaleString()}</td>
+                  <td>{row.category || "-"}</td>
                   <td>{row.salesQuantity}</td>
                   <td>{row.paymentMethod}</td>
                   <td>{row.unitPrice?.toLocaleString()}원</td>
@@ -121,13 +119,6 @@ const TransactionTable = ({ rows = [], currentPage = 0, totalPages = 1, onPageCh
               ))}
             </tbody>
           </table>
-          <div className="pagination-container">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={onPageChange}
-            />
-          </div>
         </div>
   );
 };

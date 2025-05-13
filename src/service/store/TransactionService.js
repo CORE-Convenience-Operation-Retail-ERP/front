@@ -4,7 +4,7 @@ import axios from "axios";
 export const fetchTransactionsByStore = async (storeId) => {
   const token = localStorage.getItem("token");
 
-  const response = await axios.get("/api/transactions", {
+  const response = await axios.get("/api/pos/transactions", {
     params: { storeId },
     headers: {
       Authorization: `Bearer ${token}`,

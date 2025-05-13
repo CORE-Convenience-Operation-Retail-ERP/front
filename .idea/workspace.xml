@@ -5,16 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2fb5c7c0-66e2-4482-8a87-c0cf404d7be7" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/src/components/store/PartTimerOneCom.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/containers/store/PartTimerOneCon.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/store/PartTimerOnePage.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/store/PartTimerCom.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/store/PartTimerCom.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/containers/store/common/StoreHeaderCon.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/containers/store/common/StoreHeaderCon.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/service/store/PartTimeService.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/store/PartTimeService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/service/store/axiosInstance.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/store/axiosInstance.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/yarn.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,8 +73,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.25659.59" />
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.25659.59" />
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.25410.129" />
+        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-IU-251.25410.129" />
       </set>
     </attachedChunks>
   </component>
@@ -99,6 +90,7 @@
       <workItem from="1745850587675" duration="471000" />
       <workItem from="1746021957730" duration="1574000" />
       <workItem from="1746039333796" duration="27000" />
+      <workItem from="1746866133002" duration="358000" />
     </task>
     <servers />
   </component>

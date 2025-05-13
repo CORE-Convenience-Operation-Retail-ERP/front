@@ -20,16 +20,22 @@ const TransactionPage = () => {
       try {
         const data = await fetchTransactionsByStore(storeId);
 
-        const flat = data.flatMap((transaction) =>
-          transaction.details.map((detail) => ({
-            ...detail,
-            transactionId: transaction.transactionId,
-            paymentMethod: transaction.paymentMethod,
-            finalAmount: transaction.finalAmount,
-            paidAt: transaction.paidAt,
-            isRefunded: transaction.isRefunded,
-          }))
-        );
+		console.log("✅ 백엔드 응답 데이터:", data);
+
+    const flat = data.flatMap((transaction) =>
+      (transaction.items || []).map((detail) => {
+        console.log("🧾 category 확인용:", detail.category);
+        return {
+          ...detail,
+          transactionId: transaction.transactionId,
+          paymentMethod: transaction.paymentMethod,
+          finalAmount: transaction.finalAmount,
+          paidAt: transaction.paidAt,
+          isRefunded: transaction.transactionStatus,
+          category: detail.category,
+        };
+      })
+    );
 
         setAllTransactions(flat);
         setFilteredTransactions(flat);
