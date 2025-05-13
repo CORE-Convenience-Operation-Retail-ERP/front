@@ -65,7 +65,8 @@ const StyledDrawer = styled(Drawer)({
     border: 'none',
     height: '100vh',
     marginTop: 0,
-    position: 'static', // 겹침 방지
+    position: 'fixed',
+    zIndex: 1200,
   },
 });
 
@@ -74,7 +75,10 @@ const SidebarContainer = styled(Box)({
   background: '#6FC3ED',
   borderRadius: '0 25px 25px 0',
   padding: '120px 0 40px 0',
-  position: 'relative',
+  position: 'fixed',
+  width: 220,
+  left: 0,
+  top: 0,
   overflow: 'hidden',
   '&::before': {
     content: '""',
@@ -83,7 +87,7 @@ const SidebarContainer = styled(Box)({
     left: 0,
     right: 0,
     bottom: 0,
-    background: '#A8D8F0',
+    background: '#6FC3ED',
     borderRadius: '0 50px 50px 0',
     zIndex: -1,
   }
@@ -238,7 +242,7 @@ const Sidebar = () => {
                 hasSubmenu={item.subMenus.length > 0}
                 submenuHeight={submenuHeights[index] || 0}
               >
-                <StyledListItem button={true} isActive={isActiveMenu}>
+                <StyledListItem button="true" isActive={isActiveMenu}>
                   <ListItemText primary={item.text} />
                 </StyledListItem>
                 <Collapse
@@ -251,7 +255,7 @@ const Sidebar = () => {
                       const isActiveSub = location.pathname === subItem.path;
                       return (
                         <ListItem
-                          button={true}
+                          button="true"
                           key={subItem.text}
                           onClick={(e) => handleSubMenuClick(subItem.path, e)}
                           sx={{

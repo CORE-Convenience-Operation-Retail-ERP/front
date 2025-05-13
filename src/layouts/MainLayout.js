@@ -9,7 +9,11 @@ const MainLayout = () => {
       <Header />
       <div className="main-content" style={{ display: 'flex', flex: 1 }}>
         <Sidebar />
-        <div className="content" style={{ flex: 1, overflow: 'auto' }}>
+        <div className="content" style={{ 
+          flex: 1, 
+          overflow: 'auto',
+          marginLeft: '240px' // 사이드바 너비 220px + 여백 20px
+        }}>
           <Outlet />
         </div>
       </div>

@@ -8,8 +8,13 @@ const HeadquartersLayout = () => (
   <Box sx={{ display: 'flex' }}>
     {/* 왼쪽 사이드바 */}
     <Sidebar />
-    {/* 오른쪽 컨텐츠 영역 */}
-    <Box sx={{ flex: 1, ml: '20px', minHeight: '100vh', position: 'relative' }}>
+    {/* 오른쪽 컨텐츠 영역 - 사이드바 너비만큼 마진 추가 */}
+    <Box sx={{ 
+      flex: 1, 
+      ml: '240px', // 사이드바 너비 220px + 여백 20px
+      minHeight: '100vh', 
+      position: 'relative' 
+    }}>
       {/* 상단 헤더 */}
       <Header />
       {/* 본문 영역 */}

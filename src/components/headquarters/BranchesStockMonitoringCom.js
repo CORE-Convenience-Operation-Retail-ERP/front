@@ -293,14 +293,14 @@ const PageButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid ${props => props.active ? '#6FC3ED' : '#ddd'};
-  background-color: ${props => props.active ? '#6FC3ED' : 'white'};
-  color: ${props => props.active ? 'white' : '#333'};
+  border: 1px solid ${props => props.active === "true" ? '#6FC3ED' : '#ddd'};
+  background-color: ${props => props.active === "true" ? '#6FC3ED' : 'white'};
+  color: ${props => props.active === "true" ? 'white' : '#333'};
   border-radius: 4px;
   cursor: pointer;
   
   &:hover {
-    background-color: ${props => props.active ? '#6FC3ED' : '#f0f0f0'};
+    background-color: ${props => props.active === "true" ? '#6FC3ED' : '#f0f0f0'};
   }
 `;
 
@@ -731,7 +731,7 @@ const BranchesStockMonitoringCom = ({
             {Array.from({ length: stockList.totalPages }, (_, i) => i).map(page => (
               <PageButton
                 key={page}
-                active={page === stockList.number}
+                active={(page === stockList.number).toString()}
                 onClick={() => handlePageChange(page)}
               >
                 {page + 1}
