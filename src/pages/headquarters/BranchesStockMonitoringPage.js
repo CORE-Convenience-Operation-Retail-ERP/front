@@ -1,10 +1,8 @@
 import React from 'react';
+import BranchesStockMonitoringCon from '../../containers/headquarters/BranchesStockMonitoringCon';
 
-const BranchesStockMonitoringPage = () => (
-  <div>
-    <h2>재고 모니터링</h2>
-    <p>여기는 재고 모니터링 페이지입니다.</p>
-  </div>
-);
+const BranchesStockMonitoringPage = () => {
+  return <BranchesStockMonitoringCon />;
+};
 
 export default BranchesStockMonitoringPage; 
