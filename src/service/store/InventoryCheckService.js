@@ -5,32 +5,53 @@ const handleRequest = async (apiCall) => {
     try {
         return await apiCall();
     } catch (err) {
-        const msg = typeof err.response?.data === 'string'
-            ? err.response.data
-            : err.response?.data?.message || err.message || "서버 오류 발생";
+        const msg =
+            typeof err.response?.data === 'string'
+                ? err.response.data
+                : err.response?.data?.message || err.message || '서버 오류 발생';
         return Promise.reject(msg);
     }
 };
 
-/**  [1] 실사 재고 등록 (리팩토링) */
+/** ✅ 실사 등록 */
 export const registerInventoryCheck = ({ storeId, partTimerId, reason, checks }) =>
     handleRequest(() =>
-        axios.post('/api/store/inventory-check', {
-            storeId,
-            partTimerId,   // 공통 담당자 ID
-            reason,        // 공통 사유
-            checks         // 상품 목록 (productId, realQuantity 필수)
+        axios.post('/api/store/inventory-check', { storeId, partTimerId, reason, checks })
+    );
+
+/** ✅ 실사 제품 목록 조회 (재고 현황 기준, 페이징 포함) */
+export const fetchInventoryProductList = ({ productName, barcode, page = 0, size = 10 }) =>
+    handleRequest(() =>
+        axios.get('/api/stock/summary', {
+            params: { productName, barcode, page, size },
         })
     );
 
-/**  [2] 실사 이력 조회 (페이징, 검색 포함) */
+/** ✅ 실사 이력 조회 (페이징, 검색 포함) */
 export const fetchInventoryCheckList = (params = {}) =>
     handleRequest(() =>
         axios.get('/api/store/inventory-check/history', { params })
     );
 
-/**  [3] 실사 반영 처리 (미반영 → 반영) */
+/** ✅ 단일 실사 반영 */
 export const applyInventoryCheck = (checkId) =>
     handleRequest(() =>
         axios.patch(`/api/store/inventory-check/apply/${checkId}`)
+    );
+
+/** ✅ 다건 실사 일괄 반영 */
+export const applyInventoryCheckBulk = (checkIds) =>
+    handleRequest(() =>
+        axios.patch('/api/store/inventory-check/apply-batch',  checkIds )
+    );
+
+/** ✅ 미반영 전체 실사 일괄 반영 */
+export const applyInventoryCheckAll = () =>
+    handleRequest(() =>
+    axios.patch('/api/store/inventory-check/apply-all'));
+
+/** ✅ 실사 롤백 반영 */
+export const rollbackInventoryCheck = (checkId) =>
+    handleRequest(() =>
+        axios.patch(`/api/store/inventory-check/rollback/${checkId}`)
     );
