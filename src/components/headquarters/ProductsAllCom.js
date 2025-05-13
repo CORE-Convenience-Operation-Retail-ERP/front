@@ -1,4 +1,5 @@
 import React from "react";
+import HQStockManagement from './HQStockManagement';
 
 const statusLabel = (status) => {
   switch (status) {
@@ -23,14 +24,32 @@ const ProductsAllCom = ({
   currentPage = 0,
   totalPages = 0,
   totalItems = 0,
-  onPageChange
+  onPageChange,
+  onUpdateHQStock,  // 추가: 본사 재고 수정 핸들러
+  isRecalculating = false // 추가: 재계산 상태
 }) => {
   // products가 배열인지 확인하고, 아니면 빈 배열로 설정
   const productList = Array.isArray(products) ? products : [];
 
   return (
     <div style={{ padding: "32px" }}>
-      <h2 style={{ color: "#3a5ca8", fontWeight: "bold" }}>전체 제품 관리</h2>
+      <h2 style={{ color: "#3a5ca8", fontWeight: "bold" }}>
+        전체 제품 관리
+        {isRecalculating && (
+          <span style={{ 
+            fontSize: '0.8rem', 
+            color: '#666', 
+            marginLeft: '10px',
+            fontWeight: 'normal' 
+          }}>
+            (본사 재고 계산 중...)
+          </span>
+        )}
+      </h2>
+      
+      {/* 본사 재고 관리 컴포넌트 추가 */}
+      <HQStockManagement />
+      
       <button
         style={{
           float: "right",
@@ -63,7 +82,8 @@ const ProductsAllCom = ({
             <tr style={{ background: "#f5f7fa" }}>
               <th>No.</th>
               <th>제품 명</th>
-              <th>재고</th>
+              <th>매장재고</th>
+              <th>본사재고</th>  {/* 추가된 열 */}
               <th>바코드</th>
               <th>카테고리</th>
               <th>최근입고일</th>
@@ -84,6 +104,24 @@ const ProductsAllCom = ({
                 <td>{p.proName}</td>
                 <td style={{ color: p.proStock < 20 ? "red" : "black" }}>
                   {p.proStock}
+                </td>
+                {/* 본사 재고 열 추가 */}
+                <td style={{ color: p.hqStock < 100 ? "orange" : "black" }}>
+                  {p.hqStock}
+                  <button 
+                    onClick={() => onUpdateHQStock(p.productId, p.hqStock)}
+                    style={{ 
+                      marginLeft: '5px', 
+                      fontSize: '12px', 
+                      padding: '2px 5px',
+                      background: '#5bc0de',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '2px'
+                    }}
+                  >
+                    수정
+                  </button>
                 </td>
                 <td>{p.proBarcode}</td>
                 <td>{p.categoryName}</td>

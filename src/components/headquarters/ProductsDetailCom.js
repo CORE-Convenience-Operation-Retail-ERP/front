@@ -1,9 +1,32 @@
 import React, { useState } from "react";
+import { updateHQStock } from "../../service/headquarters/HQStockService";
 
 const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [isUpdatingHQStock, setIsUpdatingHQStock] = useState(false);
+  const [hqStockQuantity, setHqStockQuantity] = useState(detail?.hqStock || 0);
+  const [showHQStockEditor, setShowHQStockEditor] = useState(false);
 
   if (!detail) return <div>로딩중...</div>;
+
+  const handleHQStockUpdate = async () => {
+    if (hqStockQuantity < 0) {
+      alert("재고 수량은 0 이상이어야 합니다.");
+      return;
+    }
+    
+    setIsUpdatingHQStock(true);
+    
+    try {
+      await updateHQStock(detail.productId, hqStockQuantity);
+      alert("본사 재고가 업데이트되었습니다.");
+      setShowHQStockEditor(false);
+    } catch (error) {
+      alert(`재고 업데이트 실패: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setIsUpdatingHQStock(false);
+    }
+  };
 
   return (
     <div style={{ padding: 32 }}>
@@ -44,7 +67,71 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
         {/* 재고 정보 */}
         <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16 }}>
           <h3>재고 정보</h3>
-          <div>총 재고: {detail.totalStock}</div>
+          <div>매장 총 재고: {detail.totalStock}</div>
+          <div style={{ display: "flex", alignItems: "center", marginTop: 8 }}>
+            <div>본사 재고: </div>
+            {showHQStockEditor ? (
+              <div style={{ display: "flex", alignItems: "center", marginLeft: 8 }}>
+                <input
+                  type="number"
+                  value={hqStockQuantity}
+                  onChange={(e) => setHqStockQuantity(parseInt(e.target.value) || 0)}
+                  style={{ width: 80, marginRight: 8 }}
+                />
+                <button 
+                  onClick={handleHQStockUpdate}
+                  disabled={isUpdatingHQStock}
+                  style={{
+                    padding: "4px 8px",
+                    background: "#5bc0de",
+                    border: "none",
+                    borderRadius: "4px",
+                    color: "white",
+                    marginRight: 4
+                  }}
+                >
+                  {isUpdatingHQStock ? "..." : "저장"}
+                </button>
+                <button 
+                  onClick={() => setShowHQStockEditor(false)}
+                  style={{
+                    padding: "4px 8px",
+                    background: "#f5f5f5",
+                    border: "1px solid #ddd",
+                    borderRadius: "4px"
+                  }}
+                >
+                  취소
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span style={{ 
+                  color: detail.hqStock < 100 ? "orange" : "black",
+                  marginLeft: 8,
+                  marginRight: 8
+                }}>
+                  {detail.hqStock}
+                </span>
+                <button 
+                  onClick={() => {
+                    setHqStockQuantity(detail.hqStock || 0);
+                    setShowHQStockEditor(true);
+                  }}
+                  style={{
+                    padding: "4px 8px",
+                    background: "#5bc0de",
+                    border: "none",
+                    borderRadius: "4px",
+                    color: "white",
+                    fontSize: "12px"
+                  }}
+                >
+                  수정
+                </button>
+              </div>
+            )}
+          </div>
           <div>발주 임계치: {detail.proStockLimit}</div>
           <button onClick={() => setModalOpen(true)}>점포별 재고 조회</button>
         </div>
