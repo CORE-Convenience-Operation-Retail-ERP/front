@@ -6,7 +6,6 @@ import Pagination from "../../../components/store/common/Pagination";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import { useNavigate } from "react-router-dom";
 
-
 function InventoryRegisterCon() {
     const [products, setProducts] = useState([]);
     const [realQuantities, setRealQuantities] = useState({});
@@ -15,11 +14,12 @@ function InventoryRegisterCon() {
     const [reason, setReason] = useState("");
     const [totalPages, setTotalPages] = useState(0);
     const navigate = useNavigate();
+
     const [searchParams, setSearchParams] = useState({
-        productName: '',
-        barcode: '',
+        productName: "",
+        barcode: "",
         page: 0,
-        size: 10
+        size: 10,
     });
 
     const storeId = parseInt(localStorage.getItem("storeId"));
@@ -52,8 +52,15 @@ function InventoryRegisterCon() {
         }
     };
 
-    const handleQuantityChange = (barcode, value) => {
-        setRealQuantities(prev => ({ ...prev, [barcode]: value }));
+    // ✅ 변경: 매장/창고 구분 처리
+    const handleQuantityChange = (barcode, type, value) => {
+        setRealQuantities((prev) => ({
+            ...prev,
+            [barcode]: {
+                ...prev[barcode],
+                [type]: Number(value),
+            },
+        }));
     };
 
     const handleRegister = async () => {
@@ -61,10 +68,10 @@ function InventoryRegisterCon() {
         if (!partTimerId) return alert("담당자를 선택하세요.");
         if (!reason.trim()) return alert("사유를 입력하세요.");
 
-        // ✅ products 배열로 전체 상품의 productId 매핑 확보 필요
+        // 전체 상품 정보 확보
         const allProducts = [];
         let currentPage = 0;
-        const pageSize = 100; // 충분히 큰 값으로 전체 로드
+        const pageSize = 100;
 
         while (true) {
             const res = await fetchInventoryProductList({ page: currentPage, size: pageSize });
@@ -74,15 +81,16 @@ function InventoryRegisterCon() {
             currentPage++;
         }
 
-        const checks = Object.entries(realQuantities).map(([barcode, quantity]) => {
-            const matchedProduct = allProducts.find(p => p.barcode === parseInt(barcode));
+        const checks = Object.entries(realQuantities).map(([barcode, qty]) => {
+            const matchedProduct = allProducts.find((p) => p.barcode === parseInt(barcode));
             return {
                 productId: matchedProduct?.productId,
-                realQuantity: parseInt(quantity || 0, 10)
+                storeRealQty: parseInt(qty.store || 0, 10),
+                warehouseRealQty: parseInt(qty.warehouse || 0, 10),
             };
         });
 
-        if (checks.some(c => !c.productId)) {
+        if (checks.some((c) => !c.productId)) {
             return alert("상품 ID가 누락된 항목이 있습니다.");
         }
 
@@ -91,7 +99,7 @@ function InventoryRegisterCon() {
                 storeId,
                 partTimerId: parseInt(partTimerId, 10),
                 reason,
-                checks
+                checks,
             });
 
             alert("실사 등록 완료!");
@@ -108,28 +116,26 @@ function InventoryRegisterCon() {
 
     const handleSearch = (params) => {
         setSearchParams({
-            productName: params.productName || '',
-            barcode: params.barcode || '',
+            productName: params.productName || "",
+            barcode: params.barcode || "",
             page: 0,
-            size: 10
+            size: 10,
         });
     };
 
-
     const handlePageChange = (page) => {
-        setSearchParams(prev => ({ ...prev, page }));
+        setSearchParams((prev) => ({ ...prev, page }));
     };
 
     return (
         <>
             <StoreSearchBar
                 filterOptions={[
-                    { key: 'productName', label: '상품명', type: 'text', placeholder: '상품명 입력' },
-                    { key: 'barcode', label: '바코드', type: 'text', placeholder: '바코드 입력' }
+                    { key: "productName", label: "상품명", type: "text", placeholder: "상품명 입력" },
+                    { key: "barcode", label: "바코드", type: "text", placeholder: "바코드 입력" },
                 ]}
                 onSearch={(params) => {
-                    // 필터 변경 시 검색어 리셋 + 페이지 0으로 초기화
-                    handleSearch({ productName: '', barcode: '', ...params });
+                    handleSearch({ productName: "", barcode: "", ...params });
                 }}
             />
             <InventoryRegisterCom

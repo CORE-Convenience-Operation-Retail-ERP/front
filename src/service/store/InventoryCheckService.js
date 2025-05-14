@@ -34,15 +34,15 @@ export const fetchInventoryCheckList = (params = {}) =>
     );
 
 /** ✅ 단일 실사 반영 */
-export const applyInventoryCheck = (checkId) =>
+export const applyInventoryCheck = (checkItemId) =>
     handleRequest(() =>
-        axios.patch(`/api/store/inventory-check/apply/${checkId}`)
+        axios.patch(`/api/store/inventory-check/apply/${checkItemId}`)
     );
 
 /** ✅ 다건 실사 일괄 반영 */
-export const applyInventoryCheckBulk = (checkIds) =>
+export const applyInventoryCheckBulk = (checkItemIds) =>
     handleRequest(() =>
-        axios.patch('/api/store/inventory-check/apply-batch',  checkIds )
+        axios.patch('/api/store/inventory-check/apply-batch',  checkItemIds )
     );
 
 /** ✅ 미반영 전체 실사 일괄 반영 */
@@ -51,7 +51,19 @@ export const applyInventoryCheckAll = () =>
     axios.patch('/api/store/inventory-check/apply-all'));
 
 /** ✅ 실사 롤백 반영 */
-export const rollbackInventoryCheck = (checkId) =>
+export const rollbackInventoryCheck = (checkItemId) =>
     handleRequest(() =>
-        axios.patch(`/api/store/inventory-check/rollback/${checkId}`)
+        axios.patch(`/api/store/inventory-check/rollback/${checkItemId}`)
+    );
+
+/** ✅ 다건 실사 일괄 롤백 */
+export const rollbackInventoryCheckBulk = (checkItemIds) =>
+    handleRequest(() =>
+        axios.patch('/api/store/inventory-check/rollback-batch', checkItemIds)
+    );
+
+/** ✅ 전체 실사 일괄 롤백 */
+export const rollbackInventoryCheckAll = () =>
+    handleRequest(() =>
+        axios.patch('/api/store/inventory-check/rollback-all')
     );

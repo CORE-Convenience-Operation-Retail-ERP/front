@@ -6,7 +6,9 @@ import {
   applyInventoryCheck,
   applyInventoryCheckBulk,
   applyInventoryCheckAll,
-  rollbackInventoryCheck
+  rollbackInventoryCheck,
+  rollbackInventoryCheckBulk,
+  rollbackInventoryCheckAll
 } from '../../../service/store/InventoryCheckService';
 
 function StockListCon() {
@@ -50,29 +52,12 @@ function StockListCon() {
     load();
   }, [searchParams]);
 
-  const handleApplyAllPendingChecks = async () => {
-    if (!window.confirm("현재 매장의 모든 미반영 실사 데이터를 반영하시겠습니까?")) return;
-
-    try {
-      await applyInventoryCheckAll();
-      alert("전체 실사 항목이 반영되었습니다.");
-      setSearchParams(prev => ({ ...prev }));  // 목록 재조회
-    } catch (err) {
-      console.error("전체 반영 실패:", err);
-      alert("전체 반영 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleApplyCheck = async (checkId) => {
-    if (!checkId) {
-      alert("유효하지 않은 실사 ID입니다.");
-      return;
-    }
-
+  const handleApplyCheck = async (checkItemId) => {
+    if (!checkItemId) return;
     if (!window.confirm("해당 실사를 반영하시겠습니까?")) return;
 
     try {
-      await applyInventoryCheck(checkId);
+      await applyInventoryCheck(checkItemId);
       alert("실사 반영이 완료되었습니다.");
       setSearchParams(prev => ({ ...prev }));
     } catch (err) {
@@ -81,18 +66,52 @@ function StockListCon() {
     }
   };
 
-  const handleApplyAll = async (checkIds) => {
-    if (!checkIds.length) return alert("선택된 항목이 없습니다.");
+  const handleApplyChecks = async (checkItemIds = []) => {
+    try {
+      if (checkItemIds.length > 0) {
+        if (!window.confirm("선택된 실사를 모두 반영하시겠습니까?")) return;
+        await applyInventoryCheckBulk(checkItemIds);
+        alert("선택 항목 반영 완료");
+      } else {
+        if (!window.confirm("전체 미반영 실사를 반영하시겠습니까?")) return;
+        await applyInventoryCheckAll();
+        alert("전체 반영 완료");
+      }
+      setSearchParams(prev => ({ ...prev }));
+    } catch (err) {
+      console.error("실사 반영 오류:", err);
+      alert("실사 반영 중 오류가 발생했습니다.");
+    }
+  };
 
-    if (!window.confirm("선택된 실사를 모두 반영하시겠습니까?")) return;
+  const handleRollbackCheck = async (checkItemId) => {
+    if (!window.confirm("해당 실사를 롤백하시겠습니까?")) return;
 
     try {
-      await applyInventoryCheckBulk(checkIds);
-      alert("일괄 반영 완료");
+      await rollbackInventoryCheck(checkItemId);
+      alert("실사 롤백이 완료되었습니다.");
       setSearchParams(prev => ({ ...prev }));
-    } catch (e) {
-      console.error("일괄 반영 오류:", e);
-      alert("일괄 반영 실패");
+    } catch (err) {
+      console.error("실사 롤백 실패:", err);
+      alert("실사 롤백 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleRollbackChecks = async (checkItemIds = []) => {
+    try {
+      if (checkItemIds.length > 0) {
+        if (!window.confirm("선택된 실사를 롤백하시겠습니까?")) return;
+        await rollbackInventoryCheckBulk(checkItemIds);
+        alert("선택 항목 롤백 완료");
+      } else {
+        if (!window.confirm("전체 반영된 실사를 롤백하시겠습니까?")) return;
+        await rollbackInventoryCheckAll();
+        alert("전체 롤백 완료");
+      }
+      setSearchParams(prev => ({ ...prev }));
+    } catch (err) {
+      console.error("실사 롤백 오류:", err);
+      alert("실사 롤백 중 오류가 발생했습니다.");
     }
   };
 
@@ -144,19 +163,6 @@ function StockListCon() {
     setSearchParams(prev => ({ ...prev, page: newPage }));
   };
 
-  const handleRollbackCheck = async (checkId) => {
-    if (!window.confirm("해당 실사를 롤백하시겠습니까?")) return;
-
-    try {
-      await rollbackInventoryCheck(checkId);
-      alert("실사 롤백이 완료되었습니다.");
-      setSearchParams(prev => ({ ...prev })); // 데이터 새로고침
-    } catch (err) {
-      console.error("실사 롤백 실패:", err);
-      alert("실사 롤백 중 오류가 발생했습니다.");
-    }
-  };
-
   return (
       <StockListCom
           stockList={stockList}
@@ -169,13 +175,13 @@ function StockListCon() {
           childCategories={childCategories}
           grandChildCategories={grandChildCategories}
           onApplyCheck={handleApplyCheck}
-          onApplyChecks={handleApplyAll}
+          onApplyChecks={handleApplyChecks}
+          onRollbackCheck={handleRollbackCheck}
+          onRollbackChecks={handleRollbackChecks}
           filters={filters}
           onParentChange={handleParentChange}
           onChildChange={handleChildChange}
           onSubChildChange={handleSubChildChange}
-          onApplyAllPendingChecks={handleApplyAllPendingChecks}
-          onRollbackCheck={handleRollbackCheck}
       />
   );
 }
