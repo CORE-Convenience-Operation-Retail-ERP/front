@@ -754,17 +754,12 @@ const IntegratedStockMonitoringCom = ({
   // 현재 페이지의 데이터 계산
   const getCurrentPageItems = () => {
     const startIndex = currentPage * itemsPerPage;
-    
-    // 마지막 페이지인 경우 (총 38개 상품일 때: 13 + 13 + 12 = 38)
-    if (currentPage === 2) {
-      return headquarters.slice(26, 38); // 26~37 (12개)
-    }
-    // 나머지 페이지는 13개씩 표시
-    return headquarters.slice(startIndex, startIndex + itemsPerPage);
+    const endIndex = Math.min(startIndex + itemsPerPage, headquarters.length);
+    return headquarters.slice(startIndex, endIndex);
   };
   
-  // 총 페이지 수 계산 - 38개 상품일 때 3페이지가 되도록 설정
-  const totalGraphPages = Math.ceil((headquarters.length - 1) / itemsPerPage) + (headquarters.length > 26 ? 1 : 0);
+  // 총 페이지 수 계산 - 동적으로 계산하여 모든 상품이 표시되도록 함
+  const totalGraphPages = Math.ceil(headquarters.length / itemsPerPage);
   
   // 차트 데이터 준비
   const pieData = {
