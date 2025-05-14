@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; // 🔥 location 가져오기
+import { useNavigate, useLocation } from 'react-router-dom';
 import StoreSidebar from '../../../components/store/common/StoreSidebar';
 import {
     Home as HomeIcon,
@@ -15,7 +15,7 @@ const sidebarMenus = [
     {
         name: '재고 관리', icon: <InventoryIcon />, submenu: [
         { name: '재고 현황', path: '/store/stock/list' },
-        { name: '입출고 기록', path: '/store/stock/in-history' },
+        { name: '입출고 기록', path: '/store/stock/flow/search' },
         { name: '실사 이력', path: '/store/inventory/check/history' },
         { name: '조정 로그', path: '/store/stock/adjust-log' },
         { name: '폐기 관리', path: '/store/inventory/disposal' }, 

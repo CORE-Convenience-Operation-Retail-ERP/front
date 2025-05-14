@@ -1,11 +1,9 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import MainLayout from '../layouts/MainLayout';
 import LoginPage from '../pages/auth/LoginPage';
 import DashboardPage from '../pages/headquarters/DashboardPage';
 import StoreLayout from "../layouts/StoreLayout";
 import HomePage from "../pages/store/HomePage";
-import StockAdjusPage from "../pages/store/stock/StockDetailPage";
 import DisposalPage from "../pages/store/disposal/DisposalPage";
 import OrderFormPage from "../pages/store/order/OrderFormPage";
 import OrderListPage from "../pages/store/order/OrderListPage";
@@ -26,7 +24,6 @@ import AnnualLeavePage from '../pages/headquarters/AnnualLeavePage';
 import BranchesListPage from '../pages/headquarters/BranchesListPage';
 import BranchFormPage from '../pages/headquarters/BranchFormPage';
 import BranchesManagementPage from '../pages/headquarters/BranchesManagementPage';
-import BranchesSalesAnalysisPage from '../pages/headquarters/BranchesSalesAnalysisPage';
 import BranchesStockMonitoringPage from '../pages/headquarters/BranchesStockMonitoringPage';
 import BranchesStatisticsPage from '../pages/headquarters/BranchesStatisticsPage';
 import RegisterPage from '../pages/auth/RegisterPage';
@@ -52,6 +49,7 @@ import InventoryRegisterPage from "../pages/store/inventory/InventoryRegisterPag
 // 통합 재고 모니터링 페이지 import
 import IntegratedStockMonitoringPage from '../pages/headquarters/IntegratedStockMonitoringPage';
 import StockDetailPage from "../pages/store/stock/StockDetailPage";
+import StockFlowLogPage from '../pages/store/stock/StockFlowLogPage';
 
 const AppRoutes = () => {
   return (
@@ -91,6 +89,7 @@ const AppRoutes = () => {
         <Route path="home" element={<HomePage/>} />
         <Route path="stock/list" element={<StockListPage/>} />              
         <Route path="stock/in-history" element={<StockInHistoryPage/>} />  
+        <Route path="stock/flow/search" element={<StockFlowLogPage/>} />
         <Route path="inventory/check/history" element={<InventoryHistoryPage/>} />
         <Route path="inventory/check/register" element={<InventoryRegisterPage/>} />
         <Route path="stock/detail/:productId" element={<StockDetailPage/>} />
