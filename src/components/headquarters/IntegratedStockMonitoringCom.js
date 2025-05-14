@@ -572,6 +572,34 @@ const IntegratedStockMonitoringCom = ({
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [viewMode, setViewMode] = useState('integrated'); // 'integrated', 'headquarters', 'branches'
   
+  // 데이터 구조 확인을 위한 로그
+  useEffect(() => {
+    console.log('데이터 확인 - headquarters 전체:', headquarters);
+    
+    // 본사 재고 데이터 필드 상세 로깅
+    if (headquarters && headquarters.length > 0) {
+      const item0 = headquarters[0];
+      console.log('첫번째 항목 모든 필드:', Object.keys(item0));
+      console.log('첫번째 항목 모든 값:', Object.entries(item0).map(([k, v]) => `${k}: ${v}`).join(', '));
+      
+      headquarters.forEach((item, index) => {
+        console.log(`본사 재고 아이템 ${index} 상세:`, {
+          productId: item.productId,
+          productName: item.productName,
+          quantity: item.quantity,
+          warehouseQuantity: item.warehouseQuantity,
+          totalQuantity: item.totalQuantity,
+          hq_total_quantity: item.hq_total_quantity, // 추가 필드 확인
+          total_quantity: item.total_quantity, // 추가 필드 확인
+          hqTotalQuantity: item.hqTotalQuantity, // 추가 필드 확인
+          allFields: Object.keys(item).join(', ')
+        });
+      });
+    }
+    
+    console.log('데이터 확인 - stockList:', stockList);
+  }, [headquarters, stockList]);
+  
   // 데이터 구조 디버깅용 콘솔 로그
   useEffect(() => {
     if (viewMode === 'branches' && stockList.content.length > 0) {
@@ -581,15 +609,25 @@ const IntegratedStockMonitoringCom = ({
       const fields = new Set();
       stockList.content.forEach(item => {
         Object.keys(item).forEach(key => {
-          if (key.toLowerCase().includes('warehouse') || key.toLowerCase().includes('stock')) {
+          if (key.toLowerCase().includes('warehouse') || key.toLowerCase().includes('stock') || key.toLowerCase().includes('quantity')) {
             fields.add(key);
           }
         });
       });
       
-      console.log('창고 관련 필드 목록:', Array.from(fields));
+      console.log('재고 관련 필드 목록:', Array.from(fields));
     }
-  }, [viewMode, stockList.content]);
+    
+    if (viewMode === 'headquarters' && headquarters.length > 0) {
+      console.log('본사 재고 데이터 구조 확인:', headquarters[0]);
+      
+      // 본사 재고 필드 확인
+      if (headquarters[0]) {
+        const fields = Object.keys(headquarters[0]);
+        console.log('본사 재고 필드 목록:', fields);
+      }
+    }
+  }, [viewMode, stockList.content, headquarters]);
   
   // 자동완성 목록 생성
   useEffect(() => {
@@ -787,22 +825,24 @@ const IntegratedStockMonitoringCom = ({
   
   // 재고 상태 결정 함수 수정
   const getStockStatus = (item) => {
-    console.log("재고 상태 계산:", item);
+    console.log("재고 상태 계산 아이템:", item);
     
-    // 본사인 경우 (창고 재고 기준으로 판단)
+    // 본사인 경우 (quantity 기준으로 판단)
     if (item.isHeadquarters || item.storeName === '본사' || item.storeName === null) {
-      // 본사 데이터의 경우 창고 재고 필드 확인
-      const stockQuantity = item.quantity || item.warehouseQuantity || 0;
+      // 본사 데이터의 경우 창고 재고(quantity) 필드 확인
+      const quantity = (item.quantity !== undefined) ? item.quantity : (item.warehouseQuantity || 0);
+      console.log("본사 재고 - 창고 재고량:", quantity);
       const minQuantity = 1000; // 본사 기준량
       
-      if (stockQuantity <= 0 || stockQuantity < minQuantity * 0.1) return 'danger';
-      if (stockQuantity < minQuantity * 0.3) return 'warning';
+      if (quantity <= 0 || quantity < minQuantity * 0.1) return 'danger';
+      if (quantity < minQuantity * 0.3) return 'warning';
       return 'normal';
     } 
     // 지점인 경우 총 재고(매장+창고) 기준으로 판단
     else {
       // 지점은 매장+창고 전체 재고로 판단
       const totalQuantity = item.totalQuantity || 0;
+      console.log("지점 재고 - 총 재고량:", totalQuantity);
       const minQuantity = item.minStock || 100; // 지점 기준량
       
       if (totalQuantity <= 0 || totalQuantity < minQuantity * 0.1) return 'danger';
@@ -946,10 +986,13 @@ const IntegratedStockMonitoringCom = ({
             
             {headquarters.length > 0 ? (
               <BarChartWrapper>
+                {console.log('막대 그래프용 본사 재고 데이터:', headquarters)}
                 <VerticalBarContainer>
                   {headquarters.slice(0, 12).map((item, index) => {
-                    // item에서 적절한 필드 선택 (quantity 또는 warehouseQuantity)
-                    const quantity = item.quantity || item.warehouseQuantity || 0;
+                    // item에서 적절한 필드 선택 (quantity - 창고 재고)
+                    console.log(`막대 그래프 아이템 ${index}:`, item);
+                    // 창고 재고(quantity)를 사용
+                    const quantity = (item.quantity !== undefined) ? item.quantity : (item.warehouseQuantity || 0);
                     const stockStatus = getStockStatus(item);
                     const displayName = item.productName || '상품명 없음';
                     const percentage = Math.round((quantity/1000)*100);
@@ -1137,22 +1180,44 @@ const IntegratedStockMonitoringCom = ({
                       <TableCell>{item.barcode}</TableCell>
                       {/* 본사/지점에 따라 재고 컬럼 표시 방식 조정 */}
                       {viewMode === 'headquarters' ? (
-                        <TableCell>{item.quantity || item.warehouseQuantity || 0}</TableCell>
+                        // 본사 재고일 경우 (창고 재고만 표시)
+                        <TableCell>
+                          {/* 본사의 창고 재고는 quantity 필드에 있어야 함 */}
+                          {(item.quantity !== undefined) ? item.quantity : (item.warehouseQuantity || 0)}
+                        </TableCell>
                       ) : (
                         <>
-                          <TableCell>{isHQ ? '-' : (item.storeQuantity || 0)}</TableCell>
                           <TableCell>
-                            {console.log('창고 재고 디버깅:', item)}
                             {isHQ 
-                              ? (item.quantity || item.warehouseQuantity || 0) 
-                              : (item.warehouseQuantity)}
+                              ? ((item.totalQuantity !== undefined && item.quantity !== undefined) 
+                                 ? item.totalQuantity - item.quantity 
+                                 : (item.totalQuantity !== undefined && item.warehouseQuantity !== undefined)
+                                   ? item.totalQuantity - item.warehouseQuantity 
+                                   : 0) 
+                              : ((item.storeQuantity !== undefined && item.storeQuantity !== null) 
+                                 ? item.storeQuantity 
+                                 : (item.totalQuantity !== undefined && item.warehouseQuantity !== undefined)
+                                   ? item.totalQuantity - item.warehouseQuantity 
+                                   : 0)}
+                          </TableCell>
+                          <TableCell>
+                            {isHQ 
+                              ? ((item.quantity !== undefined) ? item.quantity : (item.warehouseQuantity || 0)) 
+                              : (item.warehouseQuantity || 0)}
                           </TableCell>
                         </>
                       )}
                       <TableCell>
+                        {/* 총 재고는 DB의 total_quantity 값(1000)을 표시하도록 다양한 필드명 시도 */}
                         {isHQ 
-                          ? (item.quantity || item.warehouseQuantity || 0) 
-                          : (item.totalQuantity)}
+                          ? (
+                              item.totalQuantity !== undefined ? item.totalQuantity : 
+                              item.total_quantity !== undefined ? item.total_quantity :
+                              item.hqTotalQuantity !== undefined ? item.hqTotalQuantity :
+                              item.hq_total_quantity !== undefined ? item.hq_total_quantity :
+                              1000 // 기본값으로 1000 사용
+                            )
+                          : (item.totalQuantity || 0)}
                       </TableCell>
                       <TableCell>{item.latestInDate ? new Date(item.latestInDate).toLocaleDateString() : '-'}</TableCell>
                       <TableCell>

@@ -37,6 +37,8 @@ const IntegratedStockMonitoringCon = () => {
     fetchCategories();
     fetchSummaryData();
     fetchStockList();
+    // 본사 재고 데이터 초기에 바로 로드
+    fetchHeadquartersStock();
   }, []);
   
   // 필터 변경 시 데이터 리로딩
@@ -44,9 +46,8 @@ const IntegratedStockMonitoringCon = () => {
     fetchSummaryData();
     fetchStockList();
     
-    if (filters.viewMode === 'headquarters') {
-      fetchHeadquartersStock();
-    }
+    // 모든 뷰 모드에서 항상 본사 재고 데이터 로드
+    fetchHeadquartersStock();
   }, [filters]);
 
   // API 호출 함수들
