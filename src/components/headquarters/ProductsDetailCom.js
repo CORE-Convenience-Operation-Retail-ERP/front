@@ -1,16 +1,28 @@
-import React, { useState } from "react";
-import { updateHQStock } from "../../service/headquarters/HQStockService";
+import React, { useState, useEffect } from "react";
+import { updateHQStock, updateRegularInSettings, testProcessRegularIn } from "../../service/headquarters/HQStockService";
 
 const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [isUpdatingHQStock, setIsUpdatingHQStock] = useState(false);
-  const [hqStockQuantity, setHqStockQuantity] = useState(detail?.hqStock || 0);
+  const [hqStockQuantity, setHqStockQuantity] = useState(0);
   const [showHQStockEditor, setShowHQStockEditor] = useState(false);
+  const [regularInDay, setRegularInDay] = useState(1);
+  const [regularInQuantity, setRegularInQuantity] = useState(0);
+  const [regularInActive, setRegularInActive] = useState(false);
+  const [isUpdatingRegularIn, setIsUpdatingRegularIn] = useState(false);
+  const [isTestingRegularIn, setIsTestingRegularIn] = useState(false);
 
-  if (!detail) return <div>로딩중...</div>;
+  useEffect(() => {
+    if (detail) {
+      setHqStockQuantity(detail.hqStock || 0);
+      setRegularInDay(detail.regularInDay || 1);
+      setRegularInQuantity(detail.regularInQuantity || 0);
+      setRegularInActive(detail.regularInActive || false);
+    }
+  }, [detail]);
 
   const handleHQStockUpdate = async () => {
-    if (hqStockQuantity < 0) {
+    if (!detail || hqStockQuantity < 0) {
       alert("재고 수량은 0 이상이어야 합니다.");
       return;
     }
@@ -28,6 +40,47 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
     }
   };
 
+  const handleRegularInUpdate = async () => {
+    if (!detail || isUpdatingRegularIn) return;
+    
+    try {
+      setIsUpdatingRegularIn(true);
+      await updateRegularInSettings(
+        detail.productId,
+        regularInDay,
+        regularInQuantity,
+        regularInActive
+      );
+      alert("정기 입고 설정이 업데이트되었습니다.");
+    } catch (error) {
+      console.error("정기 입고 설정 업데이트 오류:", error);
+      alert("정기 입고 설정 업데이트에 실패했습니다.");
+    } finally {
+      setIsUpdatingRegularIn(false);
+    }
+  };
+  
+  // 정기 입고 즉시 테스트 함수
+  const handleTestRegularIn = async () => {
+    if (isTestingRegularIn) return;
+    
+    try {
+      setIsTestingRegularIn(true);
+      await testProcessRegularIn(regularInDay);
+      alert(`${regularInDay}일자 정기 입고가 즉시 처리되었습니다. 페이지를 새로고침하면 재고 변화를 확인할 수 있습니다.`);
+      window.location.reload(); // 페이지 새로고침
+    } catch (error) {
+      console.error("정기 입고 테스트 오류:", error);
+      alert("정기 입고 테스트에 실패했습니다.");
+    } finally {
+      setIsTestingRegularIn(false);
+    }
+  };
+
+  if (!detail) {
+    return <div>로딩중...</div>;
+  }
+
   return (
     <div style={{ padding: 32 }}>
       {/* 상단 네비 */}
@@ -39,7 +92,7 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
       <div style={{ display: "flex", alignItems: "center", marginTop: 24 }}>
         <img src={detail.proImage} alt="제품" style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 8, marginRight: 32 }} />
         <div>
-        <h1 style={{ margin: 0 }}>{detail.proName}</h1>
+          <h1 style={{ margin: 0 }}>{detail.proName}</h1>
           <div>제품 코드: {detail.productId}</div>
           <div>
             카테고리: {detail.categoryPath ? detail.categoryPath.join(" > ") : ""}
@@ -134,6 +187,75 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
           </div>
           <div>발주 임계치: {detail.proStockLimit}</div>
           <button onClick={() => setModalOpen(true)}>점포별 재고 조회</button>
+          
+          <div style={{ marginTop: 16, borderTop: "1px solid #eee", paddingTop: 16 }}>
+            <h4>정기 입고 설정</h4>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+              <div>매월</div>
+              <select 
+                value={regularInDay} 
+                onChange={(e) => setRegularInDay(parseInt(e.target.value))}
+                style={{ margin: "0 8px", padding: "4px 8px" }}
+                disabled={isUpdatingRegularIn}
+              >
+                {Array.from({ length: 30 }, (_, i) => i + 1).map(day => (
+                  <option key={day} value={day}>{day}</option>
+                ))}
+              </select>
+              <div>일에</div>
+              <input
+                type="number"
+                value={regularInQuantity}
+                onChange={(e) => setRegularInQuantity(parseInt(e.target.value) || 0)}
+                style={{ width: 80, margin: "0 8px", padding: "4px 8px" }}
+                disabled={isUpdatingRegularIn}
+                min="0"
+              />
+              <div>개 자동 입고</div>
+            </div>
+            
+            <div style={{ display: "flex", alignItems: "center", marginTop: 8 }}>
+              <input
+                type="checkbox"
+                checked={regularInActive}
+                onChange={(e) => setRegularInActive(e.target.checked)}
+                id="regularInActive"
+                disabled={isUpdatingRegularIn}
+              />
+              <label htmlFor="regularInActive" style={{ marginLeft: 8 }}>정기 입고 활성화</label>
+              
+              <button 
+                onClick={handleRegularInUpdate}
+                disabled={isUpdatingRegularIn}
+                style={{
+                  marginLeft: 16,
+                  padding: "4px 8px",
+                  background: "#5bc0de",
+                  border: "none",
+                  borderRadius: "4px",
+                  color: "white"
+                }}
+              >
+                {isUpdatingRegularIn ? "저장 중..." : "설정 저장"}
+              </button>
+              
+              {/* 정기 입고 테스트 버튼 추가 */}
+              <button 
+                onClick={handleTestRegularIn}
+                disabled={isTestingRegularIn || !regularInActive || regularInQuantity <= 0}
+                style={{
+                  marginLeft: 8,
+                  padding: "4px 8px",
+                  background: "#f0ad4e",
+                  border: "none",
+                  borderRadius: "4px",
+                  color: "white"
+                }}
+              >
+                {isTestingRegularIn ? "처리 중..." : "즉시 실행 테스트"}
+              </button>
+            </div>
+          </div>
         </div>
         {/* 가격 정보 */}
         <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16 }}>
@@ -161,13 +283,13 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
           {detail.productDetail ? (
             <>
               <div>제조사: {detail.productDetail.manufacturer}</div>
-              <div>제조사 연락처: {detail.productDetail.manuNum}</div>
+              <div>제조번호: {detail.productDetail.manuNum}</div>
               <div>유통기한: {detail.productDetail.shelfLife}</div>
-              <div>알레르기: {detail.productDetail.allergens}</div>
+              <div>알레르기 정보: {detail.productDetail.allergens}</div>
               <div>보관방법: {detail.productDetail.storageMethod}</div>
             </>
           ) : (
-            <div>부가 정보 없음</div>
+            <p>부가 정보가 없습니다.</p>
           )}
         </div>
       </div>
