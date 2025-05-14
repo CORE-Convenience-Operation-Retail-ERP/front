@@ -10,6 +10,7 @@ import {
     Table,
     Spinner
 } from '../../../features/store/styles/stock/StockList.styled';
+import {useNavigate} from "react-router-dom";
 
 function StockListCom({
                           stockList,
@@ -73,6 +74,11 @@ function StockListCom({
         if (applied) return <span style={{ color: 'gray' }}>0</span>;
         const d = real - total;
         return <span style={{ color: d > 0 ? 'blue' : d < 0 ? 'red' : 'black' }}>{d > 0 ? `+${d}` : d}</span>;
+    };
+    const navigate = useNavigate();
+
+    const handleNameClick = (productId) => {
+        navigate(`/store/stock/detail/${productId}`);
     };
 
     return (
@@ -146,7 +152,13 @@ function StockListCom({
                                     onChange={() => toggleSelect(r.checkItemId)}
                                 />
                             </td>
-                            <td>{r.productName}</td>
+                            <td
+                                style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline' }}
+                                title="상세 보기"
+                                onClick={() => handleNameClick(r.productId)}
+                            >
+                                {r.productName}
+                            </td>
                             <td>{r.barcode}</td>
                             <td>{r.categoryName}</td>
                             <td>{r.storeQuantity}</td>

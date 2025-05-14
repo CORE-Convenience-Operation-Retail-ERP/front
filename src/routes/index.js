@@ -5,7 +5,7 @@ import LoginPage from '../pages/auth/LoginPage';
 import DashboardPage from '../pages/headquarters/DashboardPage';
 import StoreLayout from "../layouts/StoreLayout";
 import HomePage from "../pages/store/HomePage";
-import StockAdjusPage from "../pages/store/stock/StockAdjustPage";
+import StockAdjusPage from "../pages/store/stock/StockDetailPage";
 import DisposalPage from "../pages/store/disposal/DisposalPage";
 import OrderFormPage from "../pages/store/order/OrderFormPage";
 import OrderListPage from "../pages/store/order/OrderListPage";
@@ -51,6 +51,7 @@ import InventoryHistoryPage from "../pages/store/inventory/InventoryHistoryPage"
 import InventoryRegisterPage from "../pages/store/inventory/InventoryRegisterPage";
 // 통합 재고 모니터링 페이지 import
 import IntegratedStockMonitoringPage from '../pages/headquarters/IntegratedStockMonitoringPage';
+import StockDetailPage from "../pages/store/stock/StockDetailPage";
 
 const AppRoutes = () => {
   return (
@@ -92,7 +93,7 @@ const AppRoutes = () => {
         <Route path="stock/in-history" element={<StockInHistoryPage/>} />  
         <Route path="inventory/check/history" element={<InventoryHistoryPage/>} />
         <Route path="inventory/check/register" element={<InventoryRegisterPage/>} />
-        <Route path="stock/manual-adjust" element={<StockAdjusPage/>} />
+        <Route path="stock/detail/:productId" element={<StockDetailPage/>} />
         <Route path="stock/adjust-log" element={<AdjustLogPage/>} />       
         <Route path="inventory/disposal" element={<DisposalPage/>} />
         <Route path="order/register" element={<OrderFormPage/>} />
