@@ -17,9 +17,10 @@ const menuItems = [
     path: '/headquarters/products',
     subMenus: [
       { text: '전체 제품 관리', path: '/headquarters/products/all' },
-      { text: '상세 제품 관리', path: '/headquarters/products/detail' }
+      { text: '상세 제품 관리', path: '/headquarters/products/detail' },
+      { text: '통합 재고 모니터링', path: '/headquarters/products/integrated-stock' }
     ],
-    hoverBoxBottom: { bottom: -25, width: 80, height: 20 },
+    hoverBoxBottom: { bottom: -45, width: 80, height: 30 },
   },
   {
     text: '인사 관리',
@@ -39,7 +40,7 @@ const menuItems = [
       { text: '지점 목록', path: '/headquarters/branches/list' },
       { text: '지점 문의 관리', path: '/headquarters/branches/inquiry' },
       { text: '지점 매출 분석', path: '/headquarters/branches/sales-analysis' },
-      { text: '재고 모니터링', path: '/headquarters/branches/stock-monitering' },
+      { text: '지점 재고 현황', path: '/headquarters/branches/stock-monitering' },
       { text: '지점 통계', path: '/headquarters/branches/statistics' }
     ],
     hoverBoxBottom: { bottom: -88, width: 88  , height: 40 },

@@ -17,6 +17,13 @@ const PageTitle = styled.h2`
   margin-bottom: 20px;
 `;
 
+const PageSubtitle = styled.p`
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+  font-style: italic;
+`;
+
 const FilterSection = styled.div`
   display: flex;
   gap: 10px;
@@ -556,7 +563,8 @@ const BranchesStockMonitoringCom = ({
   
   return (
     <Container>
-      <PageTitle>지점별 재고 모니터링</PageTitle>
+      <PageTitle>지점 중심 재고 관리</PageTitle>
+      <PageSubtitle>지점별 재고 현황을 모니터링하고 관리합니다</PageSubtitle>
       
       {/* 필터 섹션 */}
       <FilterSection>
@@ -620,7 +628,7 @@ const BranchesStockMonitoringCom = ({
         {/* 재고 개요 카드 */}
         <Card>
           <CardTitle>
-            재고 현황 요약
+            지점별 재고 현황 요약
             <DetailButton>자세히</DetailButton>
           </CardTitle>
           
@@ -693,7 +701,7 @@ const BranchesStockMonitoringCom = ({
       
       {/* 재고 목록 테이블 */}
       <Card style={{ position: 'relative' }}>
-        <CardTitle>재고 상세 목록</CardTitle>
+        <CardTitle>지점별 재고 상세 목록</CardTitle>
         
         {isLoading && <LoadingOverlay>데이터를 불러오는 중...</LoadingOverlay>}
         
@@ -701,10 +709,10 @@ const BranchesStockMonitoringCom = ({
           <StyledTable>
             <thead>
               <tr>
-                <TableHeader>바코드</TableHeader>
+                <TableHeader>지점</TableHeader>
                 <TableHeader>상품명</TableHeader>
                 <TableHeader>카테고리</TableHeader>
-                <TableHeader>지점</TableHeader>
+                <TableHeader>바코드</TableHeader>
                 <TableHeader>매장 재고</TableHeader>
                 <TableHeader>창고 재고</TableHeader>
                 <TableHeader>총 재고</TableHeader>
@@ -718,10 +726,10 @@ const BranchesStockMonitoringCom = ({
                   const stockStatus = getStockStatus(item.storeQuantity, 10); // 10은 임시 최소값
                   return (
                     <tr key={index}>
-                      <TableCell>{item.barcode}</TableCell>
+                      <TableCell>{item.storeName}</TableCell>
                       <TableCell>{item.productName}</TableCell>
                       <TableCell>{item.categoryName}</TableCell>
-                      <TableCell>{item.storeName}</TableCell>
+                      <TableCell>{item.barcode}</TableCell>
                       <TableCell>{item.storeQuantity}</TableCell>
                       <TableCell>{item.warehouseQuantity}</TableCell>
                       <TableCell>{item.totalQuantity}</TableCell>

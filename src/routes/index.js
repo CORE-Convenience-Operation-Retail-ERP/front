@@ -49,6 +49,8 @@ import SalesAnalysis from '../pages/headquarters/branches/SalesAnalysis';
 import CustomerInquiryPage from '../pages/customer/CustomerInquiryPage';
 import InventoryHistoryPage from "../pages/store/inventory/InventoryHistoryPage";
 import InventoryRegisterPage from "../pages/store/inventory/InventoryRegisterPage";
+// 통합 재고 모니터링 페이지 import
+import IntegratedStockMonitoringPage from '../pages/headquarters/IntegratedStockMonitoringPage';
 
 const AppRoutes = () => {
   return (
@@ -59,6 +61,7 @@ const AppRoutes = () => {
       {/* 본사 관련 라우트 */}
       <Route path="/headquarters/*" element={<HeadquartersLayout />}>
         <Route path="products/all" element={<ProductsAllPage />} />
+        <Route path="products/integrated-stock" element={<IntegratedStockMonitoringPage />} />
         <Route path="hr/employees" element={<EmployeesListPage />} />
         <Route path="hr/employee-management" element={<EmployeeManagementPage />} />
         <Route path="hr/employee-management/:empId" element={<EmployeeManagementPage />} />
