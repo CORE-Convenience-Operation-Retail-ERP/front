@@ -88,6 +88,7 @@ const ProductsAllCom = ({
               <th>카테고리</th>
               <th>최근입고일</th>
               <th>공급가</th>
+              <th>판매가</th>
               <th>제품 수정</th>
             </tr>
           </thead>
@@ -131,6 +132,7 @@ const ProductsAllCom = ({
                     : ""}
                 </td>
                 <td>{p.proCost?.toLocaleString()}</td>
+                <td>{p.proSellCost?.toLocaleString()}</td>
                 <td>
                   {statusLabel(p.status)}
                   <button
