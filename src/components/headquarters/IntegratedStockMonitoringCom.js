@@ -572,6 +572,10 @@ const IntegratedStockMonitoringCom = ({
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [viewMode, setViewMode] = useState('integrated'); // 'integrated', 'headquarters', 'branches'
   
+  // 그래프 페이징을 위한 상태 추가
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 13;
+  
   // 데이터 구조 확인을 위한 로그
   useEffect(() => {
     console.log('데이터 확인 - headquarters 전체:', headquarters);
@@ -737,6 +741,30 @@ const IntegratedStockMonitoringCom = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+  
+  // 그래프 페이지 변경 핸들러 추가
+  const handleGraphPageChange = (direction) => {
+    if (direction === 'next' && (currentPage + 1) * itemsPerPage < headquarters.length) {
+      setCurrentPage(prev => prev + 1);
+    } else if (direction === 'prev' && currentPage > 0) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
+  
+  // 현재 페이지의 데이터 계산
+  const getCurrentPageItems = () => {
+    const startIndex = currentPage * itemsPerPage;
+    
+    // 마지막 페이지인 경우 (총 38개 상품일 때: 13 + 13 + 12 = 38)
+    if (currentPage === 2) {
+      return headquarters.slice(26, 38); // 26~37 (12개)
+    }
+    // 나머지 페이지는 13개씩 표시
+    return headquarters.slice(startIndex, startIndex + itemsPerPage);
+  };
+  
+  // 총 페이지 수 계산 - 38개 상품일 때 3페이지가 되도록 설정
+  const totalGraphPages = Math.ceil((headquarters.length - 1) / itemsPerPage) + (headquarters.length > 26 ? 1 : 0);
   
   // 차트 데이터 준비
   const pieData = {
@@ -987,8 +1015,53 @@ const IntegratedStockMonitoringCom = ({
             {headquarters.length > 0 ? (
               <BarChartWrapper>
                 {console.log('막대 그래프용 본사 재고 데이터:', headquarters)}
+                
+                {/* 페이지 네비게이션 버튼 추가 */}
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between',
+                  marginBottom: '10px',
+                  alignItems: 'center'
+                }}>
+                  <button 
+                    onClick={() => handleGraphPageChange('prev')}
+                    disabled={currentPage === 0}
+                    style={{ 
+                      padding: '8px 15px',
+                      background: currentPage === 0 ? '#f0f0f0' : '#6FC3ED',
+                      color: currentPage === 0 ? '#999' : 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: currentPage === 0 ? 'default' : 'pointer',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    ◀ 이전
+                  </button>
+                  
+                  <div style={{ fontSize: '14px', color: '#666' }}>
+                    {currentPage + 1} / {totalGraphPages} 페이지 ({headquarters.length}개 항목 중 {currentPage * itemsPerPage + 1}-{Math.min((currentPage + 1) * itemsPerPage, headquarters.length)}개 표시)
+                  </div>
+                  
+                  <button 
+                    onClick={() => handleGraphPageChange('next')}
+                    disabled={(currentPage + 1) * itemsPerPage >= headquarters.length}
+                    style={{ 
+                      padding: '8px 15px',
+                      background: (currentPage + 1) * itemsPerPage >= headquarters.length ? '#f0f0f0' : '#6FC3ED',
+                      color: (currentPage + 1) * itemsPerPage >= headquarters.length ? '#999' : 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: (currentPage + 1) * itemsPerPage >= headquarters.length ? 'default' : 'pointer',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    다음 ▶
+                  </button>
+                </div>
+                
                 <VerticalBarContainer>
-                  {headquarters.slice(0, 12).map((item, index) => {
+                  {getCurrentPageItems().map((item, index) => {
                     // item에서 적절한 필드 선택 (quantity - 창고 재고)
                     console.log(`막대 그래프 아이템 ${index}:`, item);
                     // 창고 재고(quantity)를 사용
@@ -998,7 +1071,7 @@ const IntegratedStockMonitoringCom = ({
                     const percentage = Math.round((quantity/1000)*100);
                     
                     return (
-                      <StockItem key={index} $totalItems={Math.min(headquarters.length, 12)}>
+                      <StockItem key={index} $totalItems={Math.min(getCurrentPageItems().length, 12)}>
                         <BarLabel>{quantity}</BarLabel>
                         <VerticalBar 
                           $value={quantity} 
@@ -1027,12 +1100,6 @@ const IntegratedStockMonitoringCom = ({
                     <span>위험 (10% 미만)</span>
                   </LegendItem>
                 </StockLegend>
-                
-                {headquarters.length > 12 && (
-                  <div style={{ textAlign: 'center', marginTop: '20px', color: '#666', fontSize: '14px' }}>
-                    * 표시된 12개 상품 외 {headquarters.length - 12}개 상품이 더 있습니다.
-                  </div>
-                )}
               </BarChartWrapper>
             ) : (
               <div style={{ textAlign: 'center', padding: '30px 0' }}>

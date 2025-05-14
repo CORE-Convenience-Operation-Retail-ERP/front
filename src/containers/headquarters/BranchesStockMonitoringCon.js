@@ -176,9 +176,28 @@ const BranchesStockMonitoringCon = () => {
       setStockList(response.data);
     } catch (err) {
       console.error('Error loading stock list:', err);
-      if (err.response && err.response.status === 403) {
-        console.log('권한 부족: 재고 목록을 불러올 수 있는 권한이 없습니다.');
+      
+      // 서버 응답에 따른 구체적인 에러 메시지 설정
+      let errorMsg = '재고 목록을 불러오는 중 오류가 발생했습니다.';
+      
+      if (err.response) {
+        // 서버에서 응답이 왔지만 오류인 경우
+        if (err.response.status === 500) {
+          errorMsg = `서버 내부 오류가 발생했습니다 (500): ${err.response.data || '알 수 없는 오류'}`;
+          console.error('서버 응답 데이터:', err.response.data);
+        } else if (err.response.status === 403) {
+          errorMsg = '재고 목록을 불러올 권한이 없습니다 (403)';
+        } else if (err.response.status === 404) {
+          errorMsg = '재고 목록 API 엔드포인트를 찾을 수 없습니다 (404)';
+        } else {
+          errorMsg = `재고 목록을 불러오는 중 오류가 발생했습니다: ${err.response.status} - ${err.response.data || err.message}`;
+        }
+      } else if (err.request) {
+        // 요청은 보냈지만 응답이 없는 경우
+        errorMsg = '서버에서 응답이 없습니다. 네트워크 연결을 확인해주세요.';
       }
+      
+      setError(errorMsg);
       throw err;
     }
   };
@@ -205,6 +224,7 @@ const BranchesStockMonitoringCon = () => {
     
     try {
       setIsLoading(true);
+      setError(null); // 새 요청 시작 시 이전 오류 초기화
       
       // 지점 선택이 변경된 경우 즉시 관련 데이터를 모두 업데이트
       if ('storeId' in newFilters) {
@@ -219,7 +239,8 @@ const BranchesStockMonitoringCon = () => {
       
       setIsLoading(false);
     } catch (err) {
-      setError('데이터 필터링 중 오류가 발생했습니다.');
+      console.error('필터 변경 중 오류 발생:', err);
+      // 오류 메시지는 이미 loadStockList 내부에서 설정됨
       setIsLoading(false);
     }
   };
