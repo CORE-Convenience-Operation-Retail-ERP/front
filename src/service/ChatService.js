@@ -3,20 +3,36 @@ import axios from 'axios';
 const API_URL = 'http://localhost:8080/api/chat';
 
 // 채팅 알림 상태 저장소
-let unreadMessages = 0;
+let unreadMessagesByRoom = {}; // 채팅방별 안 읽은 메시지 수 저장
 let unreadMessageCallbacks = [];
 
 // 로컬 스토리지에서 알림 상태 초기화
-try {
-  const savedCount = localStorage.getItem('chat_unread_count');
-  if (savedCount !== null) {
-    unreadMessages = parseInt(savedCount, 10) || 0;
+function initializeFromLocalStorage() {
+  try {
+    const savedUnreadMessages = localStorage.getItem('chat_unread_by_room');
+    if (savedUnreadMessages) {
+      unreadMessagesByRoom = JSON.parse(savedUnreadMessages) || {};
+      console.log('로컬 스토리지에서 채팅 알림 상태 불러옴:', unreadMessagesByRoom);
+    } else {
+      console.log('로컬 스토리지에 저장된 채팅 알림 상태 없음');
+      unreadMessagesByRoom = {};
+    }
+  } catch (e) {
+    console.error('로컬 스토리지 읽기 오류:', e);
+    unreadMessagesByRoom = {};
   }
-} catch (e) {
-  console.error('로컬 스토리지 읽기 오류:', e);
 }
 
+// 초기화 실행
+initializeFromLocalStorage();
+
 class ChatService {
+  constructor() {
+    // 생성자에서도 로컬 스토리지에서 상태 초기화
+    initializeFromLocalStorage();
+    console.log('ChatService 초기화 완료, 현재 알림 상태:', unreadMessagesByRoom);
+  }
+
   // 채팅방 목록 조회
   getChatRooms() {
     return axios.get(`${API_URL}/rooms`, {
@@ -110,45 +126,89 @@ class ChatService {
   }
 
   // 새 메시지 알림 업데이트
-  updateUnreadMessages(count) {
-    console.log('알림 카운트 업데이트:', count);
-    unreadMessages = count;
+  updateUnreadMessages(roomId, count) {
+    console.log(`채팅방 ${roomId}의 알림 카운트 업데이트:`, count);
+    
+    if (roomId) {
+      unreadMessagesByRoom[roomId] = count;
+    }
+    
     // 로컬 스토리지에 저장
-    localStorage.setItem('chat_unread_count', count.toString());
+    localStorage.setItem('chat_unread_by_room', JSON.stringify(unreadMessagesByRoom));
+    
     // 모든 알림 콜백 호출
-    unreadMessageCallbacks.forEach(callback => callback(unreadMessages));
+    this._notifyCallbacks();
   }
 
   // 새 메시지 받음
-  addUnreadMessage() {
-    unreadMessages += 1;
-    console.log('새 메시지 알림 추가됨, 총:', unreadMessages);
+  addUnreadMessage(roomId) {
+    if (!roomId) {
+      console.warn('roomId 없이 메시지 알림 추가 시도');
+      return;
+    }
+    
+    // 해당 채팅방의 안 읽은 메시지 수 증가
+    unreadMessagesByRoom[roomId] = (unreadMessagesByRoom[roomId] || 0) + 1;
+    
+    console.log(`채팅방 ${roomId}에 새 메시지 알림 추가됨, 총:`, unreadMessagesByRoom[roomId]);
+    
     // 로컬 스토리지에 저장
-    localStorage.setItem('chat_unread_count', unreadMessages.toString());
+    localStorage.setItem('chat_unread_by_room', JSON.stringify(unreadMessagesByRoom));
+    
     // 모든 알림 콜백 호출
-    unreadMessageCallbacks.forEach(callback => callback(unreadMessages));
+    this._notifyCallbacks();
   }
 
-  // 메시지 읽음 처리
-  markMessagesAsRead(count = null) {
-    if (count === null) {
-      unreadMessages = 0;
-    } else {
-      unreadMessages = Math.max(0, unreadMessages - count);
+  // 특정 채팅방의 메시지 읽음 처리
+  markRoomMessagesAsRead(roomId) {
+    if (!roomId) {
+      return;
     }
-    console.log('메시지 읽음 처리됨, 남은 알림:', unreadMessages);
+    
+    // 해당 채팅방의 안 읽은 메시지 수 초기화
+    if (unreadMessagesByRoom[roomId]) {
+      delete unreadMessagesByRoom[roomId];
+      
+      console.log(`채팅방 ${roomId}의 메시지 읽음 처리됨`);
+      
+      // 로컬 스토리지에 저장
+      localStorage.setItem('chat_unread_by_room', JSON.stringify(unreadMessagesByRoom));
+      
+      // 모든 알림 콜백 호출
+      this._notifyCallbacks();
+    }
+  }
+
+  // 모든 메시지 읽음 처리
+  markMessagesAsRead() {
+    unreadMessagesByRoom = {};
+    console.log('모든 메시지 읽음 처리됨');
+    
     // 로컬 스토리지에 저장
-    localStorage.setItem('chat_unread_count', unreadMessages.toString());
+    localStorage.setItem('chat_unread_by_room', JSON.stringify(unreadMessagesByRoom));
+    
     // 모든 알림 콜백 호출
-    unreadMessageCallbacks.forEach(callback => callback(unreadMessages));
+    this._notifyCallbacks();
+  }
+
+  // 콜백 호출 내부 메서드
+  _notifyCallbacks() {
+    // 총 안 읽은 메시지 수 계산
+    const totalUnread = this.getUnreadMessageCount();
+    
+    // 모든 알림 콜백 호출 (총 개수와 채팅방별 개수 전달)
+    unreadMessageCallbacks.forEach(callback => 
+      callback(totalUnread, unreadMessagesByRoom)
+    );
   }
 
   // 알림 업데이트 콜백 등록
   onUnreadMessagesChange(callback) {
     console.log('알림 콜백 등록됨');
     unreadMessageCallbacks.push(callback);
+    
     // 즉시 현재 상태 반영
-    callback(unreadMessages);
+    callback(this.getUnreadMessageCount(), unreadMessagesByRoom);
     
     // 콜백 제거 함수 반환
     return () => {
@@ -158,7 +218,18 @@ class ChatService {
 
   // 현재 안읽은 메시지 수 반환
   getUnreadMessageCount() {
-    return unreadMessages;
+    // 모든 채팅방의 안 읽은 메시지 수 합산
+    return Object.values(unreadMessagesByRoom).reduce((sum, count) => sum + count, 0);
+  }
+  
+  // 특정 채팅방의 안 읽은 메시지 수 반환
+  getRoomUnreadCount(roomId) {
+    return unreadMessagesByRoom[roomId] || 0;
+  }
+  
+  // 모든 채팅방의 안 읽은 메시지 상태 반환
+  getAllUnreadMessages() {
+    return {...unreadMessagesByRoom};
   }
 }
 

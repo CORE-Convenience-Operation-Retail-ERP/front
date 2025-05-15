@@ -12,6 +12,45 @@ class WebSocketService {
     this.errorCallback = null;
     this.reconnectCount = 0;
     this.maxReconnectAttempts = 5;
+    
+    // 페이지 로드 시 자동 연결 시도
+    this.autoConnect();
+    
+    // 페이지 가시성 변경 감지 (탭 전환 등)
+    if (typeof document !== 'undefined' && document.addEventListener) {
+      document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+    }
+  }
+  
+  // 앱 초기화 시 호출되는 함수
+  init() {
+    console.log('WebSocketService 초기화 중...');
+    this.autoConnect();
+  }
+  
+  // 자동 연결 함수
+  autoConnect() {
+    // 토큰이 있으면 자동 연결
+    const token = localStorage.getItem('token');
+    if (token && !this.connected) {
+      console.log('자동 웹소켓 연결 시도...');
+      this.connect(token, 
+        () => {
+          console.log('자동 웹소켓 연결 성공');
+        }, 
+        (error) => {
+          console.error('자동 웹소켓 연결 실패:', error);
+        }
+      );
+    }
+  }
+  
+  // 페이지 가시성 변경 처리
+  handleVisibilityChange() {
+    if (!document.hidden && !this.connected) {
+      console.log('페이지 가시성 변경으로 연결 재시도');
+      this.autoConnect();
+    }
   }
 
   connect(token, onConnectCallback, onErrorCallback) {
@@ -137,41 +176,8 @@ class WebSocketService {
             messageContent: message.content
           });
           
-          // 알림 항상 추가 (조건 수정)
-          chatService.addUnreadMessage();
-            
-          // 브라우저 알림 표시 (조건 수정)
-          if (Notification.permission === 'granted') {
-            const notification = new Notification('새 메시지 알림', {
-              body: `${message.senderName || '알 수 없음'}: ${message.content}`,
-              icon: '/core_logo.png',
-              badge: '/core_badge.png',
-              image: message.senderImg || '/message_image.png',
-              tag: `chat-${message.roomId}`,
-              requireInteraction: true,
-              vibrate: [200, 100, 200],
-              dir: 'auto',
-              silent: false,
-              data: {
-                roomId: message.roomId,
-                messageId: message.messageId,
-                senderId: message.senderId
-              }
-            });
-            
-            // 알림 클릭 이벤트 추가
-            notification.onclick = function() {
-              window.focus();
-              if (message.roomId) {
-                window.location.href = `/chat/room/${message.roomId}`;
-              } else {
-                window.location.href = '/chat';
-              }
-            };
-          } else if (Notification.permission !== 'denied') {
-            // 알림 권한 요청
-            Notification.requestPermission();
-          }
+          // 알림 항상 추가 (조건 수정) - 채팅방 ID 전달
+          chatService.addUnreadMessage(message.roomId);
         }
       });
     } catch (error) {

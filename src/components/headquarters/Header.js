@@ -18,6 +18,7 @@ const Header = () => {
   const [loading, setLoading] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadMessagesByRoom, setUnreadMessagesByRoom] = useState({});
   const open = Boolean(anchorEl);
 
   // 새 방식: JWT 토큰 기반 로그인 정보 가져오기
@@ -31,9 +32,17 @@ const Header = () => {
   // 채팅 알림 구독
   useEffect(() => {
     // 알림 상태 업데이트 콜백 등록
-    const unsubscribe = chatService.onUnreadMessagesChange((count) => {
-      setUnreadMessages(count);
+    const unsubscribe = chatService.onUnreadMessagesChange((totalCount, roomCounts) => {
+      setUnreadMessages(totalCount);
+      setUnreadMessagesByRoom(roomCounts);
     });
+    
+    // 웹소켓 연결 상태 확인 및 필요 시 재연결
+    const webSocketService = require('../../service/WebSocketService').default;
+    if (!webSocketService.isConnected()) {
+      console.log('헤더 마운트 - 웹소켓 연결 확인 및 재연결 시도');
+      webSocketService.autoConnect();
+    }
     
     // 컴포넌트 언마운트 시 구독 해제
     return () => {
@@ -114,10 +123,7 @@ const Header = () => {
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
     
-    // 채팅창을 열면 읽음 처리
-    if (!isChatOpen) {
-      chatService.markMessagesAsRead();
-    }
+    // 채팅창을 열어도 알림은 유지 (각 채팅방에 들어갈 때만 해당 채팅방 알림 제거)
   };
 
   // 알림 클릭 시 해당 알림을 읽음 처리하는 함수

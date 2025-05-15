@@ -75,8 +75,8 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
     processedMessagesRef.current = new Set();
     setMessages([]);
 
-    // 페이지 접속 시 읽음 처리
-    chatService.markMessagesAsRead();
+    // 페이지 접속 시 현재 채팅방만 읽음 처리
+    chatService.markRoomMessagesAsRead(roomId);
 
     // 웹소켓 연결
     webSocketService.connect(token, 
@@ -114,7 +114,7 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
     const handleFocus = () => {
       console.log('페이지 포커스 - 채팅방 활성화');
       isActiveRoomRef.current = true;
-      chatService.markMessagesAsRead();
+      chatService.markRoomMessagesAsRead(roomId);
     };
     
     const handleBlur = () => {
