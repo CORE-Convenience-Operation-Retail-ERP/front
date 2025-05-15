@@ -4,7 +4,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import ChatIcon from '@mui/icons-material/Chat';
 import axios from 'axios';
+import ChatModal from '../chat/ChatModal';
+import chatService from '../../service/ChatService';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -13,6 +16,8 @@ const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const open = Boolean(anchorEl);
 
   // 새 방식: JWT 토큰 기반 로그인 정보 가져오기
@@ -22,6 +27,19 @@ const Header = () => {
 
   // userName 설정 부분 
   const userName = name || "로그인 해주세요";
+
+  // 채팅 알림 구독
+  useEffect(() => {
+    // 알림 상태 업데이트 콜백 등록
+    const unsubscribe = chatService.onUnreadMessagesChange((count) => {
+      setUnreadMessages(count);
+    });
+    
+    // 컴포넌트 언마운트 시 구독 해제
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // 알림 데이터 가져오기
   useEffect(() => {
@@ -92,6 +110,16 @@ const Header = () => {
     setAnchorEl(null);
   };
 
+  // 채팅 모달 열기/닫기
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
+    
+    // 채팅창을 열면 읽음 처리
+    if (!isChatOpen) {
+      chatService.markMessagesAsRead();
+    }
+  };
+
   // 알림 클릭 시 해당 알림을 읽음 처리하는 함수
   const handleNotificationRead = (notification) => {
     // 알림 읽음 처리
@@ -110,91 +138,111 @@ const Header = () => {
     handleNotificationClose();
   };
 
+  // 본사 페이지인지 확인
+  const isHeadquartersPage = location.pathname.startsWith('/headquarters');
+
   return (
-    <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #eee' }}>
-      <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64 }}>
-        <Box sx={{ width: 300 }} />
+    <>
+      <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #eee' }}>
+        <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64 }}>
+          <Box sx={{ width: 300 }} />
 
-        <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
-          <img
-            src="/core_logo.png"
-            alt="CORE"
-            style={{ height: 30, cursor: 'pointer' }}
-            onClick={() => navigate('/headquarters/dashboard')}
-          />
-        </Box>
-
-        <Box sx={{ width: 300, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1.5 }}>
-          {/* 알림 아이콘 및 뱃지 */}
-          <IconButton onClick={handleNotificationClick}>
-            <Badge badgeContent={notifications.filter(n => !n.isRead).length} color="error">
-              <NotificationsIcon sx={{ color: 'black' }} />
-            </Badge>
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleNotificationClose}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          >
-            {notifications.length > 0 ? (
-              notifications.map((notification) => (
-                <MenuItem 
-                  key={notification.id} 
-                  onClick={() => handleNotificationRead(notification)}
-                  sx={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'flex-start',
-                    backgroundColor: notification.isRead ? 'inherit' : '#f0f7ff',
-                    borderLeft: notification.isRead ? 'none' : '3px solid #1976d2'
-                  }}
-                >
-                  <Box sx={{ fontWeight: 'bold' }}>{notification.title}</Box>
-                  {notification.subtitle && (
-                    <Box sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-                      {notification.subtitle}
-                    </Box>
-                  )}
-                </MenuItem>
-              ))
-            ) : (
-              <MenuItem disabled>새로운 알림이 없습니다</MenuItem>
-            )}
-          </Menu>
-
-          <Box
-            component="img"
-            src="/profile_default.png"
-            alt="프로필"
-            sx={{
-              width: 24,
-              height: 24,
-              borderRadius: '50%',
-              cursor: 'pointer',
-              objectFit: 'cover'
-            }}
-            onClick={() => navigate('/headquarters/hr/my-page')}
-          />
-
-          <Box
-            sx={{
-              cursor: 'pointer',
-              '&:hover': { textDecoration: 'underline' },
-              color: 'black'
-            }}
-            onClick={() => navigate(`/headquarters/hr/my-page/${1}`)}
-          >
-            {userName}님
+          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+            <img
+              src="/core_logo.png"
+              alt="CORE"
+              style={{ height: 30, cursor: 'pointer' }}
+              onClick={() => navigate('/headquarters/dashboard')}
+            />
           </Box>
 
-          <LogoutIcon
-            sx={{ cursor: 'pointer', color: 'black' }}
-            onClick={handleLogout}
-          />
-        </Box>
-      </Toolbar>
-    </AppBar>
+          <Box sx={{ width: 300, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1.5 }}>
+            {/* 채팅 아이콘 (본사 페이지일 때만 표시) */}
+            {isHeadquartersPage && (
+              <IconButton onClick={toggleChat}>
+                <Badge badgeContent={unreadMessages} color="error">
+                  <ChatIcon sx={{ color: 'black' }} />
+                </Badge>
+              </IconButton>
+            )}
+            
+            {/* 알림 아이콘 및 뱃지 */}
+            <IconButton onClick={handleNotificationClick}>
+              <Badge badgeContent={notifications.filter(n => !n.isRead).length} color="error">
+                <NotificationsIcon sx={{ color: 'black' }} />
+              </Badge>
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleNotificationClose}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+              {notifications.length > 0 ? (
+                notifications.map((notification) => (
+                  <MenuItem 
+                    key={notification.id} 
+                    onClick={() => handleNotificationRead(notification)}
+                    sx={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'flex-start',
+                      backgroundColor: notification.isRead ? 'inherit' : '#f0f7ff',
+                      borderLeft: notification.isRead ? 'none' : '3px solid #1976d2'
+                    }}
+                  >
+                    <Box sx={{ fontWeight: 'bold' }}>{notification.title}</Box>
+                    {notification.subtitle && (
+                      <Box sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
+                        {notification.subtitle}
+                      </Box>
+                    )}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>새로운 알림이 없습니다</MenuItem>
+              )}
+            </Menu>
+
+            <Box
+              component="img"
+              src="/profile_default.png"
+              alt="프로필"
+              sx={{
+                width: 24,
+                height: 24,
+                borderRadius: '50%',
+                cursor: 'pointer',
+                objectFit: 'cover'
+              }}
+              onClick={() => navigate('/headquarters/hr/my-page')}
+            />
+
+            <Box
+              sx={{
+                cursor: 'pointer',
+                '&:hover': { textDecoration: 'underline' },
+                color: 'black'
+              }}
+              onClick={() => navigate(`/headquarters/hr/my-page/${1}`)}
+            >
+              {userName}님
+            </Box>
+
+            <LogoutIcon
+              sx={{ cursor: 'pointer', color: 'black' }}
+              onClick={handleLogout}
+            />
+          </Box>
+        </Toolbar>
+      </AppBar>
+      
+      {/* 채팅 모달 */}
+      <ChatModal 
+        isOpen={isChatOpen} 
+        onClose={toggleChat}
+      />
+    </>
   );
 };
 

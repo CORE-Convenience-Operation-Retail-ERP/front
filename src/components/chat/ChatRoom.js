@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import chatService from '../../service/ChatService';
 import webSocketService from '../../service/WebSocketService';
 
-const ChatRoom = () => {
+const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
   const [room, setRoom] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -12,11 +12,26 @@ const ChatRoom = () => {
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   
-  const { roomId } = useParams();
+  const params = useParams();
+  const routeRoomId = params?.roomId;
+  const roomId = propRoomId || routeRoomId;
+  
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const processedMessagesRef = useRef(new Set()); // 이미 처리된 메시지 ID를 추적
+  const isActiveRoomRef = useRef(true); // 현재 채팅방이 활성화 상태인지 추적
+
+  // 활성 상태 관리
+  useEffect(() => {
+    isActiveRoomRef.current = true; // 컴포넌트 마운트 시 활성화
+    console.log('채팅방 활성화 상태: 활성화됨');
+    
+    return () => {
+      isActiveRoomRef.current = false; // 컴포넌트 언마운트 시 비활성화
+      console.log('채팅방 활성화 상태: 비활성화됨');
+    };
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -60,6 +75,9 @@ const ChatRoom = () => {
     processedMessagesRef.current = new Set();
     setMessages([]);
 
+    // 페이지 접속 시 읽음 처리
+    chatService.markMessagesAsRead();
+
     // 웹소켓 연결
     webSocketService.connect(token, 
       () => {
@@ -74,6 +92,12 @@ const ChatRoom = () => {
             processedMessagesRef.current.add(messageId);
             setMessages(prevMessages => [...prevMessages, message]);
             scrollToBottom();
+            
+            // WebSocketService에서 글로벌 알림을 처리하므로 여기서는 처리하지 않음
+            console.log('채팅방에서 메시지 처리됨', {
+              content: message.content, 
+              messageId
+            });
           } else {
             console.log('중복 메시지 감지됨:', messageId);
           }
@@ -86,11 +110,37 @@ const ChatRoom = () => {
       }
     );
 
+    // 페이지 포커스 변경 감지
+    const handleFocus = () => {
+      console.log('페이지 포커스 - 채팅방 활성화');
+      isActiveRoomRef.current = true;
+      chatService.markMessagesAsRead();
+    };
+    
+    const handleBlur = () => {
+      console.log('페이지 블러 - 채팅방 비활성화');
+      isActiveRoomRef.current = false;
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('blur', handleBlur);
+
+    // 브라우저 알림 권한 요청
+    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        console.log('알림 권한 상태:', permission);
+      });
+    } else {
+      console.log('현재 알림 권한 상태:', Notification.permission);
+    }
+
     return () => {
       // 구독 해제
       webSocketService.unsubscribe(`/topic/chat/room/${roomId}`);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('blur', handleBlur);
     };
-  }, [roomId]);
+  }, [roomId, navigate, isInModal]);
 
   const loadChatRoomData = () => {
     // 채팅방 정보 로드
@@ -104,7 +154,7 @@ const ChatRoom = () => {
       .then(messagesResponse => {
         const loadedMessages = messagesResponse.data.reverse(); // 오래된 메시지부터 표시
         
-        // 초기 로드된.메시지 ID를 Set에 추가
+        // 초기 로드된 메시지 ID를 Set에 추가
         loadedMessages.forEach(msg => {
           const messageId = msg.messageId || `${msg.sentAt}_${msg.senderId}_${msg.content}`;
           processedMessagesRef.current.add(messageId);
@@ -150,28 +200,34 @@ const ChatRoom = () => {
   };
 
   const handleBackClick = () => {
-    navigate('/chat');
+    if (isInModal && onBackClick) {
+      onBackClick();
+    } else {
+      navigate('/chat');
+    }
   };
 
   if (loading) {
-    return <Container><p>로딩 중...</p></Container>;
+    return <Container isInModal={isInModal}><p>로딩 중...</p></Container>;
   }
 
   if (error) {
-    return <Container><p>오류: {error}</p></Container>;
+    return <Container isInModal={isInModal}><p>오류: {error}</p></Container>;
   }
 
   return (
-    <Container>
-      <Header>
-        <BackButton onClick={handleBackClick}>{'< 뒤로'}</BackButton>
-        <RoomInfo>
-          <h2>{room?.roomName}</h2>
-          <MemberCount>{room?.members?.length || 0}명 참여</MemberCount>
-        </RoomInfo>
-      </Header>
+    <Container isInModal={isInModal}>
+      {!isInModal && (
+        <Header>
+          <BackButton onClick={handleBackClick}>{'< 뒤로'}</BackButton>
+          <RoomInfo>
+            <h2>{room?.roomName}</h2>
+            <MemberCount>{room?.members?.length || 0}명 참여</MemberCount>
+          </RoomInfo>
+        </Header>
+      )}
 
-      <MessagesContainer ref={messagesContainerRef}>
+      <MessagesContainer ref={messagesContainerRef} isInModal={isInModal}>
         {messages.map((message, index) => (
           <MessageItem 
             key={index} 
@@ -217,6 +273,10 @@ const Container = styled.div`
   flex-direction: column;
   height: 100%;
   background-color: #f5f7fa;
+  
+  ${props => props.isInModal && `
+    padding-top: 0;
+  `}
 `;
 
 const Header = styled.div`
@@ -262,6 +322,10 @@ const MessagesContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 15px;
+  
+  ${props => props.isInModal && `
+    height: calc(100% - 65px);
+  `}
 `;
 
 const MessageItem = styled.div`

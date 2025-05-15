@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import chatService from '../../service/ChatService';
 import webSocketService from '../../service/WebSocketService';
 
-const ChatRoomList = () => {
+const ChatRoomList = ({ isInModal = false, onRoomSelect }) => {
   const [rooms, setRooms] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,9 +58,39 @@ const ChatRoomList = () => {
         
         // 폴링 방식으로 채팅방 목록 업데이트 (5초마다)
         stopPollingRef.current = chatService.pollChatRooms(5000, (roomsData) => {
-          setRooms(roomsData);
+          // 최근 메시지 순으로 정렬
+          const sortedRooms = sortRoomsByLatestMessage(roomsData);
+          setRooms(sortedRooms);
           if (loading) setLoading(false);
         });
+        
+        // 채팅방 업데이트를 위한 여러 가능한 토픽 구독 시도
+        try {
+          // 채팅방 업데이트 구독
+          webSocketService.subscribe('/topic/chat/rooms/update', (event) => {
+            console.log('채팅방 업데이트 이벤트 수신:', event);
+            if (event.eventType === 'MESSAGE_RECEIVED') {
+              // 메시지가 도착한 채팅방 정보 업데이트
+              updateRoomWithNewMessage(event.roomId, event.message);
+            }
+          });
+          
+          // 다른 가능한 토픽도 구독
+          webSocketService.subscribe('/topic/chat/rooms', (event) => {
+            console.log('채팅방 일반 이벤트 수신:', event);
+            // 방 목록 갱신
+            loadRoomsAndSort();
+          });
+          
+          webSocketService.subscribe('/topic/chat/message', (message) => {
+            console.log('일반 메시지 이벤트 수신:', message);
+            if (message.roomId) {
+              updateRoomWithNewMessage(message.roomId, message);
+            }
+          });
+        } catch (err) {
+          console.error('웹소켓 구독 오류:', err);
+        }
       }, 
       (error) => {
         console.error('웹소켓 연결 실패:', error);
@@ -74,9 +104,63 @@ const ChatRoomList = () => {
       if (stopPollingRef.current) {
         stopPollingRef.current();
       }
+      webSocketService.unsubscribe('/topic/chat/rooms/update');
+      webSocketService.unsubscribe('/topic/chat/rooms');
+      webSocketService.unsubscribe('/topic/chat/message');
       webSocketService.disconnect();
     };
   }, [loading]);
+
+  // 채팅방 로드 및 정렬
+  const loadRoomsAndSort = () => {
+    chatService.getChatRooms()
+      .then(response => {
+        const sortedRooms = sortRoomsByLatestMessage(response.data);
+        setRooms(sortedRooms);
+      })
+      .catch(error => {
+        console.error('채팅방 목록 로드 오류:', error);
+      });
+  };
+
+  // 채팅방을 최근 메시지 순으로 정렬
+  const sortRoomsByLatestMessage = (roomsList) => {
+    return [...roomsList].sort((a, b) => {
+      // lastMessageTime이 없는 경우 createdAt 사용
+      const timeA = a.lastMessageTime || a.createdAt || '0';
+      const timeB = b.lastMessageTime || b.createdAt || '0';
+      
+      // 내림차순 정렬 (최신이 위로)
+      return new Date(timeB) - new Date(timeA);
+    });
+  };
+
+  // 새 메시지가 도착했을 때 채팅방 정보 업데이트
+  const updateRoomWithNewMessage = (roomId, message) => {
+    console.log('채팅방 메시지 업데이트:', {roomId, message});
+    setRooms(prevRooms => {
+      // 해당 채팅방 찾기
+      const roomIndex = prevRooms.findIndex(room => room.roomId === roomId);
+      if (roomIndex === -1) {
+        // 채팅방이 없으면 목록 다시 로드
+        loadRoomsAndSort();
+        return prevRooms;
+      }
+      
+      // 새 채팅방 목록 생성
+      const updatedRooms = [...prevRooms];
+      
+      // 채팅방 정보 업데이트
+      updatedRooms[roomIndex] = {
+        ...updatedRooms[roomIndex],
+        lastMessage: message.content,
+        lastMessageTime: message.sentAt
+      };
+      
+      // 최근 메시지 순으로 정렬
+      return sortRoomsByLatestMessage(updatedRooms);
+    });
+  };
 
   const loadEmployees = () => {
     chatService.getHeadquartersEmployees()
@@ -89,7 +173,13 @@ const ChatRoomList = () => {
   };
 
   const handleRoomClick = (roomId) => {
-    navigate(`/chat/room/${roomId}`);
+    if (isInModal && onRoomSelect) {
+      // 모달에서 사용할 경우 콜백 함수 호출
+      onRoomSelect(roomId);
+    } else {
+      // 페이지로 이동
+      navigate(`/chat/room/${roomId}`);
+    }
   };
 
   const toggleNewChatForm = () => {
@@ -120,8 +210,13 @@ const ChatRoomList = () => {
     chatService.createChatRoom(name, roomType, selectedEmployees)
       .then(response => {
         toggleNewChatForm();
-        // 채팅방으로 이동
-        navigate(`/chat/room/${response.data.roomId}`);
+        
+        // 채팅방으로 이동 또는 선택
+        if (isInModal && onRoomSelect) {
+          onRoomSelect(response.data.roomId);
+        } else {
+          navigate(`/chat/room/${response.data.roomId}`);
+        }
       })
       .catch(error => {
         console.error('채팅방 생성 오류:', error);
@@ -130,15 +225,15 @@ const ChatRoomList = () => {
   };
 
   if (loading) {
-    return <Container><p>로딩 중...</p></Container>;
+    return <Container isInModal={isInModal}><p>로딩 중...</p></Container>;
   }
 
   if (error) {
-    return <Container><p>오류: {error}</p></Container>;
+    return <Container isInModal={isInModal}><p>오류: {error}</p></Container>;
   }
 
   return (
-    <Container>
+    <Container isInModal={isInModal}>
       <Header>
         <h2>채팅</h2>
         <NewChatButton onClick={toggleNewChatForm}>
@@ -213,6 +308,10 @@ const Container = styled.div`
   padding: 20px;
   height: 100%;
   background-color: #f5f7fa;
+  
+  ${props => props.isInModal && `
+    overflow-y: auto;
+  `}
 `;
 
 const Header = styled.div`

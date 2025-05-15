@@ -2,6 +2,20 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8080/api/chat';
 
+// 채팅 알림 상태 저장소
+let unreadMessages = 0;
+let unreadMessageCallbacks = [];
+
+// 로컬 스토리지에서 알림 상태 초기화
+try {
+  const savedCount = localStorage.getItem('chat_unread_count');
+  if (savedCount !== null) {
+    unreadMessages = parseInt(savedCount, 10) || 0;
+  }
+} catch (e) {
+  console.error('로컬 스토리지 읽기 오류:', e);
+}
+
 class ChatService {
   // 채팅방 목록 조회
   getChatRooms() {
@@ -93,6 +107,58 @@ class ChatService {
     return {
       'Authorization': `Bearer ${token}`
     };
+  }
+
+  // 새 메시지 알림 업데이트
+  updateUnreadMessages(count) {
+    console.log('알림 카운트 업데이트:', count);
+    unreadMessages = count;
+    // 로컬 스토리지에 저장
+    localStorage.setItem('chat_unread_count', count.toString());
+    // 모든 알림 콜백 호출
+    unreadMessageCallbacks.forEach(callback => callback(unreadMessages));
+  }
+
+  // 새 메시지 받음
+  addUnreadMessage() {
+    unreadMessages += 1;
+    console.log('새 메시지 알림 추가됨, 총:', unreadMessages);
+    // 로컬 스토리지에 저장
+    localStorage.setItem('chat_unread_count', unreadMessages.toString());
+    // 모든 알림 콜백 호출
+    unreadMessageCallbacks.forEach(callback => callback(unreadMessages));
+  }
+
+  // 메시지 읽음 처리
+  markMessagesAsRead(count = null) {
+    if (count === null) {
+      unreadMessages = 0;
+    } else {
+      unreadMessages = Math.max(0, unreadMessages - count);
+    }
+    console.log('메시지 읽음 처리됨, 남은 알림:', unreadMessages);
+    // 로컬 스토리지에 저장
+    localStorage.setItem('chat_unread_count', unreadMessages.toString());
+    // 모든 알림 콜백 호출
+    unreadMessageCallbacks.forEach(callback => callback(unreadMessages));
+  }
+
+  // 알림 업데이트 콜백 등록
+  onUnreadMessagesChange(callback) {
+    console.log('알림 콜백 등록됨');
+    unreadMessageCallbacks.push(callback);
+    // 즉시 현재 상태 반영
+    callback(unreadMessages);
+    
+    // 콜백 제거 함수 반환
+    return () => {
+      unreadMessageCallbacks = unreadMessageCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  // 현재 안읽은 메시지 수 반환
+  getUnreadMessageCount() {
+    return unreadMessages;
   }
 }
 
