@@ -50,6 +50,9 @@ import InventoryRegisterPage from "../pages/store/inventory/InventoryRegisterPag
 import IntegratedStockMonitoringPage from '../pages/headquarters/IntegratedStockMonitoringPage';
 import StockDetailPage from "../pages/store/stock/StockDetailPage";
 import StockFlowLogPage from '../pages/store/stock/StockFlowLogPage';
+// 채팅 페이지 라우트 추가
+import ChatRoomList from '../components/chat/ChatRoomList';
+import ChatRoom from '../components/chat/ChatRoom';
 
 const AppRoutes = () => {
   return (
@@ -113,6 +116,10 @@ const AppRoutes = () => {
 
       {/* 고객 관련 라우트 */}
       <Route path="/customer" element={<CustomerInquiryPage />} />
+
+      {/* 채팅 관련 라우트 추가 (다른 라우트와 함께 설정) */}
+      <Route path="/chat" element={<ChatRoomList />} />
+      <Route path="/chat/room/:roomId" element={<ChatRoom />} />
 
       {/* 기본 리다이렉트 */}
       <Route path="/" element={<Navigate to="/login" replace />} />

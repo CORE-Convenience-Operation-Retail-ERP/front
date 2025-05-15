@@ -37,7 +37,9 @@
     "recharts": "^2.15.3",
     "styled-components": "^6.1.17",
     "web-vitals": "^2.1.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "@stomp/stompjs": "^7.0.0",
+    "sockjs-client": "^1.6.1"
   },
   "scripts": {
     "start": "react-scripts start",
