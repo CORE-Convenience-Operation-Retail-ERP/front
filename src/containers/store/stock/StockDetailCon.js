@@ -16,6 +16,10 @@ export default function StockDetailCon() {
           fetchProductDetail(productId),
           fetchStockFlowLogs({ productId, page: 0, size: 10 })
         ]);
+
+        console.log("🟢 상품 상세 정보:", detail);
+        console.log("📦 재고 흐름 로그:", logs);
+
         setProductDetail(detail);
         setHistoryList(logs.content || []);
       } catch (err) {

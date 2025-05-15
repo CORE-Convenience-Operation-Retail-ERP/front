@@ -28,3 +28,5 @@ export const fetchProductDetail = async (productId) => {
   const response = await axios.get(`/api/products/detail/${productId}`);
   return response.data;
 };
+
+
