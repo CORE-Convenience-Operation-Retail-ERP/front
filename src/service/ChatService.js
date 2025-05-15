@@ -43,6 +43,50 @@ class ChatService {
     });
   }
 
+  // 채팅방 목록 폴링 (웹소켓 대체용)
+  pollChatRooms(interval = 10000, callback) {
+    // 이전 폴링 종료
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+    
+    // 즉시 첫 요청 수행
+    this.getChatRooms()
+      .then(response => {
+        if (callback) callback(response.data);
+      })
+      .catch(error => {
+        console.error('채팅방 목록 폴링 오류:', error);
+      });
+    
+    // 주기적으로 채팅방 목록 갱신
+    this.pollingInterval = setInterval(() => {
+      this.getChatRooms()
+        .then(response => {
+          if (callback) callback(response.data);
+        })
+        .catch(error => {
+          console.error('채팅방 목록 폴링 오류:', error);
+        });
+    }, interval);
+    
+    return () => {
+      if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+        this.pollingInterval = null;
+      }
+    };
+  }
+
+  // 폴링 종료
+  stopPolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+  }
+
   // 인증 헤더 생성
   getAuthHeader() {
     const token = localStorage.getItem('token');

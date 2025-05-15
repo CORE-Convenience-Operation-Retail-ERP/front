@@ -16,6 +16,7 @@ const ChatRoom = () => {
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+  const processedMessagesRef = useRef(new Set()); // 이미 처리된 메시지 ID를 추적
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -55,6 +56,10 @@ const ChatRoom = () => {
       return;
     }
 
+    // 다른 방에서 왔을 경우 처리된 메시지 목록 초기화
+    processedMessagesRef.current = new Set();
+    setMessages([]);
+
     // 웹소켓 연결
     webSocketService.connect(token, 
       () => {
@@ -62,8 +67,16 @@ const ChatRoom = () => {
         
         // 메시지 구독
         webSocketService.subscribe(`/topic/chat/room/${roomId}`, (message) => {
-          setMessages(prevMessages => [...prevMessages, message]);
-          scrollToBottom();
+          // 메시지 ID(또는 sentAt + senderId)가 있는지 확인하고 중복 제거
+          const messageId = message.messageId || `${message.sentAt}_${message.senderId}_${message.content}`;
+          
+          if (!processedMessagesRef.current.has(messageId)) {
+            processedMessagesRef.current.add(messageId);
+            setMessages(prevMessages => [...prevMessages, message]);
+            scrollToBottom();
+          } else {
+            console.log('중복 메시지 감지됨:', messageId);
+          }
         });
       }, 
       (error) => {
@@ -89,7 +102,15 @@ const ChatRoom = () => {
         return chatService.getChatMessages(roomId);
       })
       .then(messagesResponse => {
-        setMessages(messagesResponse.data.reverse()); // 오래된 메시지부터 표시
+        const loadedMessages = messagesResponse.data.reverse(); // 오래된 메시지부터 표시
+        
+        // 초기 로드된.메시지 ID를 Set에 추가
+        loadedMessages.forEach(msg => {
+          const messageId = msg.messageId || `${msg.sentAt}_${msg.senderId}_${msg.content}`;
+          processedMessagesRef.current.add(messageId);
+        });
+        
+        setMessages(loadedMessages);
         setLoading(false);
         scrollToBottom();
       })

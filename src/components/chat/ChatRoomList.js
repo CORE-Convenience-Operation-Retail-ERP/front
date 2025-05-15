@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import chatService from '../../service/ChatService';
@@ -14,6 +14,7 @@ const ChatRoomList = () => {
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   
   const navigate = useNavigate();
+  const stopPollingRef = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -53,8 +54,13 @@ const ChatRoomList = () => {
     webSocketService.connect(token, 
       () => {
         console.log('웹소켓 연결 성공');
-        loadRooms();
         loadEmployees();
+        
+        // 폴링 방식으로 채팅방 목록 업데이트 (5초마다)
+        stopPollingRef.current = chatService.pollChatRooms(5000, (roomsData) => {
+          setRooms(roomsData);
+          if (loading) setLoading(false);
+        });
       }, 
       (error) => {
         console.error('웹소켓 연결 실패:', error);
@@ -64,22 +70,13 @@ const ChatRoomList = () => {
     );
 
     return () => {
+      // 폴링 중지
+      if (stopPollingRef.current) {
+        stopPollingRef.current();
+      }
       webSocketService.disconnect();
     };
-  }, []);
-
-  const loadRooms = () => {
-    chatService.getChatRooms()
-      .then(response => {
-        setRooms(response.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('채팅방 목록 로드 오류:', error);
-        setError('채팅방 목록을 불러오는데 실패했습니다.');
-        setLoading(false);
-      });
-  };
+  }, [loading]);
 
   const loadEmployees = () => {
     chatService.getHeadquartersEmployees()
@@ -123,7 +120,7 @@ const ChatRoomList = () => {
     chatService.createChatRoom(name, roomType, selectedEmployees)
       .then(response => {
         toggleNewChatForm();
-        loadRooms();
+        // 채팅방으로 이동
         navigate(`/chat/room/${response.data.roomId}`);
       })
       .catch(error => {
