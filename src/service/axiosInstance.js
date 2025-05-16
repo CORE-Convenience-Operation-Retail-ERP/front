@@ -79,4 +79,17 @@ instance.interceptors.response.use(
   }
 );
 
+export const handleRequest = async (apiCall) => {
+  try {
+    return await apiCall();
+  } catch (err) {
+    const msg =
+        typeof err.response?.data === 'string'
+            ? err.response.data
+            : err.response?.data?.message || err.message || '서버 오류 발생';
+    return Promise.reject(msg);
+  }
+};
+
+
 export default instance;

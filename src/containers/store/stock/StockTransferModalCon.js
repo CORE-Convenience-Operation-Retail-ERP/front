@@ -56,8 +56,7 @@ function StockTransferModalCon({ product, onClose, onSuccess }) {
             onSuccess?.();
             onClose();
         } catch (err) {
-            console.error("이동 실패:", err?.response?.data || err.message);
-            alert("이동 실패: " + err);
+            alert(err);
         } finally {
             setLoading(false);
         }

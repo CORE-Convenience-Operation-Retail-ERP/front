@@ -2,9 +2,16 @@
 import React, { useState } from "react";
 import StockTransferModalCon from "../../../containers/store/stock/StockTransferModalCon";
 import StockHistorySummaryCom from "./StockHistorySummaryCom";
+import LocationEditorModal from "../display/LocationEditorModal";
 
-function StockDetailCom({ productDetail, historyList }) {
+function StockDetailCom({ productDetail, historyList, onReload }) {
     const [showTransferModal, setShowTransferModal] = useState(false);
+    const [showLocationEdit, setShowLocationEdit] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    // const [locationCode, setLocationCode] = useState(productDetail.locationCode);
+    // const updateProductLocation = (newLocationCode) => {
+    //     setLocationCode(newLocationCode);};
+
 
     if (!productDetail) return <div>로딩 중...</div>;
 
@@ -12,16 +19,17 @@ function StockDetailCom({ productDetail, historyList }) {
         proName,
         proBarcode,
         status,
-        locationCode,
         storeExpectedQty,
         storeRealQty,
         warehouseExpectedQty,
         warehouseRealQty,
         totalExpectedQty,
         totalRealQty,
+        locationCode,
         productId,
         storeId
     } = productDetail;
+
 
     const calculateDiff = (real, expected) => {
         if (real == null || expected == null) return null;
@@ -51,7 +59,23 @@ function StockDetailCom({ productDetail, historyList }) {
             <p><strong>판매 상태:</strong> {status}</p>
 
             <h3>📍 위치 정보</h3>
-            <p>매장 위치 코드: <strong>{locationCode || '미지정'}</strong></p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span
+                    title="클릭 시 진열 위치 보기"
+                    style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                    onClick={() => {
+                        setIsEditMode(false);
+                        setShowLocationEdit(true);
+                    }}
+                >
+                    매장 위치 코드: <strong>{locationCode || '미지정'}</strong>
+                </span>
+
+                <button onClick={() => {
+                    setIsEditMode(true);
+                    setShowLocationEdit(true);
+                }}>✏️ 수정</button>
+            </div>
 
             <h3>📊 재고 실사 비교</h3>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -74,13 +98,27 @@ function StockDetailCom({ productDetail, historyList }) {
                 재고 이동
             </button>
 
+            {showLocationEdit && (
+                <LocationEditorModal
+                    onClose={() => setShowLocationEdit(false)}
+                    isEditMode={isEditMode}
+                    productLocationCode={locationCode}
+                    // onSelectLocation={(loc) => {
+                    //     updateProductLocation(loc.locationCode);
+                    //     setShowLocationEdit(false);
+                    // }}
+                />
+            )}
+
             {showTransferModal && (
                 <StockTransferModalCon
                     product={{ productId, storeId }}
                     onClose={() => setShowTransferModal(false)}
+
                     onSuccess={() => {
                         alert("이동 완료");
                         setShowTransferModal(false);
+                        onReload();
                     }}
                 />
             )}
