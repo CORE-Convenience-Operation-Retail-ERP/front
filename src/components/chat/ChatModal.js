@@ -438,6 +438,7 @@ const ChatRoomWrapper = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
+  position: relative;
 `;
 
 const ModalRoomHeader = styled.div`
@@ -447,7 +448,9 @@ const ModalRoomHeader = styled.div`
   padding: 10px 15px;
   background-color: #f8f9fa;
   border-bottom: 1px solid #eee;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 `;
 
 const MenuButton = styled.button`

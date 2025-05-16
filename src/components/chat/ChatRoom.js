@@ -16,6 +16,7 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [employees, setEmployees] = useState([]);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
+  const [memberProfiles, setMemberProfiles] = useState({}); // 멤버 프로필 정보 캐시
   
   const params = useParams();
   const routeRoomId = params?.roomId;
@@ -126,7 +127,22 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
     // 채팅방 정보 로드
     chatService.getChatRoom(roomId)
       .then(roomResponse => {
-        setRoom(roomResponse.data);
+        const roomData = roomResponse.data;
+        setRoom(roomData);
+        
+        // 멤버 프로필 정보 캐싱
+        const profiles = {};
+        if (roomData.members && roomData.members.length > 0) {
+          roomData.members.forEach(member => {
+            profiles[member.empId] = {
+              name: member.empName,
+              img: member.empImg || null,
+              deptName: member.deptName || '',
+              empRole: member.empRole || ''
+            };
+          });
+          setMemberProfiles(profiles);
+        }
         
         // 채팅 메시지 로드
         return chatService.getChatMessages(roomId);
@@ -364,7 +380,21 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
             ) : (
               <>
                 {(!user || message.senderId !== user.empId) && (
-                  <SenderName>{message.senderName}</SenderName>
+                  <SenderWrapper>
+                    <SenderProfileImage>
+                      {memberProfiles[message.senderId]?.img ? (
+                        <img 
+                          src={memberProfiles[message.senderId].img} 
+                          alt={message.senderName} 
+                        />
+                      ) : (
+                        <div className="initials">
+                          {message.senderName ? message.senderName.charAt(0) : '?'}
+                        </div>
+                      )}
+                    </SenderProfileImage>
+                    <SenderName>{message.senderName}</SenderName>
+                  </SenderWrapper>
                 )}
                 <MessageContent $isCurrentUser={user && message.senderId === user.empId}>
                   {message.content}
@@ -411,6 +441,9 @@ const Header = styled.div`
   padding: 15px 20px;
   background-color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 `;
 
 const BackButton = styled.button`
@@ -656,6 +689,7 @@ const MessagesContainer = styled.div`
   
   ${props => props.$isInModal && `
     height: calc(100% - 65px);
+    padding-bottom: 80px; /* 입력 영역을 위한 패딩 추가 */
   `}
   
   ${props => props.$isOverlaid && `
@@ -686,11 +720,42 @@ const SystemMessage = styled.div`
   text-align: center;
 `;
 
+const SenderWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  padding-left: 10px;
+`;
+
+const SenderProfileImage = styled.div`
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 6px;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .initials {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4a6cf7;
+    color: white;
+    font-weight: 500;
+    font-size: 12px;
+  }
+`;
+
 const SenderName = styled.div`
   font-size: 12px;
   color: #666;
-  margin-bottom: 4px;
-  padding-left: 10px;
 `;
 
 const MessageContent = styled.div`
@@ -714,6 +779,10 @@ const MessageInputForm = styled.form`
   padding: 15px;
   background-color: white;
   border-top: 1px solid #eee;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  width: 100%;
 `;
 
 const MessageInput = styled.input`
