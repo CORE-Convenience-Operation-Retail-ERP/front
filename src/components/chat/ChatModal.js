@@ -17,6 +17,7 @@ const ChatModal = ({ isOpen, onClose }) => {
   const [employees, setEmployees] = useState([]);
   const [unreadMessagesByRoom, setUnreadMessagesByRoom] = useState({});
   const [showRoomMenu, setShowRoomMenu] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
   const chatRoomRef = useRef(null);
 
   // 모달 닫기 처리 함수
@@ -227,6 +228,9 @@ const ChatModal = ({ isOpen, onClose }) => {
     };
   }, []);
 
+  // 인원 보기 버튼 클릭 핸들러
+  const handleShowMembers = () => setShowMembers(true);
+
   // 채팅방 목록 렌더링
   const renderChatRooms = () => {
     if (loading) {
@@ -337,6 +341,10 @@ const ChatModal = ({ isOpen, onClose }) => {
             <ChatRoomWrapper>
               <ModalRoomHeader>
                 <BackButton onClick={handleBackToList}>← 목록으로</BackButton>
+                <ShowMembersButton onClick={handleShowMembers}>
+                  <FaUsers /> 인원 {/* 인원 수 표시 */}
+                  {chatRooms.find(r => r.roomId === currentRoomId)?.members?.length || 0}명
+                </ShowMembersButton>
                 <MenuButton onClick={toggleRoomMenu}>
                   <FaEllipsisV />
                 </MenuButton>
@@ -354,12 +362,46 @@ const ChatModal = ({ isOpen, onClose }) => {
                   </MenuDropdown>
                 )}
               </ModalRoomHeader>
-              <ChatRoom 
-                roomId={currentRoomId} 
-                isInModal={true}
-                onBackClick={handleBackToList}
-                ref={chatRoomRef}
-              />
+              {(() => {
+                const roomMembers = chatRooms.find(r => r.roomId === currentRoomId)?.members || [];
+                return <>
+                  <ChatRoom 
+                    roomId={currentRoomId} 
+                    isInModal={true}
+                    onBackClick={handleBackToList}
+                    ref={chatRoomRef}
+                    showMembers={showMembers}
+                    setShowMembers={setShowMembers}
+                    roomMembers={roomMembers}
+                  />
+                  {showMembers && (
+                    <MembersOverlay onClick={() => setShowMembers(false)}>
+                      <MembersModal onClick={e => e.stopPropagation()}>
+                        <h3>참여 인원</h3>
+                        <ul>
+                          {roomMembers && roomMembers.length > 0 ? (
+                            roomMembers.map(member => (
+                              <li key={member.empId}>
+                                {member.empImg ? (
+                                  <ProfileImg src={member.empImg} alt={member.empName} />
+                                ) : (
+                                  <ProfileImgPlaceholder>
+                                    {member.empName ? member.empName.charAt(0) : '?'}
+                                  </ProfileImgPlaceholder>
+                                )}
+                                <span>{member.empName} ({member.deptName} / {member.empRole})</span>
+                              </li>
+                            ))
+                          ) : (
+                            <li>참여 인원이 없습니다.</li>
+                          )}
+                        </ul>
+                        <CloseButton onClick={() => setShowMembers(false)}>닫기</CloseButton>
+                      </MembersModal>
+                    </MembersOverlay>
+                  )}
+                </>;
+              })()}
             </ChatRoomWrapper>
           ) : showNewChatForm ? (
             renderNewChatForm()
@@ -420,12 +462,15 @@ const ModalTitle = styled.h3`
 const CloseButton = styled.button`
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: 16px;
+  padding: 4px 10px;
+  border-radius: 4px;
   cursor: pointer;
-  color: #999;
-  
+  color: #666;
+  transition: background 0.15s, color 0.15s;
   &:hover {
-    color: #333;
+    background: #f0f0f0;
+    color: #222;
   }
 `;
 
@@ -774,6 +819,68 @@ const UnreadBadge = styled.div`
   font-size: 12px;
   padding: 0 6px;
   margin-left: 8px;
+`;
+
+// 인원 보기 버튼 스타일
+const ShowMembersButton = styled.button`
+  background: none;
+  border: none;
+  color: #4a6cf7;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  &:hover { text-decoration: underline; }
+`;
+
+const MembersOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const MembersModal = styled.div`
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 80%;
+  max-width: 800px;
+  height: 80%;
+  max-height: 700px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
+const ProfileImg = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
+`;
+
+const ProfileImgPlaceholder = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4a6cf7;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+  margin-right: 10px;
 `;
 
 export default ChatModal; 

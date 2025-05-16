@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import chatService from '../../service/ChatService';
 import webSocketService from '../../service/WebSocketService';
-import { FaEllipsisV, FaUserPlus, FaSignOutAlt } from 'react-icons/fa';
+import { FaEllipsisV, FaUserPlus, FaSignOutAlt, FaUsers } from 'react-icons/fa';
 
-const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClick }, ref) => {
+const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClick, showMembers, setShowMembers, roomMembers }, ref) => {
   const [room, setRoom] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -17,7 +17,7 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
   const [employees, setEmployees] = useState([]);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [memberProfiles, setMemberProfiles] = useState({}); // 멤버 프로필 정보 캐시
-  
+
   const params = useParams();
   const routeRoomId = params?.roomId;
   const roomId = propRoomId || routeRoomId;
@@ -354,6 +354,9 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
       });
   };
 
+  // 참여 인원 모달 닫기
+  const handleCloseMembers = () => setShowMembers && setShowMembers(false);
+
   if (loading) {
     return <Container $isInModal={isInModal}><p>로딩 중...</p></Container>;
   }
@@ -366,12 +369,14 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
     <Container $isInModal={isInModal} className="chat-room-component">
       {!isInModal && (
         <Header>
-          <BackButton onClick={handleBackClick}>{'< 뒤로'}</BackButton>
+          <BackButton onClick={handleBackClick}>{'< 목록으로'}</BackButton>
           <RoomInfo>
             <h2>{room?.roomName}</h2>
-            <MemberCount>{room?.members?.length || 0}명 참여</MemberCount>
           </RoomInfo>
           <MenuWrapper ref={menuRef}>
+            <ShowMembersButton onClick={() => setShowMembers(true)}>
+              <FaUsers /> 인원 {room?.members?.length || 0}명
+            </ShowMembersButton>
             <MenuButton onClick={toggleMenu}>
               <FaEllipsisV />
             </MenuButton>
@@ -434,6 +439,27 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
             </InviteButton>
           </InviteButtonContainer>
         </InviteFormContainer>
+      )}
+
+      {!isInModal && showMembers && (
+        <MembersOverlay onClick={handleCloseMembers}>
+          <MembersModal onClick={e => e.stopPropagation()}>
+            <h3>참여 인원</h3>
+            <ul>
+              {room?.members && room.members.length > 0 ? (
+                room.members.map(member => (
+                  <li key={member.empId}>
+                    <ProfileImg src={member.empImg} alt={member.empName} />
+                    <span>{member.empName} ({member.deptName} / {member.empRole})</span>
+                  </li>
+                ))
+              ) : (
+                <li>참여 인원이 없습니다.</li>
+              )}
+            </ul>
+            <CloseButton onClick={handleCloseMembers}>닫기</CloseButton>
+          </MembersModal>
+        </MembersOverlay>
       )}
 
       <MessagesContainer ref={messagesContainerRef} $isInModal={isInModal} $isOverlaid={showInviteForm}>
@@ -535,11 +561,6 @@ const RoomInfo = styled.div`
     margin: 0;
     font-size: 18px;
   }
-`;
-
-const MemberCount = styled.div`
-  font-size: 12px;
-  color: #888;
 `;
 
 const MenuWrapper = styled.div`
@@ -920,4 +941,58 @@ const SendButton = styled.button`
   }
 `;
 
-export default ChatRoom; 
+const ShowMembersButton = styled.button`
+  background: none;
+  border: none;
+  color: #4a6cf7;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  &:hover { text-decoration: underline; }
+`;
+
+const MembersOverlay = styled.div`
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const MembersModal = styled.div`
+  background: #fff;
+  border-radius: 8px;
+  padding: 30px 24px 20px 24px;
+  min-width: 300px;
+  max-width: 90vw;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  h3 { margin-top: 0; }
+  ul { list-style: none; padding: 0; margin: 0 0 16px 0; }
+  li { display: flex; align-items: center; margin-bottom: 10px; }
+  span { margin-left: 10px; }
+`;
+
+const ProfileImg = styled.img`
+  width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+  background: #eee;
+`;
+
+const ModalRoomHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 15px 0 15px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+`;
+
+export default ChatRoom;
