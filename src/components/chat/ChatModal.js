@@ -3,39 +3,52 @@ import styled from 'styled-components';
 import ChatRoomList from './ChatRoomList';
 import ChatRoom from './ChatRoom';
 import chatService from '../../service/ChatService';
-import { FaUserFriends, FaUsers } from 'react-icons/fa';
+import webSocketService from '../../service/WebSocketService';
+import { FaUserFriends, FaUsers, FaEllipsisV } from 'react-icons/fa';
 
 const ChatModal = ({ isOpen, onClose }) => {
   const [currentRoomId, setCurrentRoomId] = useState(null);
   const [chatRooms, setChatRooms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [unreadMessagesByRoom, setUnreadMessagesByRoom] = useState({});
   const [showChatList, setShowChatList] = useState(true);
   const [showNewChatForm, setShowNewChatForm] = useState(false);
   const [roomName, setRoomName] = useState('');
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [unreadMessagesByRoom, setUnreadMessagesByRoom] = useState({});
+  const [showRoomMenu, setShowRoomMenu] = useState(false);
 
-  // 모달 닫기 처리 함수 (currentRoomId 초기화 추가)
+  // 모달 닫기 처리 함수
   const handleClose = () => {
-    setCurrentRoomId(null); // 채팅방 ID 초기화
-    setShowChatList(true); // 채팅방 목록으로 돌아가기
-    setShowNewChatForm(false); // 새 채팅 폼 닫기
-    onClose(); // 상위 컴포넌트의 onClose 호출
+    setCurrentRoomId(null);
+    setShowChatList(true);
+    setShowNewChatForm(false);
+    onClose();
   };
 
-  // 채팅방 목록 로드
+  // 앱 초기화 시 웹소켓 연결 설정
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('로그인이 필요합니다.');
+      return;
+    }
+    
+    if (!webSocketService.isConnected()) {
+      console.log('웹소켓 연결 시도');
+      webSocketService.autoConnect();
+    }
+    
+    return () => {
+      // 의도적으로 연결을 유지
+    };
+  }, []);
+
+  // 모달이 열리거나 닫힐 때 처리
   useEffect(() => {
     if (isOpen) {
       loadChatRooms();
       loadEmployees();
-      
-      // 채팅 모달이 열릴 때 웹소켓 연결이 끊어져 있다면 재연결 시도
-      const webSocketService = require('../../service/WebSocketService').default;
-      if (!webSocketService.isConnected()) {
-        console.log('채팅 모달 열림 - 웹소켓 재연결 시도');
-        webSocketService.autoConnect();
-      }
     }
   }, [isOpen]);
 
@@ -44,8 +57,8 @@ const ChatModal = ({ isOpen, onClose }) => {
     setLoading(true);
     chatService.getChatRooms()
       .then(response => {
-        console.log('채팅방 목록 로드됨:', response.data);
-        setChatRooms(response.data);
+        const sortedRooms = sortRoomsByLatestMessage(response.data);
+        setChatRooms(sortedRooms);
         setLoading(false);
       })
       .catch(error => {
@@ -54,7 +67,50 @@ const ChatModal = ({ isOpen, onClose }) => {
       });
   };
 
-  // 직원 목록 로드 함수
+  // 채팅방을 최근 메시지 순으로 정렬
+  const sortRoomsByLatestMessage = (roomsList) => {
+    return [...roomsList].sort((a, b) => {
+      const timeA = a.lastMessageTime || a.createdAt || '0';
+      const timeB = b.lastMessageTime || b.createdAt || '0';
+      return new Date(timeB) - new Date(timeA);
+    });
+  };
+
+  // 새 메시지가 도착했을 때 채팅방 정보 업데이트
+  const updateRoomWithNewMessage = (roomId, message) => {
+    setChatRooms(prevRooms => {
+      const roomIndex = prevRooms.findIndex(room => room.roomId === roomId);
+      if (roomIndex === -1) {
+        loadChatRooms();
+        return prevRooms;
+      }
+      
+      const updatedRooms = [...prevRooms];
+      updatedRooms[roomIndex] = {
+        ...updatedRooms[roomIndex],
+        lastMessage: message.content,
+        lastMessageTime: message.sentAt
+      };
+      
+      return sortRoomsByLatestMessage(updatedRooms);
+    });
+  };
+
+  // 웹소켓 메시지 구독
+  useEffect(() => {
+    const handleNewMessage = (message) => {
+      if (message.roomId && isOpen) {
+        updateRoomWithNewMessage(message.roomId, message);
+      }
+    };
+    
+    webSocketService.subscribe('/topic/chat/messages/modal', handleNewMessage);
+    
+    return () => {
+      webSocketService.unsubscribe('/topic/chat/messages/modal');
+    };
+  }, [isOpen]);
+
   const loadEmployees = () => {
     chatService.getHeadquartersEmployees()
       .then(response => {
@@ -65,26 +121,18 @@ const ChatModal = ({ isOpen, onClose }) => {
       });
   };
 
-  // 안 읽은 메시지 상태 구독
-  useEffect(() => {
-    const unsubscribe = chatService.onUnreadMessagesChange((total, byRoom) => {
-      setUnreadMessagesByRoom(byRoom);
-    });
-    
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
   const handleRoomSelect = (roomId) => {
     setCurrentRoomId(roomId);
-    // 채팅방 선택 시 해당 채팅방의 메시지만 읽음 처리 (ChatRoom 컴포넌트에서 처리)
+    // 채팅방 선택 시 해당 방의 안읽은 메시지 초기화
+    chatService.markRoomMessagesAsRead(roomId);
   };
 
   const handleBackToList = () => {
     setCurrentRoomId(null);
     setShowChatList(true);
     setShowNewChatForm(false);
+    setShowRoomMenu(false);
+    loadChatRooms();
   };
 
   // 새 채팅방 생성 화면으로 전환
@@ -116,8 +164,6 @@ const ChatModal = ({ isOpen, onClose }) => {
     chatService.createChatRoom(name, roomType, selectedEmployees)
       .then(response => {
         setShowNewChatForm(false);
-        
-        // 채팅방으로 이동
         handleRoomSelect(response.data.roomId);
       })
       .catch(error => {
@@ -125,6 +171,50 @@ const ChatModal = ({ isOpen, onClose }) => {
         alert('채팅방 생성에 실패했습니다.');
       });
   };
+
+  // 채팅방 나가기 처리
+  const handleLeaveRoom = () => {
+    if (!currentRoomId) return;
+    
+    if (window.confirm('정말로 채팅방을 나가시겠습니까?')) {
+      const empName = localStorage.getItem('empName');
+      
+      chatService.leaveChatRoom(currentRoomId)
+        .then(() => {
+          // 퇴장 메시지 전송
+          const leaveMessage = {
+            roomId: Number(currentRoomId),
+            content: `${empName}님이 퇴장하였습니다.`,
+            messageType: 'LEAVE'
+          };
+          
+          webSocketService.sendMessage('/app/chat.sendMessage', leaveMessage);
+          
+          // 채팅 목록으로 이동
+          handleBackToList();
+        })
+        .catch(error => {
+          console.error('채팅방 나가기 오류:', error);
+          alert('채팅방 나가기에 실패했습니다.');
+        });
+    }
+  };
+
+  // 룸 메뉴 토글
+  const toggleRoomMenu = () => {
+    setShowRoomMenu(!showRoomMenu);
+  };
+
+  // 안 읽은 메시지 상태 구독
+  useEffect(() => {
+    const unsubscribe = chatService.onUnreadMessagesChange((total, byRoom) => {
+      setUnreadMessagesByRoom(byRoom);
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // 채팅방 목록 렌더링
   const renderChatRooms = () => {
@@ -142,7 +232,7 @@ const ChatModal = ({ isOpen, onClose }) => {
           <ChatRoomItem 
             key={room.roomId} 
             onClick={() => handleRoomSelect(room.roomId)}
-            isSelected={currentRoomId === room.roomId}
+            $isSelected={currentRoomId === room.roomId}
           >
             <RoomTypeIcon>
               {room.roomType === 'INDIVIDUAL' ? 
@@ -152,6 +242,12 @@ const ChatModal = ({ isOpen, onClose }) => {
             </RoomTypeIcon>
             <RoomInfo>
               <RoomName>{room.roomName || '이름 없는 채팅방'}</RoomName>
+              <LastMessageWrapper>
+                <LastMessage>{room.lastMessage || '새 채팅방'}</LastMessage>
+                <LastMessageTime>
+                  {room.lastMessageTime ? new Date(room.lastMessageTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
+                </LastMessageTime>
+              </LastMessageWrapper>
               <RoomMembers>
                 {room.members ? room.members.length : 0}명 참여 중
               </RoomMembers>
@@ -187,7 +283,7 @@ const ChatModal = ({ isOpen, onClose }) => {
           {employees.map(employee => (
             <EmployeeItem 
               key={employee.empId}
-              selected={selectedEmployees.includes(employee.empId)}
+              $selected={selectedEmployees.includes(employee.empId)}
               onClick={() => handleEmployeeSelect(employee.empId)}
             >
               <ProfileImage>
@@ -228,7 +324,36 @@ const ChatModal = ({ isOpen, onClose }) => {
         <ModalBody>
           {currentRoomId ? (
             <ChatRoomWrapper>
-              <BackButton onClick={handleBackToList}>← 목록으로</BackButton>
+              <ModalRoomHeader>
+                <BackButton onClick={handleBackToList}>← 목록으로</BackButton>
+                <MenuButton onClick={toggleRoomMenu}>
+                  <FaEllipsisV />
+                </MenuButton>
+                {showRoomMenu && (
+                  <MenuDropdown>
+                    <MenuItem onClick={() => {
+                      setShowRoomMenu(false);
+                      const roomElement = document.querySelector('.chat-room-component');
+                      if (roomElement) {
+                        const inviteButton = roomElement.querySelector('.invite-button');
+                        if (inviteButton) {
+                          inviteButton.click();
+                        } else {
+                          alert('초대 기능을 사용할 수 없습니다.');
+                        }
+                      }
+                    }}>
+                      초대하기
+                    </MenuItem>
+                    <MenuItem onClick={() => {
+                      setShowRoomMenu(false);
+                      handleLeaveRoom();
+                    }}>
+                      나가기
+                    </MenuItem>
+                  </MenuDropdown>
+                )}
+              </ModalRoomHeader>
               <ChatRoom 
                 roomId={currentRoomId} 
                 isInModal={true}
@@ -315,6 +440,49 @@ const ChatRoomWrapper = styled.div`
   height: 100%;
 `;
 
+const ModalRoomHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+  position: relative;
+`;
+
+const MenuButton = styled.button`
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 5px 10px;
+  
+  &:hover {
+    color: #333;
+  }
+`;
+
+const MenuDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 15px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+  z-index: 10;
+`;
+
+const MenuItem = styled.div`
+  padding: 8px 15px;
+  cursor: pointer;
+  
+  &:hover {
+    background-color: #f5f5f5;
+  }
+`;
+
 const BackButton = styled.button`
   background: none;
   border: none;
@@ -322,7 +490,7 @@ const BackButton = styled.button`
   font-weight: bold;
   cursor: pointer;
   text-align: left;
-  padding: 10px 15px;
+  padding: 5px 0;
   
   &:hover {
     text-decoration: underline;
@@ -376,6 +544,27 @@ const RoomMembers = styled.span`
   margin-top: 4px;
 `;
 
+const LastMessageWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+`;
+
+const LastMessage = styled.div`
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+`;
+
+const LastMessageTime = styled.div`
+  font-size: 11px;
+  color: #999;
+`;
+
 const LoadingMessage = styled.div`
   padding: 20px;
   text-align: center;
@@ -391,7 +580,7 @@ const EmptyMessage = styled.div`
 const ChatRoomItem = styled.div`
   padding: 12px 15px;
   cursor: pointer;
-  background-color: ${props => props.isSelected ? '#f0f7ff' : 'white'};
+  background-color: ${props => props.$isSelected ? '#f0f7ff' : 'white'};
   border-bottom: 1px solid #eee;
   display: flex;
   align-items: center;
@@ -403,20 +592,6 @@ const ChatRoomItem = styled.div`
 
 const RoomName = styled.div`
   font-weight: bold;
-`;
-
-const UnreadBadge = styled.div`
-  background-color: #ff3b30;
-  color: white;
-  border-radius: 50%;
-  min-width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  padding: 0 6px;
-  margin-left: 8px;
 `;
 
 const NewChatForm = styled.div`
@@ -475,10 +650,10 @@ const EmployeeItem = styled.div`
   padding: 10px;
   cursor: pointer;
   border-radius: 4px;
-  background-color: ${props => props.selected ? '#f0f4ff' : 'transparent'};
+  background-color: ${props => props.$selected ? '#f0f4ff' : 'transparent'};
   
   &:hover {
-    background-color: ${props => props.selected ? '#e6edff' : '#f5f5f5'};
+    background-color: ${props => props.$selected ? '#e6edff' : '#f5f5f5'};
   }
 `;
 
@@ -559,7 +734,12 @@ const CreateButton = styled.button`
   cursor: pointer;
   font-weight: bold;
   
-  &:hover {
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  &:hover:not(:disabled) {
     background-color: #3a5ce5;
   }
 `;
@@ -576,6 +756,20 @@ const CancelButton = styled.button`
   &:hover {
     background-color: #e0e0e0;
   }
+`;
+
+const UnreadBadge = styled.div`
+  background-color: #ff3b30;
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  padding: 0 6px;
+  margin-left: 8px;
 `;
 
 export default ChatModal; 

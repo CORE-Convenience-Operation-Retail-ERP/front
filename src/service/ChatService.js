@@ -73,6 +73,22 @@ class ChatService {
     });
   }
 
+  // 채팅방 나가기
+  leaveChatRoom(roomId) {
+    return axios.post(`${API_URL}/rooms/${roomId}/leave`, {}, {
+      headers: this.getAuthHeader()
+    });
+  }
+
+  // 채팅방에 사용자 초대
+  inviteUsersToRoom(roomId, memberIds) {
+    return axios.post(`${API_URL}/rooms/${roomId}/invite`, {
+      memberIds
+    }, {
+      headers: this.getAuthHeader()
+    });
+  }
+
   // 채팅방 목록 폴링 (웹소켓 대체용)
   pollChatRooms(interval = 10000, callback) {
     // 이전 폴링 종료
