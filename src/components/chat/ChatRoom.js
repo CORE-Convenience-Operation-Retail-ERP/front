@@ -35,48 +35,38 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+
     if (!token) {
       setError('로그인이 필요합니다.');
+      setLoading(false);
       return;
     }
-    
-    // 사용자 정보 가져오기 (로컬 스토리지에서 개별 필드로)
+
+    // 현재 사용자 정보 설정
     try {
       const empId = localStorage.getItem('empId');
       const empName = localStorage.getItem('empName');
       const deptId = localStorage.getItem('deptId');
       
-      if (!empId || !deptId) {
+      if (!empId || !empName || !deptId) {
         setError('사용자 정보가 없습니다. 다시 로그인해주세요.');
+        setLoading(false);
         return;
       }
       
-      // 본사 직원(deptId 4~10)인지 확인
-      const deptIdNum = parseInt(deptId);
-      if (deptIdNum < 4 || deptIdNum > 10) {
-        setError('본사 직원만 채팅 기능을 사용할 수 있습니다.');
-        return;
-      }
-      
-      // 사용자 정보 객체 생성
+      // 사용자 객체 생성
       setUser({
         empId: parseInt(empId),
-        empName: empName,
-        deptId: deptIdNum
+        empName,
+        deptId: parseInt(deptId)
       });
       
     } catch (err) {
       console.error('사용자 정보를 불러오는데 실패했습니다.', err);
       setError('사용자 정보를 불러오는데 실패했습니다.');
+      setLoading(false);
       return;
     }
-
-    // 다른 방에서 왔을 경우 처리된 메시지 목록 초기화
-    processedMessagesRef.current = new Set();
-    setMessages([]);
-
-    // 페이지 접속 시 현재 채팅방만 읽음 처리
-    chatService.markRoomMessagesAsRead(roomId);
 
     // 웹소켓 연결
     webSocketService.connect(token, 
@@ -199,6 +189,23 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
     setNewMessage('');
   };
 
+  const handleLeaveRoom = () => {
+    if (window.confirm('정말로 채팅방을 나가시겠습니까?')) {
+      // 나가기 메시지 전송
+      const leaveMessage = {
+        roomId: Number(roomId),
+        content: `${user.empName}님이 대화방에서 나갔습니다.`,
+        messageType: 'LEAVE'
+      };
+
+      // 웹소켓으로 LEAVE 메시지 전송
+      webSocketService.sendMessage('/app/chat.sendMessage', leaveMessage);
+      
+      // 채팅방에서 나가기
+      handleBackClick();
+    }
+  };
+
   const handleBackClick = () => {
     if (isInModal && onBackClick) {
       onBackClick();
@@ -224,6 +231,9 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
             <h2>{room?.roomName}</h2>
             <MemberCount>{room?.members?.length || 0}명 참여</MemberCount>
           </RoomInfo>
+          {room?.roomType === 'GROUP' && (
+            <LeaveButton onClick={handleLeaveRoom}>나가기</LeaveButton>
+          )}
         </Header>
       )}
 
@@ -234,7 +244,7 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
             isCurrentUser={user && message.senderId === user.empId}
             messageType={message.messageType}
           >
-            {message.messageType === 'JOIN' ? (
+            {message.messageType === 'JOIN' || message.messageType === 'LEAVE' ? (
               <SystemMessage>{message.content}</SystemMessage>
             ) : (
               <>
@@ -255,6 +265,9 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
       </MessagesContainer>
 
       <MessageInputForm onSubmit={handleSendMessage}>
+        {isInModal && room?.roomType === 'GROUP' && (
+          <LeaveButtonSmall onClick={handleLeaveRoom} type="button">나가기</LeaveButtonSmall>
+        )}
         <MessageInput 
           type="text" 
           value={newMessage} 
@@ -301,6 +314,36 @@ const BackButton = styled.button`
   }
 `;
 
+const LeaveButton = styled.button`
+  background-color: #ff3b30;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 15px;
+  
+  &:hover {
+    background-color: #e02d26;
+  }
+`;
+
+const LeaveButtonSmall = styled.button`
+  background-color: #ff3b30;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-right: 8px;
+  
+  &:hover {
+    background-color: #e02d26;
+  }
+`;
+
 const RoomInfo = styled.div`
   flex: 1;
   
@@ -335,7 +378,7 @@ const MessageItem = styled.div`
   max-width: 80%;
   align-self: ${props => props.isCurrentUser ? 'flex-end' : 'flex-start'};
   
-  ${props => props.messageType === 'JOIN' && `
+  ${props => (props.messageType === 'JOIN' || props.messageType === 'LEAVE') && `
     align-self: center;
     margin: 10px 0;
   `}
@@ -400,16 +443,16 @@ const SendButton = styled.button`
   border-radius: 20px;
   padding: 0 20px;
   margin-left: 10px;
-  font-weight: bold;
   cursor: pointer;
-  
-  &:hover {
-    background-color: #3a5ce5;
-  }
+  font-weight: bold;
   
   &:disabled {
     background-color: #ccc;
     cursor: not-allowed;
+  }
+  
+  &:hover:not(:disabled) {
+    background-color: #3a5ce5;
   }
 `;
 
