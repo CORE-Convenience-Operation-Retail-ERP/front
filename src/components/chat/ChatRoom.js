@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import chatService from '../../service/ChatService';
 import webSocketService from '../../service/WebSocketService';
 import { FaEllipsisV, FaUserPlus, FaSignOutAlt } from 'react-icons/fa';
 
-const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
+const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClick }, ref) => {
   const [room, setRoom] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -27,6 +27,11 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
   const messagesContainerRef = useRef(null);
   const menuRef = useRef(null);
   const processedMessagesRef = useRef(new Set()); // 이미 처리된 메시지 ID를 추적
+
+  // 외부에서 호출할 함수 노출
+  useImperativeHandle(ref, () => ({
+    toggleInviteForm: () => toggleInviteForm()
+  }));
 
   // 채팅방 입장 시 해당 채팅방의 알림 카운트를 초기화
   useEffect(() => {
@@ -240,12 +245,13 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
       // 초대 폼이 열릴 때 직원 목록 로드
       chatService.getHeadquartersEmployees()
         .then(response => {
-          // 현재 방에 없는 직원만 필터링
+          // 모든 직원 목록을 불러오고, 이미 채팅방에 있는 직원은 표시만 다르게 함
           const currentMemberIds = room.members.map(member => member.empId);
-          const filteredEmployees = response.data.filter(
-            emp => !currentMemberIds.includes(emp.empId)
-          );
-          setEmployees(filteredEmployees);
+          const allEmployees = response.data.map(emp => ({
+            ...emp,
+            isInRoom: currentMemberIds.includes(emp.empId)
+          }));
+          setEmployees(allEmployees);
           setSelectedEmployees([]);
         })
         .catch(error => {
@@ -256,6 +262,14 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
   };
 
   const handleEmployeeSelect = (empId) => {
+    // 해당 직원 찾기
+    const employee = employees.find(emp => emp.empId === empId);
+    
+    // 이미 채팅방에 있는 직원이면 선택 불가
+    if (employee && employee.isInRoom) {
+      return;
+    }
+    
     if (selectedEmployees.includes(empId)) {
       setSelectedEmployees(selectedEmployees.filter(id => id !== empId));
     } else {
@@ -269,8 +283,25 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
       return;
     }
     
+    // 로딩 상태 표시
+    const loadingMessage = document.createElement('div');
+    loadingMessage.style.position = 'fixed';
+    loadingMessage.style.top = '50%';
+    loadingMessage.style.left = '50%';
+    loadingMessage.style.transform = 'translate(-50%, -50%)';
+    loadingMessage.style.padding = '15px 20px';
+    loadingMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    loadingMessage.style.color = 'white';
+    loadingMessage.style.borderRadius = '5px';
+    loadingMessage.style.zIndex = '1000';
+    loadingMessage.textContent = '초대 중...';
+    document.body.appendChild(loadingMessage);
+    
+    console.log(`초대하기 - 선택된 직원: ${selectedEmployees.join(', ')}`);
+    
     chatService.inviteUsersToRoom(roomId, selectedEmployees)
       .then(() => {
+        console.log('초대 성공');
         // 초대 메시지 생성
         const inviteMessage = {
           roomId: Number(roomId),
@@ -280,13 +311,46 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
         
         webSocketService.sendMessage('/app/chat.sendMessage', inviteMessage);
         
+        // 로딩 메시지 제거
+        try {
+          document.body.removeChild(loadingMessage);
+        } catch (e) {
+          console.error('로딩 메시지 제거 오류:', e);
+        }
+        
         // 폼 닫기 및 채팅방 정보 새로고침
         setShowInviteForm(false);
         loadChatRoomData();
+        
+        // 성공 메시지 표시
+        setTimeout(() => {
+          alert('선택한 멤버를 채팅방에 초대했습니다.');
+        }, 100);
       })
       .catch(error => {
         console.error('초대 오류:', error);
-        alert('초대에 실패했습니다.');
+        
+        // 로딩 메시지 제거
+        try {
+          document.body.removeChild(loadingMessage);
+        } catch (e) {
+          console.error('로딩 메시지 제거 오류:', e);
+        }
+        
+        // 자세한 오류 메시지 표시
+        let errorMessage = '초대에 실패했습니다.';
+        if (error.response) {
+          console.log('Error response:', error.response);
+          if (error.response.data && error.response.data.message) {
+            errorMessage += ` (${error.response.data.message})`;
+          } else if (error.response.status === 403) {
+            errorMessage += ' (권한이 없습니다)';
+          } else if (error.response.status === 404) {
+            errorMessage += ' (채팅방 또는 사용자를 찾을 수 없습니다)';
+          }
+        }
+        
+        alert(errorMessage);
       });
   };
 
@@ -326,12 +390,12 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
       )}
 
       {showInviteForm && (
-        <InviteFormContainer>
+        <InviteFormContainer $isInModal={isInModal}>
           <InviteFormHeader>
             <h3>대화상대 초대</h3>
             <CloseButton onClick={toggleInviteForm}>×</CloseButton>
           </InviteFormHeader>
-          <EmployeeList>
+          <EmployeeList $isInModal={isInModal}>
             {employees.length === 0 ? (
               <EmptyMessage>초대할 수 있는 직원이 없습니다.</EmptyMessage>
             ) : (
@@ -339,19 +403,23 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
                 <EmployeeItem 
                   key={employee.empId}
                   $selected={selectedEmployees.includes(employee.empId)}
+                  $disabled={employee.isInRoom}
                   onClick={() => handleEmployeeSelect(employee.empId)}
                 >
-                  <ProfileImage>
+                  <ProfileImage $disabled={employee.isInRoom}>
                     {employee.empImg ? 
                       <img src={employee.empImg} alt={employee.empName} /> : 
                       <div className="initials">{employee.empName.charAt(0)}</div>
                     }
                   </ProfileImage>
-                  <EmployeeInfo>
+                  <EmployeeInfo $disabled={employee.isInRoom}>
                     <div className="name">{employee.empName}</div>
                     <div className="role">{employee.deptName} - {employee.empRole}</div>
+                    {employee.isInRoom && <div className="status">이미 참여 중</div>}
                   </EmployeeInfo>
-                  <Checkbox checked={selectedEmployees.includes(employee.empId)} />
+                  {!employee.isInRoom && (
+                    <Checkbox checked={selectedEmployees.includes(employee.empId)} />
+                  )}
                 </EmployeeItem>
               ))
             )}
@@ -420,7 +488,7 @@ const ChatRoom = ({ roomId: propRoomId, isInModal = false, onBackClick }) => {
       </MessageInputForm>
     </Container>
   );
-};
+});
 
 // 스타일 컴포넌트
 const Container = styled.div`
@@ -524,10 +592,20 @@ const InviteFormContainer = styled.div`
   right: 0;
   bottom: 0;
   background-color: white;
-  z-index: 5;
+  z-index: 100;
   display: flex;
   flex-direction: column;
   padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  
+  ${props => props.$isInModal && `
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-bottom: 80px;
+    z-index: 150;
+  `}
 `;
 
 const InviteFormHeader = styled.div`
@@ -558,6 +636,7 @@ const EmployeeList = styled.div`
   flex: 1;
   overflow-y: auto;
   margin-bottom: 15px;
+  max-height: ${props => props.$isInModal ? 'calc(100% - 120px)' : 'calc(100% - 100px)'};
 `;
 
 const EmptyMessage = styled.div`
@@ -570,12 +649,19 @@ const EmployeeItem = styled.div`
   display: flex;
   align-items: center;
   padding: 10px;
-  cursor: pointer;
+  cursor: ${props => props.$disabled ? 'default' : 'pointer'};
   border-radius: 4px;
-  background-color: ${props => props.$selected ? '#f0f4ff' : 'transparent'};
+  background-color: ${props => {
+    if (props.$disabled) return '#f0f0f0';
+    return props.$selected ? '#f0f4ff' : 'transparent';
+  }};
+  opacity: ${props => props.$disabled ? 0.7 : 1};
   
   &:hover {
-    background-color: ${props => props.$selected ? '#e6edff' : '#f5f5f5'};
+    background-color: ${props => {
+      if (props.$disabled) return '#f0f0f0';
+      return props.$selected ? '#e6edff' : '#f5f5f5';
+    }};
   }
 `;
 
@@ -585,6 +671,7 @@ const ProfileImage = styled.div`
   border-radius: 50%;
   margin-right: 10px;
   overflow: hidden;
+  opacity: ${props => props.$disabled ? 0.7 : 1};
   
   img {
     width: 100%;
@@ -598,7 +685,7 @@ const ProfileImage = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #4a6cf7;
+    background-color: ${props => props.$disabled ? '#aaaaaa' : '#4a6cf7'};
     color: white;
     font-weight: bold;
   }
@@ -610,11 +697,19 @@ const EmployeeInfo = styled.div`
   .name {
     font-weight: bold;
     margin-bottom: 3px;
+    color: ${props => props.$disabled ? '#777777' : 'inherit'};
   }
   
   .role {
     font-size: 12px;
-    color: #666;
+    color: ${props => props.$disabled ? '#999999' : '#666'};
+  }
+  
+  .status {
+    font-size: 11px;
+    color: #888;
+    font-style: italic;
+    margin-top: 2px;
   }
 `;
 
@@ -644,6 +739,11 @@ const InviteButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  margin-top: auto;
+  background-color: white;
+  width: 100%;
 `;
 
 const InviteButton = styled.button`
@@ -654,6 +754,7 @@ const InviteButton = styled.button`
   padding: 8px 16px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 14px;
   
   &:disabled {
     background-color: #ccc;
@@ -673,6 +774,7 @@ const CancelButton = styled.button`
   padding: 8px 16px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 14px;
   
   &:hover {
     background-color: #e0e0e0;

@@ -82,6 +82,17 @@ class ChatService {
 
   // 채팅방에 사용자 초대
   inviteUsersToRoom(roomId, memberIds) {
+    console.log(`채팅방 ${roomId}에 초대할 멤버:`, memberIds);
+    
+    // 유효성 검사
+    if (!roomId) {
+      return Promise.reject(new Error('유효하지 않은 채팅방입니다.'));
+    }
+    
+    if (!memberIds || !Array.isArray(memberIds) || memberIds.length === 0) {
+      return Promise.reject(new Error('초대할 멤버가 선택되지 않았습니다.'));
+    }
+    
     return axios.post(`${API_URL}/rooms/${roomId}/invite`, {
       memberIds
     }, {

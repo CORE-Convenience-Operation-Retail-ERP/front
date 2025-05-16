@@ -12,6 +12,7 @@ class WebSocketService {
     this.errorCallback = null;
     this.reconnectCount = 0;
     this.maxReconnectAttempts = 5;
+    this.userRoomIds = []; // 사용자가 속한 채팅방 ID 목록 캐시
     
     // 페이지 로드 시 자동 연결 시도
     this.autoConnect();
@@ -103,8 +104,14 @@ class WebSocketService {
       this.reconnectCount = 0;
       console.log('웹소켓 서버에 연결됨:', frame);
       
+      // 사용자의 채팅방 목록 캐시 업데이트
+      this.updateUserRoomsCache();
+      
       // 글로벌 채팅 메시지 구독
       this.subscribeToGlobalMessages();
+      
+      // 채팅방 업데이트 이벤트 구독
+      this.subscribeToChatRoomUpdates();
       
       // 이전에 구독했던 채널 재구독
       Object.keys(this.subscriptions).forEach(destination => {
@@ -152,6 +159,29 @@ class WebSocketService {
     }
   }
 
+  // 사용자의 채팅방 목록 캐시 업데이트
+  updateUserRoomsCache() {
+    return chatService.getChatRooms()
+      .then(response => {
+        this.userRoomIds = response.data.map(room => room.roomId);
+        console.log('사용자 채팅방 캐시 업데이트됨:', this.userRoomIds);
+        return this.userRoomIds;
+      })
+      .catch(error => {
+        console.error('채팅방 목록 캐시 업데이트 오류:', error);
+        return [];
+      });
+  }
+
+  // 채팅방 업데이트 이벤트 구독 (채팅방 생성, 나가기, 초대 등)
+  subscribeToChatRoomUpdates() {
+    this._subscribe('/topic/chat/rooms/update', (updatedRoom) => {
+      console.log('채팅방 정보 업데이트됨:', updatedRoom);
+      // 채팅방 목록 캐시 갱신
+      this.updateUserRoomsCache();
+    });
+  }
+
   // 글로벌 채팅 메시지 구독
   subscribeToGlobalMessages() {
     // 메시지 구독 (모든 메시지를 수신하는 토픽)
@@ -176,12 +206,32 @@ class WebSocketService {
             messageContent: message.content
           });
           
-          // 알림 항상 추가 (조건 수정) - 채팅방 ID 전달
-          chatService.addUnreadMessage(message.roomId);
+          // 캐시가 비어 있는 경우 새로 로드
+          if (this.userRoomIds.length === 0) {
+            console.log('채팅방 캐시가 비어 있어 다시 로드합니다.');
+            this.updateUserRoomsCache()
+              .then(() => this.processMessageNotification(message, isSentByMe));
+          } else {
+            this.processMessageNotification(message, isSentByMe);
+          }
         }
       });
     } catch (error) {
       console.error('글로벌 메시지 구독 오류:', error);
+    }
+  }
+  
+  // 메시지 알림 처리 로직 분리
+  processMessageNotification(message, isSentByMe) {
+    // 사용자가 속한 채팅방인지 확인 (캐시된 목록 사용)
+    const isUserInRoom = this.userRoomIds.includes(message.roomId);
+    console.log(`사용자가 채팅방 ${message.roomId}에 속해있는지: ${isUserInRoom}`, this.userRoomIds);
+    
+    // 사용자가 속한 채팅방일 경우에만 알림 추가
+    if (isUserInRoom) {
+      chatService.addUnreadMessage(message.roomId);
+    } else {
+      console.log(`채팅방 ${message.roomId}은 사용자의 채팅방이 아니므로 알림을 표시하지 않습니다.`);
     }
   }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import ChatRoomList from './ChatRoomList';
 import ChatRoom from './ChatRoom';
@@ -17,6 +17,7 @@ const ChatModal = ({ isOpen, onClose }) => {
   const [employees, setEmployees] = useState([]);
   const [unreadMessagesByRoom, setUnreadMessagesByRoom] = useState({});
   const [showRoomMenu, setShowRoomMenu] = useState(false);
+  const chatRoomRef = useRef(null);
 
   // 모달 닫기 처리 함수
   const handleClose = () => {
@@ -205,6 +206,16 @@ const ChatModal = ({ isOpen, onClose }) => {
     setShowRoomMenu(!showRoomMenu);
   };
 
+  // 초대하기 함수 호출
+  const handleInviteUsers = () => {
+    setShowRoomMenu(false);
+    if (chatRoomRef.current && chatRoomRef.current.toggleInviteForm) {
+      chatRoomRef.current.toggleInviteForm();
+    } else {
+      alert('초대 기능을 사용할 수 없습니다.');
+    }
+  };
+
   // 안 읽은 메시지 상태 구독
   useEffect(() => {
     const unsubscribe = chatService.onUnreadMessagesChange((total, byRoom) => {
@@ -331,18 +342,7 @@ const ChatModal = ({ isOpen, onClose }) => {
                 </MenuButton>
                 {showRoomMenu && (
                   <MenuDropdown>
-                    <MenuItem onClick={() => {
-                      setShowRoomMenu(false);
-                      const roomElement = document.querySelector('.chat-room-component');
-                      if (roomElement) {
-                        const inviteButton = roomElement.querySelector('.invite-button');
-                        if (inviteButton) {
-                          inviteButton.click();
-                        } else {
-                          alert('초대 기능을 사용할 수 없습니다.');
-                        }
-                      }
-                    }}>
+                    <MenuItem onClick={handleInviteUsers}>
                       초대하기
                     </MenuItem>
                     <MenuItem onClick={() => {
@@ -358,6 +358,7 @@ const ChatModal = ({ isOpen, onClose }) => {
                 roomId={currentRoomId} 
                 isInModal={true}
                 onBackClick={handleBackToList}
+                ref={chatRoomRef}
               />
             </ChatRoomWrapper>
           ) : showNewChatForm ? (
