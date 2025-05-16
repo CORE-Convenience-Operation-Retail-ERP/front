@@ -216,8 +216,45 @@ class WebSocketService {
           }
         }
       });
+      
+      // 관리자 알림 구독
+      this.subscribeToAdminNotifications();
     } catch (error) {
       console.error('글로벌 메시지 구독 오류:', error);
+    }
+  }
+  
+  // 관리자 알림 구독
+  subscribeToAdminNotifications() {
+    try {
+      this._subscribe('/topic/notifications/admin', (notification) => {
+        console.log('관리자 알림 수신:', notification);
+        
+        // AdminNotificationService 사용 가능한 경우에만 알림 추가
+        if (typeof window !== 'undefined' && window.adminNotificationService) {
+          window.adminNotificationService.addNotification(notification);
+          
+          // 브라우저 알림 표시 (페이지에 포커스가 없을 때만)
+          if (!document.hasFocus() && Notification.permission === "granted") {
+            const notif = new Notification('새 알림', {
+              body: notification.content,
+              icon: '/favicon.ico'
+            });
+            
+            // 알림 클릭 시 해당 링크로 이동
+            if (notification.link) {
+              notif.onclick = function() {
+                window.open(notification.link, '_blank');
+                notif.close();
+              };
+            }
+          }
+        } else {
+          console.warn('AdminNotificationService가 아직 초기화되지 않았습니다');
+        }
+      });
+    } catch (error) {
+      console.error('관리자 알림 구독 오류:', error);
     }
   }
   

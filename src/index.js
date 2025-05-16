@@ -4,6 +4,10 @@ import './styles/global.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// 알림 서비스 초기화
+import adminNotificationService from './service/AdminNotificationService';
+window.adminNotificationService = adminNotificationService;
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

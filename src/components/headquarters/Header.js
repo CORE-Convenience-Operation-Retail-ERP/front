@@ -3,19 +3,20 @@ import { AppBar, Toolbar, Button, Box, Badge, IconButton, Menu, MenuItem } from 
 import { useNavigate, useLocation } from 'react-router-dom';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import ChatIcon from '@mui/icons-material/Chat';
 import axios from 'axios';
 import ChatModal from '../chat/ChatModal';
 import chatService from '../../service/ChatService';
+import NotificationIcon from '../common/NotificationIcon';
+import adminNotificationService from '../../service/AdminNotificationService';
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(false);
+  // 기존 연차 알림 관련 상태 - 주석 처리
+
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [unreadMessagesByRoom, setUnreadMessagesByRoom] = useState({});
@@ -29,7 +30,7 @@ const Header = () => {
   // userName 설정 부분 
   const userName = name || "로그인 해주세요";
 
-  // 채팅 알림 구독
+  // 채팅 알림 구독 - 웹소켓 관련이므로 유지
   useEffect(() => {
     // 알림 상태 업데이트 콜백 등록
     const unsubscribe = chatService.onUnreadMessagesChange((totalCount, roomCounts) => {
@@ -45,55 +46,30 @@ const Header = () => {
     }
     
     // 컴포넌트 언마운트 시 구독 해제
+    if (adminNotificationService) {
+      console.log('헤더 마운트 - 관리자 알림 새로고침 시도');
+      adminNotificationService.refresh()
+        .then(() => console.log('관리자 알림 새로고침 성공'))
+        .catch(err => console.error('관리자 알림 새로고침 실패:', err));
+    }
+    
+    // 컴포넌트 언마운트 시 구독 해제
+    const handleVisibilityChange = () => {
+      if (!document.hidden && adminNotificationService) {
+        console.log('헤더 마운트 - 문서 보이기 상태 감지');
+        adminNotificationService.refresh();
+      }
+    };
+    
+    // 문서 보이기 상태 감지 이벤트 등록
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // 컴포넌트 언마운트 시 구독 해제
     return () => {
       unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
-
-  // 알림 데이터 가져오기
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  // 알림 데이터를 가져오는 함수
-  const fetchNotifications = async () => {
-    if (!userRole) return;
-    
-    setLoading(true);
-    try {
-      // 연차 신청 목록 조회 API 호출
-      const response = await axios.get('/api/hr/annual-leave/all', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      // 응답 데이터에서 알림 목록 생성
-      if (response.data) {
-        // 미처리(상태가 0)인 연차 신청만 필터링
-        const pendingLeaveRequests = response.data.filter(request => request.reqStatus === 0);
-        
-        // 알림 목록 생성
-        const leaveNotifications = pendingLeaveRequests.map(request => ({
-          id: request.reqId,
-          title: `새로운 연차신청이 등록되었습니다.`,
-          subtitle: `신청자: ${request.empName || '알 수 없음'}`,
-          type: 'LEAVE_REQUEST',
-          isRead: false,
-          createdAt: request.createdAt || new Date().toISOString(),
-          data: request
-        }));
-        
-        setNotifications(leaveNotifications);
-      }
-    } catch (error) {
-      console.error('연차 신청 알림 조회 실패:', error);
-      // 오류 발생 시 빈 알림 설정
-      setNotifications([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLogoClick = () => {
     navigate(location.pathname, { replace: true });
@@ -126,23 +102,6 @@ const Header = () => {
     // 채팅창을 열어도 알림은 유지 (각 채팅방에 들어갈 때만 해당 채팅방 알림 제거)
   };
 
-  // 알림 클릭 시 해당 알림을 읽음 처리하는 함수
-  const handleNotificationRead = (notification) => {
-    // 알림 읽음 처리
-    setNotifications(prevNotifications =>
-      prevNotifications.map(notif =>
-        notif.id === notification.id ? { ...notif, isRead: true } : notif
-      )
-    );
-    
-    // 알림 유형에 따른 다른 처리
-    if (notification.type === 'LEAVE_REQUEST') {
-      // 연차 신청 상세 페이지로 이동 (실제 URL로 수정 필요)
-      navigate(`/headquarters/hr/annual-leave/detail/${notification.id}`);
-    }
-    
-    handleNotificationClose();
-  };
 
   // 본사 페이지인지 확인
   const isHeadquartersPage = location.pathname.startsWith('/headquarters');
@@ -172,43 +131,7 @@ const Header = () => {
               </IconButton>
             )}
             
-            {/* 알림 아이콘 및 뱃지 */}
-            <IconButton onClick={handleNotificationClick}>
-              <Badge badgeContent={notifications.filter(n => !n.isRead).length} color="error">
-                <NotificationsIcon sx={{ color: 'black' }} />
-              </Badge>
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleNotificationClose}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-              {notifications.length > 0 ? (
-                notifications.map((notification) => (
-                  <MenuItem 
-                    key={notification.id} 
-                    onClick={() => handleNotificationRead(notification)}
-                    sx={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'flex-start',
-                      backgroundColor: notification.isRead ? 'inherit' : '#f0f7ff',
-                      borderLeft: notification.isRead ? 'none' : '3px solid #1976d2'
-                    }}
-                  >
-                    <Box sx={{ fontWeight: 'bold' }}>{notification.title}</Box>
-                    {notification.subtitle && (
-                      <Box sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-                        {notification.subtitle}
-                      </Box>
-                    )}
-                  </MenuItem>
-                ))
-              ) : (
-                <MenuItem disabled>새로운 알림이 없습니다</MenuItem>
-              )}
-            </Menu>
+            <NotificationIcon />
 
             <Box
               component="img"
