@@ -300,6 +300,7 @@ const CombinedInquiryFormCom = ({ store, onSubmit, onBack, isSubmitting }) => {
   const [foundProfanities, setFoundProfanities] = useState([]);
   const [highlightedText, setHighlightedText] = useState('');
   const textAreaRef = useRef(null);
+  const overlayRef = useRef(null);
   
   const inquiryTypes = [
     { 
@@ -332,27 +333,22 @@ const CombinedInquiryFormCom = ({ store, onSubmit, onBack, isSubmitting }) => {
    * - 크기 변경 시에도 오버레이 위치 업데이트
    */
   useEffect(() => {
-    if (textAreaRef.current) {
+    if (textAreaRef.current && overlayRef.current) {
       const scrollSync = () => {
-        const overlay = textAreaRef.current.nextSibling;
-        if (overlay) {
-          overlay.scrollTop = textAreaRef.current.scrollTop;
-          overlay.scrollLeft = textAreaRef.current.scrollLeft;
-        }
+        if (!textAreaRef.current || !overlayRef.current) return;
+        overlayRef.current.scrollTop = textAreaRef.current.scrollTop;
+        overlayRef.current.scrollLeft = textAreaRef.current.scrollLeft;
       };
-      
       const resizeObserver = new ResizeObserver(() => {
         scrollSync();
       });
-      
       textAreaRef.current.addEventListener('scroll', scrollSync);
       resizeObserver.observe(textAreaRef.current);
-      
       return () => {
         if (textAreaRef.current) {
           textAreaRef.current.removeEventListener('scroll', scrollSync);
-          resizeObserver.disconnect();
         }
+        resizeObserver.disconnect();
       };
     }
   }, []);
@@ -538,6 +534,7 @@ const CombinedInquiryFormCom = ({ store, onSubmit, onBack, isSubmitting }) => {
               $hasProfanity={profanityWarning}
             />
             <TextAreaOverlay 
+              ref={overlayRef}
               dangerouslySetInnerHTML={{ __html: highlightedText.replace(/\n/g, '<br>') }}
             />
           </TextAreaContainer>

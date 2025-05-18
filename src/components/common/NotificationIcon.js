@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import adminNotificationService from '../../service/AdminNotificationService';
+import { useNotification } from '../../contexts/NotificationContext';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 
 // 스타일
 const styles = {
@@ -131,82 +132,56 @@ const formatDate = (dateString) => {
 
 const NotificationIcon = () => {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [notifications, setNotifications] = useState([]);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
-  
-  // 알림 업데이트 구독
-  useEffect(() => {
-    const unsubscribe = adminNotificationService.onNotificationsChange((count, notifs) => {
-      setUnreadCount(count);
-      setNotifications(notifs);
-    });
-    
-    // 컴포넌트 마운트 시 최신 알림 가져오기
-    adminNotificationService.fetchUnreadNotifications();
-    
-    // 바깥 영역 클릭 시 드롭다운 닫기
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotification();
+  console.log('[Icon] notifications', notifications, unreadCount);
+
+  // 바깥 영역 클릭 시 드롭다운 닫기
+  React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false);
       }
     };
-    
     document.addEventListener('mousedown', handleClickOutside);
-    
     return () => {
-      unsubscribe();
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  
-  // ul9buc9c0 uc54auc740 uc54cub9bc uc774ucd5c uc0c1ud0dc uc2e0uaddc
+
   const isUnread = (notification) => {
-    // isRead uc18duc131 ubc0f read uc18duc131 ubaa8ub450 ud655uc778 (uc11cubc84 ubc14uc774ud544 uc774uc288ub54c ubb38uc5d0)
     return !notification.isRead && !notification.read;
   };
-  
-  // uc54cub9bc ud074ub9ad ucc98ub9ac
+
   const handleNotificationClick = (notification) => {
-    // uc77duc74c ucc98ub9ac
-    adminNotificationService.markAsRead(notification.id);
-    
-    // ub9c1ud06cuac00 uc788uc73cuba74 ud574ub2f9 ud398uc774uc9c0ub85c uc774ub3d9
+    markAsRead(notification.id);
     if (notification.link) {
       navigate(notification.link);
     }
-    
     setShowDropdown(false);
   };
-  
-  // 모든 알림 읽음 처리
-  const handleMarkAllAsRead = () => {
-    adminNotificationService.markAllAsRead();
-  };
-  
+
   return (
     <div style={styles.container} ref={dropdownRef}>
       <div onClick={() => setShowDropdown(!showDropdown)}>
-        <i className="fa fa-bell" style={styles.icon}></i>
+        <NotificationsIcon style={styles.icon} />
         {unreadCount > 0 && (
           <div style={styles.badge}>
             {unreadCount > 99 ? '99+' : unreadCount}
           </div>
         )}
       </div>
-      
       {showDropdown && (
         <div style={styles.dropdown}>
           <div style={styles.header}>
             <h3 style={styles.title}>알림</h3>
             {unreadCount > 0 && (
-              <button style={styles.markAllBtn} onClick={handleMarkAllAsRead}>
+              <button style={styles.markAllBtn} onClick={markAllAsRead}>
                 모두 읽음 처리
               </button>
             )}
           </div>
-          
           <ul style={styles.notificationList}>
             {notifications.length === 0 ? (
               <div style={styles.emptyState}>알림이 없습니다.</div>

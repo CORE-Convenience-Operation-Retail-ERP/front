@@ -3,6 +3,7 @@ import { BrowserRouter, useNavigate, useLocation } from 'react-router-dom';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import AppRoutes from './routes';
 import webSocketService from './service/WebSocketService';
+import { NotificationProvider } from './contexts/NotificationContext';
 
 const theme = createTheme({
   palette: {
@@ -27,10 +28,12 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter>
-        <WebSocketInitializer />
-        <AppRoutes />
-      </BrowserRouter>
+      <NotificationProvider>
+        <BrowserRouter>
+          <WebSocketInitializer />
+          <AppRoutes />
+        </BrowserRouter>
+      </NotificationProvider>
     </ThemeProvider>
   );
 }

@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ChatIcon from '@mui/icons-material/Chat';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import axios from 'axios';
 import ChatModal from '../chat/ChatModal';
 import chatService from '../../service/ChatService';
@@ -131,6 +132,9 @@ const Header = () => {
               </IconButton>
             )}
             
+            {/* 알림 아이콘 및 알림 목록 팝업(드롭다운) */}
+            {/* NotificationIcon 컴포넌트는 내부적으로 종 아이콘(NotificationsIcon)과 Badge(알림 갯수),
+                클릭 시 알림 목록을 보여주는 드롭다운 UI를 모두 포함합니다. */}
             <NotificationIcon />
 
             <Box

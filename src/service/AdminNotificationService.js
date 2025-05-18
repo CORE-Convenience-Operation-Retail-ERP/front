@@ -84,28 +84,30 @@ class AdminNotificationService {
 
   // uc54cub9bc ucd94uac00
   addNotification(notification) {
+    console.log('[AdminNotificationService] addNotification 호출:', notification);
     console.log('uc0c8 uc54cub9bc ucd94uac00:', notification);
     
     // uc774ubbf8 uc788ub294 uc54cub9bcuc778uc9c0 ud655uc778
     const existingIndex = notifications.findIndex(n => n.id === notification.id);
     
     if (existingIndex >= 0) {
-      // uc774ubbf8 uc788ub294 uc54cub9bcuc774uba74 uc5c5ub370uc774ud2b8
-      notifications[existingIndex] = notification;
-      console.log('uae30uc874 uc54cub9bc uc5c5ub370uc774ud2b8:', notification.id);
+      // 기존 알림 업데이트 (불변성 유지)
+      notifications = [
+        ...notifications.slice(0, existingIndex),
+        notification,
+        ...notifications.slice(existingIndex + 1)
+      ];
+      console.log('기존 알림 업데이트(불변성):', notification.id);
     } else {
-      // uc0c8 uc54cub9bcuc774uba74 ucd94uac00
-      notifications.unshift(notification);
-      
-      // uc77duc9c0 uc54auc740 uc54cub9bcuc774uba74 uac1cuc218 uc99duac00
+      // 새 알림 추가 (불변성 유지)
+      notifications = [notification, ...notifications];
       if (!notification.isRead && !notification.read) {
         unreadNotifications++;
       }
-      
-      console.log('uc0c8 uc54cub9bc ucd94uac00ub428, uc77duc9c0 uc54auc740 uac1cuc218:', unreadNotifications);
+      console.log('새 알림 추가(불변성), 현재 unread:', unreadNotifications);
     }
-    
     this.saveToLocalStorage();
+    console.log('[AdminNotificationService] notifyCallbacks 호출 전, 콜백 수:', notificationCallbacks.length);
     this.notifyCallbacks();
   }
 
@@ -251,6 +253,7 @@ class AdminNotificationService {
 
   // ucf5cubc31 ud638ucd9c ub0b4ubd80 uba54uc11cub4dc
   notifyCallbacks() {
+    console.log('[AdminNotificationService] notifyCallbacks 실행, 콜백 수:', notificationCallbacks.length, 'unread:', unreadNotifications, 'notifs:', notifications.map(n => n.id));
     notificationCallbacks.forEach(callback => 
       callback(unreadNotifications, notifications)
     );
