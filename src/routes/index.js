@@ -50,6 +50,7 @@ import InventoryRegisterPage from "../pages/store/inventory/InventoryRegisterPag
 import IntegratedStockMonitoringPage from '../pages/headquarters/IntegratedStockMonitoringPage';
 import StockDetailPage from "../pages/store/stock/StockDetailPage";
 import StockFlowLogPage from '../pages/store/stock/StockFlowLogPage';
+import SettlementListPage from '../pages/store/SettlementListPage';
 
 const AppRoutes = () => {
   return (
@@ -109,6 +110,7 @@ const AppRoutes = () => {
         <Route path="stats/order" element={<StatsOrderPage/>} />
         <Route path="stats/sales" element={<StatsSalesPage/>} />
         <Route path="sales/transactions" element={<TransactionPage />} />
+        <Route path="sales/summary" element={<SettlementListPage />} />
       </Route>
 
       {/* 고객 관련 라우트 */}

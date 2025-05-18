@@ -19,6 +19,7 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",
+    "html5-qrcode": "^2.3.8",
     "jwt-decode": "^4.0.0",
     "loadsh": "^0.0.4",
     "lodash": "^4.17.21",

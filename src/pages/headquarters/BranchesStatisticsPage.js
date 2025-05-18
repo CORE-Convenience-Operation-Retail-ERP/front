@@ -1,10 +1,12 @@
-import React from 'react';
+import BranchStatisticsCon from "../../containers/headquarters/BranchesStatisticsCon";
 
-const BranchesStatisticsPage = () => (
-  <div>
-    <h2>지점 통계</h2>
-    <p>여기는 지점 통계 페이지입니다.</p>
-  </div>
-);
-
-export default BranchesStatisticsPage; 
+const BranchStatisticsPage = () => {
+    return (
+      <div style={{ padding: "20px" }}>
+        <h2>📊 매장 정산 통계</h2>
+        <BranchStatisticsCon />
+      </div>
+    );
+  };
+  
+  export default BranchStatisticsPage;
