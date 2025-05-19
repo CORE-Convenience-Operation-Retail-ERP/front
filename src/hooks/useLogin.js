@@ -59,5 +59,5 @@ export default function useLogin() {
     }
   };
 
-  return { login, error };
+  return { login, error, setError };
 }

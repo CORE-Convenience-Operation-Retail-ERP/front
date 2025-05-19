@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Card, TextField, Button, Typography } from '@mui/material';
 import useLogin from "../../hooks/useLogin";
+import { useError } from '../../contexts/ErrorContext.tsx';
 
 // 개선된 JWT 디코딩 함수
 function decodeJWT(token) {
@@ -38,8 +39,47 @@ function decodeJWT(token) {
 export default function LoginPage() {
   const [loginId, setLoginId] = useState("");
   const [loginPwd, setLoginPwd] = useState("");
-  const { login, error } = useLogin();
+  const { login, error: loginError, setError: setLoginError } = useLogin();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { error, setError } = useError();
+
+  useEffect(() => {
+    // URL 쿼리 파라미터에서 에러 메시지 처리
+    const queryParams = new URLSearchParams(location.search);
+    const errorParam = queryParams.get('error');
+    
+    if (errorParam) {
+      let errorMessage = '로그인에 문제가 발생했습니다';
+      
+      // 에러 유형별 메시지 처리
+      switch(errorParam) {
+        case 'session_expired':
+          errorMessage = '세션이 만료되었습니다. 다시 로그인해주세요.';
+          break;
+        case 'unauthorized':
+          errorMessage = '로그인이 필요한 서비스입니다.';
+          break;
+        case 'invalid_credentials':
+          errorMessage = '아이디 또는 비밀번호가 올바르지 않습니다.';
+          break;
+        default:
+          errorMessage = '로그인 중 오류가 발생했습니다.';
+      }
+      
+      // 오류 상태 설정
+      setLoginError(errorMessage);
+      
+      // ErrorContext에 오류 등록
+      setError(errorMessage);
+    }
+    
+    // 이전 페이지에서 전달된 상태 메시지 처리
+    if (location.state?.message) {
+      setLoginError(location.state.message);
+      setError(location.state.message);
+    }
+  }, [location, setError, setLoginError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,6 +109,9 @@ export default function LoginPage() {
     }
   };
 
+  // 사용할 에러 메시지 (ErrorContext나 useLogin의 에러 중 존재하는 것 사용)
+  const displayError = error || loginError;
+
   return (
     <Box
       sx={{
@@ -93,7 +136,7 @@ export default function LoginPage() {
             margin="normal"
             value={loginId}
             onChange={(e) => setLoginId(e.target.value)}
-            error={!!error}
+            error={!!displayError}
             required
           />
           <TextField
@@ -103,12 +146,12 @@ export default function LoginPage() {
             margin="normal"
             value={loginPwd}
             onChange={(e) => setLoginPwd(e.target.value)}
-            error={!!error}
+            error={!!displayError}
             required
           />
-          {error && (
+          {displayError && (
             <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {error}
+              {displayError}
             </Typography>
           )}
           <Button

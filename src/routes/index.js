@@ -54,6 +54,11 @@ import LoadingLottie from '../components/common/LoadingLottie.tsx';
 import StatisticsPage from "../pages/store/StatisticsPage";
 import KpiStatsTestPage from "../pages/test/KpiStatsTestPage";
 import AttendancePage from "../pages/store/attendance/AttendancePage";
+import ErrorPage from '../components/common/ErrorPage';
+import ForbiddenErrorPage from '../components/common/ForbiddenErrorPage';
+import NotFoundErrorPage from '../components/common/NotFoundErrorPage';
+import NetworkErrorPage from '../components/common/NetworkErrorPage';
+import ServerErrorPage from '../components/common/ServerErrorPage';
 
 const AppRoutes = () => {
   const { isLoading } = useLoading();
@@ -63,6 +68,12 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        {/* 에러 페이지 라우트 */}
+        <Route path="/error" element={<ErrorPage />} />
+        <Route path="/error/403" element={<ForbiddenErrorPage />} />
+        <Route path="/error/network" element={<NetworkErrorPage />} />
+        <Route path="/error/404" element={<NotFoundErrorPage />} />
+        <Route path="/error/500" element={<ServerErrorPage />} />
         {/* 본사 관련 라우트 */}
         <Route path="/headquarters/*" element={<HeadquartersLayout />}>
           <Route path="products/all" element={<ProductsAllPage />} />
@@ -124,6 +135,8 @@ const AppRoutes = () => {
         <Route path="/chat/room/:roomId" element={<ChatRoom />} />
         {/* 기본 리다이렉트 */}
         <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* 404 페이지 처리를 위한 와일드카드 라우트 */}
+        <Route path="*" element={<NotFoundErrorPage />} />
       </Routes>
     </>
   );
