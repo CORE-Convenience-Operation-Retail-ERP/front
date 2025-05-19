@@ -36,11 +36,10 @@ function StockFlowLogCon() {
   };
 
   const handleSearch = (newConditions) => {
-    setFilters((prev) => ({
-      ...prev,
+    setFilters({
       ...newConditions,
-      page: 0 // 검색 시 페이지 초기화
-    }));
+      page: 0
+    });
   };
 
   useEffect(() => {

@@ -53,7 +53,7 @@ export default function StockHistorySummaryCom({ historyList = [], productId }) 
             historyList.map((log, idx) => (
               <tr key={idx}>
                 <td>{log.flowDate?.slice(0, 10)}</td>
-                <td>{log.typeLabel || log.type}</td>
+                <td>{log.flowTypeLabel || log.type}</td>
                 <td>{log.location}</td>
                 <td style={{
                   color: log.quantity > 0 ? 'green' : log.quantity < 0 ? 'red' : 'black'

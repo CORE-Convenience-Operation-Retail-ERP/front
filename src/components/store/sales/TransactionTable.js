@@ -109,7 +109,7 @@ const TransactionTable = ({ rows = [], currentPage = 0, totalPages = 1, onPageCh
                   <td>{new Date(row.paidAt).toLocaleString()}</td>
                   <td>{row.category || "-"}</td>
                   <td>{row.salesQuantity}</td>
-                  <td>{row.paymentMethod}</td>
+                  <td>{row.paymentMethod?.toUpperCase()}</td>
                   <td>{row.unitPrice?.toLocaleString()}원</td>
                   <td>{row.discountPrice?.toLocaleString()}원</td>
                   <td>{row.realIncome?.toLocaleString()}원</td>

@@ -22,7 +22,7 @@ const Amount = styled.div`
   margin-bottom: 4px;
 `;
 
-const Rate = styled.div`
+const Rate = styled(({ up, ...rest }) => <div {...rest} />)`
   font-size: 14px;
   color: ${({ up }) => (up ? '#16a34a' : '#dc2626')};
   margin-bottom: 16px;
