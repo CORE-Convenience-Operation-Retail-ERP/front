@@ -41,6 +41,16 @@ const BranchesListCom = ({
     { value: 3, label: '폐업', color: '#3B6FAE' }
   ];
   
+  // 본사 스타일 기준 컬럼 정의
+  const branchColumns = [
+    { id: 'storeId', label: '지점번호', minWidth: 100 },
+    { id: 'storeName', label: '지점명', minWidth: 120 },
+    { id: 'storeAddr', label: '주소', minWidth: 220 },
+    { id: 'storeTel', label: '전화번호', minWidth: 120 },
+    { id: 'storeStatus', label: '상태', minWidth: 100 },
+    { id: 'storeCreatedAt', label: '개설일', minWidth: 120 }
+  ];
+  
   // 검색 폼 제출 핸들러
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -53,23 +63,44 @@ const BranchesListCom = ({
   
   // 지점 정보 수정 페이지로 이동
   const handleNavigateToBranchEdit = (storeId) => {
-    console.log('수정 버튼 클릭:', storeId);
     onCloseModal();
     onNavigateToBranchEdit(storeId);
   };
   
   return (
     <Box>
+      {/* 헤더 */}
+      <Box sx={{ width: '90%', maxWidth: 2200, mx: 'auto', mt: 4, mb: 7 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography sx={{
+            fontWeight: 'bold',
+            fontSize: 30,
+            color: '#2563A6',
+            letterSpacing: '-1px',
+          }}>
+            지점 목록
+          </Typography>
+          {hasEditPermission && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={onAddBranch}
+              sx={{
+                backgroundColor: '#2563A6',
+                '&:hover': { backgroundColor: '#1E5187' },
+                borderRadius: '30px',
+                px: 3,
+                height: 40
+              }}
+            >
+              지점 추가
+            </Button>
+          )}
+        </Box>
+      </Box>
+      
       {/* 검색바 */}
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          mt: 3,
-          mb: 4,
-        }}
-      >
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', justifyContent: 'center', mb: 5 }}>
         <Paper
           component="form"
           onSubmit={handleSearchSubmit}
@@ -77,7 +108,7 @@ const BranchesListCom = ({
             p: '2px 16px',
             display: 'flex',
             alignItems: 'center',
-            width: '70%',
+            width: '100%',
             borderRadius: '30px',
             boxShadow: '0 2px 8px 0 rgba(85, 214, 223, 0.15)',
             border: '2px solid #55D6DF',
@@ -110,47 +141,8 @@ const BranchesListCom = ({
         </Paper>
       </Box>
       
-      {/* 제목과 지점 추가 버튼 */}
-      <Box mb={3} sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        px: 5
-      }}>
-        <Typography sx={{
-          fontWeight: 'bold',
-          fontSize: 30,
-          color: '#2563A6',
-          letterSpacing: '-1px',
-        }}>
-          지점 목록
-        </Typography>
-        
-        {hasEditPermission && (
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onAddBranch}
-            sx={{
-              backgroundColor: '#2563A6',
-              '&:hover': {
-                backgroundColor: '#1E5187',
-              },
-              borderRadius: '20px',
-              px: 3
-            }}
-          >
-            지점 추가
-          </Button>
-        )}
-      </Box>
-      
       {/* 상태 필터 */}
-      <Box mb={3} sx={{
-        display: 'flex',
-        alignItems: 'center',
-        px: 5
-      }}>
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', alignItems: 'center', mb: 4 }}>
         <FormControl component="fieldset">
           <FormGroup row>
             <FormLabel component="legend" sx={{ mr: 2, fontSize: 16, fontWeight: 'bold', color: '#2563A6', lineHeight: '42px' }}>
@@ -200,20 +192,13 @@ const BranchesListCom = ({
         </Box>
       )}
 
-      {/* 테이블 */}
+      {/* 테이블(필터바+목록) 중앙 정렬 및 좌우 여백 */}
       {!loading && !error && branches.length > 0 && (
         <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto' }}>
-          <Table size="small" sx={{ background: '#F8FAFB', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)', mx: 'auto' }}>
+          <Table size="small" sx={{ background: '#fff', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)', mx: 'auto' }}>
             <TableHead>
               <TableRow>
-                {[
-                  { id: 'storeId', label: '지점번호' },
-                  { id: 'storeName', label: '지점명' },
-                  { id: 'storeAddr', label: '주소' },
-                  { id: 'storeTel', label: '전화번호' },
-                  { id: 'storeStatus', label: '상태' },
-                  { id: 'storeCreatedAt', label: '개설일' }
-                ].map((column, idx) => (
+                {branchColumns.map((column, idx) => (
                   <TableCell
                     key={column.id}
                     align="center"
@@ -221,10 +206,11 @@ const BranchesListCom = ({
                       fontWeight: 'bold',
                       fontSize: 18,
                       color: '#2563A6',
-                      borderBottom: 'none',
-                      borderRight: idx < 5 ? '1px solid #E0E7EF' : undefined,
-                      bgcolor: '#F8FAFB',
+                      borderBottom: '1px solid #F5F5F5',
+                      borderRight: idx < branchColumns.length - 1 ? '1px solid #F5F5F5' : undefined,
+                      bgcolor: '#fff',
                       px: 2,
+                      minWidth: column.minWidth,
                       cursor: column.id !== 'storeStatus' ? 'pointer' : 'default'
                     }}
                     onClick={() => column.id !== 'storeStatus' && onSortChange(column.id)}
@@ -252,19 +238,11 @@ const BranchesListCom = ({
                     }
                   }}
                 >
-                  <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
-                    {highlightText(row.storeId, search)}
-                  </TableCell>
-                  <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
-                    {highlightText(row.storeName, search)}
-                  </TableCell>
-                  <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
-                    {highlightText(row.storeAddr, search)}
-                  </TableCell>
-                  <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
-                    {row.storeTel}
-                  </TableCell>
-                  <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
+                  <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 2.5, borderBottom: '1px solid #F5F5F5' }}>{highlightText(row.storeId, search)}</TableCell>
+                  <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 2.5, borderBottom: '1px solid #F5F5F5' }}>{highlightText(row.storeName, search)}</TableCell>
+                  <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 2.5, borderBottom: '1px solid #F5F5F5' }}>{highlightText(row.storeAddr, search)}</TableCell>
+                  <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 2.5, borderBottom: '1px solid #F5F5F5' }}>{row.storeTel}</TableCell>
+                  <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 2.5, borderBottom: '1px solid #F5F5F5' }}>
                     <Chip 
                       label={
                         row.storeStatus === 1 ? '영업중' :
@@ -285,16 +263,14 @@ const BranchesListCom = ({
                       }}
                     />
                   </TableCell>
-                  <TableCell align="center" sx={{ py: 2.5 }}>
-                    {new Date(row.storeCreatedAt).toLocaleDateString()}
-                  </TableCell>
+                  <TableCell align="center" sx={{ py: 2.5, borderBottom: '1px solid #F5F5F5' }}>{new Date(row.storeCreatedAt).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
 
           {/* Pagination */}
-          {/* <Box display="flex" justifyContent="center" mt={3} mb={2}>
+          <Box display="flex" justifyContent="center" mt={3} mb={2}>
             <Pagination
               count={Math.ceil(totalCount / rowsPerPage)}
               page={page}
@@ -304,7 +280,7 @@ const BranchesListCom = ({
               showFirstButton
               showLastButton
             />
-          </Box> */}
+          </Box>
         </Box>
       )}
 
