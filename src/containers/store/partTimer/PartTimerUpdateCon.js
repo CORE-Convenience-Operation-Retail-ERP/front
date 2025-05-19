@@ -96,6 +96,8 @@ function PartTimerUpdateCon() {
         ...form,
         birthDate: birthDateFormatted,
         hireDate: hireDateFormatted,
+        deviceId: localStorage.getItem("deviceId") || "",
+        deviceName: navigator.userAgent || "unknown",
       };
 
       Object.entries(updatedForm).forEach(([key, value]) => {
@@ -112,6 +114,7 @@ function PartTimerUpdateCon() {
       console.error(err);
     }
   };
+
 
   if (loading || !form) return <p>불러오는 중...</p>;
 

@@ -55,3 +55,17 @@ export const Checkbox = styled.input.attrs({ type: 'checkbox' })`
   cursor: pointer;
   accent-color: #4096ff;
 `;
+
+export const ActionButton = styled.button`
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;

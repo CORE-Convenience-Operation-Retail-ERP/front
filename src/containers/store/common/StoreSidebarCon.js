@@ -16,9 +16,7 @@ const sidebarMenus = [
         name: '재고 관리', icon: <InventoryIcon />, submenu: [
         { name: '재고 현황', path: '/store/stock/list' },
         { name: '입출고 기록', path: '/store/stock/flow/search' },
-        { name: '실사 이력', path: '/store/inventory/check/history' },
-        { name: '조정 로그', path: '/store/stock/adjust-log' },
-        { name: '폐기 관리', path: '/store/inventory/disposal' }, 
+        { name: '폐기 관리', path: '/store/inventory/disposal' },
         ]
     },
     {
@@ -32,6 +30,7 @@ const sidebarMenus = [
             { name: '직원 관리', path: '/store/parttimer/list' },
             { name: '스케줄 관리', path: '/store/hr/schedule' },
             { name: '급여 관리', path: '/store/hr/salary' },
+            { name: '근태 관리', path: '/store/attendance' },
         ]
     },
     { 
@@ -42,6 +41,7 @@ const sidebarMenus = [
     },
     {
         name: '통계 관리', icon: <BarChartIcon />, submenu: [
+            { name: '통합 통계', path: '/store/statistics' },
             { name: '발주 통계', path: '/store/stats/order' },
             { name: '상품별 매출 순위', path: '/store/stats/product' },
             { name: '카테고리별 매출 추이', path: '/store/stats/category' },

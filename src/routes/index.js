@@ -36,8 +36,6 @@ import StoreInquiryPage from '../pages/headquarters/StoreInquiryPage';
 import StoreInquiriesPage from '../pages/headquarters/board/StoreInquiriesPage';
 import SalaryBreakdownPage from '../pages/store/salary/SalaryBreakdownPage';
 import StockListPage from '../pages/store/stock/StockListPage';
-import StockInHistoryPage from '../pages/store/stock/StockInHistoryPage';
-import AdjustLogPage from '../pages/store/stock/AdjustLogPage';
 import OrderHistoryPage from '../pages/store/order/OrderHistoryPage';
 import MySalaryPage from '../pages/headquarters/MySalaryPage';
 import TransactionPage from '../pages/store/TransactionPage';
@@ -54,9 +52,8 @@ import ChatRoom from '../components/chat/ChatRoom';
 import { LoadingProvider, useLoading } from '../components/common/LoadingContext.tsx';
 import LoadingLottie from '../components/common/LoadingLottie.tsx';
 import StatisticsPage from "../pages/store/StatisticsPage";
-import TestCategoryChartPage from "../pages/test/TestCategoryChartPage";
-import HourlySalesChartTestPage from "../pages/test/HourlySalesChartTestPage";
 import KpiStatsTestPage from "../pages/test/KpiStatsTestPage";
+import AttendancePage from "../pages/store/attendance/AttendancePage";
 
 const AppRoutes = () => {
   const { isLoading } = useLoading();
@@ -96,12 +93,10 @@ const AppRoutes = () => {
         <Route path="/store" element={<StoreLayout/>} >
           <Route path="home" element={<HomePage/>} />
           <Route path="stock/list" element={<StockListPage/>} />
-          <Route path="stock/in-history" element={<StockInHistoryPage/>} />
           <Route path="stock/flow/search" element={<StockFlowLogPage/>} />
           <Route path="inventory/check/history" element={<InventoryHistoryPage/>} />
           <Route path="inventory/check/register" element={<InventoryRegisterPage/>} />
           <Route path="stock/detail/:productId" element={<StockDetailPage/>} />
-          <Route path="stock/adjust-log" element={<AdjustLogPage/>} />
           <Route path="inventory/disposal" element={<DisposalPage/>} />
           <Route path="order/register" element={<OrderFormPage/>} />
           <Route path="order/list" element={<OrderListPage/>} />
@@ -120,6 +115,7 @@ const AppRoutes = () => {
           <Route path="sales/transactions" element={<TransactionPage />} />
           <Route path="sales/summary" element={<SettlementListPage />} />
           <Route path="duum" element={<KpiStatsTestPage />} />
+          <Route path="attendance" element={<AttendancePage />} />
         </Route>
         {/* 고객 관련 라우트 */}
         <Route path="/customer" element={<CustomerInquiryPage />} />

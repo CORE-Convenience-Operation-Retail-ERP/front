@@ -11,25 +11,12 @@ function KpiStatsCon({ filters }) {
             try {
                 setLoading(true);
 
-                const useMock = true;
-                if (useMock) {
-                    const mock = {
-                        totalSales: 1234560,
-                        totalOrders: 840000,
-                        todaySalesQuantity: 348,
-                        stockInCount: 182
-                    };
-                    setData(mock);
-                    return;
-                }
-
-                // 실제 API 연동 시 아래 사용
-                // const res = await fetchKpiStats({
-                //   storeId: filters.storeId,
-                //   startDate: filters.startDate,
-                //   endDate: filters.endDate,
-                // });
-                // setData(res);
+                const res = await fetchKpiStats({
+                    storeId: filters.storeId,
+                    startDate: filters.startDate,
+                    endDate: filters.endDate,
+                });
+                setData(res);
             } catch (err) {
                 console.error("KPI 통계 불러오기 실패", err);
                 setData(null);

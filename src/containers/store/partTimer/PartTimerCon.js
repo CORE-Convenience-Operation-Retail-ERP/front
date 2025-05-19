@@ -1,34 +1,41 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PartTimerCom from "../../../components/store/partTimer/PartTimerCom";
-import {useNavigate} from "react-router-dom";
-import {useEffect, useState} from "react";
-import {fetchPartTimers, searchPartTimers} from "../../../service/store/PartTimeService";
-import {deletePartTimer} from "../../../service/store/PartTimeService";
 import SearchBar from "../../../components/store/common/StoreSearchBar";
 import Pagination from "../../../components/store/common/Pagination";
+import QRModal from "../../../containers/store/partTimer/attendance/QRModal";
 
-function PartTimerCon(){
+import {
+    fetchPartTimers,
+    searchPartTimers,
+    deletePartTimer
+} from "../../../service/store/PartTimeService";
+
+function PartTimerCon() {
     const navigate = useNavigate();
 
-
-    //  상태 관리
     const [partTimers, setPartTimers] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [searchParams, setSearchParams] = useState({ partName: '', partStatus: null });
+    const [searchParams, setSearchParams] = useState({});
     const [selectedIds, setSelectedIds] = useState([]);
     const [page, setPage] = useState(0);
     const [size] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
 
-    //  데이터 로드 함수
+    const [qrModalInfo, setQrModalInfo] = useState(null);
+
+    useEffect(() => {
+        loadPartTimers();
+    }, [searchParams, page]);
+
     const loadPartTimers = async () => {
         setLoading(true);
         try {
-            const hasSearch = searchParams.partName || searchParams.partStatus !== null || searchParams.position;
-    
+            const hasSearch = Object.values(searchParams).some((v) => v);
             const data = hasSearch
                 ? await searchPartTimers({ ...searchParams, page, size })
-                : await fetchPartTimers({ ...searchParams, page, size });  // 🔥 position 추가 필요!
-    
+                : await fetchPartTimers({ page, size });
+
             if (Array.isArray(data)) {
                 setPartTimers(data);
                 setTotalPages(1);
@@ -41,121 +48,117 @@ function PartTimerCon(){
         } finally {
             setLoading(false);
         }
-    };    
-    
-      
+    };
 
-    //  마운트 & 검색 & 페이지 이동할 때마다 reload
-    useEffect(() => {
-        (async () => {
-            await loadPartTimers();
-        })();
-    }, [searchParams, page]);
+    const handleSearch = (params) => {
+        setSearchParams(params);
+        setPage(0);
+    };
 
-    //  체크박스 개별 선택
     const handleCheck = (id) => {
-        setSelectedIds(prev =>
-            prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
+        setSelectedIds((prev) =>
+            prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
         );
     };
 
-    //  전체 선택
     const handleCheckAll = (checked) => {
         if (checked) {
-            const allIds = partTimers.map(pt => pt.partTimerId);
+            const allIds = partTimers.map((pt) => pt.partTimerId);
             setSelectedIds(allIds);
         } else {
             setSelectedIds([]);
         }
     };
 
-    //  삭제 버튼 클릭
     const handleDelete = async () => {
         if (selectedIds.length === 0) {
-            alert('삭제할 아르바이트를 선택하세요.');
+            alert("삭제할 아르바이트를 선택하세요.");
             return;
         }
 
-        if (!window.confirm('정말 삭제하시겠습니까?')) return;
+        if (!window.confirm("정말 삭제하시겠습니까?")) return;
 
         try {
-            await Promise.all(selectedIds.map(id => deletePartTimer(id)));
-            alert('삭제 성공');
+            await Promise.all(selectedIds.map((id) => deletePartTimer(id)));
+            alert("삭제 성공");
             setSelectedIds([]);
             loadPartTimers();
         } catch (error) {
-            console.error('삭제 실패:', error);
+            console.error("삭제 실패:", error);
         }
     };
 
-    //  검색창 입력
-    const handleSearch = (params) => {
-        console.log("🔍 [SearchBar] 검색 요청 파라미터:", params);
-
-        const [key, value] = Object.entries(params)[0];
-    
-        setSearchParams({
-            partName: key === 'partName' ? value : '',
-            position: key === 'position' ? value : null,
-            partStatus: key === 'partStatus' ? value : null,
-        });
-    
-        setPage(0);
+    //  QR 모달 열기
+    const handleOpenQRModal = (partTimerId, mode) => {
+        setQrModalInfo({ partTimerId, mode });
     };
 
-    //  등록 버튼 클릭
-    const handleRegister = () => {
-        navigate('/store/parttimer/register');
+    //  QR 모달 닫기
+    const handleCloseQRModal = () => {
+        setQrModalInfo(null);
     };
-
-    
 
     return (
         <div>
             <SearchBar
-            filterOptions={[
-                { key: "partName", label: "이름", type: "text" },
-                {
-                key: "position",
-                label: "직책",
-                type: "select",
-                options: [
-                    { value: "", label: "전체" },
-                    { value: "아르바이트", label: "아르바이트" },
-                    { value: "매니저", label: "매니저" },
-                    { value: "점장", label: "점장" }
-                ]
-                },
-                {
-                key: "partStatus",
-                label: "상태",
-                type: "select",
-                options: [
-                    { value: "", label: "전체" },
-                    { value: "1", label: "재직" },
-                    { value: "0", label: "퇴사" }
-                ]
-                }
-            ]}
-            onSearch={handleSearch}
+                filterOptions={[
+                    { key: "partName", label: "이름", type: "text" },
+                    {
+                        key: "position",
+                        label: "직책",
+                        type: "select",
+                        options: [
+                            { value: "", label: "전체" },
+                            { value: "아르바이트", label: "아르바이트" },
+                            { value: "매니저", label: "매니저" },
+                            { value: "점장", label: "점장" }
+                        ]
+                    },
+                    {
+                        key: "partStatus",
+                        label: "상태",
+                        type: "select",
+                        options: [
+                            { value: "", label: "전체" },
+                            { value: "1", label: "재직" },
+                            { value: "0", label: "퇴사" }
+                        ]
+                    }
+                ]}
+                onSearch={handleSearch}
             />
-            <div style={{ margin: '10px 0' }}>
-                <button onClick={handleRegister}>Register</button>
-                <button onClick={handleDelete} style={{ marginLeft: '10px' }}>Delete</button>
-        </div>
+
+            <div style={{ margin: "10px 0" }}>
+                <button onClick={() => navigate("/store/parttimer/register")}>Register</button>
+                <button onClick={handleDelete} style={{ marginLeft: "10px" }}>
+                    Delete
+                </button>
+            </div>
+
             <PartTimerCom
                 data={partTimers}
                 loading={loading}
                 selectedIds={selectedIds}
                 onCheck={handleCheck}
                 onCheckAll={handleCheckAll}
+                onOpenQRModal={handleOpenQRModal} // ✅ 넘김
             />
+
             <Pagination
                 currentPage={page}
                 totalPages={totalPages}
                 onPageChange={setPage}
             />
+
+            {qrModalInfo && (
+                <QRModal
+                    partTimerId={qrModalInfo.partTimerId}
+                    mode={qrModalInfo.mode}
+                    onClose={handleCloseQRModal}
+                />
+            )}
         </div>
     );
 }
+
 export default PartTimerCon;
