@@ -40,6 +40,23 @@ const EmployeesListCom = ({
     { value: '퇴사', label: '퇴사', color: '#3B6FAE' }
   ];
   
+  // 본사 테이블 헤더 컬럼 정의 (간격 기준)
+  const hqColumns = [
+    { id: 'empId', label: '사번', minWidth: 100 },
+    { id: 'empName', label: '이름', minWidth: 120 },
+    { id: 'deptName', label: '부서', minWidth: 140 },
+    { id: 'empStatus', label: '상태', minWidth: 100 },
+    { id: 'hireDate', label: '입사일', minWidth: 120 }
+  ];
+  // 점주 테이블 헤더 컬럼 정의 (본사 기준 간격 적용)
+  const ownerColumns = [
+    { id: 'empId', label: '점주', minWidth: 100 },
+    { id: 'empName', label: '점주명', minWidth: 120 },
+    { id: 'storeName', label: '점포명', minWidth: 140 },
+    { id: 'empStatus', label: '상태', minWidth: 100 },
+    { id: 'hireDate', label: '계약일', minWidth: 120 }
+  ];
+  
   // 검색 폼 제출 핸들러
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -63,16 +80,20 @@ const EmployeesListCom = ({
   
   return (
     <Box>
+      {/* 헤더 */}
+      <Box sx={{ width: '90%', maxWidth: 2200, mx: 'auto', mt: 4, mb: 7 }}>
+        <Typography sx={{
+          fontWeight: 'bold',
+          fontSize: 30,
+          color: '#2563A6',
+          letterSpacing: '-1px',
+        }}>
+          {employeeType === '본사' ? '본사 사원 목록' : '점주 목록'}
+        </Typography>
+      </Box>
+
       {/* 검색바 */}
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          mt: 3,
-          mb: 4,
-        }}
-      >
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', justifyContent: 'center', mb: 5 }}>
         <Paper
           component="form"
           onSubmit={handleSearchSubmit}
@@ -80,7 +101,7 @@ const EmployeesListCom = ({
             p: '2px 16px',
             display: 'flex',
             alignItems: 'center',
-            width: '70%',
+            width: '100%',
             borderRadius: '30px',
             boxShadow: '0 2px 8px 0 rgba(85, 214, 223, 0.15)',
             border: '2px solid #55D6DF',
@@ -112,24 +133,37 @@ const EmployeesListCom = ({
           </IconButton>
         </Paper>
       </Box>
-      
-      {/* 타입 선택 버튼과 제목, 사원 등록 버튼 */}
-      <Box mb={3} sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        px: 5
-      }}>
-        <Typography sx={{
-          fontWeight: 'bold',
-          fontSize: 30,
-          color: '#2563A6',
-          letterSpacing: '-1px',
-        }}>
-          {employeeType === '본사' ? '본사 사원 목록' : '점주 목록'}
-        </Typography>
-        
-        {/* 본사/점주 토글 버튼 - 오른쪽으로 이동 */}
+
+      {/* 본사/점주 선택 버튼 + 상태 필터 */}
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', alignItems: 'center', mb: 4, justifyContent: 'space-between' }}>
+        {/* 상태 필터 - 왼쪽 */}
+        <FormControl component="fieldset">
+          <FormGroup row>
+            <FormLabel component="legend" sx={{ mr: 2, fontSize: 16, fontWeight: 'bold', color: '#2563A6', lineHeight: '42px' }}>
+              상태:
+            </FormLabel>
+            {statusOptions.map(option => (
+              <Chip
+                key={option.value}
+                label={option.label}
+                onClick={() => toggleStatusFilter(option.value)}
+                sx={{
+                  mx: 0.5,
+                  px: 1,
+                  fontSize: 14,
+                  borderRadius: '16px',
+                  border: `1px solid ${option.color}`,
+                  color: filters.status.includes(option.value) ? '#fff' : option.color,
+                  backgroundColor: filters.status.includes(option.value) ? option.color : 'transparent',
+                  '&:hover': {
+                    backgroundColor: filters.status.includes(option.value) ? option.color : `${option.color}22`,
+                  },
+                }}
+              />
+            ))}
+          </FormGroup>
+        </FormControl>
+        {/* 본사/점주 토글 버튼 - 오른쪽 */}
         <Box sx={{ display: 'flex' }}>
           <Button
             variant={employeeType === '본사' ? 'contained' : 'outlined'}
@@ -166,40 +200,6 @@ const EmployeesListCom = ({
         </Box>
       </Box>
       
-      {/* 상태 필터 */}
-      <Box mb={3} sx={{
-        display: 'flex',
-        alignItems: 'center',
-        px: 5
-      }}>
-        <FormControl component="fieldset">
-          <FormGroup row>
-            <FormLabel component="legend" sx={{ mr: 2, fontSize: 16, fontWeight: 'bold', color: '#2563A6', lineHeight: '42px' }}>
-              상태:
-            </FormLabel>
-            {statusOptions.map(option => (
-              <Chip
-                key={option.value}
-                label={option.label}
-                onClick={() => toggleStatusFilter(option.value)}
-                sx={{
-                  mx: 0.5,
-                  px: 1,
-                  fontSize: 14,
-                  borderRadius: '16px',
-                  border: `1px solid ${option.color}`,
-                  color: filters.status.includes(option.value) ? '#fff' : option.color,
-                  backgroundColor: filters.status.includes(option.value) ? option.color : 'transparent',
-                  '&:hover': {
-                    backgroundColor: filters.status.includes(option.value) ? option.color : `${option.color}22`,
-                  },
-                }}
-              />
-            ))}
-          </FormGroup>
-        </FormControl>
-      </Box>
-      
       {/* 로딩 표시 */}
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
@@ -224,18 +224,13 @@ const EmployeesListCom = ({
       {/* 테이블(필터바+목록) 중앙 정렬 및 좌우 여백 */}
       {!loading && !error && employees.length > 0 && (
         <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto' }}>
-          {/* 본사 사원 테이블 */}
+          {/* 본사 테이블 시작 */}
           {employeeType === '본사' ? (
-            <Table size="small" sx={{ background: '#F8FAFB', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)', mx: 'auto' }}>
+            <Table size="small" sx={{ background: '#fff', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)', mx: 'auto' }}>
               <TableHead>
                 <TableRow>
-                  {[
-                    { id: 'empId', label: '사번' },
-                    { id: 'empName', label: '이름' },
-                    { id: 'deptName', label: '부서' },
-                    { id: 'empStatus', label: '상태' },
-                    { id: 'hireDate', label: '입사일' }
-                  ].map((column, idx) => (
+                  {/* 본사 테이블 헤더 컬럼 */}
+                  {hqColumns.map((column, idx) => (
                     <TableCell
                       key={column.id}
                       align="center"
@@ -243,10 +238,11 @@ const EmployeesListCom = ({
                         fontWeight: 'bold',
                         fontSize: 18,
                         color: '#2563A6',
-                        borderBottom: 'none',
-                        borderRight: idx < 4 ? '1px solid #E0E7EF' : undefined,
-                        bgcolor: '#F8FAFB',
+                        borderBottom: '1px solid #F5F5F5',
+                        borderRight: idx < 4 ? '1px solid #F5F5F5' : undefined,
+                        bgcolor: '#fff',
                         px: 2,
+                        minWidth: column.minWidth,
                         cursor: column.id !== 'empStatus' ? 'pointer' : 'default'
                       }}
                       onClick={() => column.id !== 'empStatus' && onSortChange(column.id)}
@@ -262,6 +258,7 @@ const EmployeesListCom = ({
                 </TableRow>
               </TableHead>
               <TableBody>
+                {/* 본사 테이블 바디 */}
                 {employees.map((row) => (
                   <TableRow 
                     key={row.empId}
@@ -274,16 +271,11 @@ const EmployeesListCom = ({
                       }
                     }}
                   >
-                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
-                      {highlightText(row.empId, search)}
-                    </TableCell>
-                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
-                      {highlightText(row.empName, search)}
-                    </TableCell>
-                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
-                      {highlightText(row.deptName, search)}
-                    </TableCell>
-                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
+                    {/* 본사 테이블 바디 셀 */}
+                    <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 1, borderBottom: '1px solid #F5F5F5' }}>{highlightText(row.empId, search)}</TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 1, borderBottom: '1px solid #F5F5F5' }}>{highlightText(row.empName, search)}</TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 1, borderBottom: '1px solid #F5F5F5' }}>{highlightText(row.deptName, search)}</TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 1, borderBottom: '1px solid #F5F5F5' }}>
                       <Chip 
                         label={row.empStatus} 
                         sx={{ 
@@ -300,25 +292,18 @@ const EmployeesListCom = ({
                         }}
                       />
                     </TableCell>
-                    <TableCell align="center" sx={{ py: 2.5 }}>
-                      {row.hireDate}
-                    </TableCell>
+                    <TableCell align="center" sx={{ py: 2.5, borderBottom: '1px solid #F5F5F5' }}>{row.hireDate}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           ) : (
-            /* 점주 테이블 */
-            <Table size="small" sx={{ background: '#F8FAFB', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)', mx: 'auto' }}>
+            // 점주 테이블 시작
+            <Table size="small" sx={{ background: '#fff', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)', mx: 'auto' }}>
               <TableHead>
                 <TableRow>
-                  {[
-                    { id: 'empId', label: '점주번호' },
-                    { id: 'empName', label: '점주명' },
-                    { id: 'storeName', label: '점포명' },
-                    { id: 'empStatus', label: '상태' },
-                    { id: 'hireDate', label: '계약일' }
-                  ].map((column, idx) => (
+                  {/* 점주 테이블 헤더 컬럼 (본사 기준 간격) */}
+                  {ownerColumns.map((column, idx) => (
                     <TableCell
                       key={column.id}
                       align="center"
@@ -326,10 +311,11 @@ const EmployeesListCom = ({
                         fontWeight: 'bold',
                         fontSize: 18,
                         color: '#2563A6',
-                        borderBottom: 'none',
-                        borderRight: idx < 4 ? '1px solid #E0E7EF' : undefined,
-                        bgcolor: '#F8FAFB',
+                        borderBottom: '1px solid #F5F5F5',
+                        borderRight: idx < 4 ? '1px solid #F5F5F5' : undefined,
+                        bgcolor: '#fff',
                         px: 2,
+                        minWidth: column.minWidth,
                         cursor: column.id !== 'empStatus' ? 'pointer' : 'default'
                       }}
                       onClick={() => column.id !== 'empStatus' && onSortChange(column.id)}
@@ -345,7 +331,8 @@ const EmployeesListCom = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {employees.map((row, index) => (
+                {/* 점주 테이블 바디 */}
+                {employees.map((row) => (
                   <TableRow 
                     key={row.empId}
                     hover
@@ -357,18 +344,11 @@ const EmployeesListCom = ({
                       }
                     }}
                   >
-                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
-                      {employeeType === '본사' ? 
-                        highlightText(row.empId, search) : 
-                        highlightText(row.rowNum, search)}
-                    </TableCell>
-                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
-                      {highlightText(row.empName, search)}
-                    </TableCell>
-                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
-                      {highlightText(row.storeName || row.deptName, search)}
-                    </TableCell>
-                    <TableCell align="center" sx={{ borderRight: '1px solid #E0E7EF', py: 2.5 }}>
+                    {/* 점주 테이블 바디 셀 */}
+                    <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 2.5, borderBottom: '1px solid #F5F5F5' }}>{highlightText(row.rowNum, search)}</TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 1, borderBottom: '1px solid #F5F5F5' }}>{highlightText(row.empName, search)}</TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 1, borderBottom: '1px solid #F5F5F5' }}>{highlightText(row.storeName, search)}</TableCell>
+                    <TableCell align="center" sx={{ borderRight: '1px solid #F5F5F5', py: 1, borderBottom: '1px solid #F5F5F5' }}>
                       <Chip 
                         label={row.empStatus} 
                         sx={{ 
@@ -385,9 +365,7 @@ const EmployeesListCom = ({
                         }}
                       />
                     </TableCell>
-                    <TableCell align="center" sx={{ py: 2.5 }}>
-                      {row.hireDate}
-                    </TableCell>
+                    <TableCell align="center" sx={{ py: 1, borderBottom: '1px solid #F5F5F5' }}>{row.hireDate}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
