@@ -2,92 +2,92 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8080/api/notifications';
 
-// uc54cub9bc uc0c1ud0dc uc800uc7a5uc18c
+// 알림 상태 저장소
 let notifications = [];
 let unreadNotifications = 0;
 let notificationCallbacks = [];
 
-// ub85cuceec uc2a4ud1a0ub9acuc9c0uc5d0uc11c uc54cub9bc uc0c1ud0dc ucd08uae30ud654
+// 로컬 스토리지에서 알림 상태 초기화
 function initializeFromLocalStorage() {
   try {
     const savedNotifications = localStorage.getItem('admin_notifications');
     if (savedNotifications) {
       notifications = JSON.parse(savedNotifications) || [];
-      console.log('ub85cuceec uc2a4ud1a0ub9acuc9c0uc5d0uc11c uc54cub9bc uc0c1ud0dc ubd88ub7ecuc634:', notifications.length, 'uac1c');
+      console.log('로컬 스토리지에서 알림 상태 불러옴:', notifications.length, '개');
     } else {
-      console.log('ub85cuceec uc2a4ud1a0ub9acuc9c0uc5d0 uc800uc7a5ub41c uc54cub9bc uc0c1ud0dc uc5c6uc74c');
+      console.log('로컬 스토리지에 저장된 알림 상태 없음');
       notifications = [];
     }
     
     const savedUnreadCount = localStorage.getItem('admin_unread_notifications');
     if (savedUnreadCount) {
       unreadNotifications = parseInt(savedUnreadCount) || 0;
-      console.log('uc77duc9c0 uc54auc740 uc54cub9bc uac1cuc218:', unreadNotifications);
+      console.log('읽지 않은 알림 개수:', unreadNotifications);
     } else {
       unreadNotifications = 0;
     }
   } catch (e) {
-    console.error('ub85cuceec uc2a4ud1a0ub9acuc9c0 uc77duae30 uc624ub958:', e);
+    console.error('로컬 스토리지 읽기 오류:', e);
     notifications = [];
     unreadNotifications = 0;
   }
 }
 
-// ucd08uae30ud654 uc2e4ud589
+// 초기화 실행
 initializeFromLocalStorage();
 
 class AdminNotificationService {
   constructor() {
-    // uc0dduc131uc790uc5d0uc11cub3c4 ub85cuceec uc2a4ud1a0ub9acuc9c0uc5d0uc11c uc0c1ud0dc ucd08uae30ud654
+    // 생성자에서도 로컬 스토리지에서 알림 상태 초기화
     initializeFromLocalStorage();
-    console.log('AdminNotificationService ucd08uae30ud654 uc644ub8cc, ud604uc7ac uc54cub9bc uac1cuc218:', notifications.length);
+    console.log('AdminNotificationService 초기화 완료, 현재 알림 개수:', notifications.length);
     
-    // uc804uc5ed window uac1duccb4uc5d0 uc11cube44uc2a4 ub4f1ub85d (uc6f9uc18cucf13 uc5f0ub3d9uc744 uc704ud574)
+    // 전역 window 객체에 서비스 등록 (웹소켓 연동을 위해)
     if (typeof window !== 'undefined') {
       window.adminNotificationService = this;
-      console.log('window uac1duccb4uc5d0 adminNotificationService ub4f1ub85d uc644ub8cc');
+      console.log('window 객체에 adminNotificationService 등록 완료');
     }
     
-    // uc0dduc131uc790uc5d0uc11c uc11cubc84uc5d0uc11c uc54cub9bc ub370uc774ud130 uac00uc838uc624uae30
+    // 생성자에서 서버에서 알림 데이터 가져오기
     this.initializeFromServer();
   }
   
-  // uc11cubc84uc5d0uc11c uc54cub9bc ub370uc774ud130 uac00uc838uc624uae30 uc2dcuc791
+  // 서버에서 알림 데이터 가져오기 시작
   initializeFromServer() {
-    console.log('uc11cubc84uc5d0uc11c uc54cub9bc ub370uc774ud130 uac00uc838uc624uae30 uc2dcuc791');
+    console.log('서버에서 알림 데이터 가져오기 시작');
     
-    // ud1a0ud070 uc5c6uc73cuba74 uc2e4ud589 uc548ud568
+    // 토큰 없으면 실행 안함
     const token = localStorage.getItem('token');
     if (!token) {
-      console.log('ud1a0ud070uc774 uc5c6uc5b4 uc11cubc84uc5d0uc11c uc54cub9bc uac00uc838uc624uae30 uc2e4ud328');
+      console.log('토큰이 없어 서버에서 알림 가져오기 실패');
       return;
     }
     
-    // uc77duc9c0 uc54auc740 uc54cub9bc uac00uc838uc624uae30
+    // 읽지 않은 알림 가져오기
     this.fetchUnreadNotifications()
       .then(() => {
-        console.log('uc77duc9c0 uc54auc740 uc54cub9bc uac00uc838uc624uae30 uc131uacf5');
+        console.log('읽지 않은 알림 가져오기 성공');
       })
       .catch(error => {
-        console.error('uc77duc9c0 uc54auc740 uc54cub9bc uac00uc838uc624uae30 uc624ub958:', error);
+        console.error('읽지 않은 알림 가져오기 오류:', error);
       });
       
-    // ucd94uac00ub85c ucd5cuadfc ubaa8ub4e0 uc54cub9bc uac00uc838uc624uae30
+    // 추가로 최근 모든 알림 가져오기
     this.fetchNotifications(0, 50)
       .then(() => {
-        console.log('ubaa8ub4e0 uc54cub9bc uac00uc838uc624uae30 uc131uacf5');
+        console.log('모든 알림 가져오기 성공');
       })
       .catch(error => {
-        console.error('ubaa8ub4e0 uc54cub9bc uac00uc838uc624uae30 uc624ub958:', error);
+        console.error('모든 알림 가져오기 오류:', error);
       });
   }
 
-  // uc54cub9bc ucd94uac00
+  // 알림 추가
   addNotification(notification) {
     console.log('[AdminNotificationService] addNotification 호출:', notification);
-    console.log('uc0c8 uc54cub9bc ucd94uac00:', notification);
+    console.log('새 알림 추가:', notification);
     
-    // uc774ubbf8 uc788ub294 uc54cub9bcuc778uc9c0 ud655uc778
+    // 이미 있는 알림인지 확인
     const existingIndex = notifications.findIndex(n => n.id === notification.id);
     
     if (existingIndex >= 0) {
@@ -111,7 +111,7 @@ class AdminNotificationService {
     this.notifyCallbacks();
   }
 
-  // ud2b9uc815 uc54cub9bc uc77duc74c ucc98ub9ac
+  // 특정 알림 읽음 처리
   markAsRead(notificationId) {
     const notification = notifications.find(n => n.id === notificationId);
     if (notification && (!notification.isRead && !notification.read)) {
@@ -119,11 +119,11 @@ class AdminNotificationService {
       notification.read = true;
       unreadNotifications = Math.max(0, unreadNotifications - 1);
       
-      // API ud638ucd9cub85c uc11cubc84uc5d0ub3c4 uc77duc74c ucc98ub9ac
+      // API 호출로 서버에도 읽음 처리
       axios.patch(`${API_URL}/${notificationId}/read`, {}, {
         headers: this.getAuthHeader()
       }).catch(error => {
-        console.error('uc54cub9bc uc77duc74c ucc98ub9ac uc624ub958:', error);
+        console.error('알림 읽음 처리 오류:', error);
       });
       
       this.saveToLocalStorage();
@@ -131,7 +131,7 @@ class AdminNotificationService {
     }
   }
 
-  // ubaa8ub4e0 uc54cub9bc uc77duc74c ucc98ub9ac
+  // 모든 알림 읽음 처리
   markAllAsRead() {
     let updatedCount = 0;
     
@@ -146,11 +146,11 @@ class AdminNotificationService {
     if (updatedCount > 0) {
       unreadNotifications = 0;
       
-      // API ud638ucd9cub85c uc11cubc84uc5d0ub3c4 uc77duc74c ucc98ub9ac
+      // API 호출로 서버에도 읽음 처리
       axios.patch(`${API_URL}/read-all`, {}, {
         headers: this.getAuthHeader()
       }).catch(error => {
-        console.error('ubaa8ub4e0 uc54cub9bc uc77duc74c ucc98ub9ac uc624ub958:', error);
+        console.error('모든 알림 읽음 처리 오류:', error);
       });
       
       this.saveToLocalStorage();
@@ -158,18 +158,18 @@ class AdminNotificationService {
     }
   }
 
-  // uc11cubc84uc5d0uc11c uc54cub9bc ubaa9ub85d uc870ud68c
+  // 서버에서 알림 목록 조회
   fetchNotifications(page = 0, size = 20) {
-    console.log('uc11cubc84uc5d0uc11c uc54cub9bc ubaa9ub85d uc870ud68c uc2dcuc791');
+    console.log('서버에서 알림 목록 조회 시작');
     return axios.get(API_URL, {
       params: { page, size },
       headers: this.getAuthHeader()
     }).then(response => {
-      console.log('uc54cub9bc ubaa9ub85d uc870ud68c uc131uacf5:', response.data.length, 'uac1c');
+      console.log('알림 목록 조회 성공:', response.data.length, '개');
       
-      if (page === 0) { // ucc98uc74c ud398uc774uc9c0ub294 ub300uccb4
+      if (page === 0) { // 첫 페이지는 대체
         notifications = response.data;
-      } else { // ucd94uac00 ud398uc774uc9c0ub294 ubcd1ud569
+      } else { // 추가 페이지는 병합
         const newIds = new Set(response.data.map(n => n.id));
         const filteredNotifications = notifications.filter(n => !newIds.has(n.id));
         notifications = [...filteredNotifications, ...response.data];
@@ -181,16 +181,16 @@ class AdminNotificationService {
     });
   }
 
-  // uc11cubc84uc5d0uc11c uc77duc9c0 uc54auc740 uc54cub9bc uc870ud68c
+  // 서버에서 읽지 않은 알림 조회
   fetchUnreadNotifications() {
-    console.log('uc11cubc84uc5d0uc11c uc77duc9c0 uc54auc740 uc54cub9bc uc870ud68c uc2dcuc791');
+    console.log('서버에서 읽지 않은 알림 조회 시작');
     return axios.get(`${API_URL}/unread`, {
       headers: this.getAuthHeader()
     }).then(response => {
       const unreadNotifs = response.data;
-      console.log('uc77duc9c0 uc54auc740 uc54cub9bc uc870ud68c uc131uacf5:', unreadNotifs.length, 'uac1c');
+      console.log('읽지 않은 알림 조회 성공:', unreadNotifs.length, '개');
       
-      // uc77duc9c0 uc54auc740 uc54cub9bcub9cc uc5c5ub370uc774ud2b8
+      // 읽지 않은 알림만 업데이트
       unreadNotifs.forEach(newNotif => {
         const existingIndex = notifications.findIndex(n => n.id === newNotif.id);
         if (existingIndex >= 0) {
@@ -200,7 +200,7 @@ class AdminNotificationService {
         }
       });
       
-      // uc77duc9c0 uc54auc740 uc54cub9bc uac1cuc218 uc5c5ub370uc774ud2b8
+      // 읽지 않은 알림 개수 업데이트
       unreadNotifications = unreadNotifs.length;
       
       this.saveToLocalStorage();
@@ -210,14 +210,14 @@ class AdminNotificationService {
     });
   }
 
-  // uc77duc9c0 uc54auc740 uc54cub9bc uac1cuc218 uc870ud68c
+  // 읽지 않은 알림 개수 조회
   fetchUnreadCount() {
-    console.log('uc11cubc84uc5d0uc11c uc77duc9c0 uc54auc740 uc54cub9bc uac1cuc218 uc870ud68c uc2dcuc791');
+    console.log('서버에서 읽지 않은 알림 개수 조회 시작');
     return axios.get(`${API_URL}/count`, {
       headers: this.getAuthHeader()
     }).then(response => {
       unreadNotifications = response.data.count;
-      console.log('uc77duc9c0 uc54auc740 uc54cub9bc uac1cuc218 uc870ud68c uc131uacf5:', unreadNotifications);
+      console.log('읽지 않은 알림 개수 조회 성공:', unreadNotifications);
       
       this.saveToLocalStorage();
       this.notifyCallbacks();
@@ -225,33 +225,33 @@ class AdminNotificationService {
     });
   }
 
-  // uc0c8ub85cuace0uce68 - uc11cubc84uc5d0uc11c ubaa8ub4e0 uc54cub9bc ub370uc774ud130 ub2e4uc2dc uac00uc838uc624uae30
+  // 새로고침 - 서버에서 모든 알림 데이터 다시 가져오기
   refresh() {
-    console.log('uc54cub9bc ub370uc774ud130 uc0c8ub85cuace0uce68 uc2dcuc791');
+    console.log('알림 데이터 새로고침 시작');
     return Promise.all([
       this.fetchUnreadNotifications(),
       this.fetchNotifications(0, 50)
     ])
     .then(() => {
-      console.log('uc54cub9bc ub370uc774ud130 uc0c8ub85cuace0uce68 uc644ub8cc');
+      console.log('알림 데이터 새로고침 완료');
       return true;
     });
   }
 
-  // ucf5cubc31 ub4f1ub85d (ChatServiceuc640 ub3d9uc77cud55c ud328ud134)
+  // 구독 등록 (ChatService와 동일한 패턴)
   onNotificationsChange(callback) {
     notificationCallbacks.push(callback);
     
-    // uc989uc2dc ud604uc7ac uc0c1ud0dc ubc18uc601
+    // 즉시 현재 상태 반영
     callback(unreadNotifications, notifications);
     
-    // ucf5cubc31 uc81cuac70 ud568uc218 ubc18ud658
+    // 구독 해제 함수 반환
     return () => {
       notificationCallbacks = notificationCallbacks.filter(cb => cb !== callback);
     };
   }
 
-  // ucf5cubc31 ud638ucd9c ub0b4ubd80 uba54uc11cub4dc
+  // 구독 호출 내부 메소드
   notifyCallbacks() {
     console.log('[AdminNotificationService] notifyCallbacks 실행, 콜백 수:', notificationCallbacks.length, 'unread:', unreadNotifications, 'notifs:', notifications.map(n => n.id));
     notificationCallbacks.forEach(callback => 
@@ -259,13 +259,13 @@ class AdminNotificationService {
     );
   }
 
-  // ub85cuceec uc2a4ud1a0ub9acuc9c0uc5d0 uc800uc7a5
+  // 로컬 스토리지에 저장
   saveToLocalStorage() {
     localStorage.setItem('admin_notifications', JSON.stringify(notifications));
     localStorage.setItem('admin_unread_notifications', unreadNotifications.toString());
   }
 
-  // uc778uc99d ud5e4ub354 uc0dduc131
+  // 인증 헤더 생성
   getAuthHeader() {
     const token = localStorage.getItem('token');
     return {
@@ -273,17 +273,17 @@ class AdminNotificationService {
     };
   }
 
-  // ubaa8ub4e0 uc54cub9bc ubc18ud658
+  // 모든 알림 반환
   getAllNotifications() {
     return [...notifications];
   }
   
-  // uc77duc9c0 uc54auc740 uc54cub9bc uac1cuc218 ubc18ud658
+  // 읽지 않은 알림 개수 반환
   getUnreadCount() {
     return unreadNotifications;
   }
 }
 
-// uc2f1uae00ud1a4 uc778uc2a4ud134uc2a4 uc0dduc131
+// 싱글톤 인스턴스 생성
 const adminNotificationService = new AdminNotificationService();
 export default adminNotificationService; 
