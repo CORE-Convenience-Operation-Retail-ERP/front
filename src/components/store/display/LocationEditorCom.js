@@ -11,8 +11,8 @@ function LocationEditorCom({
                                onSave,
                                onDelete,
                                isEditMode,
-                               highlightLocationCode,
-                               onSelectLocation = null,
+                               highlightLocationCodes = [],
+                               onSelectLocation
                            }) {
     const safeLayouts = layouts.map(l => ({
         i: l.i,
@@ -26,12 +26,18 @@ function LocationEditorCom({
     return (
         <div>
             <h2>📋 진열 위치 {isEditMode ? '편집기' : '보기'}</h2>
-            {isEditMode && (
-                <>
-                    <button onClick={onAdd}>➕ 위치 추가</button>
-                    <button onClick={onSave}>💾 저장</button>
-                </>
-            )}
+
+            <div style={{ marginBottom: 10 }}>
+                {isEditMode ? (
+                    <>
+                        <button onClick={onAdd}>➕ 위치 추가</button>
+                        <button onClick={onSave}>💾 구조 저장</button>
+                    </>
+                ) : (
+                    <button onClick={onSave}>💾 매핑 저장</button>
+                )}
+            </div>
+
             <GridLayout
                 className="layout"
                 layout={safeLayouts}
@@ -46,63 +52,69 @@ function LocationEditorCom({
                 preventCollision={true}
                 draggableHandle=".handle"
             >
-                {safeLayouts.map((item, index) => (
-                    <div
-                        key={item.i}
-                        style={{
-                            border: '2px dashed #ccc',
-                            background:
-                                highlightLocationCode === item.locationCode
-                                    ? '#ffdcdc'
-                                    : item.type === 0
-                                        ? '#e6f7ff'
-                                        : '#fffbe6',
-                            height: '100%',
-                            padding: '8px',
-                            boxSizing: 'border-box',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-                            cursor: !isEditMode && onSelectLocation ? 'pointer' : 'default',
-                        }}
-                        onClick={() => {
-                            if (!isEditMode && onSelectLocation) onSelectLocation(item);
-                        }}
-                    >
-                        {isEditMode && (
-                            <button onClick={() => onDelete(index)}>🗑 삭제</button>
-                        )}
+                {safeLayouts.map((item, index) => {
+                    const isHighlighted = highlightLocationCodes.includes(item.locationCode);
+                    return (
                         <div
-                            className="handle"
-                            style={{ fontWeight: 'bold', cursor: isEditMode ? 'move' : 'default', marginBottom: '4px' }}
+                            key={item.i}
+                            style={{
+                                border: '2px dashed #ccc',
+                                background: isHighlighted ? '#ffdcdc'
+                                    : item.type === 0 ? '#e6f7ff'
+                                        : '#fffbe6',
+                                height: '100%',
+                                padding: '8px',
+                                boxSizing: 'border-box',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                                cursor: !isEditMode && onSelectLocation ? 'pointer' : 'default'
+                            }}
+                            onClick={() => {
+                                if (!isEditMode && onSelectLocation) {
+                                    onSelectLocation(item);
+                                }
+                            }}
                         >
-                            ⠿ 위치 {item.locationCode || '(미입력)'}
+                            {isEditMode && (
+                                <button onClick={() => onDelete(index)}>🗑 삭제</button>
+                            )}
+                            <div
+                                className="handle"
+                                style={{
+                                    fontWeight: 'bold',
+                                    cursor: isEditMode ? 'move' : 'default',
+                                    marginBottom: '4px'
+                                }}
+                            >
+                                ⠿ 위치 {item.locationCode || '(미입력)'}
+                            </div>
+                            <input
+                                placeholder="코드 (예: A1)"
+                                value={item.locationCode}
+                                onChange={(e) => onInputChange(index, 'locationCode', e.target.value)}
+                                style={{ marginBottom: '4px' }}
+                                disabled={!isEditMode}
+                            />
+                            <input
+                                placeholder="이름 (예: 음료 진열대)"
+                                value={item.label}
+                                onChange={(e) => onInputChange(index, 'label', e.target.value)}
+                                style={{ marginBottom: '4px' }}
+                                disabled={!isEditMode}
+                            />
+                            <select
+                                value={item.type}
+                                onChange={(e) => onInputChange(index, 'type', Number(e.target.value))}
+                                disabled={!isEditMode}
+                            >
+                                <option value={0}>진열대</option>
+                                <option value={1}>창고</option>
+                            </select>
                         </div>
-                        <input
-                            placeholder="코드 (예: A1)"
-                            value={item.locationCode}
-                            onChange={(e) => onInputChange(index, 'locationCode', e.target.value)}
-                            style={{ marginBottom: '4px' }}
-                            disabled={!isEditMode}
-                        />
-                        <input
-                            placeholder="이름 (예: 음료 진열대)"
-                            value={item.label}
-                            onChange={(e) => onInputChange(index, 'label', e.target.value)}
-                            style={{ marginBottom: '4px' }}
-                            disabled={!isEditMode}
-                        />
-                        <select
-                            value={item.type}
-                            onChange={(e) => onInputChange(index, 'type', Number(e.target.value))}
-                            disabled={!isEditMode}
-                        >
-                            <option value={0}>진열대</option>
-                            <option value={1}>창고</option>
-                        </select>
-                    </div>
-                ))}
+                    );
+                })}
             </GridLayout>
         </div>
     );

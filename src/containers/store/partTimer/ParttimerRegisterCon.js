@@ -1,10 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import PartTimerRegisterCom from "../../../components/store/partTimer/PartTimerRegisterCom";
-import {createPartTimer} from "../../../service/store/PartTimeService";
+import { createPartTimer } from "../../../service/store/PartTimeService";
+import { sendVerificationCode, verifyDevice } from "../../../service/store/SmsService";
 
 function ParttimerRegisterCon() {
-    const today = new Date();
+    const navigate = useNavigate();
+
     const [form, setForm] = useState({
         partName: '',
         position: '',
@@ -19,10 +22,21 @@ function ParttimerRegisterCon() {
         accountBank: '',
         accountNumber: '',
         file: null,
-        partImg: ''
+        partImg: '',
+        deviceId: '',
+        deviceName: ''
     });
 
-    const navigate = useNavigate();
+    const [code, setCode] = useState('');
+    const [verified, setVerified] = useState(false);
+
+    useEffect(() => {
+        setForm(prev => ({
+            ...prev,
+            deviceId: uuidv4(),
+            deviceName: navigator.userAgent
+        }));
+    }, []);
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
@@ -37,17 +51,40 @@ function ParttimerRegisterCon() {
         setForm({ ...form, [name]: value });
     };
 
+    const handleSendCode = async () => {
+        try {
+            await sendVerificationCode(form.partPhone);
+            alert("인증번호가 전송되었습니다.");
+        } catch (err) {
+            alert("인증번호 전송 실패");
+        }
+    };
+
+    const handleVerifyCode = async () => {
+        try {
+            await verifyDevice({
+                phone: form.partPhone,
+                code,
+                deviceId: form.deviceId,
+                deviceName: form.deviceName
+            });
+            setVerified(true);
+            alert("기기 인증 및 저장 완료");
+        } catch (err) {
+            alert("인증 실패: " + (err.response?.data || '서버 오류'));
+        }
+    };
+
     const handleSubmit = async () => {
+        if (!verified) {
+            alert("먼저 기기 인증을 완료해 주세요.");
+            return;
+        }
+
         try {
             const formData = new FormData();
-
-            const birthDateFormatted = form.birthDate
-                ? form.birthDate.toISOString().split('T')[0] // yyyy-MM-dd
-                : null;
-
-            const hireDateFormatted = form.hireDate
-                ? form.hireDate.toISOString().slice(0, 19)   // yyyy-MM-ddTHH:mm:ss
-                : null;
+            const birthDateFormatted = form.birthDate?.toISOString().split('T')[0];
+            const hireDateFormatted = form.hireDate?.toISOString().slice(0, 19);
 
             const updatedForm = {
                 ...form,
@@ -57,17 +94,14 @@ function ParttimerRegisterCon() {
 
             Object.entries(updatedForm).forEach(([key, value]) => {
                 if (value !== null && value !== undefined && value !== '') {
-                    formData.append(key, value instanceof Date ? value.toISOString() : value);
+                    formData.append(key, value);
                 }
             });
 
-            console.log("📦 전송 데이터:", [...formData.entries()]);
-            await createPartTimer(formData); // ✅ 여기서 service 호출
-
+            await createPartTimer(formData);
             alert('아르바이트 등록 완료');
             navigate('/store/parttimer/list');
         } catch (error) {
-            console.error('등록 실패:', error.response?.data || error);
             alert('등록 실패');
         }
     };
@@ -75,9 +109,14 @@ function ParttimerRegisterCon() {
     return (
         <PartTimerRegisterCom
             form={form}
+            code={code}
+            verified={verified}
             onChange={handleChange}
             onDateChange={handleDateChange}
             onSubmit={handleSubmit}
+            onSendCode={handleSendCode}
+            onVerifyCode={handleVerifyCode}
+            onCodeChange={(e) => setCode(e.target.value)}
         />
     );
 }

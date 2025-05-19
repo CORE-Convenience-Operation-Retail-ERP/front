@@ -17,3 +17,38 @@ export  const ModalWrapper = styled.div`
 `;
 
 
+export const CalendarNav = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  button {
+    padding: 8px 16px;
+    background-color: #f2f2f2;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+`;
+
+export const TabContainer = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  button {
+    padding: 0.5rem 1rem;
+    &.active {
+      background-color: #03bd9e;
+      color: white;
+    }
+  }
+`;
+
+
+

@@ -53,6 +53,10 @@ import ChatRoomList from '../components/chat/ChatRoomList';
 import ChatRoom from '../components/chat/ChatRoom';
 import { LoadingProvider, useLoading } from '../components/common/LoadingContext.tsx';
 import LoadingLottie from '../components/common/LoadingLottie.tsx';
+import StatisticsPage from "../pages/store/StatisticsPage";
+import TestCategoryChartPage from "../pages/test/TestCategoryChartPage";
+import HourlySalesChartTestPage from "../pages/test/HourlySalesChartTestPage";
+import KpiStatsTestPage from "../pages/test/KpiStatsTestPage";
 
 const AppRoutes = () => {
   const { isLoading } = useLoading();
@@ -91,13 +95,13 @@ const AppRoutes = () => {
         {/* 지점 관련 라우트*/}
         <Route path="/store" element={<StoreLayout/>} >
           <Route path="home" element={<HomePage/>} />
-          <Route path="stock/list" element={<StockListPage/>} />              
-          <Route path="stock/in-history" element={<StockInHistoryPage/>} />  
+          <Route path="stock/list" element={<StockListPage/>} />
+          <Route path="stock/in-history" element={<StockInHistoryPage/>} />
           <Route path="stock/flow/search" element={<StockFlowLogPage/>} />
           <Route path="inventory/check/history" element={<InventoryHistoryPage/>} />
           <Route path="inventory/check/register" element={<InventoryRegisterPage/>} />
           <Route path="stock/detail/:productId" element={<StockDetailPage/>} />
-          <Route path="stock/adjust-log" element={<AdjustLogPage/>} />       
+          <Route path="stock/adjust-log" element={<AdjustLogPage/>} />
           <Route path="inventory/disposal" element={<DisposalPage/>} />
           <Route path="order/register" element={<OrderFormPage/>} />
           <Route path="order/list" element={<OrderListPage/>} />
@@ -110,10 +114,12 @@ const AppRoutes = () => {
           <Route path="hr/salary" element={<SalaryPage/>} />
           <Route path="hr/schedule" element={<PartTimerSchedulePage/>} />
           <Route path="hr/salary/:id/detail" element={<SalaryBreakdownPage/>} />
+          <Route path="statistics" element={<StatisticsPage/>} />
           <Route path="stats/order" element={<StatsOrderPage/>} />
           <Route path="stats/sales" element={<StatsSalesPage/>} />
           <Route path="sales/transactions" element={<TransactionPage />} />
           <Route path="sales/summary" element={<SettlementListPage />} />
+          <Route path="duum" element={<KpiStatsTestPage />} />
         </Route>
         {/* 고객 관련 라우트 */}
         <Route path="/customer" element={<CustomerInquiryPage />} />
@@ -133,4 +139,4 @@ const WrappedRoutes = () => (
   </LoadingProvider>
 );
 
-export default WrappedRoutes; 
+export default WrappedRoutes;

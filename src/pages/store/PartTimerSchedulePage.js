@@ -1,9 +1,9 @@
-import PartTimerMonthCon from "../../containers/store/partTimerSchedule/PartTimerMonthCon";
+import PartTimerCalendarCon from "../../containers/store/partTimerSchedule/PartTimerCalendarCon";
 
 function PartTimerSchedulePage() {
     return (
         <>
-        <PartTimerMonthCon/>
+        <PartTimerCalendarCon/>
         </>
     )
 }
