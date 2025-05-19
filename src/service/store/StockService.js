@@ -51,3 +51,26 @@ export const requestStockTransfer = async (transferData) => {
       axios.post("/api/stock/transfer", transferData)
   );
 };
+
+/**
+ * 3. 다중 진열 위치 매핑 저장
+ * @param {*} dto
+ * @returns
+ */
+export const saveProductLocationMapping = async (productId, locationIds) => {
+  return await axios.post("/api/display-mapping", {
+    productId,
+    locationIds
+  });
+};
+
+/**
+ * 4. 특정 상품의 매핑된 진열 위치 조회 (진열대/창고 구분)
+ */
+export const fetchMappedLocations = async (productId) => {
+  return handleRequest(() =>
+    axios
+      .get(`/api/display-mapping/product/${productId}`)
+      .then(res => res.data)
+  );
+};
