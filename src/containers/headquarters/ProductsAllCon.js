@@ -7,93 +7,97 @@ import { recalculateHQStock, silentRecalculateAllHQStocks } from "../../service/
 
 const ProductsAllCon = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [isRecalculating, setIsRecalculating] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState({
+    sort: "productId",
+    order: "asc",
+    status: []
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const initPage = async () => {
+      setLoading(true);
       try {
         setIsRecalculating(true);
         await silentRecalculateAllHQStocks();
-      } catch (error) {
-        console.error("본사 재고 재계산 오류:", error);
-      } finally {
         setIsRecalculating(false);
+        
+        const response = await axios.get("/api/products/all");
+        if (Array.isArray(response.data)) {
+          setProducts(response.data);
+          setLoading(false);
+          console.log("받아온 전체 상품 데이터:", response.data);
+        } else {
+          throw new Error("올바른 상품 데이터 형식이 아닙니다.");
+        }
+      } catch (error) {
+        console.error("상품 데이터 로딩 오류:", error);
+        setError("상품 데이터를 불러오는데 실패했습니다.");
+        setLoading(false);
       }
-      
-      fetchProducts();
     };
     
     initPage();
   }, []);
 
   useEffect(() => {
-    if (currentPage > 0) {
-      fetchProducts();
+    if (!products.length) return;
+    
+    let filtered = [...products];
+    
+    if (search) {
+      const term = search.toLowerCase();
+      filtered = filtered.filter(product => 
+        (typeof product.proName === 'string' && product.proName.toLowerCase().includes(term)) ||
+        (typeof product.proBarcode === 'string' && product.proBarcode.toLowerCase().includes(term)) ||
+        (typeof product.categoryName === 'string' && product.categoryName.toLowerCase().includes(term))
+      );
     }
-  }, [currentPage]);
-
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get(`/api/products/paged?page=${currentPage}&size=10`);
-      
-      if (response.data && response.data.content) {
-        console.log("받아온 상품 데이터:", response.data.content);
+    
+    if (filters.status && filters.status.length > 0) {
+      filtered = filtered.filter(product => filters.status.includes(product.status));
+    }
+    
+    if (filters.sort) {
+      filtered = [...filtered].sort((a, b) => {
+        let compareResult;
         
-        const hasCategory = response.data.content.some(p => p.categoryName);
-        const hasRecentDate = response.data.content.some(p => p.recentStockInDate);
-        console.log("카테고리 필드 있음:", hasCategory);
-        console.log("최근입고일 필드 있음:", hasRecentDate);
-        
-        setProducts(response.data.content);
-        setTotalPages(response.data.totalPages);
-        setTotalItems(response.data.totalElements);
-      } else {
-        try {
-          const allProductsResponse = await axios.get("/api/products/all");
-          const allProducts = Array.isArray(allProductsResponse.data) ? allProductsResponse.data : [];
-          
-          const start = currentPage * 10;
-          const end = start + 10;
-          const pagedProducts = allProducts.slice(start, end);
-          
-          setProducts(pagedProducts);
-          setTotalPages(Math.ceil(allProducts.length / 10) || 1);
-          setTotalItems(allProducts.length);
-        } catch (error) {
-          console.error("전체 제품 목록 로딩 실패:", error);
-          setProducts([]);
-          setTotalPages(0);
-          setTotalItems(0);
+        if (['productId', 'proStock', 'hqStock', 'proCost', 'proSellCost'].includes(filters.sort)) {
+          compareResult = (a[filters.sort] || 0) - (b[filters.sort] || 0);
+        } 
+        else if (filters.sort === 'recentStockInDate') {
+          compareResult = (a[filters.sort] || '').localeCompare(b[filters.sort] || '');
         }
-      }
-    } catch (err) {
-      console.error("페이징 제품 데이터 로딩 오류:", err);
-      
-      try {
-        const allProductsResponse = await axios.get("/api/products/all");
-        const allProducts = Array.isArray(allProductsResponse.data) ? allProductsResponse.data : [];
+        else {
+          compareResult = (a[filters.sort] || '').localeCompare(b[filters.sort] || '');
+        }
         
-        const start = currentPage * 10;
-        const end = start + 10;
-        const pagedProducts = allProducts.slice(start, end);
-        
-        setProducts(pagedProducts);
-        setTotalPages(Math.ceil(allProducts.length / 10) || 1);
-        setTotalItems(allProducts.length);
-      } catch (error) {
-        console.error("전체 제품 목록 로딩 실패:", error);
-        setProducts([]);
-        setTotalPages(0);
-        setTotalItems(0);
+        return filters.order === 'asc' ? compareResult : -compareResult;
+      });
+    }
+    
+    setFilteredProducts(filtered);
+    setTotalItems(filtered.length);
+    setTotalPages(Math.ceil(filtered.length / 10));
+  }, [search, filters, products]);
+
+  useEffect(() => {
+    if (filteredProducts.length > 0) {
+      if (currentPage >= Math.ceil(filteredProducts.length / 10)) {
+        setCurrentPage(Math.max(0, Math.ceil(filteredProducts.length / 10) - 1));
       }
     }
-  };
+  }, [filteredProducts, currentPage]);
 
   const handleRegister = () => {
     navigate("/headquarters/products/register");
@@ -120,21 +124,43 @@ const ProductsAllCon = () => {
   };
   
   const handleHQStockUpdateSuccess = async () => {
-    await fetchProducts();
-    
     if (selectedProduct) {
       try {
         await recalculateHQStock(selectedProduct.productId);
+        
+        const response = await axios.get("/api/products/all");
+        if (Array.isArray(response.data)) {
+          setProducts(response.data);
+        }
       } catch (error) {
-        console.error("재고 재계산 오류:", error);
+        console.error("재고 업데이트 후 재계산 오류:", error);
       }
     }
+  };
+
+  const handleSearch = (value) => {
+    setSearch(value);
+    setCurrentPage(0);
+  };
+
+  const handleSortChange = (column) => {
+    setFilters(prev => ({
+      ...prev,
+      sort: column,
+      order: prev.sort === column && prev.order === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const getCurrentPageProducts = () => {
+    const start = currentPage * 10;
+    const end = start + 10;
+    return filteredProducts.slice(start, end);
   };
 
   return (
     <>
       <ProductsAllCom
-        products={products || []}
+        products={getCurrentPageProducts()}
         onRegister={handleRegister}
         onEdit={handleEdit}
         onDetail={handleDetail}
@@ -143,7 +169,12 @@ const ProductsAllCon = () => {
         totalItems={totalItems}
         onPageChange={handlePageChange}
         onUpdateHQStock={handleUpdateHQStock}
-        isRecalculating={isRecalculating}
+        isRecalculating={isRecalculating || loading}
+        search={search}
+        onSearch={handleSearch}
+        filters={filters}
+        onSortChange={handleSortChange}
+        error={error}
       />
       
       {modalVisible && selectedProduct && (
