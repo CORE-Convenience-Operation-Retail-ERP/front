@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { updateHQStock, updateRegularInSettings, testProcessRegularIn } from "../../service/headquarters/HQStockService";
+import Modal from "@mui/material/Modal";
+import { Box, Table, TableHead, TableRow, TableCell, TableBody, Typography, Button, CircularProgress } from "@mui/material";
 
 const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -11,6 +13,9 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
   const [regularInActive, setRegularInActive] = useState(false);
   const [isUpdatingRegularIn, setIsUpdatingRegularIn] = useState(false);
   const [isTestingRegularIn, setIsTestingRegularIn] = useState(false);
+  const [inoutModalOpen, setInoutModalOpen] = useState(false);
+  const [allInOut, setAllInOut] = useState([]);
+  const [loadingInOut, setLoadingInOut] = useState(false);
 
   useEffect(() => {
     if (detail) {
@@ -75,6 +80,30 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
     } finally {
       setIsTestingRegularIn(false);
     }
+  };
+
+  // 전체 입출고 내역 불러오기
+  const fetchAllInOut = async () => {
+    setLoadingInOut(true);
+    try {
+      // 실제 API 엔드포인트에 맞게 수정 필요
+      const res = await fetch(`/api/stockin/history?productId=${detail.productId}`);
+      const data = await res.json();
+      setAllInOut(data);
+    } catch (e) {
+      setAllInOut([]);
+    }
+    setLoadingInOut(false);
+  };
+
+  const handleOpenInOutModal = () => {
+    setInoutModalOpen(true);
+    fetchAllInOut();
+  };
+
+  const handleCloseInOutModal = () => {
+    setInoutModalOpen(false);
+    setAllInOut([]);
   };
 
   if (!detail) {
@@ -268,12 +297,16 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
         {/* 입출고 정보 */}
         <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16 }}>
           <h3>입출고 정보</h3>
-          {detail.recentStockIns?.map((s, i) => (
-            <div key={i}>
-              {s.storeName} | {s.inDate} | {s.inQuantity}개
-            </div>
-          ))}
-          <button onClick={onInOut} style={{ marginTop: 8 }}>
+          {Array.isArray(detail.recentStockIns) && detail.recentStockIns.length > 0 ? (
+            detail.recentStockIns.slice(0, 3).map((s, i) => (
+              <div key={i}>
+                {s.storeName} | {s.date} | {s.quantity}개
+              </div>
+            ))
+          ) : (
+            <div>최근 입고 내역이 없습니다.</div>
+          )}
+          <button onClick={handleOpenInOutModal} style={{ marginTop: 8 }}>
             입출고 내역 확인
           </button>
         </div>
@@ -351,6 +384,50 @@ const ProductsDetailCom = ({ detail, onBack, onEdit, onInOut }) => {
           </div>
         </div>
       )}
+
+      {/* 입출고 내역 모달 */}
+      <Modal open={inoutModalOpen} onClose={handleCloseInOutModal}>
+        <Box sx={{
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          bgcolor: 'background.paper', p: 4, borderRadius: 3, minWidth: 700, maxHeight: '80vh', overflowY: 'auto'
+        }}>
+          <Typography variant="h6" fontWeight="bold" mb={2}>전체 입출고 내역</Typography>
+          {loadingInOut ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center">매장명</TableCell>
+                  <TableCell align="center">입고일</TableCell>
+                  <TableCell align="center">수량</TableCell>
+                  <TableCell align="center">비고</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {allInOut.length > 0 ? allInOut.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell align="center">{row.storeName}</TableCell>
+                    <TableCell align="center">{row.inDate}</TableCell>
+                    <TableCell align="center">{row.inQuantity}</TableCell>
+                    <TableCell align="center">{row.memo || '-'}</TableCell>
+                  </TableRow>
+                )) : (
+                  <TableRow>
+                    <TableCell align="center" colSpan={4}>입출고 내역이 없습니다.</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
+          <Box mt={2} display="flex" justifyContent="flex-end">
+            <Button onClick={handleCloseInOutModal} variant="outlined">닫기</Button>
+          </Box>
+        </Box>
+      </Modal>
     </div>
   );
 };
