@@ -1,4 +1,5 @@
 import axios from "axios";
+import { loadingManager } from '../components/common/LoadingManager';
 
 const instance = axios.create({
   baseURL: 'http://localhost:8080',
@@ -10,6 +11,7 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   (config) => {
+    loadingManager.show();
     const token = localStorage.getItem("token");
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
@@ -41,15 +43,18 @@ instance.interceptors.request.use(
     return config;
   },
   (error) => {
+    loadingManager.hide();
     return Promise.reject(error);
   }
 );
 
 instance.interceptors.response.use(
   (response) => {
+    loadingManager.hide();
     return response;
   },
   (error) => {
+    loadingManager.hide();
     if (error.response) {
       console.log('응답 에러 상태:', error.response.status);
       console.log('응답 에러 데이터:', error.response.data);

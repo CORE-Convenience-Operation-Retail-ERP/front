@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import BranchesStockMonitoringCom from '../../components/headquarters/BranchesStockMonitoringCom';
 import axios from 'axios';
+import { useLoading } from '../../components/common/LoadingContext.tsx';
 
 const BranchesStockMonitoringCon = () => {
+  const { setIsLoading: setGlobalLoading } = useLoading();
   // API 연동을 위한 상태값들
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -246,20 +248,21 @@ const BranchesStockMonitoringCon = () => {
   };
   
   useEffect(() => {
-    // 컴포넌트 마운트 시 데이터 로딩
-    loadAllData();
-    
-    // 검색 자동완성을 위한 상품 데이터 미리 로드 (페이지 사이즈를 크게 설정)
-    loadInitialProductsForAutocomplete();
-    
-    // 실시간 데이터 업데이트를 위한 폴링 (5분마다)
-    const pollingInterval = setInterval(() => {
-      loadAllData();
-    }, 300000); // 5분마다 업데이트
-    
-    return () => {
-      clearInterval(pollingInterval);
+    const loadAll = async () => {
+      setGlobalLoading(true);
+      try {
+        await loadBranches();
+        await loadCategories();
+        await loadStockSummary();
+        await loadCategoryStats();
+        await loadBranchComparison();
+        await loadStockList();
+      } finally {
+        setGlobalLoading(false);
+      }
     };
+    loadAll();
+    // eslint-disable-next-line
   }, []);
   
   // 자동완성을 위한 상품 데이터 미리 로드

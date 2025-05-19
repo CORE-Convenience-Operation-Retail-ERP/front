@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import IntegratedStockMonitoringCom from '../../components/headquarters/IntegratedStockMonitoringCom';
 import axios from 'axios';
+import { useLoading } from '../../components/common/LoadingContext.tsx';
 
 const IntegratedStockMonitoringCon = () => {
   // 상태 관리
@@ -12,6 +13,7 @@ const IntegratedStockMonitoringCon = () => {
   const [stockList, setStockList] = useState({ content: [], totalPages: 0, number: 0 });
   const [headquarters, setHeadquarters] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { setIsLoading: setGlobalLoading } = useLoading();
   
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -32,24 +34,25 @@ const IntegratedStockMonitoringCon = () => {
 
   // 데이터 로딩
   useEffect(() => {
-    // 초기 데이터 로딩
-    fetchBranches();
-    fetchCategories();
-    fetchSummaryData();
-    fetchStockList();
-    // 본사 재고 데이터 초기에 바로 로드
-    fetchHeadquartersStock();
-  }, []);
+    const loadAll = async () => {
+      setGlobalLoading(true);
+      try {
+        await Promise.all([
+          fetchBranches(),
+          fetchCategories(),
+          fetchSummaryData(),
+          fetchStockList(),
+          fetchHeadquartersStock()
+        ]);
+        // 그래프 데이터 가공 등 추가 작업이 있다면 여기서 처리
+      } finally {
+        setGlobalLoading(false);
+      }
+    };
+    loadAll();
+    // eslint-disable-next-line
+  }, [JSON.stringify(filters)]);
   
-  // 필터 변경 시 데이터 리로딩
-  useEffect(() => {
-    fetchSummaryData();
-    fetchStockList();
-    
-    // 모든 뷰 모드에서 항상 본사 재고 데이터 로드
-    fetchHeadquartersStock();
-  }, [filters]);
-
   // API 호출 함수들
   const fetchBranches = async () => {
     try {
