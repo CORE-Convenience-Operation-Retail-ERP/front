@@ -9,6 +9,8 @@ const ProductsEditCon = () => {
   const [categoryTree, setCategoryTree] = useState([]);
   const navigate = useNavigate();
 
+  const statusToPromo = { "판매중": 0, "단종": 1, "1+1": 2, "2+1": 3 };
+
   useEffect(() => {
     axios.get(`/api/products/detail/${id}`)
       .then(res => setDetail(res.data))
@@ -19,7 +21,11 @@ const ProductsEditCon = () => {
   }, [id]);
 
   const handleSubmit = async (form) => {
-    await axios.put(`/api/products/edit/${id}`, form);
+    const payload = {
+      ...form,
+      isPromo: statusToPromo[form.status] ?? 0,
+    };
+    await axios.put(`/api/products/edit/${id}`, payload);
     alert("수정 완료!");
     navigate(`/headquarters/products/detail/${id}`);
   };

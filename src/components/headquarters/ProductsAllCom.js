@@ -26,41 +26,22 @@ const highlightText = (text, searchTerm) => {
 
 // 상품 상태에 따른 라벨과 스타일 반환 함수
 const getStatusInfo = (product) => {
-  // isPromo 값에 따라 상태 결정 (isPromo가 없으면 status 값 사용)
-  let status = product.status || '판매중';
+  let status = "판매중";
+  if (product.isPromo === 1) status = "단종";
+  else if (product.isPromo === 2) status = "1+1";
+  else if (product.isPromo === 3) status = "2+1";
 
-  if (product.isPromo) {
-    if (product.isPromo === 1) {
-      status = '1+1';
-    } else if (product.isPromo === 2) {
-      status = '2+1';
-    }
-  }
-  
-  // 각 상태별 스타일 정보
   const styles = {
-    '판매중': {
-      bgColor: '#D0EBFF',
-      textColor: '#1D5795'
-    },
-    '단종': {
-      bgColor: '#FFAFAF',
-      textColor: '#A02929'
-    },
-    '1+1': {
-      bgColor: '#C8E6C9',
-      textColor: '#1B5E20'
-    },
-    '2+1': {
-      bgColor: '#FFECB3',
-      textColor: '#B36A00'
-    }
+    "판매중": { bgColor: "#D0EBFF", textColor: "#1D5795" },
+    "단종": { bgColor: "#FFAFAF", textColor: "#A02929" },
+    "1+1": { bgColor: "#C8E6C9", textColor: "#1B5E20" },
+    "2+1": { bgColor: "#FFECB3", textColor: "#B36A00" }
   };
 
   return {
     label: status,
-    backgroundColor: styles[status]?.bgColor || '#D0EBFF',
-    color: styles[status]?.textColor || '#1D5795'
+    backgroundColor: styles[status]?.bgColor || "#D0EBFF",
+    color: styles[status]?.textColor || "#1D5795"
   };
 };
 
