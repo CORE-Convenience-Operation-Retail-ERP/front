@@ -81,27 +81,11 @@ const BranchesListCom = ({
           }}>
             지점 목록
           </Typography>
-          {hasEditPermission && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={onAddBranch}
-              sx={{
-                backgroundColor: '#2563A6',
-                '&:hover': { backgroundColor: '#1E5187' },
-                borderRadius: '30px',
-                px: 3,
-                height: 40
-              }}
-            >
-              지점 추가
-            </Button>
-          )}
         </Box>
       </Box>
       
       {/* 검색바 */}
-      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', justifyContent: 'center', mb: 5 }}>
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', justifyContent: 'center', mb: 2 }}>
         <Paper
           component="form"
           onSubmit={handleSearchSubmit}
@@ -142,8 +126,9 @@ const BranchesListCom = ({
         </Paper>
       </Box>
       
-      {/* 상태 필터 */}
-      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', alignItems: 'center', mb: 4 }}>
+      {/* 상태 필터 + 지점 추가 버튼 한 줄에 배치 */}
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', alignItems: 'center', mb: 4, justifyContent: 'space-between' }}>
+        {/* 상태 필터 - 왼쪽 */}
         <FormControl component="fieldset">
           <FormGroup row>
             <FormLabel component="legend" sx={{ mr: 2, fontSize: 16, fontWeight: 'bold', color: '#2563A6', lineHeight: '42px' }}>
@@ -170,6 +155,23 @@ const BranchesListCom = ({
             ))}
           </FormGroup>
         </FormControl>
+        {/* 지점 추가 버튼 - 오른쪽 */}
+        {hasEditPermission && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={onAddBranch}
+            sx={{
+              backgroundColor: '#2563A6',
+              '&:hover': { backgroundColor: '#1E5187' },
+              borderRadius: '30px',
+              px: 3,
+              height: 40
+            }}
+          >
+            지점 추가
+          </Button>
+        )}
       </Box>
       
       {/* 로딩 표시 */}

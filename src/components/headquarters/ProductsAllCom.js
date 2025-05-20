@@ -113,25 +113,11 @@ const ProductsAllCom = ({
               </Typography>
             )}
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onRegister}
-            sx={{
-              backgroundColor: '#2563A6',
-              '&:hover': { backgroundColor: '#1E5187' },
-              borderRadius: '30px',
-              px: 3,
-              height: 40
-            }}
-          >
-            상품 등록
-          </Button>
         </Box>
       </Box>
       
       {/* 검색바 */}
-      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', justifyContent: 'center', mb: 5 }}>
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', justifyContent: 'center', mb: 2 }}>
         <Paper
           component="form"
           onSubmit={handleSearchSubmit}
@@ -170,6 +156,23 @@ const ProductsAllCom = ({
             <SearchIcon sx={{ fontSize: 32 }} />
           </IconButton>
         </Paper>
+      </Box>
+      {/* 상품 등록 버튼 */}
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={onRegister}
+          sx={{
+            backgroundColor: '#2563A6',
+            '&:hover': { backgroundColor: '#1E5187' },
+            borderRadius: '30px',
+            px: 3,
+            height: 40
+          }}
+        >
+          상품 등록
+        </Button>
       </Box>
 
       {/* 로딩 또는 에러 표시 */}

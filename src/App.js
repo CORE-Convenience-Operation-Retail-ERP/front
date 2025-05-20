@@ -1,11 +1,12 @@
 import React, { useEffect, Suspense } from 'react';
-import { BrowserRouter, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import AppRoutes from './routes';
 import webSocketService from './service/WebSocketService';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { ErrorProvider } from './contexts/ErrorContext.tsx';
 import LoadingLottie from './components/common/LoadingLottie.tsx';
+import ScrollToTop from './components/common/ScrollToTop';
 
 const theme = createTheme({
   palette: {
@@ -57,6 +58,7 @@ function App() {
       <ErrorProvider>
         <NotificationProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Suspense fallback={<LoadingLottie />}>
               <WebSocketInitializer />
               <RouteChangeHandler />

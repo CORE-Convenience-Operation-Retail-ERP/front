@@ -14,6 +14,7 @@ const BoardListCon = ({ boardType }) => {
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [userRole, setUserRole] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // 사용자 권한 확인
   useEffect(() => {
@@ -151,14 +152,12 @@ const BoardListCon = ({ boardType }) => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <>
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
-
-      
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
@@ -173,6 +172,8 @@ const BoardListCon = ({ boardType }) => {
           onEditPost={handleEditPost}
           onDeletePost={handleDeletePost}
           onAddComment={handleAddComment}
+          search={searchTerm}
+          onSearch={setSearchTerm}
         />
       )}
 
@@ -192,7 +193,7 @@ const BoardListCon = ({ boardType }) => {
         post={selectedPost}
         onSubmit={handleCommentSubmit}
       />
-    </Box>
+    </>
   );
 };
 

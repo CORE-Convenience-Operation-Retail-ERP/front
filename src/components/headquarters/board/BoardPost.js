@@ -81,7 +81,13 @@ const BoardPost = ({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        <Typography variant="h6" fontWeight="bold" color="primary">
+        <Typography sx={{
+          fontWeight: 'bold',
+          fontSize: 30,
+          color: '#2563A6',
+          letterSpacing: '-1px',
+          ml: 15
+        }}>
           {title}
         </Typography>
       </DialogTitle>

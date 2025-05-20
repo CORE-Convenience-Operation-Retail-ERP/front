@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
   Paper, Collapse, Box, Typography, Button, Chip,
-  IconButton, Pagination, Stack
+  IconButton, Pagination, Stack, InputBase
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { format } from 'date-fns';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 
 // 게시글 행 컴포넌트
 const BoardRow = ({ post, canManage, onAddComment, onEdit, onDelete }) => {
@@ -142,7 +144,9 @@ const BoardList = ({
   onAddPost, 
   onEditPost, 
   onDeletePost, 
-  onAddComment 
+  onAddComment,
+  search = '',
+  onSearch: onSearchProp
 }) => {
   const boardTypeToTitle = {
     1: '공지사항',
@@ -155,8 +159,17 @@ const BoardList = ({
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(posts.length / postsPerPage);
   
+  // 검색어로 posts 필터링
+  const filteredPosts = search
+    ? posts.filter(
+        (post) =>
+          (post.boardTitle && post.boardTitle.toLowerCase().includes(search.toLowerCase())) ||
+          (post.empName && post.empName.toLowerCase().includes(search.toLowerCase()))
+      )
+    : posts;
+
   // 현재 페이지에 해당하는 posts만 필터링
-  const displayedPosts = posts.slice(
+  const displayedPosts = filteredPosts.slice(
     (page - 1) * postsPerPage,
     page * postsPerPage
   );
@@ -165,71 +178,154 @@ const BoardList = ({
   const handlePageChange = (event, value) => {
     setPage(value);
   };
-  
+
+  const [searchTerm, setSearchTerm] = useState(search);
+  const onSearch = onSearchProp || ((term) => setSearchTerm(term));
+
+  // 검색어 초기화 핸들러
+  const handleClearSearch = () => {
+    onSearch('');
+    setSearchTerm('');
+  };
+
+  // 검색 폼 제출 핸들러
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    onSearch(searchTerm);
+  };
+
   return (
     <Box sx={{ width: '100%' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
-        <Typography variant="h5" component="div" fontWeight="bold" color="primary">
-          {boardTypeToTitle[boardType] || '게시판'}
-        </Typography>
-        {(canManage || boardType > 1) && (
+      {/* 헤더 */}
+      <Box sx={{ width: '90%', maxWidth: 2200, mx: 'auto', mt: 4, mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography sx={{
+            fontWeight: 'bold',
+            fontSize: 30,
+            color: '#2563A6',
+            letterSpacing: '-1px',
+            ml: 15
+          }}>
+            {boardTypeToTitle[boardType] || '게시판'}
+          </Typography>
+        </Box>
+      </Box>
+      {/* 검색바 */}
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', justifyContent: 'center', mb: 2 }}>
+        <Paper
+          component="form"
+          onSubmit={handleSearchSubmit}
+          sx={{
+            p: '2px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%',
+            borderRadius: '30px',
+            boxShadow: '0 2px 8px 0 rgba(85, 214, 223, 0.15)',
+            border: '2px solid #55D6DF',
+            bgcolor: '#fff',
+          }}
+        >
+          <InputBase
+            sx={{ ml: 1, flex: 1, fontSize: 18 }}
+            placeholder="제목, 작성자 검색"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              onSearch(e.target.value);
+            }}
+            inputProps={{ 'aria-label': '검색' }}
+          />
+          {searchTerm && (
+            <IconButton
+              onClick={handleClearSearch}
+              sx={{ p: '10px', color: '#55D6DF' }}
+              aria-label="clear"
+            >
+              <ClearIcon />
+            </IconButton>
+          )}
+          <IconButton
+            type="submit"
+            sx={{ p: '10px', color: '#55D6DF' }}
+            aria-label="search"
+          >
+            <SearchIcon sx={{ fontSize: 32 }} />
+          </IconButton>
+        </Paper>
+      </Box>
+      {/* 글쓰기 버튼 */}
+      {(canManage || boardType > 1) && (
+        <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
           <Button 
             variant="contained" 
             color="primary" 
             onClick={() => onAddPost(boardType)}
+            sx={{
+              backgroundColor: '#2563A6',
+              '&:hover': { backgroundColor: '#1E5187' },
+              borderRadius: '30px',
+              px: 3,
+              height: 40
+            }}
           >
             글쓰기
           </Button>
+        </Box>
+      )}
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto' }}>
+        <TableContainer component={Paper} sx={{ mb: 4, boxShadow: 3 }}>
+          <Table aria-label="collapsible table">
+            <TableHead>
+              <TableRow sx={{ backgroundColor: '#f0f7ff' }}>
+                <TableCell width="10%">번호</TableCell>
+                <TableCell width="15%">작성자</TableCell>
+                <TableCell width="50%">제목</TableCell>
+                <TableCell width="15%">작성일</TableCell>
+                <TableCell width="10%">상태</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {displayedPosts.length > 0 ? (
+                displayedPosts.map((post) => (
+                  <BoardRow 
+                    key={post.postId} 
+                    post={post} 
+                    canManage={canManage}
+                    onAddComment={onAddComment}
+                    onEdit={onEditPost}
+                    onDelete={onDeletePost}
+                  />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                    게시글이 없습니다.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        {/* 페이지네이션 */}
+        {posts.length > 0 && (
+          <Stack spacing={2} alignItems="center" sx={{ mt: 3, mb: 3 }}>
+            <Pagination 
+              count={totalPages} 
+              page={page} 
+              onChange={handlePageChange} 
+              color="primary" 
+              showFirstButton 
+              showLastButton
+              sx={{
+                '& .MuiPaginationItem-root': {
+                  borderRadius: 1
+                }
+              }}
+            />
+          </Stack>
         )}
       </Box>
-      
-      <TableContainer component={Paper} sx={{ mb: 4, boxShadow: 3 }}>
-        <Table aria-label="collapsible table">
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#f0f7ff' }}>
-              <TableCell width="10%">번호</TableCell>
-              <TableCell width="15%">작성자</TableCell>
-              <TableCell width="50%">제목</TableCell>
-              <TableCell width="15%">작성일</TableCell>
-              <TableCell width="10%">상태</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {displayedPosts.length > 0 ? (
-              displayedPosts.map((post) => (
-                <BoardRow 
-                  key={post.postId} 
-                  post={post} 
-                  canManage={canManage}
-                  onAddComment={onAddComment}
-                  onEdit={onEditPost}
-                  onDelete={onDeletePost}
-                />
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
-                  게시글이 없습니다.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      
-      {/* 페이지네이션 */}
-      {posts.length > 0 && (
-        <Stack spacing={2} alignItems="center" sx={{ mt: 3, mb: 3 }}>
-          <Pagination 
-            count={totalPages} 
-            page={page} 
-            onChange={handlePageChange} 
-            color="primary" 
-            showFirstButton 
-            showLastButton
-          />
-        </Stack>
-      )}
     </Box>
   );
 };
