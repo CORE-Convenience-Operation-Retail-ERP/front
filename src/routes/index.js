@@ -8,10 +8,10 @@ import DisposalPage from "../pages/store/disposal/DisposalPage";
 import OrderFormPage from "../pages/store/order/OrderFormPage";
 import OrderListPage from "../pages/store/order/OrderListPage";
 import PartTimerPage from "../pages/store/partTimer/PartTimerPage";
-import PartTimerSchedulePage from "../pages/store/PartTimerSchedulePage";
+import PartTimerSchedulePage from "../pages/store/partTimer/PartTimerSchedulePage";
 import SalaryPage from "../pages/store/salary/SalaryPage";
-import StatsOrderPage from "../pages/store/StatsOrderPage";
-import StatsSalesPage from "../pages/store/StatsSalesPage";
+import StatsOrderPage from "../pages/store/Statistic/StatsOrderPage";
+import StatsSalesPage from "../pages/store/Statistic/StatsSalesPage";
 import HeadquartersLayout from '../layouts/HeadquartersLayout';
 import ProductsAllPage from '../pages/headquarters/ProductsAllPage';
 import ProductsDetailPage from '../pages/headquarters/ProductsDetailPage';
@@ -51,8 +51,7 @@ import ChatRoomList from '../components/chat/ChatRoomList';
 import ChatRoom from '../components/chat/ChatRoom';
 import { LoadingProvider, useLoading } from '../components/common/LoadingContext.tsx';
 import LoadingLottie from '../components/common/LoadingLottie.tsx';
-import StatisticsPage from "../pages/store/StatisticsPage";
-import KpiStatsTestPage from "../pages/test/KpiStatsTestPage";
+import StatisticsPage from "../pages/store/Statistic/StatisticsPage";
 import AttendancePage from "../pages/store/attendance/AttendancePage";
 import ErrorPage from '../components/common/ErrorPage';
 import ForbiddenErrorPage from '../components/common/ForbiddenErrorPage';
@@ -125,7 +124,6 @@ const AppRoutes = () => {
           <Route path="stats/sales" element={<StatsSalesPage/>} />
           <Route path="sales/transactions" element={<TransactionPage />} />
           <Route path="sales/summary" element={<SettlementListPage />} />
-          <Route path="duum" element={<KpiStatsTestPage />} />
           <Route path="attendance" element={<AttendancePage />} />
         </Route>
         {/* 고객 관련 라우트 */}

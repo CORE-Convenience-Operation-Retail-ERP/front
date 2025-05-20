@@ -1,4 +1,4 @@
-import StatisticsDashboardCon from "../../containers/store/statistics/StatisticsDashboardCon";
+import StatisticsDashboardCon from "../../../containers/store/statistics/StatisticsDashboardCon";
 
 function StatisticsPage() {
     return (

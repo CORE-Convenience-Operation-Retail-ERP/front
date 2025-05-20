@@ -1,20 +1,21 @@
-import React, { useState, useMemo, useRef } from "react";
-import { PieChart, Pie, Cell, Tooltip, Legend, Sector } from "recharts";
+import React, { useState, useMemo, useEffect } from "react";
+import { PieChart, Pie, Cell, Tooltip, Sector } from "recharts";
 import CategoryColorPicker from "../common/CategoryColorPicker";
 import {
     ChartWrapper,
     LegendItem,
     ColorCircle,
-    PickerContainer
 } from "../../../features/store/styles/statistics/CategorySalesDonut.styled";
+import { createPortal } from "react-dom";
 
 function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange }) {
-    const pickerRef = useRef(null);
     const DEFAULT_COLORS = [
         "#A8DADC", "#FFBCBC", "#FFD6A5", "#FDFFB6",
         "#CAFFBF", "#9BF6FF", "#BDB2FF", "#FFC6FF"
     ];
+
     const [activeCategory, setActiveCategory] = useState(null);
+    const [pickerPos, setPickerPos] = useState(null);
 
     const safeData = useMemo(() => {
         if (!Array.isArray(data) || data.length === 0) {
@@ -54,9 +55,26 @@ function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange })
         );
     };
 
-    const handleTogglePicker = (categoryName) => {
+    const handleTogglePicker = (categoryName, event) => {
+        const rect = event.target.getBoundingClientRect();
         setActiveCategory(prev => prev === categoryName ? null : categoryName);
+        setPickerPos({
+            x: rect.left + rect.width / 2,
+            y: rect.top - 10
+        });
     };
+
+    const handleClickOutside = (event) => {
+        if (!event.target.closest(".picker-portal")) {
+            setActiveCategory(null);
+            setPickerPos(null);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     if (loading) return <div>로딩 중...</div>;
 
@@ -67,13 +85,12 @@ function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange })
             <div>
                 <h3>카테고리별 매출 비율</h3>
 
-                {/* 카테고리별 분류 라벨 */}
                 {!isEmpty && (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "1rem" }}>
                         {safeData.map((entry, index) => (
                             <LegendItem
                                 key={entry.categoryName}
-                                onClick={() => handleTogglePicker(entry.categoryName)}
+                                onClick={(e) => handleTogglePicker(entry.categoryName, e)}
                                 active={activeCategory === entry.categoryName}
                             >
                                 <ColorCircle
@@ -86,9 +103,9 @@ function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange })
                     </div>
                 )}
 
-                <PieChart width={400} height={300}>
+                <PieChart width={400} height={200} style={{ height: "280px" }}>
                     <defs>
-                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <filter id="shadow" x="-20%" y="-20%" width="150%" height="140%">
                             <feDropShadow dx="4" dy="4" stdDeviation="3" floodColor="rgba(0, 0, 0, 0.4)" />
                         </filter>
                     </defs>
@@ -111,7 +128,7 @@ function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange })
                                 <Cell
                                     key={`cell-${index}`}
                                     fill={color}
-                                    onClick={entry.isEmpty ? null : () => handleTogglePicker(entry.categoryName)}
+                                    onClick={(e) => !entry.isEmpty && handleTogglePicker(entry.categoryName, e)}
                                     style={{ cursor: entry.isEmpty ? "default" : "pointer" }}
                                 />
                             );
@@ -123,49 +140,38 @@ function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange })
                             return [`${totalSales.toLocaleString()}원`, categoryName];
                         }}
                     />}
-                    {!isEmpty && <Legend />}
                 </PieChart>
             </div>
 
-            <PickerContainer ref={pickerRef}>
-                {activeCategory && (
-                    <div style={{ position: "relative" }}>
-                        {/* 닫기 버튼 */}
-                        <button
-                            onClick={() => setActiveCategory(null)}
-                            style={{
-                                position: "absolute",
-                                top: 0,
-                                right: 0,
-                                background: "transparent",
-                                border: "none",
-                                fontSize: "1.2rem",
-                                cursor: "pointer",
-                                padding: "4px",
-                                color: "#999",
-                            }}
-                            aria-label="닫기"
-                        >
-                            ×
-                        </button>
-
-                        {/* 실제 피커 */}
-                        <CategoryColorPicker
-                            categoryName={activeCategory}
-                            onClose={() => setActiveCategory(null)}
-                            currentColor={
-                                colorOverrides?.[activeCategory] ||
-                                DEFAULT_COLORS[
-                                safeData.findIndex((d) => d.categoryName === activeCategory) %
-                                DEFAULT_COLORS.length
-                                    ]
-                            }
-                            onColorChange={onColorChange}
-                        />
-                    </div>
-                )}
-            </PickerContainer>
-
+            {activeCategory && pickerPos && createPortal(
+                <div
+                    className="picker-portal"
+                    style={{
+                        position: "absolute",
+                        top: pickerPos.y,
+                        left: pickerPos.x,
+                        transform: "translate(-50%, -100%)",
+                        zIndex: 9999
+                    }}
+                >
+                    <CategoryColorPicker
+                        categoryName={activeCategory}
+                        onClose={() => {
+                            setActiveCategory(null);
+                            setPickerPos(null);
+                        }}
+                        currentColor={
+                            colorOverrides?.[activeCategory] ||
+                            DEFAULT_COLORS[
+                            safeData.findIndex((d) => d.categoryName === activeCategory) %
+                            DEFAULT_COLORS.length
+                                ]
+                        }
+                        onColorChange={onColorChange}
+                    />
+                </div>,
+                document.body
+            )}
         </ChartWrapper>
     );
 }

@@ -8,6 +8,7 @@ import {
     fetchParentCategories,
     fetchChildCategories
 } from "../../../service/store/CategoryService";
+import { selectStyle } from "../../../features/store/styles/statistics/CategorySalesDonut.styled";
 
 function CategorySalesDonutCon({ filters }) {
     const [data, setData] = useState([]);
@@ -107,25 +108,40 @@ function CategorySalesDonutCon({ filters }) {
     return (
         <div>
             <div style={{ display: "flex", gap: "10px", marginBottom: "1rem" }}>
-                <select value={categoryFilter.parentCategoryId} onChange={e => handleParentChange(e.target.value)}>
+                <select
+                    value={categoryFilter.parentCategoryId}
+                    onChange={e => handleParentChange(e.target.value)}
+                    style={selectStyle}
+                >
                     <option value="">대분류 선택</option>
                     {parentCategories.map(c => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                 </select>
-                <select value={categoryFilter.categoryId} onChange={e => handleChildChange(e.target.value)}>
+
+                <select
+                    value={categoryFilter.categoryId}
+                    onChange={e => handleChildChange(e.target.value)}
+                    style={selectStyle}
+                >
                     <option value="">중분류 선택</option>
                     {childCategories.map(c => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                 </select>
-                <select value={categoryFilter.subCategoryId} onChange={e => handleSubChildChange(e.target.value)}>
+
+                <select
+                    value={categoryFilter.subCategoryId}
+                    onChange={e => handleSubChildChange(e.target.value)}
+                    style={selectStyle}
+                >
                     <option value="">소분류 선택</option>
                     {grandChildCategories.map(c => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                 </select>
             </div>
+
 
             <CategorySalesDonutCom
                 data={data}

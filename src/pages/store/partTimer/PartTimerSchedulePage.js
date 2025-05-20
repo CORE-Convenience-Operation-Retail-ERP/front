@@ -1,4 +1,4 @@
-import PartTimerCalendarCon from "../../containers/store/partTimerSchedule/PartTimerCalendarCon";
+import PartTimerCalendarCon from "../../../containers/store/partTimerSchedule/PartTimerCalendarCon";
 
 function PartTimerSchedulePage() {
     return (

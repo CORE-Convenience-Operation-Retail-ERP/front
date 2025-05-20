@@ -8,13 +8,15 @@ import CategorySalesDonutCon from "./CategorySalesDonutCon";
 import OrderTopProductsCon from "./OrderTopProductsCon";
 
 function StatisticsDashboardCon() {
-    // 기본값: 어제 날짜
+
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const defaultDate = yesterday.toISOString().slice(0, 10);
+    const storeId = Number(localStorage.getItem("storeId") || 1);
+
 
     const [filters, setFilters] = useState({
-        storeId: 1,
+        storeId,
         startDate: defaultDate,
         endDate: defaultDate,
         productName: "",
@@ -54,8 +56,24 @@ function StatisticsDashboardCon() {
             {/*  통계 시각화 */}
             <KpiStatsCon filters={filters} />
             <HourlySalesChartCon filters={filters} />
-            <ProductSalesChartCon filters={filters} />
-            <CategorySalesDonutCon filters={filters} />
+            <div style={{
+                display: "flex",
+                gap: "3rem",
+                alignItems: "flex-start",
+                flexWrap: "wrap",
+                minHeight: "400px",
+            }}>
+                <div style={{marginTop:"3rem", display: "flex", gap: "2rem", alignItems: "flex-start" }}>
+                    <div style={{ flex: 1, minWidth: "480px", height: "340px" }}>
+                        <CategorySalesDonutCon filters={filters} mode="summary" />
+                    </div>
+                    <div style={{ flex: 1, minWidth: "480px", height: "340px" }}>
+                        <ProductSalesChartCon filters={filters} mode="summary" />
+                    </div>
+                </div>
+
+            </div>
+
             <OrderTopProductsCon filters={filters} />
         </>
     );

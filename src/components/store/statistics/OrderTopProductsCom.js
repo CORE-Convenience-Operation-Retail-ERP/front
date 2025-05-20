@@ -9,6 +9,7 @@ import {
     Cell
 } from "recharts";
 import { useState } from "react";
+import { buttonStyle, activeStyle } from "../../../features/store/styles/statistics/CategorySalesDonut.styled";
 
 export function OrderTopProductsCom({ data, loading, mode = "summary" }) {
     const COLORS = [
@@ -31,22 +32,31 @@ export function OrderTopProductsCom({ data, loading, mode = "summary" }) {
     if (loading) return <div>로딩 중...</div>;
 
     return (
-        <div style={{ marginTop: "2rem" }}>
+        <div style={{ marginTop: "8rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h3>📦 상위 발주 상품</h3>
                 <div>
-                    <button
-                        onClick={() => setMetric("quantity")}
-                        style={{ marginRight: "8px", fontWeight: metric === "quantity" ? "bold" : "normal" }}
-                    >
-                        수량 기준
-                    </button>
-                    <button
-                        onClick={() => setMetric("amount")}
-                        style={{ fontWeight: metric === "amount" ? "bold" : "normal" }}
-                    >
-                        금액 기준
-                    </button>
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <button
+                            onClick={() => setMetric("quantity")}
+                            style={{
+                                ...buttonStyle,
+                                ...(metric === "quantity" ? activeStyle : {})
+                            }}
+                        >
+                            수량 기준
+                        </button>
+                        <button
+                            onClick={() => setMetric("amount")}
+                            style={{
+                                ...buttonStyle,
+                                ...(metric === "amount" ? activeStyle : {})
+                            }}
+                        >
+                            금액 기준
+                        </button>
+                    </div>
+
                 </div>
             </div>
 

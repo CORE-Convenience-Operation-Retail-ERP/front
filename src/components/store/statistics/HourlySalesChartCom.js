@@ -25,7 +25,7 @@ export function HourlySalesChartCom({ data, loading }) {
     });
 
     return (
-        <div>
+        <div style={{ marginTop: "3rem" }}>
             <h3>시간대별 매출 차트</h3>
             <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={filledData} margin={{ top: 20, right: 30, bottom: 5, left: 60 }}>

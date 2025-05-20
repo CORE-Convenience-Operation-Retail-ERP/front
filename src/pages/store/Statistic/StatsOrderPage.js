@@ -1,4 +1,4 @@
-import StatsOrderCon from "../../containers/store/StatsOrderCon";
+import StatsOrderCon from "../../../containers/store/StatsOrderCon";
 
 function StatsOrderPage() {
     return (

@@ -32,6 +32,35 @@ export const ColorCircle = styled.div`
     `}
 `;
 
-export const PickerContainer = styled.div`
-  margin-top: 1rem;
-`;
+export const selectStyle = {
+  padding: "8px 12px",
+  border: "1px solid #ccc",
+  borderRadius: "6px",
+  backgroundColor: "#fff",
+  fontSize: "14px",
+  color: "#333",
+  minWidth: "140px",
+  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+  cursor: "pointer",
+  outline: "none",
+  transition: "border-color 0.2s ease",
+};
+
+export const buttonStyle = {
+  padding: "6px 14px",
+  fontSize: "14px",
+  border: "1px solid #ccc",
+  borderRadius: "6px",
+  backgroundColor: "#fff",
+  color: "#333",
+  cursor: "pointer",
+  boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+  transition: "all 0.2s ease",
+};
+
+export const activeStyle = {
+  backgroundColor: "#e6f0ff",
+  borderColor: "#3399ff",
+  color: "#007bff",
+  fontWeight: "bold",
+};

@@ -19,7 +19,6 @@ export function ProductSalesChartCom({ data, loading, mode = "summary" }) {
     const emptyData = [{ productName: "데이터 없음", totalAmount: 0 }];
     const isEmpty = !data || data.length === 0;
 
-    // ⏬ 정렬 + 상위 5/10 제한
     const chartData = isEmpty
         ? emptyData
         : [...data]
@@ -31,12 +30,12 @@ export function ProductSalesChartCom({ data, loading, mode = "summary" }) {
     if (loading) return <div>로딩 중...</div>;
 
     return (
-        <div style={{ marginTop: "2rem" }}>
+        <div style={{ marginTop: "3.5rem" }}>
             <h3>💰 상품별 매출 순위</h3>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={400}>
                 <BarChart
                     data={chartData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                    margin={{ top: 20, right: 30, left: 20, bottom: -30 }}
                     onMouseLeave={() => setActiveIndex(null)}
                 >
                     <XAxis
