@@ -15,10 +15,19 @@ function ProductSalesChartCon({ filters }) {
                     storeId: filters.storeId,
                     startDate: filters.startDate,
                     endDate: filters.endDate,
+                    categoryIds: filters.categoryIds // 선택적 필터도 전달
                 });
-                setData(res);
+
+                console.log("📦 상품별 매출 응답:", res);
+                if (Array.isArray(res)) {
+                    setData(res);
+                } else {
+                    console.warn("❗예상과 다른 응답 형식:", res);
+                    setData([]);
+                }
+
             } catch (e) {
-                console.error("상품별 매출 조회 실패", e);
+                console.error("❌ 상품별 매출 조회 실패", e);
                 setData([]);
             } finally {
                 setLoading(false);

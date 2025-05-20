@@ -1,16 +1,31 @@
 import axios from "../axiosInstance";
 
-export const fetchKpiStats = async (params) =>
-    await axios.get("/api/erp/statistics/kpis", { params });
+//  KPI 통계 조회
+export const fetchKpiStats = async (params) => {
+    const res = await axios.get("/api/erp/statistics/kpis", { params });
+    return res.data;
+};
 
-export const fetchHourlySales = async (params) =>
-    await axios.get("/api/erp/statistics/sales/hourly", { params });
+//  시간대별 매출 조회
+export const fetchHourlySales = async (params) => {
+    const res = await axios.get("/api/erp/statistics/sales/hourly", { params });
+    return res.data;
+};
 
-export const fetchProductSales = async (params) =>
-    await axios.get("/api/erp/statistics/sales/products", { params });
+//  상품별 매출 조회
+export const fetchProductSales = async (params) => {
+    const res = await axios.get("/api/erp/statistics/sales/products", { params });
+    return res.data;
+};
 
-export const fetchCategorySales = async (params) =>
-    await axios.get("/api/erp/statistics/sales/categories", { params });
+//  카테고리별 매출 조회
+export const fetchCategorySales = async (params) => {
+    const res = await axios.get("/api/erp/statistics/sales/categories", { params });
+    return res.data;
+};
 
-export const fetchOrderTopProducts = async (params) =>
-    await axios.get("/api/erp/statistics/orders/products", { params });
+//  상위 발주 상품 조회
+export const fetchOrderTopProducts = async (params) => {
+    const res = await axios.get("/api/erp/statistics/orders/products", { params });
+    return res.data;
+};

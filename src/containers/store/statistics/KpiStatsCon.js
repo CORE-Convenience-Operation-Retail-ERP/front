@@ -8,6 +8,9 @@ function KpiStatsCon({ filters }) {
 
     useEffect(() => {
         const load = async () => {
+
+            if (!filters?.storeId || !filters.startDate || !filters.endDate) return;
+
             try {
                 setLoading(true);
 
