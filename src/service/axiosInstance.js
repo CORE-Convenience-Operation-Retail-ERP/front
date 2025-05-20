@@ -79,10 +79,12 @@ instance.interceptors.response.use(
         localStorage.removeItem("storeId");
         localStorage.removeItem("name");
         
-        // 로그인 페이지로 리디렉션
+        // 로그인 페이지로 리디렉션 비활성화
+        /* 401 에러 리다이렉트 비활성화
         if (window.location.pathname !== "/login") {
           window.location.href = "/login?error=session_expired";
         }
+        */
       }
       
       if (error.response.status === 404) {
@@ -93,10 +95,13 @@ instance.interceptors.response.use(
       }
       
       if (error.response.status === 500) {
-        // 500 에러 페이지로 리다이렉션
+        console.log('서버 에러 (500 Internal Server Error)');
+        // 500 에러 페이지로 리다이렉션 비활성화
+        /* 500 에러 리다이렉트 비활성화
         if (window.location.pathname !== "/error/500") {
           window.location.href = "/error/500";
         }
+        */
       }
     } else if (error.request) {
       // 요청은 보냈지만 응답이 없는 경우 (네트워크 에러)
