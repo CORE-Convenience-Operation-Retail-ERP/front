@@ -115,7 +115,7 @@ const Header = () => {
             <img
               src="/core_logo.png"
               alt="CORE"
-              style={{ height: 30, cursor: 'pointer', marginLeft: '15px' }}
+              style={{ height: 30, cursor: 'pointer', marginLeft: '600px' }}
               onClick={() => navigate('/headquarters/dashboard')}
             />
           </Box>

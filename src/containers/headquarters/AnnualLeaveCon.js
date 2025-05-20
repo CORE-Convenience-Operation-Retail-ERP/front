@@ -571,14 +571,23 @@ const AnnualLeaveCon = () => {
     // 백엔드 API 형식에 맞게 데이터 구조 변경
     const requestData = {
       empId: currentUserId,
-      reason: reason
+      reqDate: startDate.format('YYYY-MM-DD'),
+      reqReason: reason,
+      reason: reason, // 추가 - 백엔드가 이 필드명을 사용할 수도 있음
+      reqStatus: 0
     };
     
     console.log('연차 신청 데이터:', requestData);
     
-    axios.post('/api/hr/annual-leave/request', requestData)
+    // Content-Type 헤더를 명시적으로 지정
+    axios.post('/api/hr/annual-leave/request', requestData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
       .then(res => {
         console.log('연차 신청 성공:', res.data);
+        console.log('응답 데이터 구조:', JSON.stringify(res.data, null, 2));
         
         // 성공 응답이 있으면 목록 새로고침
         if (res.data && res.data.success) {
@@ -592,6 +601,8 @@ const AnnualLeaveCon = () => {
       })
       .catch(err => {
         console.error('연차 신청 실패:', err);
+        console.error('요청 데이터:', requestData);
+        
         let errorMessage = '[연차 신청 실패]다시 시도해주세요.';
         
         if (err.response && err.response.data && err.response.data.message) {

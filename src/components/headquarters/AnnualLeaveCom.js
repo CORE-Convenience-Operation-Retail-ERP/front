@@ -43,6 +43,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   borderRight: '1px solid #F5F5F5',
   paddingTop: 16,
   paddingBottom: 16,
+  textAlign: 'center' // 중앙 정렬 추가
 }));
 
 // 스타일이 적용된 테이블 데이터 셀
@@ -170,8 +171,7 @@ const AnnualLeaveCom = ({
                     key={request.reqId || Math.random().toString()}
                     hover
                     sx={{ 
-                      '&:nth-of-type(odd)': { backgroundColor: '#f9fafc' },
-                      '&:hover': { backgroundColor: '#F0F5FF' },
+                      '&:hover': { backgroundColor: '#F0F5FF !important' },
                     }}
                   >
                     <StyledTableDataCell onClick={() => onDetailView(request)}>

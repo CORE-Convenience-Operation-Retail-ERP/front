@@ -1,14 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 
-const CalendarBox = ({ fullHeight }) => {
+const CalendarBox = forwardRef(({ fullHeight }, ref) => {
   const [startDate, setStartDate] = useState(dayjs());
   const [endDate, setEndDate] = useState(dayjs());
   const [dayCount, setDayCount] = useState(1);
+
+  // ref를 통해 외부에서 날짜 정보 접근 가능하도록 설정
+  useImperativeHandle(ref, () => ({
+    getSelectedDates: () => ({
+      startDate,
+      endDate,
+      dayCount
+    })
+  }));
 
   // 날짜 변경 시 일수 계산
   useEffect(() => {
@@ -101,6 +110,6 @@ const CalendarBox = ({ fullHeight }) => {
       </LocalizationProvider>
     </Box>
   );
-};
+});
 
 export default CalendarBox; 

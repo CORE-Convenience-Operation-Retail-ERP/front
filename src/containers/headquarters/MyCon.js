@@ -20,6 +20,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../service/axiosInstance';
+import DateRangeIcon from '@mui/icons-material/DateRange';
 
 const MyCon = forwardRef(({ info, type }, ref) => {
   const navigate = useNavigate();
@@ -66,8 +67,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
   const [leaveModal, setLeaveModal] = useState({
     open: false,
     reason: '',
-    submitting: false,
-    selectedDate: new Date(),
+    submitting: false
   });
   
   // 연차 신청 내역 상태 추가
@@ -84,23 +84,41 @@ const MyCon = forwardRef(({ info, type }, ref) => {
   const fetchLeaveHistory = () => {
     // API 호출로 연차 신청 내역 가져오기
     console.log('연차 신청 내역을 불러오는 중...');
+    console.log('직원 ID:', info?.empId);
     
     // 직원 ID로 특정 직원의 연차 신청 내역만 가져오기
     axios.get(`/api/hr/annual-leave/employee/${info?.empId}`)
       .then(res => {
         console.log('연차 신청 내역 조회 성공:', res.data);
+        console.log('연차 내역 원본 데이터 구조:', JSON.stringify(res.data, null, 2));
         
         // 데이터 변환 및 가공
         const formattedRequests = Array.isArray(res.data) ? res.data.map(req => {
+          console.log('각 연차 항목 데이터:', req);
+          // 연차 사유 필드명 관련 디버깅
+          console.log('연차 사유 필드 확인:', { 
+            reqReason: req.reqReason, 
+            reason: req.reason, 
+            originalReq: req 
+          });
+          
           // 모든 필드에 대해 null/undefined 체크
           const item = {
             id: req.reqId || Date.now(),
             startDate: '',
             endDate: '',
             requestDate: '',
-            reason: req.reqReason || '',
+            reason: req.reqReason || req.reason || '사유 없음', // 다양한 필드명 시도
             status: '대기중'
           };
+          
+          // 데이터 확인용 로그
+          console.log('매핑된 연차 항목:',
+            '시작일:', req.reqDate,
+            '생성일:', req.createdAt,
+            '사유:', req.reqReason || req.reason,
+            '상태:', req.reqStatus
+          );
           
           // 날짜 형식 안전하게 변환
           try {
@@ -156,13 +174,14 @@ const MyCon = forwardRef(({ info, type }, ref) => {
       });
   };
   
-  // 연차 신청 모달 열기
+  // 연차 신청 모달 열기 - 수정된 버전
   const handleOpenLeaveModal = () => {
+    console.log('연차 신청 모달 열기');
+    
     setLeaveModal({
       open: true,
       reason: '',
-      submitting: false,
-      selectedDate: new Date()
+      submitting: false
     });
   };
   
@@ -413,13 +432,14 @@ const MyCon = forwardRef(({ info, type }, ref) => {
   
   // 연차 신청 모달 닫기
   const handleCloseLeaveModal = () => {
-    setLeaveModal(prev => ({
-      ...prev,
-      open: false
-    }));
+    setLeaveModal({
+      open: false,
+      reason: '',
+      submitting: false
+    });
   };
   
-  // 연차 신청 제출 처리
+  // 연차 신청 제출 처리 함수
   const handleLeaveRequest = () => {
     if (!leaveModal.reason.trim()) {
       showAlert('연차 신청 사유를 입력해주세요.', '입력 오류', 'warning');
@@ -428,40 +448,54 @@ const MyCon = forwardRef(({ info, type }, ref) => {
     
     setLeaveModal(prev => ({ ...prev, submitting: true }));
     
-    // 현재 날짜를 얻기
-    const today = new Date();
+    // 현재 날짜를 YYYY-MM-DD 형식으로 변환
+    const today = new Date().toISOString().split('T')[0];
     
-    // 연차 신청 데이터 준비 - API 형식에 맞게 수정
-    const leaveData = {
+    // API 호출
+    const data = {
       empId: info?.empId,
-      reqDate: dayjs(leaveModal.selectedDate).format('YYYY-MM-DD'),
+      reqDate: today, // 오늘 날짜를 기본값으로 사용
       reqReason: leaveModal.reason,
-      reqStatus: 0  // 초기 상태: 승인 대기
+      reason: leaveModal.reason, // 추가 - 백엔드에서 이 필드명을 사용할 수도 있음
+      reqStatus: 0 // 0: 대기중 상태
     };
     
-    console.log('연차 신청 데이터:', leaveData);
+    console.log('연차 신청 데이터:', data);
     
-    // 연차 신청 API 경로 수정
-    axios.post('/api/hr/annual-leave/request', leaveData)
+    // Content-Type 헤더 추가 및 요청 형식 명확화
+    axios.post('/api/hr/annual-leave/request', data, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
       .then(res => {
         console.log('연차 신청 성공:', res.data);
         
-        // 성공 알림
-        showAlert('연차 신청이 완료되었습니다.', '신청 완료', 'success');
-        
-        // 연차 내역 갱신
+        // 연차 내역 다시 로드
         fetchLeaveHistory();
         
+        // 확인 버튼을 누르면 연차 신청 관리 페이지로 이동하도록 수정
+        showConfirm(
+          '연차 신청이 완료되었습니다.\n연차 신청 관리 페이지로 이동하시겠습니까?',
+          () => navigate('/headquarters/hr/annual-leave'),
+          '신청 완료',
+          'success',
+          {
+            backgroundColor: '#FFFFFF',
+            titleColor: '#2563A6',
+            messageColor: '#333333',
+            buttonColor: '#6FC3ED'
+          }
+        );
+        
         // 모달 닫기
-        setLeaveModal({
-          open: false,
-          reason: '',
-          submitting: false,
-          selectedDate: new Date()
-        });
+        handleCloseLeaveModal();
+        
+        // 제출 상태 초기화
+        setLeaveModal(prev => ({ ...prev, submitting: false }));
       })
       .catch(err => {
-        console.error('연차 신청 실패:', err);
+        console.error('연차 신청 실패:', err, '요청 데이터:', data);
         
         // 서버 오류 메시지 표시
         let errorMessage = '연차 신청 중 오류가 발생했습니다.';
@@ -480,7 +514,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
             endDate: leaveModal.selectedDate,
             reason: leaveModal.reason,
             status: '대기중',
-            requestDate: today
+            requestDate: new Date()  // today가 아닌 Date 객체로 수정
           };
           
           setLeaveHistory(prev => [newLeave, ...prev]);
@@ -753,7 +787,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
             style: {
               borderRadius: '12px',
               padding: '8px',
-              maxWidth: '500px',
+              maxWidth: '400px',
               minWidth: '320px',
               boxShadow: '0px 8px 24px rgba(111, 195, 237, 0.2)',
               border: '1px solid rgba(111, 195, 237, 0.1)'
@@ -771,21 +805,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
             <CalendarMonthIcon sx={{ color: '#6FC3ED', mr: 1 }} />
             연차 신청
           </DialogTitle>
-          <DialogContent>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="연차 사용 날짜"
-                value={dayjs(leaveModal.selectedDate)}
-                onChange={(newValue) => {
-                  setLeaveModal(prev => ({ 
-                    ...prev, 
-                    selectedDate: newValue ? newValue.toDate() : new Date() 
-                  }));
-                }}
-                sx={{ width: '100%', mt: 2, mb: 2 }}
-                minDate={dayjs()}
-              />
-            </LocalizationProvider>
+          <DialogContent sx={{ pt: 2 }}>
             <TextField
               autoFocus
               margin="dense"
@@ -794,13 +814,15 @@ const MyCon = forwardRef(({ info, type }, ref) => {
               type="text"
               fullWidth
               multiline
-              rows={4}
+              rows={3}
               variant="outlined"
               value={leaveModal.reason}
               onChange={(e) => setLeaveModal(prev => ({ ...prev, reason: e.target.value }))}
+              placeholder="연차 신청 사유를 입력해주세요"
+              sx={{ mb: 1 }}
             />
           </DialogContent>
-          <DialogActions sx={{ padding: '16px' }}>
+          <DialogActions sx={{ padding: '8px 16px 16px' }}>
             <Button 
               onClick={handleCloseLeaveModal}
               sx={{
@@ -928,7 +950,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
                   >
                     <TableCell>{formatDate(item.startDate)}</TableCell>
                     <TableCell sx={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {item.reason}
+                      {item.reason || '사유 없음'}
                     </TableCell>
                     <TableCell>
                       <Box

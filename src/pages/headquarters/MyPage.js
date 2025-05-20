@@ -11,6 +11,7 @@ const MyPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const myConRef = useRef(null);
+  const calendarRef = useRef(null);
 
   useEffect(() => {
     // 로그인한 사용자 정보 가져오기
@@ -73,9 +74,10 @@ const MyPage = () => {
 
   // 연차 신청 모달 열기 함수
   const handleOpenLeaveModal = () => {
-    console.log("연차 신청 모달 열기 함수 호출됨, myConRef:", myConRef.current);
+    console.log("연차 신청 모달 열기 함수 호출됨");
+    
     if (myConRef.current && myConRef.current.handleOpenLeaveModal) {
-      console.log("handleOpenLeaveModal 함수 실행");
+      // 날짜 정보 전달 없이 단순히 모달 열기
       myConRef.current.handleOpenLeaveModal();
     } else {
       console.error("연차 신청 모달을 열 수 없습니다. myConRef:", myConRef.current);
@@ -198,7 +200,7 @@ const MyPage = () => {
                     
                     {/* 연차 신청 캘린더 */}
                     <Box sx={{ mb: 3 }}>
-                      <CalendarBox />
+                      <CalendarBox ref={calendarRef} />
                       
                       <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                         <Button 
