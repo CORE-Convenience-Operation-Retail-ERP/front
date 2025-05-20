@@ -33,17 +33,17 @@ const formatNumber = (num) => {
 /**
  * 전체 통합 통계 차트 컴포넌트
  */
-const SalesOverviewChart = ({ data }) => {
+const SalesOverviewChart = ({ data, height = 220 }) => {
   if (!data || !data.chartData || !Array.isArray(data.chartData) || data.chartData.length === 0 || !data.summary) {
     return (
-      <Card>
+      <Card sx={{ width: '100%', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
         <CardHeader 
-          title="매출 개요" 
-          subheader="기간 내 매출 추이" 
+          title={<Typography variant="h6" sx={{ fontWeight: 600 }}>매출 개요</Typography>}
+          subheader={<Typography variant="body2" color="text.secondary">기간 내 매출 추이</Typography>}
         />
         <Divider />
-        <CardContent>
-          <Typography variant="body1" align="center">
+        <CardContent sx={{ p: 2 }}>
+          <Typography variant="body1" align="center" sx={{ py: 6 }}>
             데이터가 없습니다.
           </Typography>
         </CardContent>
@@ -58,14 +58,14 @@ const SalesOverviewChart = ({ data }) => {
 
   if (validChartData.length === 0) {
     return (
-      <Card>
+      <Card sx={{ width: '100%', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
         <CardHeader 
-          title="매출 개요" 
-          subheader="기간 내 매출 추이" 
+          title={<Typography variant="h6" sx={{ fontWeight: 600 }}>매출 개요</Typography>}
+          subheader={<Typography variant="body2" color="text.secondary">기간 내 매출 추이</Typography>}
         />
         <Divider />
-        <CardContent>
-          <Typography variant="body1" align="center">
+        <CardContent sx={{ p: 2 }}>
+          <Typography variant="body1" align="center" sx={{ py: 6 }}>
             유효한 데이터가 없습니다.
           </Typography>
         </CardContent>
@@ -81,8 +81,8 @@ const SalesOverviewChart = ({ data }) => {
         label: '매출',
         data: validChartData.map(item => item.value),
         fill: true,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(53, 162, 235, 0.2)',
+        borderColor: 'rgba(53, 162, 235, 0.8)',
         tension: 0.4
       }
     ]
@@ -93,9 +93,22 @@ const SalesOverviewChart = ({ data }) => {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        display: false
       },
       tooltip: {
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        titleColor: '#555',
+        bodyColor: '#333',
+        borderColor: 'rgba(53, 162, 235, 0.8)',
+        borderWidth: 1,
+        titleFont: {
+          size: 13,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 12
+        },
+        padding: 10,
         callbacks: {
           label: function(context) {
             let label = context.dataset.label || '';
@@ -111,8 +124,16 @@ const SalesOverviewChart = ({ data }) => {
       }
     },
     scales: {
+      x: {
+        grid: {
+          display: false
+        }
+      },
       y: {
         beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        },
         ticks: {
           callback: function(value) {
             if (value >= 1000000) {
@@ -130,62 +151,41 @@ const SalesOverviewChart = ({ data }) => {
 
   // 요약 데이터
   const { totalSales, totalTransactions, averageTransaction, previousPeriodSales, growthRate } = data.summary;
-
   // 성장률 색상 결정
-  const growthColor = growthRate > 0 ? 'success.main' : growthRate < 0 ? 'error.main' : 'text.secondary';
+  const growthColor = growthRate > 0 ? '#2e7d32' : growthRate < 0 ? '#d32f2f' : '#666';
+  const growthBgColor = growthRate > 0 ? 'rgba(46, 125, 50, 0.1)' : growthRate < 0 ? 'rgba(211, 47, 47, 0.1)' : 'rgba(0, 0, 0, 0.05)';
 
   return (
-    <Card>
+    <Card sx={{ width: '100%', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
       <CardHeader 
-        title="매출 개요" 
-        subheader="기간 내 매출 추이" 
+        title={<Typography variant="h6" sx={{ fontWeight: 600 }}>매출 개요</Typography>}
+        subheader={<Typography variant="body2" color="text.secondary">기간 내 매출 추이</Typography>}
       />
       <Divider />
-      <CardContent>
-        <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid xs={12} sm={6} md={3}>
-            <Box sx={{ p: 2, textAlign: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                총 매출
-              </Typography>
-              <Typography variant="h6">
-                {formatNumber(Math.round(totalSales))}원
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid xs={12} sm={6} md={3}>
-            <Box sx={{ p: 2, textAlign: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                총 거래 건수
-              </Typography>
-              <Typography variant="h6">
-                {formatNumber(totalTransactions)}건
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid xs={12} sm={6} md={3}>
-            <Box sx={{ p: 2, textAlign: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                평균 객단가
-              </Typography>
-              <Typography variant="h6">
-                {formatNumber(Math.round(averageTransaction))}원
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid xs={12} sm={6} md={3}>
-            <Box sx={{ p: 2, textAlign: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                전기 대비 성장률
-              </Typography>
-              <Typography variant="h6" color={growthColor}>
-                {growthRate > 0 ? '+' : ''}{growthRate.toFixed(1)}%
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
-        
-        <Box sx={{ height: 350 }}>
+      <CardContent sx={{ p: 2 }}>
+        {/* 요약 박스: 한 줄로 깔끔하게 */}
+        <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          <Box sx={{ flex: 1, minWidth: 100, py: 1, px: 2, borderRadius: 1, bgcolor: 'rgba(53, 162, 235, 0.08)' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>총 매출</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>{formatNumber(Math.round(totalSales))}원</Typography>
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 100, py: 1, px: 2, borderRadius: 1, bgcolor: 'rgba(53, 162, 235, 0.08)' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>총 거래 건수</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>{formatNumber(totalTransactions)}건</Typography>
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 100, py: 1, px: 2, borderRadius: 1, bgcolor: 'rgba(53, 162, 235, 0.08)' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>평균 객단가</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>{formatNumber(Math.round(averageTransaction))}원</Typography>
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 100, py: 1, px: 2, borderRadius: 1, bgcolor: growthBgColor }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>전기 대비</Typography>
+            <Typography variant="h6" sx={{ color: growthColor, fontWeight: 600 }}>
+              {growthRate > 0 ? '+' : ''}{growthRate.toFixed(1)}%
+            </Typography>
+          </Box>
+        </Box>
+        {/* 차트: 최대한 넓게 */}
+        <Box sx={{ width: '100%', height, mt: 2 }}>
           <Line data={chartData} options={chartOptions} />
         </Box>
       </CardContent>

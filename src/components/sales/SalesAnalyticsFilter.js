@@ -77,14 +77,14 @@ const SalesAnalyticsFilter = ({
         <Grid container spacing={2} alignItems="center">
           {/* 지점 선택 */}
           <Grid xs={12} sm={6} md={4}>
-            <FormControl fullWidth size="small">
+            <FormControl fullWidth size="small" sx={{ minWidth: 120 }}>
               <InputLabel>지점</InputLabel>
               <Select
-                value={selectedStore || ''}
-                onChange={(e) => setSelectedStore(e.target.value || null)}
+                value={selectedStore === null || selectedStore === '' ? 'ALL' : selectedStore}
+                onChange={(e) => setSelectedStore(e.target.value === 'ALL' ? null : e.target.value)}
                 label="지점"
               >
-                <MenuItem value="">전체 지점</MenuItem>
+                <MenuItem value="ALL">전체 지점</MenuItem>
                 {stores.map(store => (
                   <MenuItem key={store.storeId} value={store.storeId}>
                     {store.storeName}

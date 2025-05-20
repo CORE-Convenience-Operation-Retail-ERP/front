@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Paper, Typography, Box, Alert, CircularProgress, Grid } from '@mui/material';
+import { Container, Paper, Typography, Box, Alert, CircularProgress, Grid, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../service/axiosInstance';
 
@@ -46,6 +46,7 @@ const SalesAnalysis = () => {
     category: null,
     weather: null
   });
+  const [tab, setTab] = useState(0);
 
   // 권한 확인
   const checkPermission = () => {
@@ -206,8 +207,15 @@ const SalesAnalysis = () => {
   const renderLoadingOrChart = (type, ChartComponent, data, props = {}) => {
     if (loading[type]) {
       return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 2, height: 200 }}>
-          <CircularProgress />
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          height: props.height || 250, 
+          bgcolor: 'rgba(0, 0, 0, 0.02)', 
+          borderRadius: 1 
+        }}>
+          <CircularProgress size={40} thickness={4} sx={{ color: 'primary.main' }} />
         </Box>
       );
     }
@@ -228,62 +236,129 @@ const SalesAnalysis = () => {
   };
 
   return (
-    <Container maxWidth="xl">
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          매출 분석
-        </Typography>
-        <Typography variant="body2" color="text.secondary" paragraph>
-          지점별, 기간별, 카테고리별 등 다양한 기준으로 매출을 분석합니다.
-        </Typography>
-        
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-        
-        <SalesAnalyticsFilter
-          selectedStore={selectedStore}
-          setSelectedStore={setSelectedStore}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          stores={stores}
-          onApplyFilter={handleApplyFilter}
-          hideAnalysisType={true}
-        />
-        
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            {renderLoadingOrChart('overview', SalesOverviewChart, analysisData.overview)}
-          </Grid>
+    <Box sx={{ bgcolor: '#f5f5f7', minHeight: '100vh', pb: 6 }}>
+      {/* ERP 스타일 헤더 */}
+      <Box sx={{ 
+        width: '100%', 
+        bgcolor: 'white', 
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)', 
+        mb: 4, 
+        pt: 4, 
+        pb: 3 
+      }}>
+        <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto' }}>
+          <Typography sx={{
+            fontWeight: 700,
+            fontSize: 30,
+            color: '#2563A6',
+            letterSpacing: '-0.5px'
+          }}>
+            지점 매출 분석
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* 컨텐츠 영역 */}
+      <Box sx={{ width: '90%', maxWidth: 1500, mx: 'auto' }}>
+        {/* 매출 분석 필터와 탭 버튼 섹션 */}
+        <Box sx={{ 
+          display: 'flex', 
+          mb: 4, 
+          alignItems: 'flex-start', 
+          flexWrap: { xs: 'wrap', md: 'nowrap' },
+          gap: 3
+        }}>
+          {/* 왼쪽: 필터 */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <SalesAnalyticsFilter
+              selectedStore={selectedStore}
+              setSelectedStore={setSelectedStore}
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              stores={stores}
+              onApplyFilter={handleApplyFilter}
+              hideAnalysisType={true}
+            />
+          </Box>
           
-          <Grid item xs={12} md={6}>
-            {renderLoadingOrChart('store', StoreSalesChart, analysisData.store)}
-          </Grid>
+          {/* 오른쪽: 탭 버튼 */}
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: 1.5,
+            minWidth: { xs: '100%', sm: 180 },
+            mt: { xs: 0, md: 1 }
+          }}>
+            <Button 
+              variant={tab === 0 ? 'contained' : 'outlined'} 
+              onClick={() => setTab(0)}
+              sx={{ 
+                fontWeight: 500, 
+                py: 1.2,
+                boxShadow: tab === 0 ? 2 : 0
+              }}
+            >
+              매출 상세 분석
+            </Button>
+            <Button 
+              variant={tab === 1 ? 'contained' : 'outlined'} 
+              onClick={() => setTab(1)}
+              sx={{ 
+                fontWeight: 500, 
+                py: 1.2,
+                boxShadow: tab === 1 ? 2 : 0
+              }}
+            >
+              매출 요인 분석
+            </Button>
+          </Box>
+        </Box>
+
+        {/* 차트 그룹 */}
+        <Box>
+          {tab === 0 && (
+            <Grid container spacing={4}>
+              {/* 1줄: 매출 개요 차트 */}
+              <Grid item xs={12}>
+                {renderLoadingOrChart('overview', SalesOverviewChart, analysisData.overview, { height: 340 })}
+              </Grid>
+              
+              {/* 2줄: 좌우 50%씩 시간대별 & 지점별 차트 */}
+              <Grid item xs={12} md={6}>
+                {renderLoadingOrChart('time', TimeAnalysisChart, analysisData.time, { height: 350 })}
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                {renderLoadingOrChart('store', StoreSalesChart, analysisData.store, { height: 340 })}
+              </Grid>
+            </Grid>
+          )}
           
-          <Grid item xs={12} md={6}>
-            {renderLoadingOrChart('time', TimeAnalysisChart, analysisData.time)}
-          </Grid>
-          
-          <Grid item xs={12} md={6}>
-            {renderLoadingOrChart('demographicAge', DemographicSalesChart, analysisData.demographicAge, { type: 'age' })}
-          </Grid>
-          
-          <Grid item xs={12} md={6}>
-            {renderLoadingOrChart('demographicGender', DemographicSalesChart, analysisData.demographicGender, { type: 'gender' })}
-          </Grid>
-          
-          <Grid item xs={12} md={6}>
-            {renderLoadingOrChart('category', CategorySalesChart, analysisData.category)}
-          </Grid>
-          
-          <Grid item xs={12} md={6}>
-            {renderLoadingOrChart('weather', WeatherSalesChart, analysisData.weather)}
-          </Grid>
-        </Grid>
-      </Paper>
-    </Container>
+          {tab === 1 && (
+            <Grid container spacing={4}>
+              {/* 1줄: 카테고리 & 연령대/성별(탭) */}
+              <Grid item xs={12} md={6} sx={{ width: '40%' }}>
+                {renderLoadingOrChart('category', CategorySalesChart, analysisData.category, { height: 370 })}
+              </Grid>
+
+              <Grid item xs={12} md={6} sx={{ width: '25%' }}>
+                {renderLoadingOrChart('weather', WeatherSalesChart, analysisData.weather, { height: 350 })}
+              </Grid>
+
+              {/* 연령대/성별 매출 분석: 탭으로 병합 */}
+              <Grid item xs={12} md={6}>
+                <DemographicSalesChart
+                  ageData={analysisData.demographicAge}
+                  genderData={analysisData.demographicGender}
+                  height={250}
+                  defaultType="age"
+                />
+              </Grid>
+            </Grid>
+          )}
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

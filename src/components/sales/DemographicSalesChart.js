@@ -29,21 +29,29 @@ const formatNumber = (num) => {
 /**
  * 연령대/성별 매출 분석 차트 컴포넌트
  */
-const DemographicSalesChart = ({ data, type = 'age' }) => {
-  const [chartType, setChartType] = React.useState(type);
+const DemographicSalesChart = ({ ageData, genderData, height = 350, defaultType = 'age' }) => {
+  const [chartType, setChartType] = React.useState(defaultType);
+
+  // 탭 변경 핸들러
+  const handleTabChange = (event, newValue) => {
+    setChartType(newValue);
+  };
+
+  // 데이터 선택
+  const data = chartType === 'age' ? ageData : genderData;
 
   if (!data || !data.chartData || !Array.isArray(data.chartData) || data.chartData.length === 0 || !data.summary) {
     return (
       <Card>
         <CardHeader 
-          title={chartType === 'age' ? "연령대별 매출 분석" : "성별 매출 분석"} 
-          subheader="인구통계학적 매출 분석" 
+          title={<Typography variant="h6" sx={{ fontWeight: 600 }}>{chartType === 'age' ? "연령대별 매출 분석" : "성별 매출 분석"}</Typography>} 
+          subheader={<Typography variant="body2" color="text.secondary">인구통계학적 매출 분석</Typography>} 
         />
         <Divider />
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs 
             value={chartType} 
-            onChange={(e, val) => setChartType(val)}
+            onChange={handleTabChange}
             indicatorColor="primary"
             textColor="primary"
             variant="fullWidth"
@@ -71,22 +79,9 @@ const DemographicSalesChart = ({ data, type = 'age' }) => {
     return (
       <Card>
         <CardHeader 
-          title={chartType === 'age' ? "연령대별 매출 분석" : "성별 매출 분석"} 
-          subheader="인구통계학적 매출 분석" 
+          title={<Typography variant="h6" sx={{ fontWeight: 600 }}>{chartType === 'age' ? "연령대별 매출 분석" : "성별 매출 분석"}</Typography>} 
+          subheader={<Typography variant="body2" color="text.secondary">인구통계학적 매출 분석</Typography>} 
         />
-        <Divider />
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs 
-            value={chartType} 
-            onChange={(e, val) => setChartType(val)}
-            indicatorColor="primary"
-            textColor="primary"
-            variant="fullWidth"
-          >
-            <Tab label="연령대별" value="age" />
-            <Tab label="성별" value="gender" />
-          </Tabs>
-        </Box>
         <CardContent>
           <Typography variant="body1" align="center">
             유효한 데이터가 없습니다.
@@ -190,11 +185,6 @@ const DemographicSalesChart = ({ data, type = 'age' }) => {
     maintainAspectRatio: false
   };
 
-  // 탭 변경 핸들러
-  const handleTabChange = (event, newValue) => {
-    setChartType(newValue);
-  };
-
   // 최대 매출 항목 찾기
   const maxItem = validChartData.reduce((max, item) => 
     item.value > max.value ? item : max, validChartData[0]);
@@ -202,8 +192,8 @@ const DemographicSalesChart = ({ data, type = 'age' }) => {
   return (
     <Card>
       <CardHeader 
-        title={chartType === 'age' ? "연령대별 매출 분석" : "성별 매출 분석"} 
-        subheader="인구통계학적 매출 분석" 
+        title={<Typography variant="h6" sx={{ fontWeight: 600 }}>{chartType === 'age' ? "연령대별 매출 분석" : "성별 매출 분석"}</Typography>} 
+        subheader={<Typography variant="body2" color="text.secondary">인구통계학적 매출 분석</Typography>} 
       />
       <Divider />
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -219,7 +209,7 @@ const DemographicSalesChart = ({ data, type = 'age' }) => {
         </Tabs>
       </Box>
       <CardContent>
-        <Box sx={{ height: 350, mb: 3 }}>
+        <Box sx={{ height: height, mb: 3 }}>
           <Bar data={chartData} options={chartOptions} />
         </Box>
         <Grid container spacing={2}>

@@ -66,8 +66,8 @@ const WeatherSalesChart = ({ data }) => {
     return (
       <Card>
         <CardHeader 
-          title="날씨별 매출 분석" 
-          subheader="날씨 조건별 매출 영향" 
+          title={<Typography variant="h6" sx={{ fontWeight: 600 }}>날씨별 매출 분석</Typography>} 
+          subheader={<Typography variant="body2" color="text.secondary">날씨 조건별 매출 영향</Typography>} 
         />
         <Divider />
         <CardContent>
@@ -86,8 +86,8 @@ const WeatherSalesChart = ({ data }) => {
     return (
       <Card>
         <CardHeader 
-          title="날씨별 매출 분석" 
-          subheader="날씨 조건별 매출 영향" 
+          title={<Typography variant="h6" sx={{ fontWeight: 600 }}>날씨별 매출 분석</Typography>} 
+          subheader={<Typography variant="body2" color="text.secondary">날씨 조건별 매출 영향</Typography>} 
         />
         <Divider />
         <CardContent>
@@ -189,12 +189,12 @@ const WeatherSalesChart = ({ data }) => {
   return (
     <Card>
       <CardHeader 
-        title="날씨별 매출 분석" 
-        subheader="날씨 조건별 매출 영향" 
+        title={<Typography variant="h6" sx={{ fontWeight: 600 }}>날씨별 매출 분석</Typography>} 
+        subheader={<Typography variant="body2" color="text.secondary">날씨 조건별 매출 영향</Typography>} 
       />
       <Divider />
       <CardContent>
-        <Box sx={{ height: 350 }}>
+        <Box sx={{ height: 335 }}>
           <Bar data={chartData} options={chartOptions} />
         </Box>
         <Box sx={{ mt: 3 }}>
