@@ -77,6 +77,7 @@ const BranchesListCom = ({
             fontSize: 30,
             color: '#2563A6',
             letterSpacing: '-1px',
+            ml: 15
           }}>
             지점 목록
           </Typography>

@@ -99,6 +99,7 @@ const ProductsAllCom = ({
             fontSize: 30,
             color: '#2563A6',
             letterSpacing: '-1px',
+            ml: 15
           }}>
             전체 제품 관리
             {isRecalculating && (
