@@ -246,7 +246,7 @@ const SalesAnalysis = () => {
         pt: 4, 
         pb: 3 
       }}>
-        <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto' }}>
+        <Box sx={{ width: '90%', maxWidth: 1216, mx: 'auto' }}>
           <Typography sx={{
             fontWeight: 700,
             fontSize: 30,
