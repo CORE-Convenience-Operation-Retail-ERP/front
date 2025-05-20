@@ -4,9 +4,12 @@ import * as XLSX from 'xlsx';
 import StoreSearchBar from '../common/StoreSearchBar';
 import {
     Wrapper,
-    FilterRow,
+    FilterActionRow,
+    FilterGroup,
+    ActionGroup,
     CategorySelect,
     DownloadButton,
+    SearchBarRow,
     Table,
     Spinner
 } from '../../../features/store/styles/stock/StockList.styled';
@@ -84,46 +87,55 @@ function StockListCom({
     return (
         <Wrapper>
             <h2>재고 현황</h2>
-            <FilterRow>
-                <CategorySelect value={filters.parentCategoryId} onChange={e => onParentChange(e.target.value)}>
-                    <option value="">대분류</option>
-                    {parentCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </CategorySelect>
-                <CategorySelect value={filters.categoryId} onChange={e => onChildChange(e.target.value)}>
-                    <option value="">중분류</option>
-                    {childCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </CategorySelect>
-                <CategorySelect value={filters.subCategoryId} onChange={e => onSubChildChange(e.target.value)}>
-                    <option value="">소분류</option>
-                    {grandChildCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </CategorySelect>
-                <DownloadButton onClick={handleDownload}>📥 엑셀 다운로드</DownloadButton>
-                <DownloadButton onClick={() => window.location.href = '/store/inventory/check/register'}>📋 실사 등록</DownloadButton>
-                <DownloadButton onClick={() => {
-                    if (selectedIds.length > 0) {
-                        onApplyChecks(selectedIds);
-                        setSelectedIds([]);
-                    } else {
-                        onApplyChecks();
-                    }
-                }}>✅ 실사 반영 (전체/선택)</DownloadButton>
-                <DownloadButton onClick={() => {
-                    if (selectedIds.length > 0) {
-                        onRollbackChecks(selectedIds);
-                        setSelectedIds([]);
-                    } else {
-                        onRollbackChecks();
-                    }
-                }}>🔁 실사 롤백 (전체/선택)</DownloadButton>
-            </FilterRow>
+            <FilterActionRow style={{ marginTop: "4em", marginBottom: "12px" }}>
+                <FilterGroup >
+                    <CategorySelect value={filters.parentCategoryId} onChange={e => onParentChange(e.target.value)}>
+                        <option value="">대분류</option>
+                        {parentCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </CategorySelect>
+                    <CategorySelect value={filters.categoryId} onChange={e => onChildChange(e.target.value)}>
+                        <option value="">중분류</option>
+                        {childCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </CategorySelect>
+                    <CategorySelect value={filters.subCategoryId} onChange={e => onSubChildChange(e.target.value)}>
+                        <option value="">소분류</option>
+                        {grandChildCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </CategorySelect>
+                </FilterGroup>
 
-            <StoreSearchBar
-                filterOptions={[
-                    { key: 'productName', label: '상품명', type: 'text', placeholder: '상품명 입력' },
-                    { key: 'barcode', label: '바코드', type: 'text', placeholder: '바코드 입력' }
-                ]}
-                onSearch={onSearch}
-            />
+                <ActionGroup>
+                    <DownloadButton onClick={handleDownload}> 엑셀 다운로드</DownloadButton>
+                    <DownloadButton onClick={() => window.location.href = '/store/inventory/check/register'}> 실사 등록</DownloadButton>
+                    <DownloadButton onClick={() => {
+                        if (selectedIds.length > 0) {
+                            onApplyChecks(selectedIds);
+                            setSelectedIds([]);
+                        } else {
+                            onApplyChecks();
+                        }
+                    }}> 실사 반영</DownloadButton>
+                    <DownloadButton onClick={() => {
+                        if (selectedIds.length > 0) {
+                            onRollbackChecks(selectedIds);
+                            setSelectedIds([]);
+                        } else {
+                            onRollbackChecks();
+                        }
+                    }}> 실사 롤백</DownloadButton>
+                </ActionGroup>
+            </FilterActionRow>
+
+            <SearchBarRow style={{ marginBottom: "3em" }}>
+                <StoreSearchBar
+                    filterOptions={[
+                        { key: 'productName', label: '상품명', type: 'text', placeholder: '상품명 입력' },
+                        { key: 'barcode', label: '바코드', type: 'text', placeholder: '바코드 입력' }
+                    ]}
+                    onSearch={onSearch}
+                />
+            </SearchBarRow>
+
+
 
             {isLoading ? <Spinner /> : (
                 <Table>
