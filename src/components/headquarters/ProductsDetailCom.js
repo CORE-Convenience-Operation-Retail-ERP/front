@@ -105,21 +105,92 @@ const ProductsDetailCom = ({ detail, onBack, onEdit }) => {
   const extra = detail.productDetail || {};
 
   return (
-    <Box sx={{ p: 4, bgcolor: "#fafbfc", borderRadius: 2, maxWidth: 900, mx: "auto", mt: 4, boxShadow: 2 }}>
-      <Typography variant="h5" fontWeight="bold" mb={2}>상품 정보 고시</Typography>
-      <Divider sx={{ mb: 3 }} />
-      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-        <Box sx={{ width: 160, height: 160, bgcolor: "#eee", borderRadius: 2, overflow: "hidden", mr: 3 }}>
-          <img src={detail.proImage} alt="제품" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    <Box>
+      {/* 헤더 */}
+      <Box sx={{ width: '90%', maxWidth: 2200, mx: 'auto', mt: 4, mb: 7, display: 'flex', justifyContent: 'center' }}>
+        <Typography sx={{
+          fontWeight: 'bold',
+          fontSize: 30,
+          color: '#2563A6',
+          letterSpacing: '-1px',
+        }}>
+          상품 상세 정보
+        </Typography>
+      </Box>
+      <Box sx={{ p: 4, bgcolor: "#fafbfc", borderRadius: 2, maxWidth: 1100, mx: "auto", mt: 0, boxShadow: 2 }}>
+        <Box sx={{ display: "flex", gap: 4, mb: 3 }}>
+          <Box sx={{ width: 240, height: 240, bgcolor: "#eee", borderRadius: 2, overflow: "hidden", mr: 4 }}>
+            <img src={detail.proImage} alt="제품" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            {[
+              { label: "제품명", value: detail.proName },
+              { label: "제품번호", value: detail.productId },
+              { label: "카테고리", value: detail.categoryPath?.join(" > ") },
+              { label: "바코드", value: detail.proBarcode },
+              { label: "상태", value: detail.status },
+              { label: "이벤트 기간", value: detail.eventStart && detail.eventEnd ? `${detail.eventStart} ~ ${detail.eventEnd}` : "없음" }
+            ].map((row, i) => (
+              <Box key={i} sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                <Typography sx={labelStyle}>{row.label}</Typography>
+                <TextField
+                  value={row.value || ""}
+                  size="small"
+                  InputProps={{ readOnly: true }}
+                  sx={{ ...inputStyle, background: "#fff" }}
+                />
+              </Box>
+            ))}
+          </Box>
         </Box>
-        <Box sx={{ flex: 1 }}>
+        {/* 1. 공급가, 판매가, 이익률, 원가율 */}
+        <Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>공급가</Typography>
+            <TextField
+              value={detail.proCost?.toLocaleString() + "원"}
+              size="small"
+              InputProps={{ readOnly: true }}
+              sx={{ ...inputStyle, background: "#fff" }}
+            />
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>판매가</Typography>
+            <TextField
+              value={detail.proSellCost?.toLocaleString() + "원"}
+              size="small"
+              InputProps={{ readOnly: true }}
+              sx={{ ...inputStyle, background: "#fff" }}
+            />
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>이익률</Typography>
+            <TextField
+              value={detail.profitRate?.toFixed(1) + "%"}
+              size="small"
+              InputProps={{ readOnly: true }}
+              sx={{ ...inputStyle, background: "#fff" }}
+            />
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>원가율</Typography>
+            <TextField
+              value={detail.costRate?.toFixed(1) + "%"}
+              size="small"
+              InputProps={{ readOnly: true }}
+              sx={{ ...inputStyle, background: "#fff" }}
+            />
+          </Box>
+        </Box>
+        <Divider sx={{ my: 2 }} />
+        {/* 2. 제조사, 제조번호, 유통기한, 알레르기, 보관방법 */}
+        <Box>
           {[
-            { label: "제품명", value: detail.proName },
-            { label: "제품번호", value: detail.productId },
-            { label: "카테고리", value: detail.categoryPath?.join(" > ") },
-            { label: "바코드", value: detail.proBarcode },
-            { label: "상태", value: detail.status },
-            { label: "이벤트 기간", value: detail.eventStart && detail.eventEnd ? `${detail.eventStart} ~ ${detail.eventEnd}` : "없음" }
+            { label: "제조사", value: extra.manufacturer },
+            { label: "제조번호", value: extra.manuNum },
+            { label: "유통기한", value: extra.shelfLife },
+            { label: "알레르기", value: extra.allergens },
+            { label: "보관방법", value: extra.storageMethod }
           ].map((row, i) => (
             <Box key={i} sx={{ display: "flex", alignItems: "center", mb: 1 }}>
               <Typography sx={labelStyle}>{row.label}</Typography>
@@ -132,256 +203,196 @@ const ProductsDetailCom = ({ detail, onBack, onEdit }) => {
             </Box>
           ))}
         </Box>
-      </Box>
-      {/* 1. 공급가, 판매가, 이익률, 원가율 */}
-      <Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>공급가</Typography>
-          <TextField
-            value={detail.proCost?.toLocaleString() + "원"}
-            size="small"
-            InputProps={{ readOnly: true }}
-            sx={{ ...inputStyle, background: "#fff" }}
-          />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>판매가</Typography>
-          <TextField
-            value={detail.proSellCost?.toLocaleString() + "원"}
-            size="small"
-            InputProps={{ readOnly: true }}
-            sx={{ ...inputStyle, background: "#fff" }}
-          />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>이익률</Typography>
-          <TextField
-            value={detail.profitRate?.toFixed(1) + "%"}
-            size="small"
-            InputProps={{ readOnly: true }}
-            sx={{ ...inputStyle, background: "#fff" }}
-          />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>원가율</Typography>
-          <TextField
-            value={detail.costRate?.toFixed(1) + "%"}
-            size="small"
-            InputProps={{ readOnly: true }}
-            sx={{ ...inputStyle, background: "#fff" }}
-          />
-        </Box>
-      </Box>
-      <Divider sx={{ my: 2 }} />
-      {/* 2. 제조사, 제조번호, 유통기한, 알레르기, 보관방법 */}
-      <Box>
-        {[
-          { label: "제조사", value: extra.manufacturer },
-          { label: "제조번호", value: extra.manuNum },
-          { label: "유통기한", value: extra.shelfLife },
-          { label: "알레르기", value: extra.allergens },
-          { label: "보관방법", value: extra.storageMethod }
-        ].map((row, i) => (
-          <Box key={i} sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <Typography sx={labelStyle}>{row.label}</Typography>
+        <Divider sx={{ my: 2 }} />
+        {/* 3. 발주 임계치, 매장 총재고, 본사 재고 */}
+        <Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>발주 임계치</Typography>
             <TextField
-              value={row.value || ""}
+              value={detail.proStockLimit}
               size="small"
               InputProps={{ readOnly: true }}
               sx={{ ...inputStyle, background: "#fff" }}
             />
           </Box>
-        ))}
-      </Box>
-      <Divider sx={{ my: 2 }} />
-      {/* 3. 발주 임계치, 매장 총재고, 본사 재고 */}
-      <Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>발주 임계치</Typography>
-          <TextField
-            value={detail.proStockLimit}
-            size="small"
-            InputProps={{ readOnly: true }}
-            sx={{ ...inputStyle, background: "#fff" }}
-          />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>매장 총 재고</Typography>
-          <TextField
-            value={detail.totalStock}
-            size="small"
-            InputProps={{ readOnly: true }}
-            sx={{ ...inputStyle, background: "#fff" }}
-          />
-          <Button sx={{ ml: 1 }} variant="outlined" onClick={() => setModalOpen(true)}>매장별 재고</Button>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>본사 재고</Typography>
-          {showHQStockEditor ? (
-            <>
-              <TextField
-                value={hqStockQuantity}
-                onChange={e => setHqStockQuantity(Number(e.target.value))}
-                size="small"
-                sx={{ ...inputStyle, background: "#fff" }}
-                type="number"
-              />
-              <Button sx={{ ml: 1 }} variant="contained" onClick={handleHQStockUpdate} disabled={isUpdatingHQStock}>
-                {isUpdatingHQStock ? "저장중..." : "저장"}
-              </Button>
-              <Button sx={{ ml: 1 }} variant="outlined" onClick={() => setShowHQStockEditor(false)}>취소</Button>
-            </>
-          ) : (
-            <>
-              <TextField
-                value={detail.hqStock}
-                size="small"
-                InputProps={{ readOnly: true }}
-                sx={{ ...inputStyle, background: "#fff" }}
-              />
-              <Button sx={{ ml: 1 }} variant="outlined" onClick={() => {
-                setHqStockQuantity(detail.hqStock || 0);
-                setShowHQStockEditor(true);
-              }}>수정</Button>
-            </>
-          )}
-        </Box>
-      </Box>
-      <Divider sx={{ my: 2 }} />
-      {/* 4. 정기입고일, 정기입고수량, 정기입고 활성화, 최근 입고내역 */}
-      <Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>정기입고일</Typography>
-          <TextField
-            value={regularInDay}
-            size="small"
-            InputProps={{ readOnly: false }}
-            sx={{ ...inputStyle, background: "#fff" }}
-            type="number"
-            onChange={e => setRegularInDay(Number(e.target.value))}
-            disabled={isUpdatingRegularIn}
-          />
-          <Typography sx={{ ml: 1 }}>일</Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>정기입고수량</Typography>
-          <TextField
-            value={regularInQuantity}
-            size="small"
-            InputProps={{ readOnly: false }}
-            sx={{ ...inputStyle, background: "#fff" }}
-            type="number"
-            onChange={e => setRegularInQuantity(Number(e.target.value))}
-            disabled={isUpdatingRegularIn}
-          />
-          <Typography sx={{ ml: 1 }}>개</Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>정기입고 활성화</Typography>
-          <Checkbox
-            checked={!!regularInActive}
-            onChange={e => setRegularInActive(e.target.checked)}
-            disabled={isUpdatingRegularIn}
-          />
-          <Button
-            sx={{ ml: 2 }}
-            variant="contained"
-            onClick={handleRegularInUpdate}
-            disabled={isUpdatingRegularIn}
-          >
-            {isUpdatingRegularIn ? "저장 중..." : "설정 저장"}
-          </Button>
-          <Button
-            sx={{ ml: 1 }}
-            variant="outlined"
-            onClick={handleTestRegularIn}
-            disabled={isTestingRegularIn || !regularInActive || regularInQuantity <= 0}
-          >
-            {isTestingRegularIn ? "처리 중..." : "즉시 실행 테스트"}
-          </Button>
-        </Box>
-        {/* 최근 입고 내역 */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>최근 입고내역</Typography>
-          <Box sx={{ flex: 1 }}>
-            {Array.isArray(detail.recentStockIns) && detail.recentStockIns.length > 0 ? (
-              detail.recentStockIns.slice(0, 3).map((s, i) => (
-                <Box key={i} sx={{ fontSize: 14, color: "#333" }}>
-                  {s.storeName} | {s.date} | {s.quantity}개
-                </Box>
-              ))
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>매장 총 재고</Typography>
+            <TextField
+              value={detail.totalStock}
+              size="small"
+              InputProps={{ readOnly: true }}
+              sx={{ ...inputStyle, background: "#fff" }}
+            />
+            <Button sx={{ ml: 1 }} variant="outlined" onClick={() => setModalOpen(true)}>매장별 재고</Button>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>본사 재고</Typography>
+            {showHQStockEditor ? (
+              <>
+                <TextField
+                  value={hqStockQuantity}
+                  onChange={e => setHqStockQuantity(Number(e.target.value))}
+                  size="small"
+                  sx={{ ...inputStyle, background: "#fff" }}
+                  type="number"
+                />
+                <Button sx={{ ml: 1 }} variant="contained" onClick={handleHQStockUpdate} disabled={isUpdatingHQStock}>
+                  {isUpdatingHQStock ? "저장중..." : "저장"}
+                </Button>
+                <Button sx={{ ml: 1 }} variant="outlined" onClick={() => setShowHQStockEditor(false)}>취소</Button>
+              </>
             ) : (
-              <Typography color="text.secondary" sx={{ fontSize: 14 }}>최근 입고 내역이 없습니다.</Typography>
+              <>
+                <TextField
+                  value={detail.hqStock}
+                  size="small"
+                  InputProps={{ readOnly: true }}
+                  sx={{ ...inputStyle, background: "#fff" }}
+                />
+                <Button sx={{ ml: 1 }} variant="outlined" onClick={() => {
+                  setHqStockQuantity(detail.hqStock || 0);
+                  setShowHQStockEditor(true);
+                }}>수정</Button>
+              </>
             )}
           </Box>
-          <Button sx={{ ml: 1 }} variant="outlined" onClick={handleOpenInOutModal}>입출고 내역</Button>
         </Box>
-      </Box>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
-        <Button variant="outlined" onClick={onBack}>목록</Button>
-        <Button variant="contained" onClick={onEdit}>상품 정보 수정</Button>
-      </Box>
-      {/* 매장별 재고 모달 */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <Box sx={{
-          position: 'absolute', top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
-          bgcolor: 'background.paper', p: 4, borderRadius: 3, minWidth: 400, maxHeight: '80vh', overflowY: 'auto'
-        }}>
-          <Typography variant="h6" fontWeight="bold" mb={2}>매장별 재고</Typography>
-          {detail.storeStocks?.length > 0 ? detail.storeStocks.map((s, i) => (
-            <Box key={i} sx={{ color: s.quantity <= 5 ? "red" : "black", mb: 1 }}>
-              {s.storeName} : {s.quantity}개
+        <Divider sx={{ my: 2 }} />
+        {/* 4. 정기입고일, 정기입고수량, 정기입고 활성화, 최근 입고내역 */}
+        <Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>정기입고일</Typography>
+            <TextField
+              value={regularInDay}
+              size="small"
+              InputProps={{ readOnly: false }}
+              sx={{ ...inputStyle, background: "#fff" }}
+              type="number"
+              onChange={e => setRegularInDay(Number(e.target.value))}
+              disabled={isUpdatingRegularIn}
+            />
+            <Typography sx={{ ml: 1 }}>일</Typography>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>정기입고수량</Typography>
+            <TextField
+              value={regularInQuantity}
+              size="small"
+              InputProps={{ readOnly: false }}
+              sx={{ ...inputStyle, background: "#fff" }}
+              type="number"
+              onChange={e => setRegularInQuantity(Number(e.target.value))}
+              disabled={isUpdatingRegularIn}
+            />
+            <Typography sx={{ ml: 1 }}>개</Typography>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>정기입고 활성화</Typography>
+            <Checkbox
+              checked={!!regularInActive}
+              onChange={e => setRegularInActive(e.target.checked)}
+              disabled={isUpdatingRegularIn}
+            />
+            <Button
+              sx={{ ml: 2 }}
+              variant="contained"
+              onClick={handleRegularInUpdate}
+              disabled={isUpdatingRegularIn}
+            >
+              {isUpdatingRegularIn ? "저장 중..." : "설정 저장"}
+            </Button>
+            <Button
+              sx={{ ml: 1 }}
+              variant="outlined"
+              onClick={handleTestRegularIn}
+              disabled={isTestingRegularIn || !regularInActive || regularInQuantity <= 0}
+            >
+              {isTestingRegularIn ? "처리 중..." : "즉시 실행 테스트"}
+            </Button>
+          </Box>
+          {/* 최근 입고 내역 */}
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>최근 입고내역</Typography>
+            <Box sx={{ flex: 1 }}>
+              {Array.isArray(detail.recentStockIns) && detail.recentStockIns.length > 0 ? (
+                detail.recentStockIns.slice(0, 3).map((s, i) => (
+                  <Box key={i} sx={{ fontSize: 14, color: "#333" }}>
+                    {s.storeName} | {s.date} | {s.quantity}개
+                  </Box>
+                ))
+              ) : (
+                <Typography color="text.secondary" sx={{ fontSize: 14 }}>최근 입고 내역이 없습니다.</Typography>
+              )}
             </Box>
-          )) : <Typography>데이터 없음</Typography>}
-          <Box mt={2} display="flex" justifyContent="flex-end">
-            <Button onClick={() => setModalOpen(false)} variant="outlined">닫기</Button>
+            <Button sx={{ ml: 1 }} variant="outlined" onClick={handleOpenInOutModal}>입출고 내역</Button>
           </Box>
         </Box>
-      </Modal>
-      {/* 입출고 내역 모달 */}
-      <Modal open={inoutModalOpen} onClose={handleCloseInOutModal}>
-        <Box sx={{
-          position: 'absolute', top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
-          bgcolor: 'background.paper', p: 4, borderRadius: 3, minWidth: 700, maxHeight: '80vh', overflowY: 'auto'
-        }}>
-          <Typography variant="h6" fontWeight="bold" mb={2}>전체 입출고 내역</Typography>
-          {loadingInOut ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-              <CircularProgress />
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
+          <Button variant="outlined" onClick={onBack}>목록</Button>
+          <Button variant="contained" onClick={onEdit}>상품 정보 수정</Button>
+        </Box>
+        {/* 매장별 재고 모달 */}
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+          <Box sx={{
+            position: 'absolute', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            bgcolor: 'background.paper', p: 4, borderRadius: 3, minWidth: 400, maxHeight: '80vh', overflowY: 'auto'
+          }}>
+            <Typography variant="h6" fontWeight="bold" mb={2}>매장별 재고</Typography>
+            {detail.storeStocks?.length > 0 ? detail.storeStocks.map((s, i) => (
+              <Box key={i} sx={{ color: s.quantity <= 5 ? "red" : "black", mb: 1 }}>
+                {s.storeName} : {s.quantity}개
+              </Box>
+            )) : <Typography>데이터 없음</Typography>}
+            <Box mt={2} display="flex" justifyContent="flex-end">
+              <Button onClick={() => setModalOpen(false)} variant="outlined">닫기</Button>
             </Box>
-          ) : (
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell align="center">매장명</TableCell>
-                  <TableCell align="center">입고일</TableCell>
-                  <TableCell align="center">수량</TableCell>
-                  <TableCell align="center">비고</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {allInOut.length > 0 ? allInOut.map((row, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell align="center">{row.storeName}</TableCell>
-                    <TableCell align="center">{row.inDate}</TableCell>
-                    <TableCell align="center">{row.inQuantity}</TableCell>
-                    <TableCell align="center">{row.memo || '-'}</TableCell>
-                  </TableRow>
-                )) : (
+          </Box>
+        </Modal>
+        {/* 입출고 내역 모달 */}
+        <Modal open={inoutModalOpen} onClose={handleCloseInOutModal}>
+          <Box sx={{
+            position: 'absolute', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            bgcolor: 'background.paper', p: 4, borderRadius: 3, minWidth: 700, maxHeight: '80vh', overflowY: 'auto'
+          }}>
+            <Typography variant="h6" fontWeight="bold" mb={2}>전체 입출고 내역</Typography>
+            {loadingInOut ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <Table size="small">
+                <TableHead>
                   <TableRow>
-                    <TableCell align="center" colSpan={4}>입출고 내역이 없습니다.</TableCell>
+                    <TableCell align="center">매장명</TableCell>
+                    <TableCell align="center">입고일</TableCell>
+                    <TableCell align="center">수량</TableCell>
+                    <TableCell align="center">비고</TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
-          <Box mt={2} display="flex" justifyContent="flex-end">
-            <Button onClick={handleCloseInOutModal} variant="outlined">닫기</Button>
+                </TableHead>
+                <TableBody>
+                  {allInOut.length > 0 ? allInOut.map((row, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell align="center">{row.storeName}</TableCell>
+                      <TableCell align="center">{row.inDate}</TableCell>
+                      <TableCell align="center">{row.inQuantity}</TableCell>
+                      <TableCell align="center">{row.memo || '-'}</TableCell>
+                    </TableRow>
+                  )) : (
+                    <TableRow>
+                      <TableCell align="center" colSpan={4}>입출고 내역이 없습니다.</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+            <Box mt={2} display="flex" justifyContent="flex-end">
+              <Button onClick={handleCloseInOutModal} variant="outlined">닫기</Button>
+            </Box>
           </Box>
-        </Box>
-      </Modal>
+        </Modal>
+      </Box>
     </Box>
   );
 };

@@ -100,142 +100,153 @@ const ProductsEditCom = ({ detail, categoryTree, onSubmit, onImageUpload, onCanc
   const cat3List = cat2List.find(c => c.id === cat2)?.children || [];
 
   return (
-    <Box sx={{ p: 4, bgcolor: "#fafbfc", borderRadius: 2, maxWidth: 900, mx: "auto", mt: 4, boxShadow: 2 }}>
-      <Typography variant="h5" fontWeight="bold" mb={2}>상품 정보 수정</Typography>
-      <Divider sx={{ mb: 3 }} />
-      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-        <Box sx={{ width: 160, height: 160, bgcolor: "#eee", borderRadius: 2, overflow: "hidden", mr: 3 }}>
-          <img src={form.proImage} alt="제품" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          <Button component="label" variant="outlined" sx={{ mt: 1, width: "100%" }}>
-            이미지 변경
-            <input type="file" accept="image/*" hidden onChange={handleImageChange} />
-          </Button>
-        </Box>
-        <Box sx={{ flex: 1 }}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <Typography sx={labelStyle}>제품명</Typography>
-            <TextField name="proName" value={form.proName} onChange={handleChange} size="small" sx={inputStyle} />
+    <Box>
+      {/* 헤더 */}
+      <Box sx={{ width: '90%', maxWidth: 2200, mx: 'auto', mt: 4, mb: 7, display: 'flex', justifyContent: 'center' }}>
+        <Typography sx={{
+          fontWeight: 'bold',
+          fontSize: 30,
+          color: '#2563A6',
+          letterSpacing: '-1px',
+        }}>
+          상품 정보 수정
+        </Typography>
+      </Box>
+      <Box sx={{ p: 4, bgcolor: "#fafbfc", borderRadius: 2, maxWidth: 1100, mx: "auto", mt: 0, boxShadow: 2 }}>
+        <Box sx={{ display: "flex", gap: 4, mb: 3 }}>
+          <Box sx={{ width: 240, height: 240, bgcolor: "#eee", borderRadius: 2, overflow: "hidden", mr: 4 }}>
+            <img src={form.proImage} alt="제품" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <Button component="label" variant="outlined" sx={{ mt: 1, width: "100%" }}>
+              이미지 변경
+              <input type="file" accept="image/*" hidden onChange={handleImageChange} />
+            </Button>
           </Box>
+          <Box sx={{ flex: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <Typography sx={labelStyle}>제품명</Typography>
+              <TextField name="proName" value={form.proName} onChange={handleChange} size="small" sx={inputStyle} />
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <Typography sx={labelStyle}>상태</Typography>
+              <TextField
+                name="status"
+                select
+                value={form.status}
+                onChange={handleChange}
+                size="small"
+                sx={inputStyle}
+              >
+                {statusOptions.map(opt => (
+                  <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                ))}
+              </TextField>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <Typography sx={labelStyle}>발주 임계치</Typography>
+              <TextField name="proStockLimit" value={form.proStockLimit} onChange={handleChange} size="small" sx={inputStyle} type="number" />
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <Typography sx={labelStyle}>공급가</Typography>
+              <TextField name="proCost" value={form.proCost} onChange={handleChange} size="small" sx={inputStyle} type="number" />
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <Typography sx={labelStyle}>판매가</Typography>
+              <TextField name="proSellCost" value={form.proSellCost} onChange={handleChange} size="small" sx={inputStyle} type="number" />
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <Typography sx={labelStyle}>본사 재고</Typography>
+              <TextField name="hqStock" value={form.hqStock} onChange={handleChange} size="small" sx={inputStyle} type="number" />
+            </Box>
+          </Box>
+        </Box>
+        <Divider sx={{ my: 2 }} />
+        <Box>
+          <Typography sx={{ fontWeight: 600, mb: 1 }}>정기 입고 정보</Typography>
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <Typography sx={labelStyle}>상태</Typography>
+            <Typography sx={labelStyle}>정기입고일</Typography>
             <TextField
-              name="status"
-              select
-              value={form.status}
+              name="regularInDay"
+              value={form.regularInDay}
               onChange={handleChange}
               size="small"
               sx={inputStyle}
-            >
-              {statusOptions.map(opt => (
-                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-              ))}
-            </TextField>
+              type="number"
+              inputProps={{ min: 1, max: 31 }}
+            />
+            <Typography sx={{ ml: 1 }}>일</Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <Typography sx={labelStyle}>발주 임계치</Typography>
-            <TextField name="proStockLimit" value={form.proStockLimit} onChange={handleChange} size="small" sx={inputStyle} type="number" />
+            <Typography sx={labelStyle}>정기입고수량</Typography>
+            <TextField
+              name="regularInQuantity"
+              value={form.regularInQuantity}
+              onChange={handleChange}
+              size="small"
+              sx={inputStyle}
+              type="number"
+              inputProps={{ min: 0 }}
+            />
+            <Typography sx={{ ml: 1 }}>개</Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <Typography sx={labelStyle}>공급가</Typography>
-            <TextField name="proCost" value={form.proCost} onChange={handleChange} size="small" sx={inputStyle} type="number" />
+            <Typography sx={labelStyle}>정기입고 활성화</Typography>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="regularInActive"
+                  checked={!!form.regularInActive}
+                  onChange={handleChange}
+                />
+              }
+              label="활성화"
+            />
+          </Box>
+        </Box>
+        <Divider sx={{ my: 2 }} />
+        <Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>이벤트 시작일</Typography>
+            <DatePicker
+              selected={form.eventStart ? new Date(form.eventStart) : null}
+              onChange={date => setForm(f => ({ ...f, eventStart: date ? date.toISOString().slice(0, 10) : "" }))}
+              dateFormat="yyyy-MM-dd"
+              customInput={<TextField size="small" sx={inputStyle} />}
+            />
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <Typography sx={labelStyle}>판매가</Typography>
-            <TextField name="proSellCost" value={form.proSellCost} onChange={handleChange} size="small" sx={inputStyle} type="number" />
+            <Typography sx={labelStyle}>이벤트 종료일</Typography>
+            <DatePicker
+              selected={form.eventEnd ? new Date(form.eventEnd) : null}
+              onChange={date => setForm(f => ({ ...f, eventEnd: date ? date.toISOString().slice(0, 10) : "" }))}
+              dateFormat="yyyy-MM-dd"
+              customInput={<TextField size="small" sx={inputStyle} />}
+            />
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <Typography sx={labelStyle}>본사 재고</Typography>
-            <TextField name="hqStock" value={form.hqStock} onChange={handleChange} size="small" sx={inputStyle} type="number" />
+            <Typography sx={labelStyle}>제조사</Typography>
+            <TextField name="manufacturer" value={form.manufacturer} onChange={handleChange} size="small" sx={inputStyle} />
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>제조번호</Typography>
+            <TextField name="manuNum" value={form.manuNum} onChange={handleChange} size="small" sx={inputStyle} />
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>유통기한</Typography>
+            <TextField name="shelfLife" value={form.shelfLife} onChange={handleChange} size="small" sx={inputStyle} />
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>알레르기</Typography>
+            <TextField name="allergens" value={form.allergens} onChange={handleChange} size="small" sx={inputStyle} />
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography sx={labelStyle}>보관방법</Typography>
+            <TextField name="storageMethod" value={form.storageMethod} onChange={handleChange} size="small" sx={inputStyle} />
           </Box>
         </Box>
-      </Box>
-      <Divider sx={{ my: 2 }} />
-      <Box>
-        <Typography sx={{ fontWeight: 600, mb: 1 }}>정기 입고 정보</Typography>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>정기입고일</Typography>
-          <TextField
-            name="regularInDay"
-            value={form.regularInDay}
-            onChange={handleChange}
-            size="small"
-            sx={inputStyle}
-            type="number"
-            inputProps={{ min: 1, max: 31 }}
-          />
-          <Typography sx={{ ml: 1 }}>일</Typography>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
+          <Button variant="outlined" onClick={onCancel}>취소</Button>
+          <Button variant="contained" onClick={() => onSubmit(form)}>저장</Button>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>정기입고수량</Typography>
-          <TextField
-            name="regularInQuantity"
-            value={form.regularInQuantity}
-            onChange={handleChange}
-            size="small"
-            sx={inputStyle}
-            type="number"
-            inputProps={{ min: 0 }}
-          />
-          <Typography sx={{ ml: 1 }}>개</Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>정기입고 활성화</Typography>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="regularInActive"
-                checked={!!form.regularInActive}
-                onChange={handleChange}
-              />
-            }
-            label="활성화"
-          />
-        </Box>
-      </Box>
-      <Divider sx={{ my: 2 }} />
-      <Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>이벤트 시작일</Typography>
-          <DatePicker
-            selected={form.eventStart ? new Date(form.eventStart) : null}
-            onChange={date => setForm(f => ({ ...f, eventStart: date ? date.toISOString().slice(0, 10) : "" }))}
-            dateFormat="yyyy-MM-dd"
-            customInput={<TextField size="small" sx={inputStyle} />}
-          />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>이벤트 종료일</Typography>
-          <DatePicker
-            selected={form.eventEnd ? new Date(form.eventEnd) : null}
-            onChange={date => setForm(f => ({ ...f, eventEnd: date ? date.toISOString().slice(0, 10) : "" }))}
-            dateFormat="yyyy-MM-dd"
-            customInput={<TextField size="small" sx={inputStyle} />}
-          />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>제조사</Typography>
-          <TextField name="manufacturer" value={form.manufacturer} onChange={handleChange} size="small" sx={inputStyle} />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>제조번호</Typography>
-          <TextField name="manuNum" value={form.manuNum} onChange={handleChange} size="small" sx={inputStyle} />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>유통기한</Typography>
-          <TextField name="shelfLife" value={form.shelfLife} onChange={handleChange} size="small" sx={inputStyle} />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>알레르기</Typography>
-          <TextField name="allergens" value={form.allergens} onChange={handleChange} size="small" sx={inputStyle} />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography sx={labelStyle}>보관방법</Typography>
-          <TextField name="storageMethod" value={form.storageMethod} onChange={handleChange} size="small" sx={inputStyle} />
-        </Box>
-      </Box>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
-        <Button variant="outlined" onClick={onCancel}>취소</Button>
-        <Button variant="contained" onClick={() => onSubmit(form)}>저장</Button>
       </Box>
     </Box>
   );
