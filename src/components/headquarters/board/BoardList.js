@@ -10,6 +10,29 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { format } from 'date-fns';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import { styled } from '@mui/system';
+import MuiChip from '@mui/material/Chip';
+
+// 둥근 칩 스타일 (AnnualLeaveCom.js와 동일)
+const RoundChip = styled(MuiChip)({
+  borderRadius: '30px !important',
+  minWidth: 80,
+  fontWeight: 700,
+  fontSize: '0.8rem',
+  justifyContent: 'center',
+});
+
+// AnnualLeaveCom.js와 동일한 색상 로직
+const getStatusColor = (status) => {
+  switch(status) {
+    case '답변완료':
+      return { color: '#10B981', bgcolor: '#ECFDF5', borderColor: '#A7F3D0' };
+    case '답변대기':
+      return { color: '#F59E0B', bgcolor: '#FFFBEB', borderColor: '#FDE68A' };
+    default:
+      return { color: '#64748B', bgcolor: '#F8FAFC', borderColor: '#E2E8F0' };
+  }
+};
 
 // 게시글 행 컴포넌트
 const BoardRow = ({ post, canManage, onAddComment, onEdit, onDelete }) => {
@@ -45,22 +68,32 @@ const BoardRow = ({ post, canManage, onAddComment, onEdit, onDelete }) => {
         <TableCell align="center">
           {post.boardType > 1 && (
             hasComment ? 
-              <Chip
+              <RoundChip
                 label="답변완료"
                 size="small"
                 sx={{
-                  backgroundColor: 'skyblue',
-                  color: '#fff',
-                  fontWeight: 600
+                  backgroundColor: getStatusColor('답변완료').bgcolor,
+                  color: getStatusColor('답변완료').color,
+                  border: '1px solid',
+                  borderColor: getStatusColor('답변완료').borderColor,
+                  minWidth: 80,
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  justifyContent: 'center',
                 }}
               /> : 
-              <Chip
+              <RoundChip
                 label="답변대기"
                 size="small"
                 sx={{
-                  backgroundColor: 'orange',
-                  color: '#fff',
-                  fontWeight: 600
+                  backgroundColor: getStatusColor('답변대기').bgcolor,
+                  color: getStatusColor('답변대기').color,
+                  border: '1px solid',
+                  borderColor: getStatusColor('답변대기').borderColor,
+                  minWidth: 80,
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  justifyContent: 'center',
                 }}
               />
           )}

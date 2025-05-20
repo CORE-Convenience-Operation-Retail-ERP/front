@@ -289,6 +289,13 @@ const BranchesStockMonitoringCon = () => {
     }
   };
   
+  // storeId가 바뀌면 데이터 로드 (storeId가 null이어도 전체 데이터 로드)
+  useEffect(() => {
+    // storeId가 null이어도 전체 데이터 로드
+    handleFilterChange({ storeId: filters.storeId });
+    // eslint-disable-next-line
+  }, [filters.storeId]);
+  
   return (
     <>
       {error && <div style={{ color: 'red', padding: '10px', margin: '10px 0' }}>{error}</div>}

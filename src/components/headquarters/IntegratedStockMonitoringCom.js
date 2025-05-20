@@ -1108,23 +1108,24 @@ const IntegratedStockMonitoringCom = ({
       {/* 대시보드 그리드 - 지점 모드 또는 통합 모드일 때만 표시 */}
       {(viewMode === 'branches' || viewMode === 'integrated') && (
         <DashboardGrid>
-          {/* 카테고리별 재고 비율 차트 - 먼저 표시하고 크기 키우기 */}
-          <Card style={{ gridColumn: viewMode === 'integrated' ? 'span 2' : 'auto' }}>
-            <CardTitle>
-              카테고리별 재고 비율
-              <DetailButton>자세히</DetailButton>
-            </CardTitle>
-            
-            <ChartContainer style={{ height: viewMode === 'integrated' ? '400px' : '300px' }}>
-              {categoryStats.length > 0 ? (
-                <Pie data={pieData} options={pieOptions} />
-              ) : (
-                <div style={{textAlign: 'center', paddingTop: '100px'}}>
-                  카테고리별 데이터가 없습니다.
-                </div>
-              )}
-            </ChartContainer>
-          </Card>
+          {/* 카테고리별 재고 비율 차트는 통합 모드에서만 표시 */}
+          {viewMode === 'integrated' && (
+            <Card style={{ gridColumn: 'span 2' }}>
+              <CardTitle>
+                카테고리별 재고 비율
+                <DetailButton>자세히</DetailButton>
+              </CardTitle>
+              <ChartContainer style={{ height: '400px' }}>
+                {categoryStats.length > 0 ? (
+                  <Pie data={pieData} options={pieOptions} />
+                ) : (
+                  <div style={{textAlign: 'center', paddingTop: '100px'}}>
+                    카테고리별 데이터가 없습니다.
+                  </div>
+                )}
+              </ChartContainer>
+            </Card>
+          )}
           
           {/* 지점 재고 현황 요약 - 통합 모드일 때는 숨기기 */}
           {viewMode !== 'integrated' && (

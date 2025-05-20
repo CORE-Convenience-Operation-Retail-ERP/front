@@ -508,6 +508,7 @@ const BranchesStockMonitoringCom = ({
       },
       y: {
         stacked: true,
+        max:25,    // 최대 25개 표시 수정가능능
       },
     },
   };
@@ -563,9 +564,6 @@ const BranchesStockMonitoringCom = ({
   
   return (
     <Container>
-      <PageTitle>지점 중심 재고 관리</PageTitle>
-      <PageSubtitle>지점별 재고 현황을 모니터링하고 관리합니다</PageSubtitle>
-      
       {/* 필터 섹션 */}
       <FilterSection>
         <SelectWrapper>
@@ -687,9 +685,26 @@ const BranchesStockMonitoringCom = ({
             <DetailButton>자세히</DetailButton>
           </CardTitle>
           
-          <ChartContainer style={{ height: '400px' }}>
+          <ChartContainer style={{ height: '540px' }}>
             {branchComparison.length > 0 ? (
-              <Bar data={barData} options={barOptions} />
+              <Bar data={{
+                ...barData,
+                labels: branchComparison.map(item => item.name),
+                datasets: [
+                  {
+                    ...barData.datasets[0],
+                    data: branchComparison.map(item => item.정상재고),
+                  },
+                  {
+                    ...barData.datasets[1],
+                    data: branchComparison.map(item => item.경고재고),
+                  },
+                  {
+                    ...barData.datasets[2],
+                    data: branchComparison.map(item => item.긴급재고),
+                  },
+                ],
+              }} options={barOptions} />
             ) : (
               <div style={{textAlign: 'center', paddingTop: '100px'}}>
                 지점 비교 데이터가 없습니다.

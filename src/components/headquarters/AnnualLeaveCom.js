@@ -31,6 +31,8 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import CommentIcon from '@mui/icons-material/Comment';
 import { styled } from '@mui/system';
+import MuiButton from '@mui/material/Button';
+import MuiChip from '@mui/material/Chip';
 
 // 스타일이 적용된 테이블 셀
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -64,6 +66,22 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
   overflow: 'hidden',
 }));
+
+// 둥근 버튼 스타일
+const RoundButton = styled(MuiButton)({
+  borderRadius: '30px !important',
+  minWidth: 'unset',
+  padding: '6px 16px',
+});
+
+// 둥근 칩 스타일
+const RoundChip = styled(MuiChip)({
+  borderRadius: '30px !important',
+  minWidth: 80,
+  fontWeight: 700,
+  fontSize: '0.75rem',
+  justifyContent: 'center',
+});
 
 const AnnualLeaveCom = ({ 
   leaveRequests, 
@@ -195,33 +213,24 @@ const AnnualLeaveCom = ({
                         : request.reason || '-'}
                     </StyledTableDataCell>
                     <StyledTableDataCell>
-                      <Chip 
+                      <RoundChip 
                         label={request.status} 
                         size="small"
-                        sx={{ 
-                          ...getStatusColor(request.status),
-                          minWidth: 80,
-                          justifyContent: 'center',
-                          fontWeight: 'bold',
-                          fontSize: '0.75rem',
-                          borderRadius: '4px',
-                        }} 
+                        sx={getStatusColor(request.status)}
                       />
                     </StyledTableDataCell>
                     <StyledTableDataCell align="center">
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
-                        <Button
+                        <RoundButton
                           variant="outlined"
                           size="small"
                           onClick={() => onDetailView(request)}
                           sx={{
-                            minWidth: 'unset',
+                            borderColor: '#55D6DF',
+                            color: '#2563A6',
                             px: 1,
                             py: 0.5,
                             fontSize: 12,
-                            borderRadius: '12px',
-                            borderColor: '#55D6DF',
-                            color: '#2563A6',
                             '&:hover': {
                               borderColor: '#1E5187',
                               backgroundColor: 'rgba(85, 214, 223, 0.1)',
@@ -229,24 +238,22 @@ const AnnualLeaveCom = ({
                           }}
                         >
                           상세보기
-                        </Button>
+                        </RoundButton>
                         
                         {isMaster && (
                           <>
                             {/* 대기중이거나 반려 상태일 때만 승인 버튼 표시 */}
                             {(request.status === '대기중' || request.status === '거절') && (
-                              <Button
+                              <RoundButton
                                 variant="outlined"
                                 size="small"
                                 onClick={() => onApprove(request.reqId)}
                                 sx={{
-                                  minWidth: 'unset',
+                                  borderColor: '#10B981',
+                                  color: '#10B981',
                                   px: 1,
                                   py: 0.5,
                                   fontSize: 12,
-                                  borderRadius: '12px',
-                                  borderColor: '#10B981',
-                                  color: '#10B981',
                                   '&:hover': {
                                     borderColor: '#059669',
                                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -254,23 +261,21 @@ const AnnualLeaveCom = ({
                                 }}
                               >
                                 승인
-                              </Button>
+                              </RoundButton>
                             )}
                             
                             {/* 대기중이거나 승인 상태일 때만 반려 버튼 표시 */}
                             {(request.status === '대기중' || request.status === '승인') && (
-                              <Button
+                              <RoundButton
                                 variant="outlined"
                                 size="small"
                                 onClick={() => onReject(request.reqId)}
                                 sx={{
-                                  minWidth: 'unset',
+                                  borderColor: '#EF4444',
+                                  color: '#EF4444',
                                   px: 1,
                                   py: 0.5,
                                   fontSize: 12,
-                                  borderRadius: '12px',
-                                  borderColor: '#EF4444',
-                                  color: '#EF4444',
                                   '&:hover': {
                                     borderColor: '#DC2626',
                                     backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -278,7 +283,7 @@ const AnnualLeaveCom = ({
                                 }}
                               >
                                 반려
-                              </Button>
+                              </RoundButton>
                             )}
                           </>
                         )}
