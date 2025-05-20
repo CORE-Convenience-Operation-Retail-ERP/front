@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   Dialog, 
   DialogTitle, 
@@ -10,7 +10,8 @@ import {
   Typography, 
   CircularProgress, 
   Alert, 
-  FormHelperText
+  FormHelperText,
+  Pagination
 } from '@mui/material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -18,12 +19,18 @@ import dayjs from 'dayjs';
 import AnnualLeaveCom from '../../components/headquarters/AnnualLeaveCom';
 import axios from '../../service/axiosInstance';
 import { useLocation } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 
 const AnnualLeaveCon = () => {
   const location = useLocation();
   
   // 연차 신청 목록 상태
   const [leaveRequests, setLeaveRequests] = useState([]);
+  const [filteredLeaveRequests, setFilteredLeaveRequests] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [rowsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -231,6 +238,31 @@ const AnnualLeaveCon = () => {
   useEffect(() => {
     loadLeaveRequests();
   }, []);
+  
+  // leaveRequests 변경 시 페이징 처리
+  useEffect(() => {
+    if (leaveRequests.length > 0) {
+      setFilteredLeaveRequests(leaveRequests);
+      setTotalItems(leaveRequests.length);
+      setTotalPages(Math.ceil(leaveRequests.length / rowsPerPage));
+    } else {
+      setFilteredLeaveRequests([]);
+      setTotalItems(0);
+      setTotalPages(0);
+    }
+  }, [leaveRequests, rowsPerPage]);
+  
+  // 페이지 변경 핸들러
+  const handlePageChange = (event, newPage) => {
+    setCurrentPage(newPage - 1);
+  };
+  
+  // 페이징된 목록 계산
+  const paginatedRequests = useMemo(() => {
+    const startIndex = currentPage * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    return filteredLeaveRequests.slice(startIndex, endIndex);
+  }, [filteredLeaveRequests, currentPage, rowsPerPage]);
   
   // 연차 신청 목록 조회 함수 - 수정
   const loadLeaveRequests = () => {
@@ -588,7 +620,7 @@ const AnnualLeaveCon = () => {
       )}
       
       <AnnualLeaveCom 
-        leaveRequests={leaveRequests}
+        leaveRequests={paginatedRequests}
         onNewRequest={handleOpenModal}
         onDetailView={handleDetailView}
         selectedRequest={selectedRequest}
@@ -603,6 +635,10 @@ const AnnualLeaveCon = () => {
         isProcessing={isProcessing}
         approveError={approveError}
         commentLog={commentLog}
+        totalItems={totalItems}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
       />
       
       {/* 연차 신청 모달 */}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EmployeeManagementCom from '../../components/headquarters/EmployeeManagementCom';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../service/axiosInstance';
+import { Box, Typography } from '@mui/material';
 
 const EmployeeManagementCon = () => {
   const { empId } = useParams(); // URL에서 사원 ID 가져오기

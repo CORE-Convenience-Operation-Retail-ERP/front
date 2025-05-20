@@ -73,10 +73,12 @@ const MyPage = () => {
 
   // 연차 신청 모달 열기 함수
   const handleOpenLeaveModal = () => {
+    console.log("연차 신청 모달 열기 함수 호출됨, myConRef:", myConRef.current);
     if (myConRef.current && myConRef.current.handleOpenLeaveModal) {
+      console.log("handleOpenLeaveModal 함수 실행");
       myConRef.current.handleOpenLeaveModal();
     } else {
-      console.error("연차 신청 모달을 열 수 없습니다.");
+      console.error("연차 신청 모달을 열 수 없습니다. myConRef:", myConRef.current);
     }
   };
 
@@ -87,62 +89,166 @@ const MyPage = () => {
   );
 
   return (
-    <Box sx={{ p: 3, backgroundColor: '#f8f9fa' }}>
-      <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
-        근무 이력 관리
-      </Typography>
-      
+    <Box sx={{ 
+      background: '#FFFFFF', 
+      minHeight: '100vh' 
+    }}>
+      <Box sx={{ width: '90%', maxWidth: 2200, mx: 'auto', mt: 4, mb: 7 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography sx={{
+            fontWeight: 'bold',
+            fontSize: 30,
+            color: '#2563A6',
+            letterSpacing: '-1px',
+            ml: 15
+          }}>
+            마이페이지
+          </Typography>
+        </Box>
+      </Box>
+
       {error && (
-        <Typography variant="body2" color="error.main" sx={{ mb: 2 }}>
+        <Typography variant="body2" color="error.main" sx={{ width: '90%', maxWidth: 1200, mx: 'auto', mb: 2 }}>
           {error}
         </Typography>
       )}
       
       {info && (
-        <Grid container spacing={3}>
-          {/* 왼쪽: 사원 프로필 */}
-          <Grid item xs={12} md={3}>
-            <MyCom info={info} />
+        <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto' }}>
+          <Grid container spacing={4}>
+            {/* 왼쪽: 사원 프로필 */}
+            <Grid item xs={12} md={4} lg={3}>
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  borderRadius: 3, 
+                  p: 3,
+                  height: '100%',
+                  border: '1px solid #eaeef3',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)',
+                  backgroundColor: '#fff'
+                }}
+              >
+                <MyCom info={info} />
+              </Paper>
+            </Grid>
+            
+            {/* 오른쪽: 컨텐츠 영역 */}
+            <Grid item xs={12} md={8} lg={9}>
+              <Grid container spacing={4} sx={{ height: '100%' }}>
+                {/* 왼쪽 컬럼: 근무 이력 관리 + 급여 정보 */}
+                <Grid item xs={12} lg={6} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <Grid container direction="column" spacing={3} sx={{ height: '100%' }}>
+                    {/* 근무 이력 관리 */}
+                    <Grid item sx={{ flex: '0 0 auto' }}>
+                      <Paper 
+                        elevation={0} 
+                        sx={{ 
+                          p: 3, 
+                          borderRadius: 3,
+                          backgroundColor: '#fff',
+                          border: '1px solid #eaeef3',
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)',
+                          height: '100%'
+                        }}
+                      >
+                        <MyCon ref={myConRef} info={info} type="attendance" />
+                      </Paper>
+                    </Grid>
+                    
+                    {/* 급여 정보 */}
+                    <Grid item sx={{ flex: '1 1 auto' }}>
+                      <Paper 
+                        elevation={0} 
+                        sx={{ 
+                          p: 3, 
+                          borderRadius: 3,
+                          backgroundColor: '#fff',
+                          border: '1px solid #eaeef3',
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}
+                      >
+                        <MyCon info={info} type="salary" />
+                      </Paper>
+                    </Grid>
+                  </Grid>
+                </Grid>
+                
+                {/* 오른쪽 컬럼: 연차 신청 캘린더 + 연차 신청 내역 */}
+                <Grid item xs={12} lg={6} sx={{ height: '100%' }}>
+                  <Paper 
+                    elevation={0} 
+                    sx={{ 
+                      p: 3, 
+                      borderRadius: 3,
+                      backgroundColor: '#fff',
+                      border: '1px solid #eaeef3',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)',
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}
+                  >
+                    <Typography variant="h6" fontWeight="bold" color="#2563A6" sx={{ mb: 2 }}>
+                      연차 신청
+                    </Typography>
+                    
+                    {/* 연차 신청 캘린더 */}
+                    <Box sx={{ mb: 3 }}>
+                      <CalendarBox />
+                      
+                      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                        <Button 
+                          variant="contained"
+                          startIcon={<EventIcon />}
+                          onClick={handleOpenLeaveModal}
+                          sx={{ 
+                            bgcolor: '#6FC3ED',
+                            '&:hover': {
+                              bgcolor: '#5DB3DD',
+                            },
+                            borderRadius: '8px',
+                            textTransform: 'none',
+                            fontWeight: 'medium',
+                            padding: '8px 16px',
+                            boxShadow: '0px 3px 6px rgba(111, 195, 237, 0.3)',
+                            width: '100%',
+                          }}
+                        >
+                          연차 신청하기
+                        </Button>
+                      </Box>
+                    </Box>
+                    
+                    {/* 신청한 연차 정보 */}
+                    <Box sx={{ mt: 1, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <Typography variant="h6" fontWeight="bold" color="#2563A6" sx={{ mb: 2 }}>
+                        연차 신청 내역
+                      </Typography>
+                      
+                      <Box 
+                        sx={{ 
+                          border: '1px solid #e0e0e0', 
+                          borderRadius: 2, 
+                          p: 2,
+                          backgroundColor: '#F8FAFB',
+                          flex: 1,
+                          overflow: 'auto'
+                        }}
+                      >
+                        {/* 여기에 연차 신청 내역 표시 - 수정 */}
+                        <MyCon ref={myConRef} info={info} type="leave-history" />
+                      </Box>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </Grid>
           </Grid>
-          
-          {/* 중앙: 근태 정보와 급여 정보 */}
-          <Grid item xs={12} md={5}>
-            <MyCon ref={myConRef} info={info} type="attendance" />
-            <MyCon info={info} type="salary" />
-          </Grid>
-          
-          {/* 오른쪽: 캘린더 */}
-          <Grid item xs={12} md={4}>
-            <Paper elevation={3} sx={{ p: 3, borderRadius: 2, mb: 3 }}>
-              <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
-                연차 신청 기간
-              </Typography>
-              <CalendarBox />
-              
-              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-                <Button 
-                  variant="contained"
-                  startIcon={<EventIcon />}
-                  onClick={handleOpenLeaveModal}
-                  sx={{ 
-                    bgcolor: '#1EACB5',
-                    '&:hover': {
-                      bgcolor: '#015D70',
-                    },
-                    borderRadius: '8px',
-                    textTransform: 'none',
-                    fontWeight: 'medium',
-                    boxShadow: '0px 3px 6px rgba(1, 93, 112, 0.2)',
-                    width: '100%',
-                    py: 1
-                  }}
-                >
-                  연차 신청하기
-                </Button>
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
+        </Box>
       )}
     </Box>
   );

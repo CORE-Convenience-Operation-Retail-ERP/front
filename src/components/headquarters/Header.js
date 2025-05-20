@@ -111,13 +111,11 @@ const Header = () => {
     <>
       <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #eee' }}>
         <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64 }}>
-          <Box sx={{ width: 300 }} />
-
-          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <img
               src="/core_logo.png"
               alt="CORE"
-              style={{ height: 30, cursor: 'pointer' }}
+              style={{ height: 30, cursor: 'pointer', marginLeft: '15px' }}
               onClick={() => navigate('/headquarters/dashboard')}
             />
           </Box>

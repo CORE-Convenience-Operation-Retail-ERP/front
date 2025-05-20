@@ -21,7 +21,8 @@ import {
   Grid,
   Alert,
   CircularProgress,
-  Tooltip
+  Tooltip,
+  Pagination
 } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import AddIcon from '@mui/icons-material/Add';
@@ -34,10 +35,12 @@ import { styled } from '@mui/system';
 // 스타일이 적용된 테이블 셀
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   fontWeight: 'bold',
-  backgroundColor: '#F8FAFC',
-  color: '#334155',
-  fontSize: '0.875rem',
+  backgroundColor: '#fff',
+  color: '#2563A6',
+  fontSize: '16px',
   border: 'none',
+  borderBottom: '1px solid #F5F5F5',
+  borderRight: '1px solid #F5F5F5',
   paddingTop: 16,
   paddingBottom: 16,
 }));
@@ -45,10 +48,13 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 // 스타일이 적용된 테이블 데이터 셀
 const StyledTableDataCell = styled(TableCell)(({ theme }) => ({
   border: 'none',
-  borderBottom: '1px solid #F1F5F9',
+  borderBottom: '1px solid #F5F5F5',
+  borderRight: '1px solid #F5F5F5',
   fontSize: '0.875rem',
   color: '#475569',
   verticalAlign: 'middle',
+  textAlign: 'center',
+  py: 2
 }));
 
 // 스타일이 적용된 Paper 컴포넌트
@@ -73,7 +79,11 @@ const AnnualLeaveCom = ({
   setApproveComment,
   isProcessing,
   approveError,
-  commentLog
+  commentLog,
+  totalItems,
+  currentPage,
+  totalPages,
+  onPageChange
 }) => {
   // 상태에 따른 칩 색상 설정
   const getStatusColor = (status) => {
@@ -98,32 +108,49 @@ const AnnualLeaveCom = ({
 
   return (
     <Box sx={{ width: '100%' }}>
+      {/* 헤더 */}
+      <Box sx={{ width: '90%', maxWidth: 2200, mx: 'auto', mt: 4, mb: 7 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography sx={{
+            fontWeight: 'bold',
+            fontSize: 30,
+            color: '#2563A6',
+            letterSpacing: '-1px',
+            ml: 15
+          }}>
+            연차 신청 관리
+          </Typography>
+        </Box>
+      </Box>
+      
       <Box sx={{ 
         display: 'flex', 
         justifyContent: 'flex-end', 
-        alignItems: 'center', 
-        mb: 2
+        alignItems: 'center',
+        width: '90%', 
+        maxWidth: 1200, 
+        mx: 'auto', 
+        mb: 5
       }}>
         <Button 
           variant="contained" 
           startIcon={<AddIcon />}
           onClick={onNewRequest}
           sx={{ 
-            bgcolor: '#0EA5E9',
-            '&:hover': { bgcolor: '#0284C7' },
-            borderRadius: 2,
+            backgroundColor: '#2563A6',
+            '&:hover': { backgroundColor: '#1E5187' },
+            borderRadius: '30px',
             px: 3,
-            py: 1,
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            height: 40
           }}
         >
           연차 신청
         </Button>
       </Box>
       
-      <StyledPaper>
-        <TableContainer sx={{ maxHeight: 600 }}>
-          <Table stickyHeader>
+      <StyledPaper sx={{ width: '90%', maxWidth: 1200, mx: 'auto', mb: 3 }}>
+        <TableContainer>
+          <Table size="small" sx={{ background: '#fff', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)' }}>
             <TableHead>
               <TableRow>
                 <StyledTableCell>번호</StyledTableCell>
@@ -143,9 +170,8 @@ const AnnualLeaveCom = ({
                     key={request.reqId || Math.random().toString()}
                     hover
                     sx={{ 
-                      cursor: 'pointer',
-                      '&:hover': { bgcolor: '#F8FAFC' },
-                      transition: 'background-color 0.2s ease'
+                      '&:nth-of-type(odd)': { backgroundColor: '#f9fafc' },
+                      '&:hover': { backgroundColor: '#F0F5FF' },
                     }}
                   >
                     <StyledTableDataCell onClick={() => onDetailView(request)}>
@@ -168,57 +194,91 @@ const AnnualLeaveCom = ({
                         ? `${request.reason.substring(0, 15)}...` 
                         : request.reason || '-'}
                     </StyledTableDataCell>
-                    <StyledTableDataCell onClick={() => onDetailView(request)}>
+                    <StyledTableDataCell>
                       <Chip 
                         label={request.status} 
                         size="small"
-                        variant="outlined"
                         sx={{ 
                           ...getStatusColor(request.status),
-                          fontWeight: 'medium',
+                          minWidth: 80,
+                          justifyContent: 'center',
+                          fontWeight: 'bold',
                           fontSize: '0.75rem',
                           borderRadius: '4px',
                         }} 
                       />
                     </StyledTableDataCell>
                     <StyledTableDataCell align="center">
-                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                        <Tooltip title="상세보기">
-                          <IconButton 
-                            size="small" 
-                            onClick={() => onDetailView(request)}
-                            sx={{ color: '#3B82F6' }}
-                          >
-                            <VisibilityIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => onDetailView(request)}
+                          sx={{
+                            minWidth: 'unset',
+                            px: 1,
+                            py: 0.5,
+                            fontSize: 12,
+                            borderRadius: '12px',
+                            borderColor: '#55D6DF',
+                            color: '#2563A6',
+                            '&:hover': {
+                              borderColor: '#1E5187',
+                              backgroundColor: 'rgba(85, 214, 223, 0.1)',
+                            },
+                          }}
+                        >
+                          상세보기
+                        </Button>
                         
                         {isMaster && (
                           <>
                             {/* 대기중이거나 반려 상태일 때만 승인 버튼 표시 */}
                             {(request.status === '대기중' || request.status === '거절') && (
-                              <Tooltip title="승인">
-                                <IconButton 
-                                  size="small" 
-                                  onClick={() => onApprove(request.reqId)}
-                                  sx={{ color: '#10B981' }}
-                                >
-                                  <CheckCircleOutlineIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => onApprove(request.reqId)}
+                                sx={{
+                                  minWidth: 'unset',
+                                  px: 1,
+                                  py: 0.5,
+                                  fontSize: 12,
+                                  borderRadius: '12px',
+                                  borderColor: '#10B981',
+                                  color: '#10B981',
+                                  '&:hover': {
+                                    borderColor: '#059669',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                  },
+                                }}
+                              >
+                                승인
+                              </Button>
                             )}
                             
                             {/* 대기중이거나 승인 상태일 때만 반려 버튼 표시 */}
                             {(request.status === '대기중' || request.status === '승인') && (
-                              <Tooltip title="반려">
-                                <IconButton 
-                                  size="small" 
-                                  onClick={() => onReject(request.reqId)}
-                                  sx={{ color: '#EF4444' }}
-                                >
-                                  <CancelOutlinedIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => onReject(request.reqId)}
+                                sx={{
+                                  minWidth: 'unset',
+                                  px: 1,
+                                  py: 0.5,
+                                  fontSize: 12,
+                                  borderRadius: '12px',
+                                  borderColor: '#EF4444',
+                                  color: '#EF4444',
+                                  '&:hover': {
+                                    borderColor: '#DC2626',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                  },
+                                }}
+                              >
+                                반려
+                              </Button>
                             )}
                           </>
                         )}
@@ -250,6 +310,33 @@ const AnnualLeaveCom = ({
             </TableBody>
           </Table>
         </TableContainer>
+        
+        {/* 페이징 */}
+        {totalPages > 0 && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+            <Pagination
+              count={totalPages}
+              page={currentPage + 1}
+              onChange={onPageChange}
+              color="primary"
+              shape="rounded"
+              showFirstButton
+              showLastButton
+            />
+          </Box>
+        )}
+        
+        {totalItems > 0 && (
+          <Box sx={{ 
+            textAlign: 'center', 
+            mt: 1,
+            mb: 3,
+            color: '#666',
+            fontSize: 14
+          }}>
+            총 {totalItems}개의 연차 신청 중 {(currentPage * 10) + 1} - {Math.min((currentPage + 1) * 10, totalItems)}번째 항목을 보고 있습니다.
+          </Box>
+        )}
       </StyledPaper>
       
       {/* 연차 신청 상세 정보 다이얼로그 */}

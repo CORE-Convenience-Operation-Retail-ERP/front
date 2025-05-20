@@ -1,11 +1,15 @@
 import React from 'react';
 import EmployeeManagementCon from '../../containers/headquarters/EmployeeManagementCon';
-import { Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
-const EmployeeManagementPage = () => (
-  <Box sx={{ padding: 3 }}>
-    <EmployeeManagementCon />
-  </Box>
-);
+const EmployeeManagementPage = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div>
+      <EmployeeManagementCon />
+    </div>
+  );
+};
 
 export default EmployeeManagementPage; 

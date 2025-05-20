@@ -82,18 +82,21 @@ const EmployeesListCom = ({
     <Box>
       {/* 헤더 */}
       <Box sx={{ width: '90%', maxWidth: 2200, mx: 'auto', mt: 4, mb: 7 }}>
-        <Typography sx={{
-          fontWeight: 'bold',
-          fontSize: 30,
-          color: '#2563A6',
-          letterSpacing: '-1px',
-        }}>
-          {employeeType === '본사' ? '본사 사원 목록' : '점주 목록'}
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography sx={{
+            fontWeight: 'bold',
+            fontSize: 30,
+            color: '#2563A6',
+            letterSpacing: '-1px',
+            ml: 15
+          }}>
+            {employeeType === '본사' ? '본사 사원 목록' : '점주 목록'}
+          </Typography>
+        </Box>
       </Box>
 
       {/* 검색바 */}
-      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', justifyContent: 'center', mb: 5 }}>
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', display: 'flex', justifyContent: 'center', mb: 2 }}>
         <Paper
           component="form"
           onSubmit={handleSearchSubmit}

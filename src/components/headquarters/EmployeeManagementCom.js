@@ -16,8 +16,11 @@ import {
   Alert,
   FormHelperText
 } from '@mui/material';
+import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading, error, employeeType }) => {
+  const navigate = useNavigate();
   // 초기 상태 설정
   const [formData, setFormData] = useState({
     empId: '',
@@ -151,20 +154,21 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
 
   return (
     <Box>
-      {/* 제목 */}
-      <Typography 
-        variant="h5" 
-        sx={{ 
-          fontWeight: 'bold', 
-          color: '#2563A6', 
-          mb: 4,
-          borderBottom: '2px solid #55D6DF',
-          paddingBottom: 1
-        }}
-      >
-        {employeeType === '본사' ? '사원 정보 관리' : '점주 정보 관리'}
-      </Typography>
-
+      {/* 헤더 */}
+      <Box sx={{ width: '90%', maxWidth: 2200, mx: 'auto', mt: 4, mb: 7 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography sx={{
+            fontWeight: 'bold',
+            fontSize: 30,
+            color: '#2563A6',
+            letterSpacing: '-1px',
+            ml: 15
+          }}>
+            사원 정보 관리
+          </Typography>
+        </Box>
+      </Box>
+    
       {/* 오류 메시지 */}
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -172,14 +176,19 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
         </Alert>
       )}
 
+      {/* 검색바 + 사원 정보 테이블 */}
       <Paper 
         component="form" 
         onSubmit={handleSubmit}
         elevation={3} 
         sx={{ 
-          p: 3, 
+          p: 4, 
           borderRadius: 2,
-          backgroundColor: '#F8FAFB'
+          backgroundColor: '#fff',
+          width: '90%',
+          maxWidth: 1200,
+          mx: 'auto',
+          position: 'relative'
         }}
       >
         <Grid container spacing={4}>
@@ -218,8 +227,9 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
             </Button>
           </Grid>
 
-          {/* 기본 정보 섹션 */}
+          {/* 정보 섹션 */}
           <Grid item xs={12} md={9}>
+            {/* 1. 기본 정보 섹션 */}
             <Typography 
               variant="subtitle1" 
               sx={{ 
@@ -234,6 +244,18 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  label={employeeType === '본사' ? "이름" : "점주명"}
+                  name="empName"
+                  value={formData.empName}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
                   label={employeeType === '본사' ? "사번" : "점주번호"}
                   name="empId"
                   value={formData.empId}
@@ -244,21 +266,38 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
                   required
                 />
               </Grid>
+            </Grid>
+
+            <Divider sx={{ my: 3 }} />
+
+            {/* 2. 입사 정보 섹션 */}
+            <Typography 
+              variant="subtitle1" 
+              sx={{ 
+                fontWeight: 'bold', 
+                mb: 2,
+                color: '#2563A6'
+              }}
+            >
+              {employeeType === '본사' ? '입사 정보' : '계약 정보'}
+            </Typography>
+            <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label={employeeType === '본사' ? "이름" : "점주명"}
-                  name="empName"
-                  value={formData.empName}
+                  label={employeeType === '본사' ? "입사일" : "계약일"}
+                  name="hireDate"
+                  type="date"
+                  value={formData.hireDate}
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
-                  required
+                  InputLabelProps={{ shrink: true }}
                 />
               </Grid>
               {employeeType === '본사' ? (
                 <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
+                  <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
                     <InputLabel>부서</InputLabel>
                     <Select
                       name="deptCode"
@@ -283,8 +322,8 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
                   </FormControl>
                 </Grid>
               ) : null}
-              <Grid item xs={12} sm={employeeType === '본사' ? 6 : 12}>
-                <FormControl fullWidth size="small">
+              <Grid item xs={12} sm={employeeType === '본사' ? 6 : 6}>
+                <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
                   <InputLabel>상태</InputLabel>
                   <Select
                     name="empStatus"
@@ -304,7 +343,7 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
 
             <Divider sx={{ my: 3 }} />
 
-            {/* 연락처 정보 섹션 */}
+            {/* 3. 연락처 정보 섹션 */}
             <Typography 
               variant="subtitle1" 
               sx={{ 
@@ -399,7 +438,7 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
 
             <Divider sx={{ my: 3 }} />
 
-            {/* 급여 계좌 정보 섹션 추가 */}
+            {/* 4. 급여 계좌 정보 섹션 */}
             <Typography 
               variant="subtitle1" 
               sx={{ 
@@ -412,7 +451,7 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small">
+                <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
                   <InputLabel>급여 은행</InputLabel>
                   <Select
                     name="empBank"
@@ -480,7 +519,7 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
                           />
                         ) : (
                           // 지점이 할당되지 않은 경우만 드롭다운으로 선택 가능
-                          <FormControl fullWidth size="small">
+                          <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
                             <InputLabel>지점 선택</InputLabel>
                             <Select
                               name="storeId"
@@ -511,56 +550,40 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
                 );
               })()
             }
-
-            <Divider sx={{ my: 3 }} />
-
-            {/* 입사 정보 섹션 */}
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
-                fontWeight: 'bold', 
-                mb: 2,
-                color: '#2563A6'
-              }}
-            >
-              {employeeType === '본사' ? '입사 정보' : '계약 정보'}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label={employeeType === '본사' ? "입사일" : "계약일"}
-                  name="hireDate"
-                  type="date"
-                  value={formData.hireDate}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-
-          {/* 저장 버튼 */}
-          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={loading}
-              sx={{
-                minWidth: 150,
-                borderRadius: '20px',
-                backgroundColor: '#2563A6',
-                '&:hover': {
-                  backgroundColor: '#1E5187',
-                }
-              }}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : '저장하기'}
-            </Button>
           </Grid>
         </Grid>
+        
+        {/* 저장 버튼 - 오른쪽 하단으로 이동 */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end', 
+          mt: 4 
+        }}>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={loading}
+            sx={{
+              width: '200px', 
+              height: '45px',
+              borderRadius: '20px',
+              backgroundColor: '#2563A6',
+              '&:hover': {
+                backgroundColor: '#1E5187',
+              },
+              fontSize: '16px',
+              fontWeight: 'bold',
+              textTransform: 'none',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              minWidth: '200px',
+              maxWidth: '200px',
+              flexShrink: 0,
+              flexGrow: 0
+            }}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : '저장하기'}
+          </Button>
+        </Box>
       </Paper>
     </Box>
   );
