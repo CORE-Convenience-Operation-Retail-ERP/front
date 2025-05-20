@@ -214,8 +214,8 @@ const ProductsAllCom = ({
 
       {/* 테이블 */}
       {!isRecalculating && !error && productList.length > 0 && (
-        <Box sx={{ width: '95%', maxWidth: 1500, mx: 'auto' }}>
-          <Table size="small" sx={{ background: '#fff', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)', mx: 'auto', minWidth: 1600 }}>
+        <Box sx={{ width: '100%', maxWidth: 1300, mx: 'auto' }}>
+          <Table size="small" sx={{ background: '#fff', borderRadius: 2, boxShadow: '0 1px 4px 0 rgba(85, 214, 223, 0.08)', mx: 'auto', minWidth: 1100 }}>
             <TableHead>
               <TableRow>
                 {productColumns.map((column, idx) => (
