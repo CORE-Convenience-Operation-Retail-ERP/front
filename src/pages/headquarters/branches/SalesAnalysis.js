@@ -241,7 +241,7 @@ const SalesAnalysis = () => {
       <Box sx={{ 
         width: '100%', 
         bgcolor: 'white', 
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)', 
+        // boxShadow: '0 2px 8px rgba(0,0,0,0.08)', 
         mb: 4, 
         pt: 4, 
         pb: 3 
