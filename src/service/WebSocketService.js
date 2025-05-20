@@ -14,23 +14,36 @@ class WebSocketService {
     this.maxReconnectAttempts = 5;
     this.userRoomIds = []; // 사용자가 속한 채팅방 ID 목록 캐시
     
-    // 페이지 로드 시 자동 연결 시도
-    this.autoConnect();
-    
-    // 페이지 가시성 변경 감지 (탭 전환 등)
-    if (typeof document !== 'undefined' && document.addEventListener) {
-      document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+    // deptId 체크: 본사 직원(4~10)만 웹소켓 사용
+    const deptId = parseInt(localStorage.getItem('deptId'), 10);
+    this.isAllowed = deptId >= 4 && deptId <= 10;
+
+    if (this.isAllowed) {
+      // 페이지 로드 시 자동 연결 시도
+      this.autoConnect();
+      
+      // 페이지 가시성 변경 감지 (탭 전환 등)
+      if (typeof document !== 'undefined' && document.addEventListener) {
+        document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+      }
+    } else {
+      console.log('WebSocketService: deptId', deptId, '웹소켓 미사용');
     }
   }
   
   // 앱 초기화 시 호출되는 함수
   init() {
+    if (!this.isAllowed) {
+      console.log('WebSocketService.init: deptId 미허용, 초기화 중단');
+      return;
+    }
     console.log('WebSocketService 초기화 중...');
     this.autoConnect();
   }
   
   // 자동 연결 함수
   autoConnect() {
+    if (!this.isAllowed) return;
     // 토큰이 있으면 자동 연결
     const token = localStorage.getItem('token');
     if (token && !this.connected) {
@@ -48,6 +61,7 @@ class WebSocketService {
   
   // 페이지 가시성 변경 처리
   handleVisibilityChange() {
+    if (!this.isAllowed) return;
     if (!document.hidden && !this.connected) {
       console.log('페이지 가시성 변경으로 연결 재시도');
       this.autoConnect();
@@ -55,6 +69,10 @@ class WebSocketService {
   }
 
   connect(token, onConnectCallback, onErrorCallback) {
+    if (!this.isAllowed) {
+      console.log('WebSocketService.connect: deptId 미허용, 연결 중단');
+      return;
+    }
     // 토큰이 없는 경우 연결을 시도하지 않음
     if (!token) {
       console.log('토큰이 없어 웹소켓 연결을 시도하지 않습니다.');
@@ -144,6 +162,7 @@ class WebSocketService {
 
   // 알림 권한 요청 함수
   requestNotificationPermission() {
+    if (!this.isAllowed) return;
     if (!("Notification" in window)) {
       console.log("이 브라우저는 알림을 지원하지 않습니다.");
       return;
@@ -161,6 +180,7 @@ class WebSocketService {
 
   // 사용자의 채팅방 목록 캐시 업데이트
   updateUserRoomsCache() {
+    if (!this.isAllowed) return Promise.resolve([]);
     return chatService.getChatRooms()
       .then(response => {
         this.userRoomIds = response.data.map(room => room.roomId);
@@ -175,6 +195,7 @@ class WebSocketService {
 
   // 채팅방 업데이트 이벤트 구독 (채팅방 생성, 나가기, 초대 등)
   subscribeToChatRoomUpdates() {
+    if (!this.isAllowed) return;
     this._subscribe('/topic/chat/rooms/update', (updatedRoom) => {
       console.log('채팅방 정보 업데이트됨:', updatedRoom);
       // 채팅방 목록 캐시 갱신
@@ -184,6 +205,7 @@ class WebSocketService {
 
   // 글로벌 채팅 메시지 구독
   subscribeToGlobalMessages() {
+    if (!this.isAllowed) return;
     // 메시지 구독 (모든 메시지를 수신하는 토픽)
     try {
       this._subscribe('/topic/chat/messages', (message) => {
@@ -223,6 +245,7 @@ class WebSocketService {
   
   // 메시지 알림 처리 로직 분리
   processMessageNotification(message, isSentByMe) {
+    if (!this.isAllowed) return;
     // 사용자가 속한 채팅방인지 확인 (캐시된 목록 사용)
     const isUserInRoom = this.userRoomIds.includes(message.roomId);
     console.log(`사용자가 채팅방 ${message.roomId}에 속해있는지: ${isUserInRoom}`, this.userRoomIds);
@@ -236,6 +259,7 @@ class WebSocketService {
   }
 
   disconnect() {
+    if (!this.isAllowed) return;
     if (this.stompClient && this.connected) {
       // 모든 구독 해제
       Object.keys(this.stompSubscriptions).forEach(destination => {
@@ -258,6 +282,7 @@ class WebSocketService {
   }
 
   subscribe(destination, callback) {
+    if (!this.isAllowed) return;
     console.log(`구독 등록: ${destination}`);
     this.subscriptions[destination] = callback;
     
@@ -269,6 +294,7 @@ class WebSocketService {
   }
 
   _subscribe(destination, callback) {
+    if (!this.isAllowed) return;
     try {
       // 이미 구독 중인지 확인
       if (this.stompSubscriptions[destination]) {
@@ -296,6 +322,7 @@ class WebSocketService {
   }
 
   unsubscribe(destination) {
+    if (!this.isAllowed) return;
     console.log(`구독 해제 시도: ${destination}`);
     
     if (this.stompSubscriptions[destination]) {
@@ -316,6 +343,7 @@ class WebSocketService {
   }
 
   sendMessage(destination, message) {
+    if (!this.isAllowed) return;
     if (this.connected && this.stompClient && this.stompClient.connected) {
       console.log(`메시지 전송 (${destination}):`, message);
       this.stompClient.publish({
@@ -329,7 +357,7 @@ class WebSocketService {
   }
 
   isConnected() {
-    return this.connected && this.stompClient && this.stompClient.connected;
+    return this.isAllowed && this.connected && this.stompClient && this.stompClient.connected;
   }
 }
 
