@@ -1,14 +1,30 @@
 import React, { useEffect, useState } from "react";
 import CategorySalesDonutCom from "../../../components/store/statistics/CategorySalesDonutCom";
-import { fetchCategorySales } from "../../../service/store/StatisticsService";
-import { fetchAllDescendants } from "../../../service/store/CategoryService";
+import {
+    fetchCategorySales
+} from "../../../service/store/StatisticsService";
+import {
+    fetchAllDescendants,
+    fetchParentCategories,
+    fetchChildCategories
+} from "../../../service/store/CategoryService";
 
 function CategorySalesDonutCon({ filters }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [colorOverrides, setColorOverrides] = useState({});
 
-    //  로컬스토리지 색상 불러오기
+    const [parentCategories, setParentCategories] = useState([]);
+    const [childCategories, setChildCategories] = useState([]);
+    const [grandChildCategories, setGrandChildCategories] = useState([]);
+
+    const [categoryFilter, setCategoryFilter] = useState({
+        parentCategoryId: "",
+        categoryId: "",
+        subCategoryId: ""
+    });
+
+    //  색상 로딩
     useEffect(() => {
         const savedColors = localStorage.getItem("categoryColors");
         if (savedColors) {
@@ -16,22 +32,55 @@ function CategorySalesDonutCon({ filters }) {
         }
     }, []);
 
-    //  색상 변경 핸들러
     const handleColorChange = (categoryName, newColor) => {
         const updated = { ...colorOverrides, [categoryName]: newColor };
         setColorOverrides(updated);
         localStorage.setItem("categoryColors", JSON.stringify(updated));
     };
 
-    //  통계 데이터 로드
+    //  카테고리 목록 로딩
+    useEffect(() => {
+        fetchParentCategories().then(data => setParentCategories(data || []));
+    }, []);
+
+    const handleParentChange = async (id) => {
+        setCategoryFilter({ parentCategoryId: id, categoryId: "", subCategoryId: "" });
+        setChildCategories([]);
+        setGrandChildCategories([]);
+        if (id) {
+            const children = await fetchChildCategories(id);
+            setChildCategories(children || []);
+        }
+    };
+
+    const handleChildChange = async (id) => {
+        setCategoryFilter(prev => ({ ...prev, categoryId: id, subCategoryId: "" }));
+        setGrandChildCategories([]);
+        if (id) {
+            const children = await fetchChildCategories(id);
+            setGrandChildCategories(children || []);
+        }
+    };
+
+    const handleSubChildChange = (id) => {
+        setCategoryFilter(prev => ({ ...prev, subCategoryId: id }));
+    };
+
+    //  통계 로딩
     useEffect(() => {
         const load = async () => {
             try {
                 setLoading(true);
-
                 let categoryIds = [];
-                if (filters?.categoryId) {
-                    categoryIds = await fetchAllDescendants(filters.categoryId); // 🎯 리팩토링된 fetch 함수 사용
+
+                // 우선순위: 소분류 → 중분류 → 대분류
+                const selectedCategoryId =
+                    categoryFilter.subCategoryId ||
+                    categoryFilter.categoryId ||
+                    categoryFilter.parentCategoryId;
+
+                if (selectedCategoryId) {
+                    categoryIds = await fetchAllDescendants(selectedCategoryId);
                 }
 
                 const stats = await fetchCategorySales({
@@ -53,15 +102,38 @@ function CategorySalesDonutCon({ filters }) {
         if (filters?.storeId) {
             load();
         }
-    }, [filters]);
+    }, [filters, categoryFilter]);
 
     return (
-        <CategorySalesDonutCom
-            data={data}
-            loading={loading}
-            colorOverrides={colorOverrides}
-            onColorChange={handleColorChange}
-        />
+        <div>
+            <div style={{ display: "flex", gap: "10px", marginBottom: "1rem" }}>
+                <select value={categoryFilter.parentCategoryId} onChange={e => handleParentChange(e.target.value)}>
+                    <option value="">대분류 선택</option>
+                    {parentCategories.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                </select>
+                <select value={categoryFilter.categoryId} onChange={e => handleChildChange(e.target.value)}>
+                    <option value="">중분류 선택</option>
+                    {childCategories.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                </select>
+                <select value={categoryFilter.subCategoryId} onChange={e => handleSubChildChange(e.target.value)}>
+                    <option value="">소분류 선택</option>
+                    {grandChildCategories.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                </select>
+            </div>
+
+            <CategorySalesDonutCom
+                data={data}
+                loading={loading}
+                colorOverrides={colorOverrides}
+                onColorChange={handleColorChange}
+            />
+        </div>
     );
 }
 

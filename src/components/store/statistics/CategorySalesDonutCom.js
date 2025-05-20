@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { PieChart, Pie, Cell, Tooltip, Legend, Sector } from "recharts";
 import CategoryColorPicker from "../common/CategoryColorPicker";
 import {
@@ -9,6 +9,7 @@ import {
 } from "../../../features/store/styles/statistics/CategorySalesDonut.styled";
 
 function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange }) {
+    const pickerRef = useRef(null);
     const DEFAULT_COLORS = [
         "#A8DADC", "#FFBCBC", "#FFD6A5", "#FDFFB6",
         "#CAFFBF", "#9BF6FF", "#BDB2FF", "#FFC6FF"
@@ -65,6 +66,26 @@ function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange })
         <ChartWrapper>
             <div>
                 <h3>카테고리별 매출 비율</h3>
+
+                {/* 카테고리별 분류 라벨 */}
+                {!isEmpty && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "1rem" }}>
+                        {safeData.map((entry, index) => (
+                            <LegendItem
+                                key={entry.categoryName}
+                                onClick={() => handleTogglePicker(entry.categoryName)}
+                                active={activeCategory === entry.categoryName}
+                            >
+                                <ColorCircle
+                                    color={colorOverrides?.[entry.categoryName] || DEFAULT_COLORS[index % DEFAULT_COLORS.length]}
+                                    active={activeCategory === entry.categoryName}
+                                />
+                                <span>{entry.categoryName}</span>
+                            </LegendItem>
+                        ))}
+                    </div>
+                )}
+
                 <PieChart width={400} height={300}>
                     <defs>
                         <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
@@ -78,7 +99,7 @@ function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange })
                         cx="50%"
                         cy="50%"
                         outerRadius={100}
-                        label
+                        label={({ categoryName }) => categoryName}
                         activeIndex={activeIndex >= 0 ? activeIndex : null}
                         activeShape={renderActiveShape}
                     >
@@ -101,44 +122,50 @@ function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange })
                             const { categoryName, totalSales } = props.payload;
                             return [`${totalSales.toLocaleString()}원`, categoryName];
                         }}
-                    />
-                    }
+                    />}
                     {!isEmpty && <Legend />}
                 </PieChart>
-
-                {!isEmpty && (
-                    <div style={{ marginTop: "1rem" }}>
-                        {safeData.map((entry, index) => {
-                            const color = colorOverrides?.[entry.categoryName] || DEFAULT_COLORS[index % DEFAULT_COLORS.length];
-                            return (
-                                <LegendItem
-                                    key={entry.categoryName}
-                                    onClick={() => handleTogglePicker(entry.categoryName)}
-                                    active={activeCategory === entry.categoryName}
-                                >
-                                    <ColorCircle color={color} active={activeCategory === entry.categoryName} />
-                                    <span>{entry.categoryName}</span>
-                                </LegendItem>
-                            );
-                        })}
-                    </div>
-                )}
             </div>
 
-            <PickerContainer>
+            <PickerContainer ref={pickerRef}>
                 {activeCategory && (
-                    <CategoryColorPicker
-                        categoryName={activeCategory}
-                        currentColor={
-                            colorOverrides?.[activeCategory] ||
-                            DEFAULT_COLORS[
-                            safeData.findIndex(d => d.categoryName === activeCategory) % DEFAULT_COLORS.length
-                                ]
-                        }
-                        onColorChange={onColorChange}
-                    />
+                    <div style={{ position: "relative" }}>
+                        {/* 닫기 버튼 */}
+                        <button
+                            onClick={() => setActiveCategory(null)}
+                            style={{
+                                position: "absolute",
+                                top: 0,
+                                right: 0,
+                                background: "transparent",
+                                border: "none",
+                                fontSize: "1.2rem",
+                                cursor: "pointer",
+                                padding: "4px",
+                                color: "#999",
+                            }}
+                            aria-label="닫기"
+                        >
+                            ×
+                        </button>
+
+                        {/* 실제 피커 */}
+                        <CategoryColorPicker
+                            categoryName={activeCategory}
+                            onClose={() => setActiveCategory(null)}
+                            currentColor={
+                                colorOverrides?.[activeCategory] ||
+                                DEFAULT_COLORS[
+                                safeData.findIndex((d) => d.categoryName === activeCategory) %
+                                DEFAULT_COLORS.length
+                                    ]
+                            }
+                            onColorChange={onColorChange}
+                        />
+                    </div>
                 )}
             </PickerContainer>
+
         </ChartWrapper>
     );
 }

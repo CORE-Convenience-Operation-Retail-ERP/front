@@ -22,7 +22,6 @@ function StatisticsDashboardCon() {
     });
 
     const handleSearch = (newFilter) => {
-        // 날짜 필터가 date로 들어온 경우 → startDate, endDate를 동일하게 설정
         if (newFilter.date) {
             setFilters((prev) => ({
                 ...prev,
@@ -40,21 +39,12 @@ function StatisticsDashboardCon() {
             }));
         }
 
-        // 나머지 일반 필터
-        else {
-            setFilters((prev) => ({
-                ...prev,
-                ...newFilter,
-            }));
-        }
     };
 
     return (
         <>
             <StoreSearchBar
                 filterOptions={[
-                    { key: "productName", label: "상품명", type: "text" },
-                    { key: "categoryIds", label: "카테고리", type: "tree" },
                     { key: "date", label: "날짜(단일)", type: "date" },
                     { key: "dateRange", label: "기간(범위)", type: "date-range" },
                 ]}
