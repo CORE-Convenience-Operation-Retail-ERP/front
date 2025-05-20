@@ -237,7 +237,7 @@ const BranchesListCom = ({
                   sx={{ 
                     cursor: 'pointer',
                     '&:hover': {
-                      backgroundColor: '#F0F5FF',
+                      backgroundColor: '#F0F5FF !important',
                     }
                   }}
                 >

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
   Paper, Collapse, Box, Typography, Button, Chip,
-  IconButton, Pagination, Stack, InputBase
+  IconButton, Pagination, Stack, InputBase, Divider
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -22,13 +22,13 @@ const BoardRow = ({ post, canManage, onAddComment, onEdit, onDelete }) => {
         sx={{ 
           '& > *': { borderBottom: 'unset' }, 
           cursor: 'pointer',
-          '&:hover': { backgroundColor: '#f5f5f5' }
+          '&:hover': { backgroundColor: '#F0F5FF' }
         }}
         onClick={() => setOpen(!open)}
       >
-        <TableCell>{post.postId}</TableCell>
-        <TableCell>{post.empName}</TableCell>
-        <TableCell>
+        <TableCell align="center">{post.postId}</TableCell>
+        <TableCell align="center">{post.empName}</TableCell>
+        <TableCell align="center">
           {post.boardTitle}
           <IconButton
             aria-label="expand row"
@@ -41,12 +41,28 @@ const BoardRow = ({ post, canManage, onAddComment, onEdit, onDelete }) => {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell>{format(new Date(post.boardCreatedAt), 'yyyy-MM-dd')}</TableCell>
-        <TableCell>
+        <TableCell align="center">{format(new Date(post.boardCreatedAt), 'yyyy-MM-dd')}</TableCell>
+        <TableCell align="center">
           {post.boardType > 1 && (
             hasComment ? 
-              <Chip label="답변완료" color="success" size="small" /> : 
-              <Chip label="답변대기" color="warning" size="small" />
+              <Chip
+                label="답변완료"
+                size="small"
+                sx={{
+                  backgroundColor: 'skyblue',
+                  color: '#fff',
+                  fontWeight: 600
+                }}
+              /> : 
+              <Chip
+                label="답변대기"
+                size="small"
+                sx={{
+                  backgroundColor: 'orange',
+                  color: '#fff',
+                  fontWeight: 600
+                }}
+              />
           )}
         </TableCell>
       </TableRow>
@@ -54,25 +70,31 @@ const BoardRow = ({ post, canManage, onAddComment, onEdit, onDelete }) => {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 2 }}>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom component="div">
-                {post.boardTitle}
-              </Typography>
-              <Box sx={{ p: 2, bgcolor: '#f5f5f5', borderRadius: 1, mb: 2 }}>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-                  {post.boardContent}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-                  작성자: {post.empName} | 작성일: {format(new Date(post.boardCreatedAt), 'yyyy-MM-dd HH:mm')}
-                </Typography>
+              {/* 제목+내용 박스 */}
+              <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, mb: 2, p: 0 }}>
+                <Box sx={{ pl: 2, pt: 2, pr: 2 }}>
+                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom component="div">
+                    {post.boardTitle}
+                  </Typography>
+                </Box>
+                <Divider />
+                <Box sx={{ p: 2 }}>
+                  <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+                    {post.boardContent}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                    작성자: {post.empName} | 작성일: {format(new Date(post.boardCreatedAt), 'yyyy-MM-dd HH:mm')}
+                  </Typography>
+                </Box>
               </Box>
-              
+              {/* 답변 */}
               {hasComment && (
-                <Box sx={{ ml: 3, mb: 2 }}>
+                <Box sx={{ ml: 3, mb: 2, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#f7fafd', p: 2 }}>
                   <Typography variant="subtitle2" color="primary" gutterBottom>
                     답변
                   </Typography>
                   {post.comments.map(comment => (
-                    <Box key={comment.commentId} sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 1 }}>
+                    <Box key={comment.commentId} sx={{ mb: 1 }}>
                       <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
                         {comment.comContent}
                       </Typography>
@@ -103,7 +125,7 @@ const BoardRow = ({ post, canManage, onAddComment, onEdit, onDelete }) => {
                   )}
                   <Button 
                     variant="outlined" 
-                    color="secondary" 
+                    color="success" 
                     size="small" 
                     onClick={(e) => {
                       e.stopPropagation();
@@ -263,7 +285,7 @@ const BoardList = ({
             onClick={() => onAddPost(boardType)}
             sx={{
               backgroundColor: '#2563A6',
-              '&:hover': { backgroundColor: '#1E5187' },
+              '&:hover': { backgroundColor: '#F0F5FF' },
               borderRadius: '30px',
               px: 3,
               height: 40
@@ -278,11 +300,11 @@ const BoardList = ({
           <Table aria-label="collapsible table">
             <TableHead>
               <TableRow sx={{ backgroundColor: '#f0f7ff' }}>
-                <TableCell width="10%">번호</TableCell>
-                <TableCell width="15%">작성자</TableCell>
-                <TableCell width="50%">제목</TableCell>
-                <TableCell width="15%">작성일</TableCell>
-                <TableCell width="10%">상태</TableCell>
+                <TableCell width="10%" align="center">번호</TableCell>
+                <TableCell width="15%" align="center">작성자</TableCell>
+                <TableCell width="50%" align="center">제목</TableCell>
+                <TableCell width="15%" align="center">작성일</TableCell>
+                <TableCell width="10%" align="center">상태</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
