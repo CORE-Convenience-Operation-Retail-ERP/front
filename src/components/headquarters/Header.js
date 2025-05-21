@@ -162,7 +162,7 @@ const Header = () => {
                 '&:hover': { textDecoration: 'underline' },
                 color: 'black'
               }}
-              onClick={() => navigate(`/headquarters/hr/my-page/${1}`)}
+              onClick={() => navigate(`/headquarters/hr/my-page`)}
             >
               {userName}님
             </Box>
