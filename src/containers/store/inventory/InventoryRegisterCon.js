@@ -128,33 +128,26 @@ function InventoryRegisterCon() {
     };
 
     return (
-        <>
-            <StoreSearchBar
-                filterOptions={[
-                    { key: "productName", label: "상품명", type: "text", placeholder: "상품명 입력" },
-                    { key: "barcode", label: "바코드", type: "text", placeholder: "바코드 입력" },
-                ]}
-                onSearch={(params) => {
-                    handleSearch({ productName: "", barcode: "", ...params });
-                }}
-            />
-            <InventoryRegisterCom
-                products={products}
-                realQuantities={realQuantities}
-                onQuantityChange={handleQuantityChange}
-                onRegister={handleRegister}
-                partTimers={partTimers}
-                partTimerId={partTimerId}
-                setPartTimerId={setPartTimerId}
-                reason={reason}
-                setReason={setReason}
-            />
-            <Pagination
-                currentPage={searchParams.page}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-            />
-        </>
+    <InventoryRegisterCom
+        products={products}
+        realQuantities={realQuantities}
+        onQuantityChange={handleQuantityChange}
+        onRegister={handleRegister}
+        partTimers={partTimers}
+        partTimerId={partTimerId}
+        setPartTimerId={setPartTimerId}
+        reason={reason}
+        setReason={setReason}
+        currentPage={searchParams.page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        searchOptions={[
+        { key: "productName", label: "상품명", type: "text", placeholder: "상품명 입력" },
+        { key: "barcode", label: "바코드", type: "text", placeholder: "바코드 입력" },
+        ]}
+        onSearch={handleSearch}
+    />
+
     );
 }
 

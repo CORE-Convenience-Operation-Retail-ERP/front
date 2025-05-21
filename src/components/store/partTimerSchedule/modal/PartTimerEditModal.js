@@ -12,7 +12,6 @@ function PartTimerEditModal({ onClose, onUpdate, onDelete, schedule, colorOption
         bgColor: schedule.bgColor || '#03bd9e'
     });
 
-    // 파트타이머 전체 로딩 + 현재 선택된 이름 찾아서 자동 설정
     useEffect(() => {
         const load = async () => {
             try {

@@ -1,6 +1,16 @@
 import React, { useState } from "react";
+import { FiEdit3, FiArrowRightCircle } from "react-icons/fi";
+import { MdInventory, MdLocationOn } from "react-icons/md";
 import StockTransferModalCon from "../../../containers/store/stock/StockTransferModalCon";
 import StockHistorySummaryCom from "./StockHistorySummaryCom";
+import { MdHistory } from "react-icons/md";
+import {
+  PageWrapper,
+  PageSection,
+  PageTitle,
+} from '../../../features/store/styles/common/PageLayout';
+import { PrimaryButton } from '../../../features/store/styles/common/Button.styled';
+import { Table } from '../../../features/store/styles/common/Table.styled';
 
 function StockDetailCom({
   productDetail,
@@ -33,11 +43,11 @@ function StockDetailCom({
     return real - expected;
   };
 
-  const renderRow = (label, expected, real) => {
+  const renderRow = (label, expected, real, rowStyle = {}) => {
     const diff = calculateDiff(real, expected);
     const diffStyle = diff > 0 ? { color: "green" } : diff < 0 ? { color: "red" } : {};
     return (
-      <tr>
+      <tr style={rowStyle}>
         <td>{label}</td>
         <td>{expected ?? "-"}</td>
         <td>{real ?? "-"}</td>
@@ -47,53 +57,65 @@ function StockDetailCom({
   };
 
   return (
-    <div>
-      <h2>📦 상품 상세 정보</h2>
-      <p><strong>상품명:</strong> {proName}</p>
-      <p><strong>바코드:</strong> {proBarcode}</p>
-      <p><strong>판매 상태:</strong> {status}</p>
+    <PageWrapper>
+      <PageTitle><MdInventory style={{ marginRight: '6px', verticalAlign: 'middle' }} /> 상품 상세 정보</PageTitle>
 
-      <h3>📍 위치 정보</h3>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <span
-          title="클릭 시 진열 위치 보기"
-          style={{ cursor: "pointer", textDecoration: "underline" }}
-          onClick={onClickOpenView}
-        >
-          <div>
-            <strong>매장 위치 코드:</strong>{" "}
-            {Array.isArray(locationCode) && locationCode.length > 0 ? (
-              locationCode.map((code) => (
-                <span key={code} style={{ marginRight: "6px", fontWeight: "bold" }}>
-                  {code}
-                </span>
-              ))
-            ) : (
-              <span>미지정</span>
-            )}
-          </div>
-        </span>
-        <button onClick={onClickOpenEdit}>✏️ 수정</button>
-      </div>
+      <PageSection>
+        <p><strong>상품명:</strong> {proName}</p>
+        <p><strong>바코드:</strong> {proBarcode}</p>
+        <p><strong>판매 상태:</strong> {status}</p>
+      </PageSection>
 
-      <h3>📊 재고 실사 비교</h3>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ backgroundColor: "#f2f2f2" }}>
-            <th>구분</th>
-            <th>기존 수량</th>
-            <th>실사 수량</th>
-            <th>오차</th>
-          </tr>
-        </thead>
-        <tbody>
-          {renderRow("매장", storeExpectedQty, storeRealQty)}
-          {renderRow("창고", warehouseExpectedQty, warehouseRealQty)}
-          {renderRow("총합", totalExpectedQty, totalRealQty)}
-        </tbody>
-      </table>
+      <PageSection>
+        <h3><MdLocationOn style={{ marginRight: '6px', verticalAlign: 'middle' }} /> 위치 정보</h3>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <span
+            title="클릭 시 진열 위치 보기"
+            style={{ cursor: "pointer", textDecoration: "underline" }}
+            onClick={onClickOpenView}
+          >
+            <div>
+              <strong>매장 위치 코드:</strong>{" "}
+              {Array.isArray(locationCode) && locationCode.length > 0 ? (
+                locationCode.map((code) => (
+                  <span key={code} style={{ marginRight: "6px", fontWeight: "bold" }}>
+                    {code}
+                  </span>
+                ))
+              ) : (
+                <span>미지정</span>
+              )}
+            </div>
+          </span>
+          <PrimaryButton onClick={onClickOpenEdit}>
+            <FiEdit3 style={{ marginRight: "4px" }} /> 위치 수정
+          </PrimaryButton>
+        </div>
+      </PageSection>
 
-      <button onClick={() => setShowTransferModal(true)}>재고 이동</button>
+      <PageSection>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <h3 style={{ margin: 0 }}><FiArrowRightCircle style={{ marginRight: '6px', verticalAlign: 'middle' }} /> 재고 실사 비교</h3>
+          <PrimaryButton onClick={() => setShowTransferModal(true)}>
+            <FiArrowRightCircle style={{ marginRight: '6px' }} /> 재고 이동
+          </PrimaryButton>
+        </div>
+        <Table>
+          <thead>
+            <tr>
+              <th style={{ width: '25%' }}>구분</th>
+              <th style={{ width: '25%' }}>기존 수량</th>
+              <th style={{ width: '25%' }}>실사 수량</th>
+              <th style={{ width: '25%' }}>오차</th>
+            </tr>
+          </thead>
+          <tbody>
+            {renderRow("매장", storeExpectedQty, storeRealQty)}
+            {renderRow("창고", warehouseExpectedQty, warehouseRealQty)}
+            {renderRow("총합", totalExpectedQty, totalRealQty, { backgroundColor: '#f9f9fc', fontWeight: 'bold' })}
+          </tbody>
+        </Table>
+      </PageSection>
 
       {showTransferModal && (
         <StockTransferModalCon
@@ -107,8 +129,16 @@ function StockDetailCom({
         />
       )}
 
-      <StockHistorySummaryCom historyList={historyList} productId={productId} />
-    </div>
+      <PageSection>
+        <h3><MdHistory style={{ marginRight: '6px', verticalAlign: 'middle' }} /> 수량 변화 로그</h3>
+        <StockHistorySummaryCom
+          historyList={historyList}
+          productId={productId}
+          enableFilter={true}
+          highlightDiff={true}
+        />
+      </PageSection>
+    </PageWrapper>
   );
 }
 

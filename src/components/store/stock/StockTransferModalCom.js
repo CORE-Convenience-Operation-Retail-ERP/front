@@ -1,4 +1,3 @@
-// src/components/store/stock/StockTransferModalCom.js
 import React from "react";
 import {
     ModalOverlay,

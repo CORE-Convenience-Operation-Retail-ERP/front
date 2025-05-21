@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 function LocationEditorCon({
   onClose,
   isEditMode,
-  productLocationCode = [],        // 저장된 위치들
+  productLocationCode = [],     
   onConfirmSave,
 }) {
   const { productId } = useParams();
