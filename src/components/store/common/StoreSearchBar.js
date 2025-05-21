@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   SearchWrap,
   Input,
@@ -12,28 +12,30 @@ function StoreSearchBar({ filterOptions = [], onSearch, initialValues = {} }) {
   const [criteria, setCriteria] = useState(filterOptions[0]?.key || '');
   const [value, setValue] = useState('');
   const [range, setRange] = useState([null, null]);
+  const prevCriteriaRef = useRef(criteria);
 
   const selectedOption = filterOptions.find(opt => opt.key === criteria) || {};
 
-  // 초기값 세팅 로직
+  // 초기값 세팅 로직 (criteria 변경 시에만)
   useEffect(() => {
-    if (!criteria) return;
-
-    const type = selectedOption.type;
-    if (type === 'text' || type === 'number' || type === 'select' || type === 'date') {
-      setValue(initialValues[criteria] || '');
-    }
-
-    if (type === 'date-range') {
-      if (initialValues.startDate && initialValues.endDate) {
-        setRange([
-          new Date(initialValues.startDate),
-          new Date(initialValues.endDate)
-        ]);
+    if (prevCriteriaRef.current !== criteria) {
+      const type = selectedOption.type;
+      if (type === 'text' || type === 'number' || type === 'select' || type === 'date') {
+        setValue(initialValues[criteria] || '');
       }
-    }
-  }, [criteria, initialValues, selectedOption.type]);
 
+      if (type === 'date-range') {
+        if (initialValues.startDate && initialValues.endDate) {
+          setRange([
+            new Date(initialValues.startDate),
+            new Date(initialValues.endDate)
+          ]);
+        }
+      }
+
+      prevCriteriaRef.current = criteria;
+    }
+  }, [criteria, initialValues]);
 
   const handleSelectChange = (e) => {
     const v = e.target.value;
@@ -81,7 +83,7 @@ function StoreSearchBar({ filterOptions = [], onSearch, initialValues = {} }) {
       const [start, end] = range;
       if (start && end) {
         onSearch({
-          startDate: formatDate(start), 
+          startDate: formatDate(start),
           endDate: formatDate(end),
         });
       }
@@ -94,105 +96,105 @@ function StoreSearchBar({ filterOptions = [], onSearch, initialValues = {} }) {
   };
 
   const renderSelectOptions = (options = [], defaultLabel = "선택") => (
-    <>
-      <option value="">{defaultLabel}</option>
-      {options.map(o => (
-        <option key={o.id || o.value} value={o.id || o.value}>
-          {o.name || o.label}
-        </option>
-      ))}
-    </>
+      <>
+        <option value="">{defaultLabel}</option>
+        {options.map(o => (
+            <option key={o.id || o.value} value={o.id || o.value}>
+              {o.name || o.label}
+            </option>
+        ))}
+      </>
   );
 
   return (
-    <SearchWrap>
-      <CriteriaSelect
-        value={criteria}
-        onChange={(e) => {
-          setCriteria(e.target.value);
-          setValue('');
-          setRange([null, null]);
-        }}
-      >
-        {filterOptions.map(opt => (
-          <option key={opt.key} value={opt.key}>{opt.label}</option>
-        ))}
-      </CriteriaSelect>
+      <SearchWrap>
+        <CriteriaSelect
+            value={criteria}
+            onChange={(e) => {
+              setCriteria(e.target.value);
+              setValue('');
+              setRange([null, null]);
+            }}
+        >
+          {filterOptions.map(opt => (
+              <option key={opt.key} value={opt.key}>{opt.label}</option>
+          ))}
+        </CriteriaSelect>
 
-      {selectedOption.type === 'tree' && (
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <ValueSelect
-            value={selectedOption.filters?.parentCategoryId || ''}
-            onChange={(e) => selectedOption.onParentChange?.(e.target.value)}
-          >
-            {renderSelectOptions(selectedOption.parentCategories, "대분류")}
-          </ValueSelect>
+        {selectedOption.type === 'tree' && (
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <ValueSelect
+                  value={selectedOption.filters?.parentCategoryId || ''}
+                  onChange={(e) => selectedOption.onParentChange?.(e.target.value)}
+              >
+                {renderSelectOptions(selectedOption.parentCategories, "대분류")}
+              </ValueSelect>
 
-          <ValueSelect
-            value={selectedOption.filters?.categoryId || ''}
-            onChange={(e) => selectedOption.onChildChange?.(e.target.value)}
-          >
-            {renderSelectOptions(selectedOption.childCategories, "중분류")}
-          </ValueSelect>
+              <ValueSelect
+                  value={selectedOption.filters?.categoryId || ''}
+                  onChange={(e) => selectedOption.onChildChange?.(e.target.value)}
+              >
+                {renderSelectOptions(selectedOption.childCategories, "중분류")}
+              </ValueSelect>
 
-          <ValueSelect
-            value={selectedOption.filters?.subCategoryId || ''}
-            onChange={(e) => selectedOption.onSubChildChange?.(e.target.value)}
-          >
-            {renderSelectOptions(selectedOption.grandChildCategories, "소분류")}
-          </ValueSelect>
-        </div>
-      )}
+              <ValueSelect
+                  value={selectedOption.filters?.subCategoryId || ''}
+                  onChange={(e) => selectedOption.onSubChildChange?.(e.target.value)}
+              >
+                {renderSelectOptions(selectedOption.grandChildCategories, "소분류")}
+              </ValueSelect>
+            </div>
+        )}
 
-      {selectedOption.type === 'number' && (
-        <Input
-          type="number"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        />
-      )}
+        {selectedOption.type === 'number' && (
+            <Input
+                type="number"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+        )}
 
-      {selectedOption.type === 'text' && (
-        <Input
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        />
-      )}
+        {selectedOption.type === 'text' && (
+            <Input
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+        )}
 
-      {selectedOption.type === 'select' && (
-        <ValueSelect value={value} onChange={handleSelectChange}>
-          {renderSelectOptions(selectedOption.options)}
-        </ValueSelect>
-      )}
+        {selectedOption.type === 'select' && (
+            <ValueSelect value={value} onChange={handleSelectChange}>
+              {renderSelectOptions(selectedOption.options)}
+            </ValueSelect>
+        )}
 
-      {selectedOption.type === 'date' && (
-        <CustomCalendar
-          selected={value ? new Date(value) : null}
-          onChange={(date) => setValue(date.toISOString().split('T')[0])}
-          placeholder="날짜 선택"
-        />
-      )}
+        {selectedOption.type === 'date' && (
+            <CustomCalendar
+                selected={value ? new Date(value) : null}
+                onChange={(date) => setValue(date.toISOString().split('T')[0])}
+                placeholder="날짜 선택"
+            />
+        )}
 
-      {selectedOption.type === 'date-range' && (
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <CustomCalendar
-            selected={range[0]}
-            onChange={(date) => setRange([date, range[1]])}
-            placeholder="시작일"
-          />
-          <span>~</span>
-          <CustomCalendar
-            selected={range[1]}
-            onChange={(date) => setRange([range[0], date])}
-            placeholder="종료일"
-          />
-        </div>
-      )}
+        {selectedOption.type === 'date-range' && (
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <CustomCalendar
+                  selected={range[0]}
+                  onChange={(date) => setRange([date, range[1]])}
+                  placeholder="시작일"
+              />
+              <span>~</span>
+              <CustomCalendar
+                  selected={range[1]}
+                  onChange={(date) => setRange([range[0], date])}
+                  placeholder="종료일"
+              />
+            </div>
+        )}
 
-      <Button onClick={handleSearch}>검색</Button>
-    </SearchWrap>
+        <Button onClick={handleSearch}>검색</Button>
+      </SearchWrap>
   );
 }
 

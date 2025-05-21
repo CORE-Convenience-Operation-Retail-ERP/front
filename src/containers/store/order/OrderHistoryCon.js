@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useEffect, useMemo, useState} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   completePartialItems,
@@ -16,6 +16,13 @@ function OrderHistoryCon() {
   const [partialItems, setPartialItems] = useState([]);
   const [partTimers, setPartTimers] = useState([]);
   const [selectedPartTimerId, setSelectedPartTimerId] = useState(null);
+  const [page, setPage] = useState(0);
+  const [pageSize] = useState(10);
+
+  const pagedItems = useMemo(() => {
+    const start = page * pageSize;
+    return items.slice(start, start + pageSize);
+  }, [items, page, pageSize]);
 
 
   // ▶ 아이템과 남은 수량을 반환하는 유틸
@@ -153,7 +160,11 @@ const getItemAndRemainingQty = (itemId) => {
 
   return (
       <OrderHistoryCom
-          itemList={items}
+          itemList={pagedItems}
+          totalItems={items.length}
+          currentPage={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
           partialItems={partialItems}
           partTimers={partTimers}
           selectedPartTimerId={selectedPartTimerId}

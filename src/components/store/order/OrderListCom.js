@@ -1,58 +1,84 @@
+import React from "react";
 import {
-  OrderTable,
-  OrderHead,
-  OrderTh,
-  OrderTd,
-  HighlightId,
-  Btn,
-} from '../../../features/store/styles/order/Order.styled';
+  PageWrapper,
+  PageSection,
+  TableWrapper,
+  HighlightId
+} from "../../../features/store/styles/common/PageLayout";
+import { Table } from "../../../features/store/styles/common/Table.styled";
+import { PrimaryButton } from "../../../features/store/styles/common/Button.styled";
+import Pagination from "../../../components/store/common/Pagination";
 
-function OrderListCom({ orderList, onRowClick, getOrderStatusLabel, onEditClick, onDeleteClick, onCancleClick }) {
+function OrderListCom({
+                        orderList,
+                        onRowClick,
+                        getOrderStatusLabel,
+                        onEditClick,
+                        onDeleteClick,
+                        onCancleClick,
+                        currentPage,
+                        totalPages,
+                        onPageChange
+                      }) {
+
   const userRole = localStorage.getItem("role");
 
   const renderCell = (order, content) => (
-    <OrderTd onClick={() => onRowClick(order.orderId)}>{content}</OrderTd>
+      <td onClick={() => onRowClick(order.orderId)}>{content}</td>
   );
 
   const renderActionButtons = (order) => {
     const isPending = order.orderStatus === 0;
     return (
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
-        {isPending && <Btn onClick={() => onEditClick(order.orderId)}>수정</Btn>}
-        {userRole === "ROLE_HQ" && (
-          <Btn onClick={() => onCancleClick(order.orderId)}>취소</Btn>
-        )}
-        {isPending && userRole === "ROLE_STORE" && (
-          <Btn onClick={() => onDeleteClick(order.orderId)}>삭제</Btn>
-        )}
-      </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {isPending && <PrimaryButton onClick={() => onEditClick(order.orderId)}>수정</PrimaryButton>}
+          {userRole === "ROLE_HQ" && (
+              <PrimaryButton onClick={() => onCancleClick(order.orderId)}>취소</PrimaryButton>
+          )}
+          {isPending && userRole === "ROLE_STORE" && (
+              <PrimaryButton onClick={() => onDeleteClick(order.orderId)}>삭제</PrimaryButton>
+          )}
+        </div>
     );
   };
+
   return (
-    <OrderTable>
-      <OrderHead>
-        <tr>
-          <OrderTh>발주번호</OrderTh>
-          <OrderTh>총 수량</OrderTh>
-          <OrderTh>총 금액</OrderTh>
-          <OrderTh>입고 일자</OrderTh>
-          <OrderTh>상태</OrderTh>
-          <OrderTh>작업</OrderTh>
-        </tr>
-      </OrderHead>
-      <tbody>
-        {orderList.map(order => (
-          <tr key={order.orderId} style={{ cursor: 'pointer' }}>
-            {renderCell(order, <HighlightId>{order.orderId}</HighlightId>)}
-            {renderCell(order, order.totalQuantity)}
-            {renderCell(order, `${order.totalAmount?.toLocaleString() || 0}원`)}
-            {renderCell(order, order.orderDate ? new Date(order.orderDate).toLocaleString() : '-')}
-            {renderCell(order, getOrderStatusLabel(order.orderStatus))}
-            <OrderTd>{renderActionButtons(order)}</OrderTd>
-          </tr>
-        ))}
-      </tbody>
-    </OrderTable>
+      <PageWrapper>
+        <PageSection>
+          <TableWrapper>
+            <Table>
+              <thead>
+              <tr>
+                <th>발주번호</th>
+                <th>총 수량</th>
+                <th>총 금액</th>
+                <th>입고 일자</th>
+                <th>상태</th>
+                <th>작업</th>
+              </tr>
+              </thead>
+              <tbody>
+              {orderList.map(order => (
+                  <tr key={order.orderId} style={{ cursor: 'pointer' }}>
+                    {renderCell(order, <HighlightId>{order.orderId}</HighlightId>)}
+                    {renderCell(order, order.totalQuantity)}
+                    {renderCell(order, `${order.totalAmount?.toLocaleString() || 0}원`)}
+                    {renderCell(order, order.orderDate ? new Date(order.orderDate).toLocaleString() : '-')}
+                    {renderCell(order, getOrderStatusLabel(order.orderStatus))}
+                    <td>{renderActionButtons(order)}</td>
+                  </tr>
+              ))}
+              </tbody>
+            </Table>
+          </TableWrapper>
+
+          <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
+          />
+        </PageSection>
+      </PageWrapper>
   );
 }
 

@@ -5,7 +5,7 @@ import styled, { keyframes } from 'styled-components';
 // 전체 감싸는 래퍼
 export const Wrapper = styled.div`
     padding: 24px;
-    background-color: #fdfdfd;
+    background-color: white;
 `;
 
 // 필터/버튼 행

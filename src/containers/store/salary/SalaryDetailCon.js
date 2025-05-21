@@ -16,13 +16,11 @@ function SalaryDetailCon() {
   const [loading, setLoading] = useState(false);
 
   const loadDetail = async () => {
-    console.log("✅ fetch detail params", { id, view, year, month });
     setLoading(true);
     try {
       const res = await fetchSalaryDetailById(id, view, year, month);
       setSalaryData(res.data);
     } catch (err) {
-      console.error("상세 조회 실패", err);
     } finally {
       setLoading(false);
     }

@@ -1,125 +1,96 @@
-import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td
-} from "../../../features/store/styles/salary/SalaryList.styled";
+import { Table } from "../../../features/store/styles/common/Table.styled";
 
 function SalaryListCom({ data = [], loading, viewMode, onRowClick }) {
-  if (loading) return <p>급여 데이터를 불러오는 중입니다...</p>;
-  if (!Array.isArray(data) || data.length === 0)
-    return <p>표시할 급여 데이터가 없습니다.</p>;
+    if (loading) return <p>급여 데이터를 불러오는 중입니다...</p>;
+    if (!Array.isArray(data) || data.length === 0)
+        return <p>표시할 급여 데이터가 없습니다.</p>;
 
-  const renderRowByView = (item) => {
-    switch (viewMode) {
-      case "monthly":
-        return (
-          <>
-            <Td>{item.salaryTypeStr}</Td>
-            <Td>{item.workHours ?? "-"}</Td>
-            <Td>{toCurrency(item.baseSalary)}</Td>
-            <Td>{toCurrency(item.deductTotal)}</Td>
-            <Td>{toCurrency(item.netSalary)}</Td>
-            <Td>{item.payStatus === 1 ? "지급완료" : "미지급"}</Td>
-            <Td>{item.payDate ? item.payDate.split("T")[0] : "-"}</Td>
-          </>
-        );
-      case "yearly":
-        return (
-          <>
-            <Td>{toCurrency(item.totalSalary)}</Td>
-            <Td>{toCurrency(item.totalDeduct)}</Td>
-            <Td>{toCurrency(item.totalBonus)}</Td>
-            <Td>{toCurrency(item.averageMonthly)}</Td>
-            <Td>{item.year}</Td>
-          </>
-        );
-      case "custom":
-        return (
-          <>
-            <Td>{item.salaryTypeStr}</Td>
-            <Td>{item.workHours ?? "-"}</Td>
-            <Td>{toCurrency(item.baseSalary)}</Td>
-            <Td>{toCurrency(item.deductTotal)}</Td>
-            <Td>{toCurrency(item.netSalary)}</Td>
-            <Td>{item.payStatus === 1 ? "지급완료" : "미지급"}</Td>
-            <Td>{item.payDateStr ?? "-"}</Td>
-          </>
-        );
-      default:
-        return null;
-    }
-  };
+    const renderRowByView = (item) => {
+        switch (viewMode) {
+            case "monthly":
+            case "custom":
+                return (
+                    <>
+                        <td>{item.salaryTypeStr}</td>
+                        <td>{item.workHours ?? "-"}</td>
+                        <td>{toCurrency(item.baseSalary)}</td>
+                        <td>{toCurrency(item.deductTotal)}</td>
+                        <td>{toCurrency(item.netSalary)}</td>
+                        <td>{item.payStatus === 1 ? "지급완료" : "미지급"}</td>
+                        <td>{item.payDateStr ?? item.payDate?.split("T")[0] ?? "-"}</td>
+                    </>
+                );
+            case "yearly":
+                return (
+                    <>
+                        <td>{toCurrency(item.totalSalary)}</td>
+                        <td>{toCurrency(item.totalDeduct)}</td>
+                        <td>{toCurrency(item.totalBonus)}</td>
+                        <td>{toCurrency(item.averageMonthly)}</td>
+                        <td>{item.year}</td>
+                    </>
+                );
+            default:
+                return null;
+        }
+    };
 
-  const renderHeaderByView = () => {
-    switch (viewMode) {
-      case "monthly":
-        return (
-          <>
-            <Th>급여형태</Th>
-            <Th>근무시간</Th>
-            <Th>기본급</Th>
-            <Th>공제</Th>
-            <Th>실지급</Th>
-            <Th>지급상태</Th>
-            <Th>지급날짜</Th>
-          </>
-        );
-      case "yearly":
-        return (
-          <>
-            <Th>총 지급</Th>
-            <Th>총 공제</Th>
-            <Th>총 수당</Th>
-            <Th>평균 지급</Th>
-            <Th>연도</Th>
-          </>
-        );
-      case "custom":
-        return (
-          <>
-            <Th>급여형태</Th>
-            <Th>근무시간</Th>
-            <Th>기본급</Th>
-            <Th>공제</Th>
-            <Th>실지급</Th>
-            <Th>지급상태</Th>
-            <Th>지급일</Th>
-          </>
-        );
-      default:
-        return null;
-    }
-  };
+    const renderHeaderByView = () => {
+        switch (viewMode) {
+            case "monthly":
+            case "custom":
+                return (
+                    <>
+                        <th>급여형태</th>
+                        <th>근무시간</th>
+                        <th>기본급</th>
+                        <th>공제</th>
+                        <th>실지급</th>
+                        <th>지급상태</th>
+                        <th>지급일</th>
+                    </>
+                );
+            case "yearly":
+                return (
+                    <>
+                        <th>총 지급</th>
+                        <th>총 공제</th>
+                        <th>총 수당</th>
+                        <th>평균 지급</th>
+                        <th>연도</th>
+                    </>
+                );
+            default:
+                return null;
+        }
+    };
 
-  return (
-    <Table>
-      <Thead>
-        <Tr>
-          <Th>이름</Th>
-          {renderHeaderByView()}
-        </Tr>
-      </Thead>
-      <Tbody>
-        {data.map((item, idx) => (
-          <Tr
-            key={item.partTimerId || idx}
-            onClick={() => onRowClick(item.partTimerId)}
-            style={{ cursor: "pointer" }}
-          >
-            <Td>{item.name}</Td>
-            {renderRowByView(item)}
-          </Tr>
-        ))}
-      </Tbody>
-    </Table>
-  );
+    return (
+        <Table>
+            <thead>
+            <tr>
+                <th>이름</th>
+                {renderHeaderByView()}
+            </tr>
+            </thead>
+            <tbody>
+            {data.map((item, idx) => (
+                <tr
+                    key={item.partTimerId || idx}
+                    onClick={() => onRowClick(item.partTimerId)}
+                    style={{ cursor: "pointer" }}
+                >
+                    <td>{item.name}</td>
+                    {renderRowByView(item)}
+                </tr>
+            ))}
+            </tbody>
+        </Table>
+    );
 }
 
 function toCurrency(val) {
-  return typeof val === "number" && !isNaN(val) ? `${val.toLocaleString()}원` : "-";
+    return typeof val === "number" && !isNaN(val) ? `${val.toLocaleString()}원` : "-";
 }
 
 export default SalaryListCom;

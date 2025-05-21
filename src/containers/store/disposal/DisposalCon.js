@@ -7,7 +7,10 @@ const DisposalCon = () => {
   const [disposalList, setDisposalList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 폐기 데이터 로딩 함수
+  const [expiredPage, setExpiredPage] = useState(0);
+  const [disposalPage, setDisposalPage] = useState(0);
+  const pageSize = 10;
+
   const loadData = async () => {
     try {
       const [expired, history] = await Promise.all([
@@ -23,29 +26,42 @@ const DisposalCon = () => {
     }
   };
 
-  // 최초 마운트 시 데이터 로드
   useEffect(() => {
     loadData();
   }, []);
 
-  // 폐기 취소 처리
   const handleCancel = async (disposalId) => {
     try {
       await cancelDisposalById(disposalId);
       alert("✅ 폐기 내역이 취소되었습니다.");
-      loadData(); // 데이터 갱신
+      loadData();
     } catch (e) {
       alert("❌ 취소 실패: " + (e.response?.data || e.message));
     }
   };
 
+  const paginatedExpired = expiredList.slice(
+      expiredPage * pageSize,
+      (expiredPage + 1) * pageSize
+  );
+  const paginatedDisposal = disposalList.slice(
+      disposalPage * pageSize,
+      (disposalPage + 1) * pageSize
+  );
+
   return (
-    <DisposalCom
-      expiredList={expiredList}
-      disposalList={disposalList}
-      loading={loading}
-      onCancel={handleCancel}
-    />
+      <DisposalCom
+          expiredList={paginatedExpired}
+          disposalList={paginatedDisposal}
+          loading={loading}
+          onCancel={handleCancel}
+          expiredPage={expiredPage}
+          expiredTotalPages={Math.ceil(expiredList.length / pageSize)}
+          onExpiredPageChange={setExpiredPage}
+          disposalPage={disposalPage}
+          disposalTotalPages={Math.ceil(disposalList.length / pageSize)}
+          onDisposalPageChange={setDisposalPage}
+      />
   );
 };
 

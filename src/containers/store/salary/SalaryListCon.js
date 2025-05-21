@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import SalaryListCom from "../../../components/store/salary/SalaryListCom";
@@ -11,6 +11,8 @@ import {
   ButtonGroup,
   ViewToggleButton,
 } from "../../../features/store/styles/salary/SalaryList.styled";
+import {PageTitle} from "../../../features/store/styles/common/PageLayout";
+import {PrimaryButton} from "../../../features/store/styles/common/Button.styled";
 
 function SalaryListCon() {
   const now = new Date();
@@ -147,25 +149,34 @@ function SalaryListCon() {
 
   return (
     <div>
-      <StoreSearchBar filterOptions={filterOptions} onSearch={handleSearch} />
+      <PageTitle>급여 관리</PageTitle>
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "1.5rem"
+      }}>
+        <ButtonGroup>
+          <ViewToggleButton
+              active={viewMode === "monthly"}
+              onClick={() => handleViewChange("monthly")}
+          >
+            월별 보기
+          </ViewToggleButton>
+          <ViewToggleButton
+              active={viewMode === "yearly"}
+              onClick={() => handleViewChange("yearly")}
+          >
+            연도별 보기
+          </ViewToggleButton>
+          <PrimaryButton onClick={handleGenerate} disabled={loading}>
+            {loading ? "생성 중..." : "급여 생성"}
+          </PrimaryButton>
+        </ButtonGroup>
 
-      <ButtonGroup>
-        <ViewToggleButton
-          active={viewMode === "monthly"}
-          onClick={() => handleViewChange("monthly")}
-        >
-          월별 보기
-        </ViewToggleButton>
-        <ViewToggleButton
-          active={viewMode === "yearly"}
-          onClick={() => handleViewChange("yearly")}
-        >
-          연도별 보기
-        </ViewToggleButton>
-        <button onClick={handleGenerate} disabled={loading}>
-          {loading ? "생성 중..." : "급여 생성"}
-        </button>
-      </ButtonGroup>
+        <StoreSearchBar filterOptions={filterOptions} onSearch={handleSearch} />
+      </div>
+
 
       <SalaryListCom
         data={salaries}

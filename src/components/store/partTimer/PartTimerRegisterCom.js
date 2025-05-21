@@ -8,6 +8,7 @@ import {
     SubmitButton
 } from '../../../features/store/styles/partTimer/StorePatTimerRegister.styled';
 import CustomCalendar from '../../../components/store/common/CustomCalendar';
+import {PageTitle} from "../../../features/store/styles/common/PageLayout";
 
 function PartTimerRegisterCom({
                                   form,
@@ -22,6 +23,7 @@ function PartTimerRegisterCom({
                               }) {
     return (
         <FormWrap>
+            <PageTitle>직원 등록 </PageTitle>
             <Label>이름</Label>
             <Input name="partName" value={form.partName} onChange={onChange} placeholder="이름" />
 

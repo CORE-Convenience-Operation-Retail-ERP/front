@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { deleteOrder, fetchOrderList, removeOrder } from "../../../service/store/OrderService";
 import OrderListCom from "../../../components/store/order/OrderListCom";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import Pagination from "../../../components/store/common/Pagination";
 import { useNavigate } from "react-router-dom";
+import {PageTitle} from "../../../features/store/styles/common/PageLayout";
 
 // 공통: Null, 빈 값 제거
 const cleanParams = (params) =>
@@ -88,22 +89,21 @@ function OrderListCon() {
 
   return (
     <>
-      <StoreSearchBar 
-        filterOptions={filterOptions} 
-        onSearch={handleSearch} 
-      />
-      <OrderListCom 
-        orderList={orders} 
-        onRowClick={handleNavigate} 
-        getOrderStatusLabel={getOrderStatusLabel}
-        onEditClick={handleEdit}
-        onDeleteClick={handleDelete}
-        onCancleClick={handleCancle}
-      />
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={setPage}
+      <PageTitle>📦 발주 목록</PageTitle>
+
+      <div style={{ display: "flex", justifyContent: "flex-end" , marginRight: "1rem" }}>
+        <StoreSearchBar filterOptions={filterOptions} onSearch={handleSearch} />
+      </div>
+      <OrderListCom
+          orderList={orders}
+          onRowClick={handleNavigate}
+          getOrderStatusLabel={getOrderStatusLabel}
+          onEditClick={handleEdit}
+          onDeleteClick={handleDelete}
+          onCancleClick={handleCancle}
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
       />
     </>
   );

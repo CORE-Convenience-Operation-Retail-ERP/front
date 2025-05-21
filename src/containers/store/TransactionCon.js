@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import StoreSearchBar from "../../components/store/common/StoreSearchBar";
 import TransactionTable from "../../components/store/sales/TransactionTable";
 import Pagination from "../../components/store/common/Pagination";
 import { fetchTransactionsByStore } from "../../service/store/TransactionService";
+import { PageTitle } from "../../features/store/styles/common/PageLayout";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -15,19 +15,13 @@ const TransactionCon = () => {
 
   const filterOptions = [
     {
-      key: "transactionId",
-      label: "거래 ID",
-      type: "number",
-      placeholder: "거래 ID 입력"
-    },
-    {
       key: "paymentMethod",
       label: "결제수단",
       type: "select",
       options: [
         { value: "CARD", label: "카드" },
-        { value: "CASH", label: "현금" }
-      ]
+        { value: "CASH", label: "현금" },
+      ],
     },
     {
       key: "transactionStatus",
@@ -35,9 +29,9 @@ const TransactionCon = () => {
       type: "select",
       options: [
         { value: 0, label: "정상" },
-        { value: 1, label: "환불" }
-      ]
-    }
+        { value: 1, label: "환불" },
+      ],
+    },
   ];
 
   useEffect(() => {
@@ -51,26 +45,21 @@ const TransactionCon = () => {
       }
     };
 
-    if (storeId) {
-      loadTransactions();
-    }
+    if (storeId) loadTransactions();
   }, [storeId]);
 
   const handleSearch = (params) => {
     const filtered = allTransactions.filter((row) =>
-      Object.entries(params).every(([key, value]) => {
-        const rowValue = row[key];
-
-        if (typeof rowValue === "number") {
-          return Number(value) === rowValue;
-        }
-
-        if (typeof rowValue === "string") {
-          return rowValue.toUpperCase() === String(value).toUpperCase();
-        }
-
-        return String(rowValue) === String(value);
-      })
+        Object.entries(params).every(([key, value]) => {
+          const rowValue = row[key];
+          if (typeof rowValue === "number") {
+            return Number(value) === rowValue;
+          }
+          if (typeof rowValue === "string") {
+            return rowValue.toUpperCase() === String(value).toUpperCase();
+          }
+          return String(rowValue) === String(value);
+        })
     );
 
     setFilteredTransactions(filtered);
@@ -83,22 +72,24 @@ const TransactionCon = () => {
   const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
 
   return (
-    <>
-      <StoreSearchBar filterOptions={filterOptions} onSearch={handleSearch} />
+      <>
+        <PageTitle>거래내역</PageTitle>
 
-      <TransactionTable
-        rows={currentData}
-        currentPage={currentPage - 1}
-        totalPages={totalPages}
-        onPageChange={(page) => setCurrentPage(page + 1)}
-      />
+        <TransactionTable
+            rows={currentData}
+            filterOptions={filterOptions}
+            onSearch={handleSearch}
+            currentPage={currentPage - 1}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page + 1)}
+        />
 
-      <Pagination
-        currentPage={currentPage - 1}
-        totalPages={totalPages}
-        onPageChange={(page) => setCurrentPage(page + 1)}
-      />
-    </>
+        <Pagination
+            currentPage={currentPage - 1}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page + 1)}
+        />
+      </>
   );
 };
 

@@ -2,14 +2,23 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PartTimerCom from "../../../components/store/partTimer/PartTimerCom";
 import SearchBar from "../../../components/store/common/StoreSearchBar";
-import Pagination from "../../../components/store/common/Pagination";
 import QRModal from "../../../containers/store/partTimer/attendance/QRModal";
+import { PrimaryButton, DangerButton } from "../../../features/store/styles/common/Button.styled";
+import styled from "styled-components";
 
 import {
     fetchPartTimers,
     searchPartTimers,
     deletePartTimer
 } from "../../../service/store/PartTimeService";
+import {PageTitle} from "../../../features/store/styles/common/PageLayout";
+
+const TopBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+`;
 
 function PartTimerCon() {
     const navigate = useNavigate();
@@ -88,52 +97,52 @@ function PartTimerCon() {
         }
     };
 
-    //  QR 모달 열기
     const handleOpenQRModal = (partTimerId, mode) => {
         setQrModalInfo({ partTimerId, mode });
     };
 
-    //  QR 모달 닫기
     const handleCloseQRModal = () => {
         setQrModalInfo(null);
     };
 
     return (
         <div>
-            <SearchBar
-                filterOptions={[
-                    { key: "partName", label: "이름", type: "text" },
-                    {
-                        key: "position",
-                        label: "직책",
-                        type: "select",
-                        options: [
-                            { value: "", label: "전체" },
-                            { value: "아르바이트", label: "아르바이트" },
-                            { value: "매니저", label: "매니저" },
-                            { value: "점장", label: "점장" }
-                        ]
-                    },
-                    {
-                        key: "partStatus",
-                        label: "상태",
-                        type: "select",
-                        options: [
-                            { value: "", label: "전체" },
-                            { value: "1", label: "재직" },
-                            { value: "0", label: "퇴사" }
-                        ]
-                    }
-                ]}
-                onSearch={handleSearch}
-            />
+                <PageTitle>인사관리</PageTitle>
+            <TopBar>
 
-            <div style={{ margin: "10px 0" }}>
-                <button onClick={() => navigate("/store/parttimer/register")}>Register</button>
-                <button onClick={handleDelete} style={{ marginLeft: "10px" }}>
-                    Delete
-                </button>
-            </div>
+                <SearchBar
+                    filterOptions={[
+                        { key: "partName", label: "이름", type: "text" },
+                        {
+                            key: "position",
+                            label: "직책",
+                            type: "select",
+                            options: [
+                                { value: "", label: "전체" },
+                                { value: "아르바이트", label: "아르바이트" },
+                                { value: "매니저", label: "매니저" },
+                                { value: "점장", label: "점장" }
+                            ]
+                        },
+                        {
+                            key: "partStatus",
+                            label: "상태",
+                            type: "select",
+                            options: [
+                                { value: "", label: "전체" },
+                                { value: "1", label: "재직" },
+                                { value: "0", label: "퇴사" }
+                            ]
+                        }
+                    ]}
+                    onSearch={handleSearch}
+                />
+
+                <div style={{ display: "flex", gap: "8px" }}>
+                    <PrimaryButton onClick={() => navigate("/store/parttimer/register")}>등록</PrimaryButton>
+                    <DangerButton onClick={handleDelete}>삭제</DangerButton>
+                </div>
+            </TopBar>
 
             <PartTimerCom
                 data={partTimers}
@@ -141,10 +150,7 @@ function PartTimerCon() {
                 selectedIds={selectedIds}
                 onCheck={handleCheck}
                 onCheckAll={handleCheckAll}
-                onOpenQRModal={handleOpenQRModal} // ✅ 넘김
-            />
-
-            <Pagination
+                onOpenQRModal={handleOpenQRModal}
                 currentPage={page}
                 totalPages={totalPages}
                 onPageChange={setPage}

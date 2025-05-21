@@ -1,28 +1,14 @@
 import React from "react";
-import styled from "styled-components";
+import { Table } from "../../../features/store/styles/common/Table.styled";
+import {
+  PageWrapper,
+  PageSection,
+  TableWrapper
+} from "../../../features/store/styles/common/PageLayout";
+import Pagination from "../../../components/store/common/Pagination";
 
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-`;
-
-const Th = styled.th`
-  background-color: #f2f2f2;
-  padding: 10px;
-  border: 1px solid #ddd;
-`;
-
-const Td = styled.td`
-  padding: 10px;
-  border: 1px solid #ddd;
-  text-align: center;
-`;
-
-function StockFlowLogCom({ logs }) {
-  const formatDate = (dateTimeStr) => {
-    return dateTimeStr?.split("T")[0] || "-";
-  };
+function StockFlowLogCom({ logs, pageInfo, onPageChange }) {
+  const formatDate = (dateTimeStr) => dateTimeStr?.split("T")[0] || "-";
 
   const formatQuantity = (qty, before, after) => {
     const sign = qty > 0 ? "+" : "";
@@ -30,41 +16,52 @@ function StockFlowLogCom({ logs }) {
   };
 
   return (
-    <div>
-      <h3>📦 입출고 내역</h3>
-      <Table>
-        <thead>
-          <tr>
-            <Th>날짜</Th>
-            <Th>상품명</Th>
-            <Th>유형</Th>
-            <Th>위치</Th>
-            <Th>수량</Th>
-            <Th>담당자</Th>
-            <Th>비고</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.length > 0 ? (
-            logs.map((log) => (
-              <tr key={log.flowId}>
-                <Td>{formatDate(log.flowDate)}</Td>
-                <Td>{log.productName}</Td>
-                <Td>{log.flowTypeLabel}</Td>
-                <Td>{log.location}</Td>
-                <Td>{formatQuantity(log.quantity, log.beforeQuantity, log.afterQuantity)}</Td>
-                <Td>{log.processedBy}</Td>
-                <Td>{log.note}</Td>
+      <PageWrapper>
+        <PageSection>
+          <TableWrapper>
+            <Table>
+              <thead>
+              <tr>
+                <th>날짜</th>
+                <th>상품명</th>
+                <th>유형</th>
+                <th>위치</th>
+                <th>수량</th>
+                <th>담당자</th>
+                <th>비고</th>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <Td colSpan="6">로그가 없습니다.</Td>
-            </tr>
-          )}
-        </tbody>
-      </Table>
-    </div>
+              </thead>
+              <tbody>
+              {logs.length > 0 ? (
+                  logs.map((log) => (
+                      <tr key={log.flowId}>
+                        <td>{formatDate(log.flowDate)}</td>
+                        <td>{log.productName}</td>
+                        <td>{log.flowTypeLabel}</td>
+                        <td>{log.location}</td>
+                        <td>{formatQuantity(log.quantity, log.beforeQuantity, log.afterQuantity)}</td>
+                        <td>{log.processedBy}</td>
+                        <td>{log.note}</td>
+                      </tr>
+                  ))
+              ) : (
+                  <tr>
+                    <td colSpan="7" style={{ padding: 20, textAlign: "center" }}>
+                      로그가 없습니다.
+                    </td>
+                  </tr>
+              )}
+              </tbody>
+            </Table>
+          </TableWrapper>
+
+          <Pagination
+              currentPage={pageInfo.currentPage}
+              totalPages={pageInfo.totalPages}
+              onPageChange={onPageChange}
+          />
+        </PageSection>
+      </PageWrapper>
   );
 }
 

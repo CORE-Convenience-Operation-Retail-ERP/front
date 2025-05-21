@@ -9,6 +9,7 @@ import {
     ActionButton,
 } from '../../../features/store/styles/partTimer/StorePartTimerOne.styled';
 import CustomCalendar from '../common/CustomCalendar';
+import {PageTitle} from "../../../features/store/styles/common/PageLayout";
 
 function PartTimerUpdateCom({
                                 form,
@@ -26,7 +27,7 @@ function PartTimerUpdateCom({
 
     return (
         <FormWrap>
-            <h2>아르바이트 정보 수정</h2>
+             <PageTitle>아르바이트 정보 수정</PageTitle>
 
             {form.partImg && <ImgPreview src={form.partImg} alt="프로필 이미지" />}
 

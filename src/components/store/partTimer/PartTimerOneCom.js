@@ -9,13 +9,14 @@ import {
     ButtonGroup,
     ActionButton
   } from '../../../features/store/styles/partTimer/StorePartTimerOne.styled';
+import {PageTitle} from "../../../features/store/styles/common/PageLayout";
 
 function PartTimerOneCom({ form, onEdit, onResign , onRejoin }){
   const navigate = useNavigate();
 
     return(
         <FormWrap>
-        <h2>아르바이트 상세 정보</h2>
+            <PageTitle>직원 상세 정보 </PageTitle>
   
         {/* 프로필 이미지 */}
         {form.partImg && (

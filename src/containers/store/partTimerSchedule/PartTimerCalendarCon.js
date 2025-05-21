@@ -15,6 +15,7 @@ import {
   CalendarNav
 } from '../../../features/store/styles/partTimerSchedule/PartTimerSchedule.styled';
 import { generateCalendarMatrix } from '../../../utils/calendarUtils';
+import {PageTitle} from "../../../features/store/styles/common/PageLayout";
 
 const WeekHeader = styled.div`
   display: grid;
@@ -197,6 +198,7 @@ function PartTimerCalendarCon() {
 
   return (
     <div>
+      <PageTitle>스케줄 관리</PageTitle>
       <TabContainer>
         <button className={view === 'month' ? 'active' : ''} onClick={() => setView('month')}>월간 보기</button>
         <button className={view === 'week' ? 'active' : ''} onClick={() => setView('week')}>주간 보기</button>

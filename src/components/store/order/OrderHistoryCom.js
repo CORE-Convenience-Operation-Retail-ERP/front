@@ -1,11 +1,15 @@
+import React from "react";
 import {
-    OrderTable,
-    OrderHead,
-    OrderTh,
-    OrderTd,
+    PageWrapper,
+    PageTitle,
+    PageSection,
+    TableWrapper,
     HighlightId,
-    Btn
-} from '../../../features/store/styles/order/Order.styled';
+} from "../../../features/store/styles/common/PageLayout";
+import { Table } from "../../../features/store/styles/common/Table.styled";
+import { PrimaryButton } from "../../../features/store/styles/common/Button.styled";
+import Pagination from "../../../components/store/common/Pagination";
+import SelectBox from "../../../features/store/styles/common/SelectBox";
 
 function OrderHistoryCom({
                              itemList,
@@ -17,9 +21,12 @@ function OrderHistoryCom({
                              onQuantityChange,
                              onReasonChange,
                              handleSubmitStockIn,
-                             onCancelSelection,
                              onSelectAllChange,
-                             navigate
+                             navigate,
+                             currentPage,
+                             totalItems,
+                             pageSize,
+                             onPageChange,
                          }) {
     const handleSelectAll = (e) => {
         onSelectAllChange(e.target.checked);
@@ -29,120 +36,112 @@ function OrderHistoryCom({
         partialItems.find((i) => i.itemId === itemId) || {};
 
     return (
-        <>
-            <label htmlFor="partTimer">입고 담당자 선택</label>
-            <select
-                id="partTimer"
-                value={selectedPartTimerId || ''}
-                onChange={(e) => setSelectedPartTimerId(Number(e.target.value))}
-            >
-                <option value="">-- 알바 선택 --</option>
-                {partTimers.map((pt) => (
-                    <option key={pt.partTimerId} value={pt.partTimerId}>
-                        {pt.partName} ({pt.position})
-                    </option>
-                ))}
-            </select>
+        <PageWrapper>
+            <PageTitle>입고 처리</PageTitle>
 
-            <OrderTable>
-                <OrderHead>
+            <PageSection style={{ maxWidth: "300px", marginBottom: "2rem" }}>
+                <SelectBox
+                    label="입고 담당자 선택"
+                    id="partTimer"
+                    value={selectedPartTimerId || ""}
+                    onChange={(e) => setSelectedPartTimerId(Number(e.target.value))}
+                    options={partTimers.map((pt) => ({
+                        value: pt.partTimerId,
+                        label: `${pt.partName} (${pt.position})`
+                    }))}
+                />
+            </PageSection>
+
+            <TableWrapper>
+                <Table>
+                    <thead>
                     <tr>
-                        <OrderTh>
-                            <input type="checkbox" onChange={handleSelectAll} />
-                        </OrderTh>
-                        <OrderTh>상품명</OrderTh>
-                        <OrderTh>주문수량</OrderTh>
-                        <OrderTh>입고됨</OrderTh>
-                        <OrderTh>단가</OrderTh>
-                        <OrderTh>총액</OrderTh>
-                        <OrderTh>입고 수량</OrderTh>
-                        <OrderTh>사유</OrderTh>
+                        <th><input type="checkbox" onChange={handleSelectAll} /></th>
+                        <th>상품명</th>
+                        <th>주문수량</th>
+                        <th>입고됨</th>
+                        <th>단가</th>
+                        <th>총액</th>
+                        <th>입고 수량</th>
+                        <th>사유</th>
                     </tr>
-                </OrderHead>
-                <tbody>
-                {itemList.map((item) => {
-                    const {
-                        itemId,
-                        productName,
-                        orderQuantity,
-                        receivedQuantity = 0,
-                        unitPrice,
-                        totalPrice
-                    } = item;
+                    </thead>
+                    <tbody>
+                    {itemList.map((item) => {
+                        const {
+                            itemId,
+                            productName,
+                            orderQuantity,
+                            receivedQuantity = 0,
+                            unitPrice,
+                            totalPrice,
+                        } = item;
 
-                    const remainingQty = orderQuantity - receivedQuantity;
-                    const selected = getPartialItem(itemId);
-                    const isDisabled = remainingQty <= 0;
+                        const remainingQty = orderQuantity - receivedQuantity;
+                        const selected = getPartialItem(itemId);
+                        const isDisabled = remainingQty <= 0;
 
-                    return (
-                        <tr key={itemId}>
-                            <OrderTd>
-                                <input
-                                    type="checkbox"
-                                    checked={!!selected.itemId}
-                                    disabled={isDisabled}
-                                    onChange={() => onCheckboxChange(itemId, remainingQty)}
-                                />
-                            </OrderTd>
-                            <OrderTd>
-                                <HighlightId>{productName}</HighlightId>
-                            </OrderTd>
-                            <OrderTd>{orderQuantity}</OrderTd>
-                            <OrderTd>{receivedQuantity}</OrderTd>
-                            <OrderTd>{unitPrice.toLocaleString()}원</OrderTd>
-                            <OrderTd>{totalPrice.toLocaleString()}원</OrderTd>
-                            <OrderTd>
-                                <div style={{ fontSize: '12px', color: 'gray' }}>
-                                    남음: {remainingQty}
-                                </div>
-                                <input
-                                    type="number"
-                                    inputMode="numeric"
-                                    min="0"
-                                    max={remainingQty}
-                                    value={
-                                        selected.inQuantity !== undefined
-                                            ? selected.inQuantity
-                                            : ''
-                                    }
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (value === '') {
-                                            onQuantityChange(item.itemId, undefined);
-                                        } else {
-                                            onQuantityChange(item.itemId, value);
+                        return (
+                            <tr key={itemId}>
+                                <td>
+                                    <input
+                                        type="checkbox"
+                                        checked={!!selected.itemId}
+                                        disabled={isDisabled}
+                                        onChange={() => onCheckboxChange(itemId, remainingQty)}
+                                    />
+                                </td>
+                                <td><HighlightId>{productName}</HighlightId></td>
+                                <td>{orderQuantity}</td>
+                                <td>{receivedQuantity}</td>
+                                <td>{unitPrice.toLocaleString()}원</td>
+                                <td>{totalPrice.toLocaleString()}원</td>
+                                <td>
+                                    <div style={{ fontSize: "12px", color: "gray" }}>남음: {remainingQty}</div>
+                                    <input
+                                        type="number"
+                                        inputMode="numeric"
+                                        min="0"
+                                        max={remainingQty}
+                                        value={selected.inQuantity !== undefined ? selected.inQuantity : ""}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (value === "") onQuantityChange(item.itemId, undefined);
+                                            else onQuantityChange(item.itemId, value);
+                                        }}
+                                        disabled={isDisabled}
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="text"
+                                        value={selected.reason || ""}
+                                        onChange={(e) => onReasonChange(itemId, e.target.value)}
+                                        disabled={
+                                            !selected.itemId ||
+                                            selected.inQuantity === remainingQty ||
+                                            selected.inQuantity === 0
                                         }
-                                    }}
-                                    disabled={isDisabled}
-                                />
-                            </OrderTd>
-                            <OrderTd>
-                                <input
-                                    type="text"
-                                    value={selected.reason || ''}
-                                    onChange={(e) => onReasonChange(itemId, e.target.value)}
-                                    disabled={
-                                        !selected.itemId ||
-                                        selected.inQuantity === remainingQty ||
-                                        selected.inQuantity === 0
-                                    }
-                                />
-                            </OrderTd>
-                        </tr>
-                    );
-                })}
-                </tbody>
-            </OrderTable>
+                                    />
+                                </td>
+                            </tr>
+                        );
+                    })}
+                    </tbody>
+                </Table>
+            </TableWrapper>
 
-            <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                <Btn className="btn-submit" onClick={handleSubmitStockIn}>
-                    입고 처리
-                </Btn>
-                <Btn className="btn-back" onClick={() => navigate(-1)}>
-                    이전으로
-                </Btn>
+            <div style={{ display: "flex", justifyContent: "center", gap: "12px", margin: "2rem 0" }}>
+                <PrimaryButton className="btn-submit" onClick={handleSubmitStockIn}>입고 처리</PrimaryButton>
+                <PrimaryButton className="btn-back" onClick={() => navigate(-1)}>이전으로</PrimaryButton>
             </div>
-        </>
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(totalItems / pageSize)}
+                onPageChange={onPageChange}
+            />
+        </PageWrapper>
     );
 }
 

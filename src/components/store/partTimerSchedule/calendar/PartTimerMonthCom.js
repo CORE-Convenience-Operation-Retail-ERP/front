@@ -1,11 +1,13 @@
 import Calendar from '@toast-ui/react-calendar';
 import '@toast-ui/calendar/dist/toastui-calendar.min.css';
 import { ScheduleWrapper } from '../../../../features/store/styles/partTimerSchedule/PartTimerSchedule.styled';
+import {PageTitle} from "../../../../features/store/styles/common/PageLayout";
+import React from "react";
 
 function PartTimerMonthCom({ calendarRef, schedules, onClickSchedule, onSelectDateTime }) {
   return (
     <ScheduleWrapper>
-      <Calendar
+        <Calendar
         ref={calendarRef}
         height="850px"
         view="month"
