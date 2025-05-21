@@ -17,7 +17,16 @@ const menuItems = [
     path: '/headquarters/products',
     subMenus: [
       { text: '전체 제품 관리', path: '/headquarters/products/all' },
-      { text: '상세 제품 관리', path: '/headquarters/products/detail' },
+      {
+        text: '상세 제품 관리',
+        path: '/headquarters/products/detail',
+        matchPaths: [
+          '/headquarters/products/detail',
+          '/headquarters/products/detail/',
+          '/headquarters/products/edit/',
+        ],
+        disabled: true
+      },
       { text: '통합 재고 모니터링', path: '/headquarters/products/integrated-stock' }
     ],
     hoverBoxBottom: { bottom: -45, width: 80, height: 30 },
@@ -27,8 +36,18 @@ const menuItems = [
     path: '/headquarters/hr',
     subMenus: [
       { text: '사원 목록', path: '/headquarters/hr/employees' },
-      { text: '사원 정보 관리', path: '/headquarters/hr/employee-management' },
-      { text: '마이 페이지', path: '/headquarters/hr/my-page' },
+      {
+        text: '사원 정보 관리',
+        path: '/headquarters/hr/employee-management',
+        disabled: true
+      },
+      { text: '마이 페이지', 
+        path: '/headquarters/hr/my-page',
+        matchPaths: [
+          '/headquarters/hr/my-page',
+          '/headquarters/hr/my-salary'
+        ]
+      },
       { text: '연차 신청 관리', path: '/headquarters/hr/annual-leave' },
     ],
     hoverBoxBottom: { bottom: -65, width: 81, height: 35 },
@@ -37,7 +56,13 @@ const menuItems = [
     text: '지점 관리',
     path: '/headquarters/branches',
     subMenus: [
-      { text: '지점 목록', path: '/headquarters/branches/list' },
+      { text: '지점 목록',
+        path: '/headquarters/branches/list',
+        matchPaths: [
+          '/headquarters/branches/list',
+          '/headquarters/branches/edit/'
+        ]
+       },
       { text: '지점 문의 관리', path: '/headquarters/branches/inquiry' },
       { text: '지점 매출 분석', path: '/headquarters/branches/sales-analysis' },
       { text: '지점 재고 현황', path: '/headquarters/branches/stock-monitering' },
@@ -167,11 +192,17 @@ const Sidebar = () => {
   const [hoveredMenu, setHoveredMenu] = useState(null);
   const [submenuHeights, setSubmenuHeights] = useState({});
   const [submenuOpened, setSubmenuOpened] = useState({});
+  const [footerHover, setFooterHover] = useState(false);
 
-  // 현재 경로에 해당하는 상위 메뉴 index 찾기
+  // 현재 경로에 해당하는 상위 메뉴 index 찾기 (matchPaths 지원)
   const getActiveMenuIndex = () => {
     for (let i = 0; i < menuItems.length; i++) {
-      if (menuItems[i].subMenus.some(sub => sub.path === location.pathname)) {
+      if (menuItems[i].subMenus.some(sub => {
+        if (sub.matchPaths && Array.isArray(sub.matchPaths)) {
+          return sub.matchPaths.some(matchPath => location.pathname.startsWith(matchPath));
+        }
+        return location.pathname.startsWith(sub.path);
+      })) {
         return i;
       }
     }
@@ -194,6 +225,9 @@ const Sidebar = () => {
         [activeMenuIndex]: expectedHeight
       }));
       setHoveredMenu(activeMenuIndex);
+    } else {
+      // 어떤 메뉴에도 해당하지 않으면 사이드바 메뉴 닫기
+      setHoveredMenu(null);
     }
   }, [activeMenuIndex, location.pathname]);
 
@@ -227,6 +261,14 @@ const Sidebar = () => {
     }
   };
 
+  // 서브메뉴 활성화 체크 (matchPaths 지원)
+  const isActiveSub = (subItem) => {
+    if (subItem.matchPaths && Array.isArray(subItem.matchPaths)) {
+      return subItem.matchPaths.some(matchPath => location.pathname.startsWith(matchPath));
+    }
+    return location.pathname.startsWith(subItem.path);
+  };
+
   return (
     <StyledDrawer variant="permanent">
       <SidebarContainer>
@@ -253,22 +295,27 @@ const Sidebar = () => {
                 >
                   <SubMenuList>
                     {item.subMenus.map((subItem) => {
-                      const isActiveSub = location.pathname === subItem.path;
+                      const activeSub = isActiveSub(subItem);
+                      // 클릭 비활성화 처리: disabled 플래그가 true면 클릭 막고 스타일 변경
+                      const isDisabled = subItem.disabled;
                       return (
                         <ListItem
                           button="true"
                           key={subItem.text}
-                          onClick={(e) => handleSubMenuClick(subItem.path, e)}
+                          onClick={isDisabled ? undefined : (e) => handleSubMenuClick(subItem.path, e)}
                           sx={{
-                            borderBottom: isActiveSub ? '2px solid #1A237E' : 'none',
-                            fontWeight: isActiveSub ? 700 : 400,
+                            borderBottom: activeSub ? '2px solid #1A237E' : 'none',
+                            fontWeight: activeSub ? 700 : 400,
+                            pointerEvents: isDisabled ? 'none' : 'auto',
+                            color: isDisabled ? '#aaa' : undefined,
+                            cursor: isDisabled ? 'not-allowed' : 'pointer',
                           }}
                         >
                           <ListItemText
                             primary={subItem.text}
                             sx={{
-                              fontWeight: isActiveSub ? 700 : 400,
-                              color: isActiveSub ? '#1A237E' : undefined,
+                              fontWeight: activeSub ? 700 : 400,
+                              color: activeSub ? '#1A237E' : isDisabled ? '#aaa' : undefined,
                             }}
                           />
                         </ListItem>
@@ -291,42 +338,51 @@ const Sidebar = () => {
             zIndex: 2,
             pointerEvents: 'auto'
           }}
+          onMouseEnter={() => setFooterHover(true)}
+          onMouseLeave={() => setFooterHover(false)}
         >
-          <Tooltip
-            title={
-              <Box sx={{ p: 1, bgcolor: 'white', color: '#1A237E', borderRadius: 2, fontSize: 14 }}>
-                <span style={{ fontWeight: 700 }}>CORE ERP 시스템 v1.0</span><br />
-                문의   : core@company.com<br />
-                전화   : 1234-5678<br />
-                주소   : 서울특별시 강남구 테헤란로 123<br />
-                운영시간: 월-금 09:00-18:00
-              </Box>
-            }
-            placement="top"
-            enterDelay={200}
-            sx={{
-              '& .MuiTooltip-tooltip': {
-                border: '2px solid #222',
-                boxShadow: 'none',
-                backgroundColor: 'white',
-                color: '#1A237E',
-              },
-              '& .MuiTooltip-arrow': {
-                color: 'white',
-              }
-            }}
-          >
-            <span style={{
+          <span
+            style={{
               fontFamily: 'Pretendard, sans-serif',
               fontWeight: 400,
               color: 'white',
               fontSize: '16px',
               letterSpacing: '1px',
-              cursor: 'pointer'
-            }}>
-              &copy; CORE
-            </span>
-          </Tooltip>
+              cursor: 'pointer',
+              display: 'inline-block',
+              padding: '8px 32px',
+              borderRadius: '16px'
+            }}
+          >
+            &copy; CORE
+          </span>
+          {/* 상세 정보: hover 시에만 보임 */}
+          <Box
+            sx={{
+              mt: 1,
+              px: 2,
+              py: 1,
+              bgcolor: '#6FC3ED',
+              color: '#fff',
+              borderRadius: 2,
+              fontSize: 14,   
+              position: 'absolute',
+              left: '50%',
+              bottom: -30,
+              transform: 'translateX(-50%) translateY(-12px)',
+              minWidth: 220,
+              opacity: footerHover ? 1 : 0,
+              pointerEvents: footerHover ? 'auto' : 'none',
+              transition: 'opacity 0.25s',
+              zIndex: 10,
+            }}
+          >
+            <span style={{ fontWeight: 700 }}>CORE ERP 시스템 v1.0</span><br />
+            문의 : core@company.com<br />
+            전화 : 1234-5678<br />
+            주소 : 서울특별시 강남구 테헤란로 123<br />
+            운영시간: 월-금 09:00-18:00
+          </Box>
         </Box>
       </SidebarContainer>
     </StyledDrawer>

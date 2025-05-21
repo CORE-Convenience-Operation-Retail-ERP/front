@@ -110,17 +110,29 @@ const Header = () => {
   return (
     <>
       <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #eee' }}>
-        <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Toolbar sx={{ minHeight: 64, px: 3, position: 'relative' }}>
+          {/* 중앙: 로고 */}
+          <Box
+            sx={{
+              position: 'absolute',
+              left: '45%',
+              top: '50%',
+              transform: 'translate(-45%, -50%)',
+              display: 'flex',
+              alignItems: 'center',
+              zIndex: 1, // 아이콘 그룹보다 위에 오도록
+            }}
+          >
             <img
               src="/core_logo.png"
               alt="CORE"
-              style={{ height: 30, cursor: 'pointer', marginLeft: '600px' }}
+              style={{ height: 30, cursor: 'pointer' }}
               onClick={() => navigate('/headquarters/dashboard')}
             />
           </Box>
 
-          <Box sx={{ width: 300, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1.5 }}>
+          {/* 오른쪽: 아이콘 그룹 */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, marginLeft: 'auto' }}>
             {/* 채팅 아이콘 (본사 페이지일 때만 표시) */}
             {isHeadquartersPage && (
               <IconButton onClick={toggleChat}>
@@ -129,12 +141,8 @@ const Header = () => {
                 </Badge>
               </IconButton>
             )}
-            
             {/* 알림 아이콘 및 알림 목록 팝업(드롭다운) */}
-            {/* NotificationIcon 컴포넌트는 내부적으로 종 아이콘(NotificationsIcon)과 Badge(알림 갯수),
-                클릭 시 알림 목록을 보여주는 드롭다운 UI를 모두 포함합니다. */}
             <NotificationIcon />
-
             <Box
               component="img"
               src="/profile_default.png"
@@ -148,7 +156,6 @@ const Header = () => {
               }}
               onClick={() => navigate('/headquarters/hr/my-page')}
             />
-
             <Box
               sx={{
                 cursor: 'pointer',
@@ -159,7 +166,6 @@ const Header = () => {
             >
               {userName}님
             </Box>
-
             <LogoutIcon
               sx={{ cursor: 'pointer', color: 'black' }}
               onClick={handleLogout}
