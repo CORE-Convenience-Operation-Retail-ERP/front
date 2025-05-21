@@ -32,7 +32,8 @@ const AddressSearch = ({ onSelect, value, onChange, detailAddress = '', onDetail
                     roadAddress: data.roadAddress,
                     jibunAddress: data.jibunAddress,
                     detailAddress: detail,
-                    extraAddress: data.buildingName ? `(${data.buildingName})` : ''
+                    extraAddress: data.buildingName ? `(${data.buildingName})` : '',
+                    fullAddress: detail ? `${address} ${detail}` : address
                 });
 
                 // 주소 입력 필드 업데이트

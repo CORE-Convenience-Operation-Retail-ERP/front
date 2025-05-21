@@ -57,8 +57,10 @@ const RegisterCom = ({
   };
 
   const handleAddressSelect = (address) => {
+    // address가 객체면 fullAddress만 전송, 아니면 그대로
+    const value = typeof address === 'object' && address.fullAddress ? address.fullAddress : address;
     onChange({
-      target: { name: "address", value: address }
+      target: { name: "address", value }
     });
   };
 

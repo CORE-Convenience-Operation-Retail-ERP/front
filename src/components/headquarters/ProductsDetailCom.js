@@ -315,11 +315,14 @@ const ProductsDetailCom = ({ detail, onBack, onEdit }) => {
             <Typography sx={labelStyle}>최근 입고내역</Typography>
             <Box sx={{ flex: 1 }}>
               {Array.isArray(detail.recentStockIns) && detail.recentStockIns.length > 0 ? (
-                detail.recentStockIns.slice(0, 3).map((s, i) => (
-                  <Box key={i} sx={{ fontSize: 14, color: "#333" }}>
-                    {s.storeName} | {s.date} | {s.quantity}개
-                  </Box>
-                ))
+                detail.recentStockIns
+                  .sort((a, b) => new Date(b.date) - new Date(a.date)) // 최신순 정렬(필요시)
+                  .slice(0, 3)
+                  .map((s, i) => (
+                    <Box key={i} sx={{ fontSize: 14, color: "#333" }}>
+                      {s.storeName} | {s.date} | {s.quantity}개
+                    </Box>
+                  ))
               ) : (
                 <Typography color="text.secondary" sx={{ fontSize: 14 }}>최근 입고 내역이 없습니다.</Typography>
               )}
@@ -357,11 +360,7 @@ const ProductsDetailCom = ({ detail, onBack, onEdit }) => {
             bgcolor: 'background.paper', p: 4, borderRadius: 3, minWidth: 700, maxHeight: '80vh', overflowY: 'auto'
           }}>
             <Typography variant="h6" fontWeight="bold" mb={2}>전체 입출고 내역</Typography>
-            {loadingInOut ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-                <CircularProgress />
-              </Box>
-            ) : (
+            {Array.isArray(detail.recentStockIns) && detail.recentStockIns.length > 0 ? (
               <Table size="small">
                 <TableHead>
                   <TableRow>
@@ -372,20 +371,20 @@ const ProductsDetailCom = ({ detail, onBack, onEdit }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {allInOut.length > 0 ? allInOut.map((row, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell align="center">{row.storeName}</TableCell>
-                      <TableCell align="center">{row.inDate}</TableCell>
-                      <TableCell align="center">{row.inQuantity}</TableCell>
-                      <TableCell align="center">{row.memo || '-'}</TableCell>
-                    </TableRow>
-                  )) : (
-                    <TableRow>
-                      <TableCell align="center" colSpan={4}>입출고 내역이 없습니다.</TableCell>
-                    </TableRow>
-                  )}
+                  {detail.recentStockIns
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .map((row, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell align="center">{row.storeName}</TableCell>
+                        <TableCell align="center">{row.date}</TableCell>
+                        <TableCell align="center">{row.quantity}</TableCell>
+                        <TableCell align="center">{row.memo || '-'}</TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
+            ) : (
+              <Typography>입출고 내역이 없습니다.</Typography>
             )}
             <Box mt={2} display="flex" justifyContent="flex-end">
               <Button onClick={handleCloseInOutModal} variant="outlined">닫기</Button>
