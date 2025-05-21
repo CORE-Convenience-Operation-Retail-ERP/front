@@ -123,12 +123,9 @@ export default function LoginPage() {
       }}
     >
       <Card sx={{ p: 4, width: '100%', maxWidth: 400 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          CORE ERP
-        </Typography>
-        <Typography variant="subtitle1" align="center" color="textSecondary" sx={{ mb: 3 }}>
-          본사 관리자 로그인
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <img src="/core_logo.png" alt="CORE 로고" style={{ height: 60 }} />
+        </Box>
         <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
@@ -138,6 +135,7 @@ export default function LoginPage() {
             onChange={(e) => setLoginId(e.target.value)}
             error={!!displayError}
             required
+            InputLabelProps={{ required: false }}
           />
           <TextField
             fullWidth
@@ -148,6 +146,7 @@ export default function LoginPage() {
             onChange={(e) => setLoginPwd(e.target.value)}
             error={!!displayError}
             required
+            InputLabelProps={{ required: false }}
           />
           {displayError && (
             <Typography color="error" variant="body2" sx={{ mt: 1 }}>
