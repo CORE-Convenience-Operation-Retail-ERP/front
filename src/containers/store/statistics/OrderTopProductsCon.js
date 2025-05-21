@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import OrderTopProductsCom from "../../../components/store/statistics/OrderTopProductsCom";
 import { fetchOrderTopProducts } from "../../../service/store/StatisticsService";
+import OrderTopProductsTableCom from "../../../components/store/statistics/OrderTopProductsTableCom";
 
-function OrderTopProductsCon({ filters, mode = "summary" }) {
+function OrderTopProductsCon({ filters, mode = "summary", showTable = false  }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -31,7 +32,12 @@ function OrderTopProductsCon({ filters, mode = "summary" }) {
     }, [filters, mode]);
 
     return (
-        <OrderTopProductsCom data={data} loading={loading} mode={mode} />
+        <>
+            <OrderTopProductsCom data={data} loading={loading} mode={mode} />
+            {showTable && mode === "detail" && (
+                <OrderTopProductsTableCom data={data} loading={loading} />
+            )}
+        </>
     );
 }
 

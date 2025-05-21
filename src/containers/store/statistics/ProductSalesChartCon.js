@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ProductSalesChartCom from "../../../components/store/statistics/ProductSalesChartCom";
 import { fetchProductSales } from "../../../service/store/StatisticsService";
+import ProductSalesTableCom from "../../../components/store/statistics/ProductSalesTableCom";
 
 function ProductSalesChartCon({ filters, mode = "summary" }) {
     const [data, setData] = useState([]);
@@ -34,7 +35,14 @@ function ProductSalesChartCon({ filters, mode = "summary" }) {
         load();
     }, [filters]);
 
-    return <ProductSalesChartCom data={data} loading={loading} mode={mode} />;
+    return (
+        <>
+            <ProductSalesChartCom data={data} loading={loading} mode={mode} />
+            {mode === "detail" && (
+                <ProductSalesTableCom data={data} loading={loading} />
+            )}
+        </>
+    );
 }
 
 export default ProductSalesChartCon;

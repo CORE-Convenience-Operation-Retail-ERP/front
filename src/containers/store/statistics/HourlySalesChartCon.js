@@ -2,16 +2,15 @@ import React, { useEffect, useState } from "react";
 import HourlySalesChartCom from "../../../components/store/statistics/HourlySalesChartCom";
 import { fetchHourlySales } from "../../../service/store/StatisticsService";
 
-function HourlySalesChartCon({ filters }) {
+function HourlySalesChartCon({ filters, mode = "detail", height = 300  }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+
+        if (!filters?.storeId || !filters?.startDate || !filters?.endDate) return;
+
         const load = async () => {
-
-            if (!filters?.storeId || !filters.startDate || !filters.endDate) return;
-
-
             try {
                 setLoading(true);
 
@@ -21,6 +20,8 @@ function HourlySalesChartCon({ filters }) {
                     endDate: filters.endDate,
                 });
                 setData(res);
+
+                console.log("📦 응답 데이터:", res); 
 
             } catch (e) {
                 console.error("시간대별 매출 에러:", e);
@@ -37,6 +38,8 @@ function HourlySalesChartCon({ filters }) {
         <HourlySalesChartCom
             data={data}
             loading={loading}
+            mode={mode}
+            height={height}
         />
     );
 }

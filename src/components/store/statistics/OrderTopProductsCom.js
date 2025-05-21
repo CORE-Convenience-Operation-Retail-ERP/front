@@ -32,31 +32,28 @@ export function OrderTopProductsCom({ data, loading, mode = "summary" }) {
     if (loading) return <div>로딩 중...</div>;
 
     return (
-        <div style={{ marginTop: "8rem" }}>
+        <div style={{ marginTop: mode === "detail" ? "2rem" : "8rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <h3>📦 상위 발주 상품</h3>
-                <div>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                        <button
-                            onClick={() => setMetric("quantity")}
-                            style={{
-                                ...buttonStyle,
-                                ...(metric === "quantity" ? activeStyle : {})
-                            }}
-                        >
-                            수량 기준
-                        </button>
-                        <button
-                            onClick={() => setMetric("amount")}
-                            style={{
-                                ...buttonStyle,
-                                ...(metric === "amount" ? activeStyle : {})
-                            }}
-                        >
-                            금액 기준
-                        </button>
-                    </div>
-
+                <h3>📦 상위 발주 상품 {mode === "detail" && "(상세)"}</h3>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button
+                        onClick={() => setMetric("quantity")}
+                        style={{
+                            ...buttonStyle,
+                            ...(metric === "quantity" ? activeStyle : {})
+                        }}
+                    >
+                        수량 기준
+                    </button>
+                    <button
+                        onClick={() => setMetric("amount")}
+                        style={{
+                            ...buttonStyle,
+                            ...(metric === "amount" ? activeStyle : {})
+                        }}
+                    >
+                        금액 기준
+                    </button>
                 </div>
             </div>
 
@@ -65,21 +62,15 @@ export function OrderTopProductsCom({ data, loading, mode = "summary" }) {
                     data={visibleData}
                     layout="vertical"
                     margin={{ top: 20, right: 30, bottom: 5, left: 100 }}
-                    style={{ backgroundColor: "#fff", borderRadius: "8px" }}
                     onMouseLeave={() => setActiveIndex(null)}
                 >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" allowDecimals={false} />
                     <YAxis dataKey="productName" type="category" />
                     <Tooltip
-                        formatter={(v) => `${v.toLocaleString()}${unit}`}
-                        cursor={{ fill: "transparent" }}
+                        formatter={(value) => `${value.toLocaleString()}${unit}`}
+                        labelStyle={{ fontWeight: "bold" }}
                         wrapperStyle={{ pointerEvents: "none" }}
-                        onMouseMove={(e) => {
-                            if (e && e.activeTooltipIndex != null) {
-                                setActiveIndex(e.activeTooltipIndex);
-                            }
-                        }}
                     />
                     <Bar dataKey={dataKey} barSize={20} isAnimationActive={false}>
                         {visibleData.map((entry, index) => (
@@ -91,15 +82,11 @@ export function OrderTopProductsCom({ data, loading, mode = "summary" }) {
                                         ? {
                                             transform: "scale(1.05)",
                                             transformOrigin: "left center",
-                                            filter: "brightness(1.15) saturate(1.1)",
-                                            transition: "transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease",
-                                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
+                                            filter: "brightness(1.1)",
+                                            transition: "transform 0.2s, filter 0.2s",
                                             cursor: "pointer"
                                         }
-                                        : {
-                                            transform: "scale(1)",
-                                            transition: "transform 0.2s ease"
-                                        }
+                                        : { transition: "transform 0.2s" }
                                 }
                             />
                         ))}
@@ -107,7 +94,11 @@ export function OrderTopProductsCom({ data, loading, mode = "summary" }) {
                 </BarChart>
             </ResponsiveContainer>
 
-            {isEmpty && <p style={{ textAlign: "center", marginTop: "0.5rem" }}>데이터 없음</p>}
+            {isEmpty && (
+                <p style={{ textAlign: "center", marginTop: "0.5rem" }}>
+                    데이터 없음
+                </p>
+            )}
         </div>
     );
 }

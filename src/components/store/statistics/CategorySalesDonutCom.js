@@ -8,7 +8,7 @@ import {
 } from "../../../features/store/styles/statistics/CategorySalesDonut.styled";
 import { createPortal } from "react-dom";
 
-function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange }) {
+function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange, mode = "summary" }) {
     const DEFAULT_COLORS = [
         "#A8DADC", "#FFBCBC", "#FFD6A5", "#FDFFB6",
         "#CAFFBF", "#9BF6FF", "#BDB2FF", "#FFC6FF"
@@ -136,8 +136,9 @@ function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange })
                     </Pie>
                     {!isEmpty && <Tooltip
                         formatter={(value, name, props) => {
-                            const { categoryName, totalSales } = props.payload;
-                            return [`${totalSales.toLocaleString()}원`, categoryName];
+                            const { categoryName, totalSales, salesRatio } = props.payload;
+                            const ratioText = mode === "detail" ? ` (${(salesRatio * 100).toFixed(1)}%)` : "";
+                            return [`${totalSales.toLocaleString()}원`, categoryName + ratioText];
                         }}
                     />}
                 </PieChart>

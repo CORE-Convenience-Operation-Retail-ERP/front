@@ -6,8 +6,11 @@ import HourlySalesChartCon from "./HourlySalesChartCon";
 import ProductSalesChartCon from "./ProductSalesChartCon";
 import CategorySalesDonutCon from "./CategorySalesDonutCon";
 import OrderTopProductsCon from "./OrderTopProductsCon";
+import { useNavigate } from "react-router-dom";
 
 function StatisticsDashboardCon() {
+    const navigate = useNavigate();
+    // 기본값: 어제 날짜
 
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -55,7 +58,13 @@ function StatisticsDashboardCon() {
 
             {/*  통계 시각화 */}
             <KpiStatsCon filters={filters} />
-            <HourlySalesChartCon filters={filters} />
+            <div
+                className="card"
+                onClick={() => navigate("/store/stats/time", { state: filters })}
+                style={{ cursor: "pointer" }}
+            >
+                <HourlySalesChartCon filters={filters} mode="full" height={300} />
+            </div>
             <div style={{
                 display: "flex",
                 gap: "3rem",
@@ -64,17 +73,29 @@ function StatisticsDashboardCon() {
                 minHeight: "400px",
             }}>
                 <div style={{marginTop:"3rem", display: "flex", gap: "2rem", alignItems: "flex-start" }}>
-                    <div style={{ flex: 1, minWidth: "480px", height: "340px" }}>
+                    <div 
+                        style={{ flex: 1, minWidth: "480px", height: "340px" }}
+                        onClick={() => navigate("/store/stats/category", { state: filters })}
+                    >
                         <CategorySalesDonutCon filters={filters} mode="summary" />
                     </div>
-                    <div style={{ flex: 1, minWidth: "480px", height: "340px" }}>
+                    <div 
+                        style={{ flex: 1, minWidth: "480px", height: "340px" }}
+                        onClick={() => navigate("/store/stats/product", { state: filters })}
+                    >
                         <ProductSalesChartCon filters={filters} mode="summary" />
                     </div>
                 </div>
 
             </div>
+            <div
+                className="card"
+                onClick={() => navigate("/store/stats/order", { state: filters })}
+                style={{ cursor: "pointer" }}
+            >
+                <OrderTopProductsCon filters={filters} mode="mini" height={180} />
+            </div>
 
-            <OrderTopProductsCon filters={filters} />
         </>
     );
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import CategorySalesDonutCom from "../../../components/store/statistics/CategorySalesDonutCom";
+import CategorySalesTableCom from "../../../components/store/statistics/CategorySalesTableCom";
 import {
     fetchCategorySales
 } from "../../../service/store/StatisticsService";
@@ -10,7 +11,7 @@ import {
 } from "../../../service/store/CategoryService";
 import { selectStyle } from "../../../features/store/styles/statistics/CategorySalesDonut.styled";
 
-function CategorySalesDonutCon({ filters }) {
+function CategorySalesDonutCon({ filters, mode = "summary", showTable = false }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [colorOverrides, setColorOverrides] = useState({});
@@ -25,7 +26,7 @@ function CategorySalesDonutCon({ filters }) {
         subCategoryId: ""
     });
 
-    //  색상 로딩
+    // 색상 로딩
     useEffect(() => {
         const savedColors = localStorage.getItem("categoryColors");
         if (savedColors) {
@@ -39,7 +40,7 @@ function CategorySalesDonutCon({ filters }) {
         localStorage.setItem("categoryColors", JSON.stringify(updated));
     };
 
-    //  카테고리 목록 로딩
+    // 카테고리 목록 로딩
     useEffect(() => {
         fetchParentCategories().then(data => setParentCategories(data || []));
     }, []);
@@ -67,14 +68,13 @@ function CategorySalesDonutCon({ filters }) {
         setCategoryFilter(prev => ({ ...prev, subCategoryId: id }));
     };
 
-    //  통계 로딩
+    // 통계 로딩
     useEffect(() => {
         const load = async () => {
             try {
                 setLoading(true);
                 let categoryIds = [];
 
-                // 우선순위: 소분류 → 중분류 → 대분류
                 const selectedCategoryId =
                     categoryFilter.subCategoryId ||
                     categoryFilter.categoryId ||
@@ -107,6 +107,7 @@ function CategorySalesDonutCon({ filters }) {
 
     return (
         <div>
+            {/* 🧭 카테고리 필터 */}
             <div style={{ display: "flex", gap: "10px", marginBottom: "1rem" }}>
                 <select
                     value={categoryFilter.parentCategoryId}
@@ -142,13 +143,19 @@ function CategorySalesDonutCon({ filters }) {
                 </select>
             </div>
 
-
+            {/* 🍩 도넛 차트 */}
             <CategorySalesDonutCom
                 data={data}
                 loading={loading}
                 colorOverrides={colorOverrides}
                 onColorChange={handleColorChange}
+                mode={mode}
             />
+
+            {/* 📋 상세 테이블 (옵션) */}
+            {showTable && mode === "detail" && (
+                <CategorySalesTableCom data={data} loading={loading} />
+            )}
         </div>
     );
 }
