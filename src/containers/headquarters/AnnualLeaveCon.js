@@ -20,6 +20,9 @@ import AnnualLeaveCom from '../../components/headquarters/AnnualLeaveCom';
 import axios from '../../service/axiosInstance';
 import { useLocation } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import CommentIcon from '@mui/icons-material/Comment';
 
 const AnnualLeaveCon = () => {
   const location = useLocation();
@@ -33,11 +36,12 @@ const AnnualLeaveCon = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [search, setSearch] = useState('');
   
   // 연차 신청 모달 상태
   const [openModal, setOpenModal] = useState(false);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(dayjs());
+  const [endDate, setEndDate] = useState(dayjs());
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -372,8 +376,8 @@ const AnnualLeaveCon = () => {
   
   // 모달 열기
   const handleOpenModal = () => {
-    setStartDate(null);
-    setEndDate(null);
+    setStartDate(dayjs());
+    setEndDate(dayjs());
     setReason('');
     setFormErrors({});
     setSubmitError(null);
@@ -614,6 +618,32 @@ const AnnualLeaveCon = () => {
       });
   };
 
+  // 검색어 변경 핸들러
+  const handleSearch = (value) => {
+    setSearch(value);
+    setCurrentPage(0); // 검색 시 첫 페이지로 돌아감
+    
+    // 검색어가 있으면 해당 조건으로 필터링, 없으면 모든 데이터 표시
+    if (value.trim() === '') {
+      setFilteredLeaveRequests(leaveRequests);
+      setTotalItems(leaveRequests.length);
+      setTotalPages(Math.ceil(leaveRequests.length / rowsPerPage));
+    } else {
+      // 클라이언트 측에서 필터링 처리 (서버 API 호출 없이)
+      const searchVal = value.toLowerCase();
+      const filtered = leaveRequests.filter(request => {
+        // 사번(reqId) 또는 이름(empName)으로 검색
+        const empIdMatch = request.reqId && request.reqId.toString().includes(searchVal);
+        const nameMatch = request.empName && request.empName.toLowerCase().includes(searchVal);
+        return empIdMatch || nameMatch;
+      });
+      
+      setFilteredLeaveRequests(filtered);
+      setTotalItems(filtered.length);
+      setTotalPages(Math.ceil(filtered.length / rowsPerPage));
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
@@ -650,82 +680,241 @@ const AnnualLeaveCon = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
+        search={search}
+        onSearch={handleSearch}
       />
       
       {/* 연차 신청 모달 */}
-      <Dialog open={openModal} onClose={handleCloseModal} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ bgcolor: '#1EACB5', color: 'white', fontWeight: 'bold' }}>
+      <Dialog 
+        open={openModal} 
+        onClose={handleCloseModal} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          style: {
+            borderRadius: '12px',
+            padding: '8px',
+            maxWidth: '800px',
+            minWidth: '600px',
+            boxShadow: '0px 8px 24px rgba(1, 93, 112, 0.15)',
+            border: '1px solid rgba(30, 172, 181, 0.1)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          pb: 1,
+          color: '#1E9FF2',
+          fontWeight: 'bold',
+          fontSize: '1.2rem',
+          borderBottom: '1px solid rgba(30, 159, 242, 0.15)',
+          mb: 1
+        }}>
+          <CalendarMonthIcon sx={{ color: '#1E9FF2', mr: 1 }} />
           연차 신청
         </DialogTitle>
         
-        <DialogContent sx={{ pt: 3, pb: 1 }}>
+        <DialogContent sx={{ pt: 3, px: 4 }}>
           {submitError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert 
+              severity="error" 
+              sx={{ 
+                mb: 3, 
+                borderRadius: '8px',
+                '& .MuiAlert-icon': {
+                  color: '#E53935',
+                  opacity: 0.9
+                }
+              }}
+            >
               {submitError}
             </Alert>
           )}
           
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Box sx={{ mb: 2, mt: 1 }}>
-              <DatePicker
-                label="시작일"
-                value={startDate}
-                onChange={setStartDate}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    error: !!formErrors.startDate,
-                    helperText: formErrors.startDate
-                  }
-                }}
-                disablePast
-              />
+          <Box sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+            py: 2,
+            maxWidth: '100%'
+          }}>
+            {/* 날짜 선택 섹션 */}
+            <Box>
+              <Typography variant="h6" sx={{ 
+                mb: 3, 
+                color: '#1E9FF2', 
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
+                <DateRangeIcon sx={{ fontSize: '1.2rem' }} />
+                연차 기간 선택
+              </Typography>
+              
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: {xs: 'column', sm: 'row'}, 
+                  gap: {xs: 2, sm: 4},
+                  width: '100%',
+                  mb: 4
+                }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle2" sx={{ 
+                      mb: 1, 
+                      color: '#333333', 
+                      fontWeight: 'medium',
+                      fontSize: '0.9rem'
+                    }}>
+                      시작일
+                    </Typography>
+                    <DatePicker
+                      value={startDate}
+                      onChange={setStartDate}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error: !!formErrors.startDate,
+                          helperText: formErrors.startDate,
+                          placeholder: "MM/DD/YYYY",
+                          size: "medium",
+                          sx: { 
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              backgroundColor: '#FFFFFF',
+                              '&:hover fieldset': {
+                                borderColor: '#1E9FF2',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#1E9FF2',
+                              }
+                            }
+                          }
+                        }
+                      }}
+                      disablePast
+                    />
+                  </Box>
+                  
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle2" sx={{ 
+                      mb: 1, 
+                      color: '#333333', 
+                      fontWeight: 'medium',
+                      fontSize: '0.9rem'
+                    }}>
+                      종료일
+                    </Typography>
+                    <DatePicker
+                      value={endDate}
+                      onChange={setEndDate}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error: !!formErrors.endDate || !!formErrors.dateRange,
+                          helperText: formErrors.endDate || formErrors.dateRange,
+                          placeholder: "MM/DD/YYYY",
+                          size: "medium",
+                          sx: { 
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              backgroundColor: '#FFFFFF',
+                              '&:hover fieldset': {
+                                borderColor: '#1E9FF2',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#1E9FF2',
+                              }
+                            }
+                          }
+                        }
+                      }}
+                      disablePast
+                      minDate={startDate}
+                    />
+                  </Box>
+                </Box>
+              </LocalizationProvider>
+              
+              {startDate && endDate && (
+                <Box sx={{ 
+                  backgroundColor: 'rgba(30, 159, 242, 0.1)', 
+                  p: 2, 
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  mb: 2,
+                  border: '1px solid rgba(30, 159, 242, 0.15)'
+                }}>
+                  <CalendarMonthIcon sx={{ color: '#1E9FF2', fontSize: '1.2rem' }} />
+                  <Typography variant="body2" sx={{ color: '#333333', fontWeight: 'medium' }}>
+                    총 <strong>{calculateDays(startDate, endDate)}</strong>일의 연차를 사용합니다.
+                  </Typography>
+                </Box>
+              )}
             </Box>
             
-            <Box sx={{ mb: 2 }}>
-              <DatePicker
-                label="종료일"
-                value={endDate}
-                onChange={setEndDate}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    error: !!formErrors.endDate || !!formErrors.dateRange,
-                    helperText: formErrors.endDate || formErrors.dateRange
+            {/* 사유 입력 섹션 */}
+            <Box>
+              <Typography variant="h6" sx={{ 
+                mb: 3, 
+                color: '#1E9FF2', 
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
+                <CommentIcon sx={{ fontSize: '1.2rem' }} />
+                연차 신청 사유
+              </Typography>
+              
+              <TextField
+                multiline
+                rows={5}
+                fullWidth
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                error={!!formErrors.reason}
+                helperText={formErrors.reason}
+                placeholder="연차 신청 사유를 상세히 입력해주세요."
+                size="medium"
+                sx={{ 
+                  backgroundColor: '#FFFFFF',
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                    '&:hover fieldset': {
+                      borderColor: '#1E9FF2',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#1E9FF2',
+                    }
                   }
                 }}
-                disablePast
-                minDate={startDate}
               />
             </Box>
-          </LocalizationProvider>
-          
-          {startDate && endDate && (
-            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-              총 {calculateDays(startDate, endDate)}일의 연차를 사용합니다.
-            </Typography>
-          )}
-          
-          <TextField
-            label="사유"
-            multiline
-            rows={3}
-            fullWidth
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            error={!!formErrors.reason}
-            helperText={formErrors.reason}
-          />
+          </Box>
         </DialogContent>
         
-        <DialogActions sx={{ px: 3, py: 2 }}>
+        <DialogActions sx={{ 
+          padding: '20px 24px 24px',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: 2,
+          borderTop: '1px solid rgba(30, 159, 242, 0.08)',
+          mt: 1
+        }}>
           <Button 
             onClick={handleCloseModal}
-            sx={{ 
+            sx={{
               color: '#777777',
               borderRadius: '8px',
               fontWeight: 'medium',
               textTransform: 'none',
+              padding: '10px 20px',
+              width: '120px',
               border: '1px solid #dddddd',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.05)',
@@ -739,14 +928,23 @@ const AnnualLeaveCon = () => {
             onClick={handleSubmit}
             variant="contained"
             disabled={submitting}
+            startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : null}
             sx={{ 
-              bgcolor: '#015D70', 
-              '&:hover': { bgcolor: '#014D5E' },
+              backgroundColor: '#1E9FF2',
+              color: '#ffffff',
               borderRadius: '8px',
-              textTransform: 'none'
+              fontWeight: 'medium',
+              textTransform: 'none',
+              padding: '10px 20px',
+              width: '120px',
+              boxShadow: '0px 3px 6px rgba(30, 159, 242, 0.2)',
+              '&:hover': {
+                backgroundColor: '#1A8DE0',
+                boxShadow: '0px 4px 8px rgba(30, 159, 242, 0.3)',
+              }
             }}
           >
-            {submitting ? <CircularProgress size={24} sx={{ color: 'white' }} /> : '신청하기'}
+            신청하기
           </Button>
         </DialogActions>
       </Dialog>

@@ -106,8 +106,8 @@ const EmployeesListCom = ({
             alignItems: 'center',
             width: '100%',
             borderRadius: '30px',
-            boxShadow: '0 2px 8px 0 rgba(85, 214, 223, 0.15)',
-            border: '2px solid #55D6DF',
+            boxShadow: '0 2px 8px 0 rgba(85, 110, 223, 0.15)',
+            border: '2px solid #005F9A',
             bgcolor: '#fff',
           }}
         >
@@ -121,7 +121,7 @@ const EmployeesListCom = ({
           {search && (
             <IconButton
               onClick={handleClearSearch}
-              sx={{ p: '10px', color: '#55D6DF' }}
+              sx={{ p: '10px', color: '#005F9A' }}
               aria-label="clear"
             >
               <ClearIcon />
@@ -129,7 +129,7 @@ const EmployeesListCom = ({
           )}
           <IconButton
             type="submit"
-            sx={{ p: '10px', color: '#55D6DF' }}
+            sx={{ p: '10px', color: '#005F9A' }}
             aria-label="search"
           >
             <SearchIcon sx={{ fontSize: 32 }} />
