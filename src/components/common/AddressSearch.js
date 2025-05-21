@@ -108,15 +108,15 @@ const AddressSearch = ({ onSelect, value, onChange, detailAddress = '', onDetail
                         <Button
                             variant="contained"
                             onClick={handleAddressSearch}
-                            startIcon={<SearchIcon />}
+                            startIcon={<SearchIcon fontSize="small" />}
                             sx={{ 
-                                minWidth: '140px', 
+                                minWidth: '90px', 
                                 height: 56,
-                                fontSize: '1rem',
+                                fontSize: '0.95rem',
                                 borderRadius: 2
                             }}
                         >
-                            주소 검색
+                            검색
                         </Button>
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block', fontSize: '0.9rem' }}>
