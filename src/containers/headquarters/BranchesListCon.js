@@ -10,7 +10,7 @@ const BranchesListCon = () => {
   const [branches, setBranches] = useState([]);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({
-    status: [1, 2, 3],
+    status: [],
     sort: 'storeId',
     order: 'asc'
   });
@@ -108,6 +108,11 @@ const BranchesListCon = () => {
       // 응답 데이터가 배열인 경우 직접 사용
       let content = Array.isArray(response.data) ? response.data : [];
       
+      // 상태 필터링 추가 (employees 방식 참고)
+      if (filters.status && filters.status.length > 0) {
+        content = content.filter(branch => filters.status.includes(branch.storeStatus));
+      }
+      
       // 검색어가 있는 경우 클라이언트 측에서 필터링
       if (search) {
         const searchLower = search.toLowerCase();
@@ -165,14 +170,15 @@ const BranchesListCon = () => {
   // 상태 필터 토글 핸들러
   const toggleStatusFilter = (status) => {
     setFilters(prev => {
-      const newStatus = prev.status.includes(status)
-        ? prev.status.filter(s => s !== status)
-        : [...prev.status, status];
-      
-      if (newStatus.length === 0) {
-        return { ...prev, status: [1, 2, 3] };
+      let newStatus;
+      if (prev.status.includes(status)) {
+        // 이미 선택된 상태면 해제
+        newStatus = prev.status.filter(s => s !== status);
+      } else {
+        // 선택 추가
+        newStatus = [...prev.status, status];
       }
-      
+      // 아무것도 선택 안 하면 전체로 복귀(빈 배열 유지, 전체 보여줌)
       return { ...prev, status: newStatus };
     });
     setPage(1);

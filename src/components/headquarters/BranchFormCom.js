@@ -48,16 +48,15 @@ const BranchFormCom = ({
       <Card elevation={4}>
         <CardContent sx={{ p: 0 }}>
           <Box sx={{ 
-            bgcolor: 'primary.main', 
-            color: 'primary.contrastText', 
-            p: 3,
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            p: 1.5,
             borderRadius: '4px 4px 0 0',
             display: 'flex',
             alignItems: 'center',
-            gap: 2
+            gap: 1.2
           }}>
-            <BusinessIcon fontSize="large" />
-            <Typography variant="h4" component="h1" fontWeight="bold">
+            <Typography variant="h6" component="h1" fontWeight="bold" sx={{ fontSize: 22 }}>
               {isEdit ? '지점 정보 수정' : '새 지점 등록'}
             </Typography>
           </Box>
@@ -92,7 +91,7 @@ const BranchFormCom = ({
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <StoreIcon color="primary" fontSize="large" />
+                            <StoreIcon color="primary" fontSize="small" sx={{ fontSize: 20 }} />
                           </InputAdornment>
                         ),
                       }}
@@ -116,7 +115,7 @@ const BranchFormCom = ({
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <PhoneIcon color="primary" fontSize="large" />
+                            <PhoneIcon color="primary" fontSize="small" sx={{ fontSize: 20 }} />
                           </InputAdornment>
                         ),
                       }}
@@ -165,7 +164,7 @@ const BranchFormCom = ({
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <StorefrontIcon color="primary" fontSize="large" />
+                            <StorefrontIcon color="primary" fontSize="small" sx={{ fontSize: 20 }} />
                           </InputAdornment>
                         ),
                       }}
@@ -215,7 +214,7 @@ const BranchFormCom = ({
                       disabled={loading}
                       startIcon={loading ? <CircularProgress size={24} /> : <SaveIcon />}
                       size="large"
-                      sx={{ fontSize: '1.1rem', py: 1.5, px: 4, borderRadius: 2 }}
+                      sx={{ fontSize: '1.1rem', py: 1, px: 3, borderRadius: 2 }}
                     >
                       {isEdit ? '수정 완료' : '지점 등록'}
                     </Button>
