@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
+import axios from '../../service/axiosInstance';
+import IconButton from '@mui/material/IconButton';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
 // Chart.js 등록
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -317,6 +320,7 @@ const NavButton = styled(PageButton)`
 `;
 
 const ChartContainer = styled.div`
+  position: relative;
   height: 300px;
   margin: 20px 0;
 `;
@@ -334,11 +338,26 @@ const LoadingOverlay = styled.div`
   z-index: 10;
 `;
 
+const BackButton = styled.button`
+  margin-top: 12px;
+  padding: 8px 18px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover {
+    background: #1565c0;
+  }
+`;
+
 const BranchesStockMonitoringCom = ({ 
   branches = [], 
   categories = [], 
   stockSummary = null, 
-  categoryStats = [], 
   branchComparison = [], 
   stockList = { content: [], totalPages: 0, number: 0 }, 
   filters = {},
@@ -349,6 +368,10 @@ const BranchesStockMonitoringCom = ({
   const [searchInput, setSearchInput] = useState('');
   const [autocompleteItems, setAutocompleteItems] = useState([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [categoryLevel, setCategoryLevel] = useState(1); // 1:대, 2:중, 3:소
+  const [parentCategoryId, setParentCategoryId] = useState(null);
+  const [categoryStats, setCategoryStats] = useState([]);
+  const [categoryStack, setCategoryStack] = useState([]);
   
   // 자동완성 목록 생성
   useEffect(() => {
@@ -452,6 +475,41 @@ const BranchesStockMonitoringCom = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+  
+  // 카테고리별 재고 비율 데이터 요청
+  useEffect(() => {
+    axios.get('/api/headquarters/branches/stock/category-stats', {
+      params: { parentCategoryId }
+    }).then(res => {
+      setCategoryStats(res.data);
+      console.log('categoryStats', res.data);
+    });
+  }, [parentCategoryId]);
+  
+  // 파이차트 클릭 이벤트 (드릴다운)
+  const handlePieClick = (evt, elements) => {
+    if (elements.length > 0) {
+      const idx = elements[0].index;
+      const clicked = categoryStats[idx];
+      if (clicked.categoryFilter === 3) {
+        // 소분류(최하위)는 클릭 무시
+        return;
+      }
+      setCategoryStack([...categoryStack, { id: parentCategoryId, level: categoryLevel }]);
+      setParentCategoryId(clicked.categoryId);
+      setCategoryLevel(categoryLevel + 1);
+    }
+  };
+
+  // 상위로 이동
+  const handleBack = () => {
+    if (categoryStack.length > 0) {
+      const prev = categoryStack[categoryStack.length - 1];
+      setParentCategoryId(prev.id);
+      setCategoryLevel(prev.level);
+      setCategoryStack(categoryStack.slice(0, -1));
+    }
+  };
   
   // 차트 데이터 준비
   const pieData = {
@@ -669,7 +727,14 @@ const BranchesStockMonitoringCom = ({
           
           <ChartContainer>
             {categoryStats.length > 0 ? (
-              <Pie data={pieData} options={pieOptions} />
+              <>
+                <Pie data={pieData} options={{ ...pieOptions, onClick: handlePieClick }} />
+                {categoryLevel > 1 && (
+                  <IconButton onClick={handleBack} sx={{ position: 'absolute', top: 10, left: 10, zIndex: 2, background: '#fff', boxShadow: 1 }} size="small">
+                    <ArrowBackIosNewIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </>
             ) : (
               <div style={{textAlign: 'center', paddingTop: '100px'}}>
                 카테고리별 데이터가 없습니다.
