@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
+import axios from '../../service/axiosInstance';
+import { IconButton } from '@mui/material';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 // Chart.js 등록
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -559,7 +563,7 @@ const IntegratedStockMonitoringCom = ({
   branches = [], 
   categories = [], 
   stockSummary = null, 
-  categoryStats = [], 
+  integratedCategoryStats = [], 
   branchComparison = [], 
   stockList = { content: [], totalPages: 0, number: 0 }, 
   filters = {},
@@ -570,11 +574,17 @@ const IntegratedStockMonitoringCom = ({
   const [searchInput, setSearchInput] = useState('');
   const [autocompleteItems, setAutocompleteItems] = useState([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
-  const [viewMode, setViewMode] = useState('integrated'); // 'integrated', 'headquarters', 'branches'
+  const [viewMode, setViewMode] = useState('headquarters'); // 'integrated', 'headquarters', 'branches'
   
   // 그래프 페이징을 위한 상태 추가
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 13;
+  
+  // 드릴다운 카테고리 상태
+  const [categoryLevel, setCategoryLevel] = useState(1); // 1:대, 2:중, 3:소
+  const [parentCategoryId, setParentCategoryId] = useState(null);
+  const [categoryStats, setCategoryStats] = useState([]);
+  const [categoryStack, setCategoryStack] = useState([]);
   
   // 데이터 구조 확인을 위한 로그
   useEffect(() => {
@@ -761,7 +771,42 @@ const IntegratedStockMonitoringCom = ({
   // 총 페이지 수 계산 - 동적으로 계산하여 모든 상품이 표시되도록 함
   const totalGraphPages = Math.ceil(headquarters.length / itemsPerPage);
   
-  // 차트 데이터 준비
+  // 드릴다운 카테고리 데이터 로딩 (API 경로 그대로)
+  useEffect(() => {
+    if (viewMode !== 'integrated') return;
+    axios.get('/api/headquarters/branches/stock/category-stats', {
+      params: { parentCategoryId }
+    }).then(res => {
+      setCategoryStats(res.data);
+    });
+  }, [parentCategoryId, viewMode]);
+  
+  // 파이차트 클릭 이벤트 (드릴다운)
+  const handlePieClick = (evt, elements) => {
+    if (elements.length > 0) {
+      const idx = elements[0].index;
+      const clicked = categoryStats[idx];
+      if (clicked.categoryFilter === 3) {
+        // 소분류(최하위)는 클릭 무시
+        return;
+      }
+      setCategoryStack([...categoryStack, { id: parentCategoryId, level: categoryLevel }]);
+      setParentCategoryId(clicked.categoryId);
+      setCategoryLevel(categoryLevel + 1);
+    }
+  };
+  
+  // 상위로 이동
+  const handleBack = () => {
+    if (categoryStack.length > 0) {
+      const prev = categoryStack[categoryStack.length - 1];
+      setParentCategoryId(prev.id);
+      setCategoryLevel(prev.level);
+      setCategoryStack(categoryStack.slice(0, -1));
+    }
+  };
+  
+  // 파이차트 데이터/옵션
   const pieData = {
     labels: categoryStats.map(item => item.categoryName),
     datasets: [
@@ -778,48 +823,6 @@ const IntegratedStockMonitoringCom = ({
     ],
   };
   
-  const barData = {
-    labels: branchComparison.map(item => item.name),
-    datasets: [
-      {
-        label: '정상재고',
-        data: branchComparison.map(item => item.정상재고),
-        backgroundColor: '#4CAF50',
-      },
-      {
-        label: '경고재고',
-        data: branchComparison.map(item => item.경고재고),
-        backgroundColor: '#FFC107',
-      },
-      {
-        label: '긴급재고',
-        data: branchComparison.map(item => item.긴급재고),
-        backgroundColor: '#FF5252',
-      },
-    ],
-  };
-  
-  const barOptions = {
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: false,
-      },
-    },
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        stacked: true,
-      },
-      y: {
-        stacked: true,
-      },
-    },
-  };
-  
   const pieOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -832,11 +835,14 @@ const IntegratedStockMonitoringCom = ({
           label: function(context) {
             const label = context.label || '';
             const value = context.raw || 0;
-            return `${label}: ${value.toFixed(1)}%`;
+            // 수량 정보도 함께 표시 (API 응답에 quantity 필드가 있다고 가정)
+            const quantity = categoryStats[context.dataIndex]?.quantity;
+            return `${label}: ${value.toFixed(1)}%${quantity !== undefined ? ` (${quantity}개)` : ''}`;
           }
         }
       }
     },
+    onClick: handlePieClick
   };
 
   // 재고 상태에 대한 설명
@@ -890,33 +896,60 @@ const IntegratedStockMonitoringCom = ({
     };
   };
 
+  // barData, barOptions 복원
+  const barData = {
+    labels: branchComparison.map(item => item.name),
+    datasets: [
+      {
+        label: '정상재고',
+        data: branchComparison.map(item => item.정상재고),
+        backgroundColor: '#4CAF50',
+      },
+      {
+        label: '경고재고',
+        data: branchComparison.map(item => item.경고재고),
+        backgroundColor: '#FFC107',
+      },
+      {
+        label: '긴급재고',
+        data: branchComparison.map(item => item.긴급재고),
+        backgroundColor: '#FF5252',
+      },
+    ],
+  };
+
+  const barOptions = {
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: false,
+      },
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        stacked: true,
+      },
+      y: {
+        stacked: true,
+      },
+    },
+  };
+
   return (
     <Container>
-      <PageTitle>상품 중심 통합 재고 관리</PageTitle>
-      <PageSubtitle>상품별 통합 재고 현황을 모니터링하고 관리합니다</PageSubtitle>
-      
       {/* 뷰 모드 전환 탭 */}
       <div style={{ display: 'flex', marginBottom: '20px' }}>
         <button 
           style={{ 
             padding: '10px 15px', 
-            background: viewMode === 'integrated' ? '#6FC3ED' : '#f5f5f5',
-            color: viewMode === 'integrated' ? 'white' : '#333',
+            background: viewMode === 'headquarters' ? '#6FC3ED' : '#f5f5f5',
+            color: viewMode === 'headquarters' ? 'white' : '#333',
             border: 'none', 
             borderRadius: '4px 0 0 4px',
-            cursor: 'pointer',
-            fontWeight: viewMode === 'integrated' ? 'bold' : 'normal'
-          }}
-          onClick={() => handleViewModeChange('integrated')}
-        >
-          통합 재고 현황
-        </button>
-        <button 
-          style={{ 
-            padding: '10px 15px', 
-            background: viewMode === 'headquarters' ? '#6FC3ED' : '#f5f5f5', 
-            color: viewMode === 'headquarters' ? 'white' : '#333',
-            border: 'none',
             cursor: 'pointer',
             fontWeight: viewMode === 'headquarters' ? 'bold' : 'normal'
           }}
@@ -1004,7 +1037,6 @@ const IntegratedStockMonitoringCom = ({
           <Card>
             <CardTitle>
               본사 재고 현황
-              <DetailButton>자세히</DetailButton>
             </CardTitle>
             
             {headquarters.length > 0 ? (
@@ -1022,36 +1054,43 @@ const IntegratedStockMonitoringCom = ({
                     onClick={() => handleGraphPageChange('prev')}
                     disabled={currentPage === 0}
                     style={{ 
-                      padding: '8px 15px',
+                        width: '36px',
+                      height: '36px',
+                      padding: 0,
                       background: currentPage === 0 ? '#f0f0f0' : '#6FC3ED',
                       color: currentPage === 0 ? '#999' : 'white',
                       border: 'none',
-                      borderRadius: '4px',
+                      borderRadius: '50%',
                       cursor: currentPage === 0 ? 'default' : 'pointer',
-                      fontWeight: 'bold'
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
                     }}
                   >
-                    ◀ 이전
+                    <ArrowBackIosNewIcon fontSize="small" />
                   </button>
-                  
-                  <div style={{ fontSize: '14px', color: '#666' }}>
-                    {currentPage + 1} / {totalGraphPages} 페이지 ({headquarters.length}개 항목 중 {currentPage * itemsPerPage + 1}-{Math.min((currentPage + 1) * itemsPerPage, headquarters.length)}개 표시)
-                  </div>
-                  
                   <button 
                     onClick={() => handleGraphPageChange('next')}
                     disabled={(currentPage + 1) * itemsPerPage >= headquarters.length}
                     style={{ 
-                      padding: '8px 15px',
+                      width: '36px',
+                      height: '36px',
+                      padding: 0,
                       background: (currentPage + 1) * itemsPerPage >= headquarters.length ? '#f0f0f0' : '#6FC3ED',
                       color: (currentPage + 1) * itemsPerPage >= headquarters.length ? '#999' : 'white',
                       border: 'none',
-                      borderRadius: '4px',
+                      borderRadius: '50%',
                       cursor: (currentPage + 1) * itemsPerPage >= headquarters.length ? 'default' : 'pointer',
-                      fontWeight: 'bold'
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
                     }}
                   >
-                    다음 ▶
+                    <ArrowForwardIosIcon fontSize="small" />
                   </button>
                 </div>
                 
@@ -1113,11 +1152,17 @@ const IntegratedStockMonitoringCom = ({
             <Card style={{ gridColumn: 'span 2' }}>
               <CardTitle>
                 카테고리별 재고 비율
-                <DetailButton>자세히</DetailButton>
               </CardTitle>
-              <ChartContainer style={{ height: '400px' }}>
+              <ChartContainer style={{ height: '400px', position: 'relative' }}>
                 {categoryStats.length > 0 ? (
-                  <Pie data={pieData} options={pieOptions} />
+                  <>
+                    <Pie data={pieData} options={pieOptions} />
+                    {categoryLevel > 1 && (
+                      <IconButton onClick={handleBack} sx={{ position: 'absolute', top: 10, left: 10, zIndex: 2, background: '#fff', boxShadow: 1 }} size="small">
+                        <ArrowBackIosNewIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </>
                 ) : (
                   <div style={{textAlign: 'center', paddingTop: '100px'}}>
                     카테고리별 데이터가 없습니다.
@@ -1132,7 +1177,6 @@ const IntegratedStockMonitoringCom = ({
             <Card>
               <CardTitle>
                 지점 재고 현황 요약
-                <DetailButton>자세히</DetailButton>
               </CardTitle>
               
               {stockSummary && (
@@ -1179,7 +1223,6 @@ const IntegratedStockMonitoringCom = ({
             <Card>
               <CardTitle>
                 지점별 재고 비교
-                <DetailButton>자세히</DetailButton>
               </CardTitle>
               
               <ChartContainer style={{ height: '400px' }}>
