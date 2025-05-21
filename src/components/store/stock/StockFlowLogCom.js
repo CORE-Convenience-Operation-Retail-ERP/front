@@ -10,9 +10,14 @@ import Pagination from "../../../components/store/common/Pagination";
 function StockFlowLogCom({ logs, pageInfo, onPageChange }) {
   const formatDate = (dateTimeStr) => dateTimeStr?.split("T")[0] || "-";
 
-  const formatQuantity = (qty, before, after) => {
-    const sign = qty > 0 ? "+" : "";
-    return `${sign}${qty} (${before} → ${after})`;
+  const formatQuantity = (qty, before, after, flowType) => {
+    // 감소 유형: 출고(1), 판매(2), 폐기(3), 반품(5), 이동출고(6)
+    let diff = after - before;
+    if ([1, 2, 3, 5, 6].includes(flowType)) {
+      diff = before - after;
+    }
+    const sign = diff > 0 ? "+" : "";
+    return `${sign}${diff} (${before} → ${after})`;
   };
 
   return (
@@ -39,7 +44,7 @@ function StockFlowLogCom({ logs, pageInfo, onPageChange }) {
                         <td>{log.productName}</td>
                         <td>{log.flowTypeLabel}</td>
                         <td>{log.location}</td>
-                        <td>{formatQuantity(log.quantity, log.beforeQuantity, log.afterQuantity)}</td>
+                        <td>{formatQuantity(log.quantity, log.beforeQuantity, log.afterQuantity, log.flowType)}</td>
                         <td>{log.processedBy}</td>
                         <td>{log.note}</td>
                       </tr>

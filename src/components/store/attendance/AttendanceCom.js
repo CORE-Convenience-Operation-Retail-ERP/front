@@ -2,7 +2,6 @@ import React from "react";
 import { format, isValid } from "date-fns";
 import StoreSearchBar from "../common/StoreSearchBar";
 import { Table } from "../../../features/store/styles/common/Table.styled";
-import { PageTitle } from "../../../features/store/styles/common/PageLayout";
 import styled from "styled-components";
 
 const StatusTag = styled.span`
@@ -56,9 +55,7 @@ function AttendanceCom({
 
   return (
       <>
-        <PageTitle>근태 관리</PageTitle>
-
-          <div style={{ display: "flex", justifyContent: "flex-end", marginRight: "1rem" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginRight: "1rem", marginBottom: "0.5rem" }}>
               <StoreSearchBar filterOptions={filterOptions} onSearch={onSearch} />
           </div>
         <Table>

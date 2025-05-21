@@ -36,7 +36,14 @@ export default function StockHistorySummaryCom({ historyList = [], productId }) 
 
   return (
     <div>
-      <h4>📦 수량 변화 로그 (최근 10건)</h4>
+      <div style={{display:'flex',justifyContent:'space-between'}}>
+      <h4> 수량 변화 로그 (최근 10건)</h4>
+      {productId && (
+          <MoreLink onClick={() => navigate(`/store/stock/flow/search`)}>
+            자세히 보러가기 →
+          </MoreLink>
+      )}
+    </div>
       <Table>
         <thead>
           <tr>
@@ -77,11 +84,6 @@ export default function StockHistorySummaryCom({ historyList = [], productId }) 
         </tbody>
       </Table>
 
-      {productId && (
-        <MoreLink onClick={() => navigate(`/store/stock/flow/search`)}>
-          자세히 보러가기 →
-        </MoreLink>
-      )}
     </div>
   );
 }

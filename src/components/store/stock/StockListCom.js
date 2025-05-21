@@ -16,7 +16,7 @@ import {
     TableWrapper
 } from '../../../features/store/styles/common/PageLayout';
 import { Table } from '../../../features/store/styles/common/Table.styled';
-import { CategorySelect } from '../../../features/store/styles/stock/StockList.styled';
+import SelectBox from '../../../features/store/styles/common/SelectBox';
 import { PrimaryButton } from '../../../features/store/styles/common/Button.styled';
 
 function StockListCom({
@@ -93,22 +93,50 @@ function StockListCom({
         <PageWrapper>
             <PageSection>
                 <FilterActionRow>
-            <PageTitle>재고 현황</PageTitle>
-                    <FilterGroup style={{ marginLeft: '25rem' }}>
-                        <CategorySelect value={filters.parentCategoryId} onChange={e => onParentChange(e.target.value)}>
-                            <option value="">대분류</option>
-                            {parentCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </CategorySelect>
-                        <CategorySelect value={filters.categoryId} onChange={e => onChildChange(e.target.value)}>
-                            <option value="">중분류</option>
-                            {childCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </CategorySelect>
-                        <CategorySelect value={filters.subCategoryId} onChange={e => onSubChildChange(e.target.value)}>
-                            <option value="">소분류</option>
-                            {grandChildCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </CategorySelect>
+                    <PageTitle>재고 현황</PageTitle>
+                </FilterActionRow>
+            </PageSection>
+            <SearchBarRow style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "1rem",
+                marginBottom: "5px",
+            }}>
+                {/* 왼쪽: 카테고리 필터 */}
+                <div style={{ minWidth: 320, display: "flex", justifyContent: "flex-start", marginRight: "-0.5rem" }}>
+                    <FilterGroup>
+                        <SelectBox
+                            value={filters.parentCategoryId}
+                            onChange={e => onParentChange(e.target.value)}
+                            options={parentCategories.map(c => ({ value: c.id, label: c.name }))}
+                            placeholder="대분류"
+                        />
+                        <SelectBox
+                            value={filters.categoryId}
+                            onChange={e => onChildChange(e.target.value)}
+                            options={childCategories.map(c => ({ value: c.id, label: c.name }))}
+                            placeholder="중분류"
+                        />
+                        <SelectBox
+                            value={filters.subCategoryId}
+                            onChange={e => onSubChildChange(e.target.value)}
+                            options={grandChildCategories.map(c => ({ value: c.id, label: c.name }))}
+                            placeholder="소분류"
+                        />
                     </FilterGroup>
-
+                </div>
+                {/* 가운데: 검색바 */}
+                <div style={{ flex: 1, display: "flex", justifyContent: "center", maginLeft: "2rem", marginTop: "1rem" }}>
+                    <StoreSearchBar
+                        filterOptions={[
+                            { key: 'productName', label: '상품명', type: 'text', placeholder: '상품명 입력' },
+                            { key: 'barcode', label: '바코드', type: 'text', placeholder: '바코드 입력' }
+                        ]}
+                        onSearch={onSearch}
+                    />
+                </div>
+                {/* 오른쪽: 액션 버튼 */}
+                <div style={{ minWidth: 380, display: "flex", justifyContent: "flex-end" }}>
                     <ActionGroup>
                         <PrimaryButton onClick={handleDownload}>엑셀 다운로드</PrimaryButton>
                         <PrimaryButton onClick={() => window.location.href = '/store/inventory/check/register'}>실사 등록</PrimaryButton>
@@ -129,18 +157,8 @@ function StockListCom({
                             }
                         }}>실사 복원(선택/전체)</PrimaryButton>
                     </ActionGroup>
-                </FilterActionRow>
-            </PageSection>
-            <SearchBarRow style={{ marginLeft: '33.5rem', marginTop: '-3rem' }}>
-                <StoreSearchBar
-                    filterOptions={[
-                        { key: 'productName', label: '상품명', type: 'text', placeholder: '상품명 입력' },
-                        { key: 'barcode', label: '바코드', type: 'text', placeholder: '바코드 입력' }
-                    ]}
-                    onSearch={onSearch}
-                />
+                </div>
             </SearchBarRow>
-
 
             <TableWrapper>
                 {stockList.length === 0 ? (

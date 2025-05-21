@@ -11,7 +11,7 @@ import {
     searchPartTimers,
     deletePartTimer
 } from "../../../service/store/PartTimeService";
-import {PageTitle} from "../../../features/store/styles/common/PageLayout";
+import {PageTitle, PageWrapper} from "../../../features/store/styles/common/PageLayout";
 
 const TopBar = styled.div`
   display: flex;
@@ -106,7 +106,7 @@ function PartTimerCon() {
     };
 
     return (
-        <div>
+        <PageWrapper>
                 <PageTitle>인사관리</PageTitle>
             <TopBar>
 
@@ -163,7 +163,7 @@ function PartTimerCon() {
                     onClose={handleCloseQRModal}
                 />
             )}
-        </div>
+        </PageWrapper>
     );
 }
 

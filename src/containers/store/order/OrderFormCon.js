@@ -31,7 +31,7 @@ export default function OrderFormCon() {
   const [storeOptions, setStoreOptions] = useState([]);
 
   const [searchParams, setSearchParams] = useState({
-    storeId: role === "ROLE_HQ" ? "" : defaultStoreId,
+    storeId: role === "ROLE_MASTER" ? "" : defaultStoreId,
     page: 0,
     size: PAGE_SIZE,
   });

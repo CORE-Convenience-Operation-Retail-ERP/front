@@ -19,7 +19,8 @@ const StyledSelect = styled.select`
   border-radius: 6px;
   background-color: #fff;
   font-size: 14px;
-  min-width: 180px;
+  width: 100px;
+  min-width: 100px;
   text-align: center;
   &:focus {
     border-color: #4f46e5;

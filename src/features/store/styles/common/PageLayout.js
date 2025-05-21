@@ -68,6 +68,12 @@ export const FlexSectionWrapper = styled.div`
   }
 `;
 
+export const TableSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
 export default function PageLayout({ title, children }) {
     return (
         <PageWrapper>

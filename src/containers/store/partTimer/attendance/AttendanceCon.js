@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import AttendanceCom from "../../../../components/store/attendance/AttendanceCom";
 import { fetchPartTimerAttendanceList } from "../../../../service/store/AttendanceSerivce";
 import { fetchStoreList } from "../../../../service/store/StoreService";
+import {PageTitle, PageWrapper} from "../../../../features/store/styles/common/PageLayout";
 
 function AttendanceCon() {
   const [attendanceList, setAttendanceList] = useState([]);
@@ -55,13 +56,16 @@ const handleSearch = (newFilters) => {
   };
 
   return (
-    <AttendanceCom
+      <PageWrapper>
+  <PageTitle>근태 관리</PageTitle>
+  <AttendanceCom
       data={attendanceList}
       onSearch={handleSearch}
       storeList={storeList}
       selectedStoreId={selectedStoreId}
       onStoreChange={isHQ ? handleStoreChange : null}
     />
+    </PageWrapper>
   );
 }
 

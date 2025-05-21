@@ -11,7 +11,7 @@ import {
   ButtonGroup,
   ViewToggleButton,
 } from "../../../features/store/styles/salary/SalaryList.styled";
-import {PageTitle} from "../../../features/store/styles/common/PageLayout";
+import {PageTitle, PageWrapper} from "../../../features/store/styles/common/PageLayout";
 import {PrimaryButton} from "../../../features/store/styles/common/Button.styled";
 
 function SalaryListCon() {
@@ -148,15 +148,16 @@ function SalaryListCon() {
   ];
 
   return (
-    <div>
+    <PageWrapper>
       <PageTitle>급여 관리</PageTitle>
       <div style={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: "1.5rem"
+        marginBottom: "1rem"
+
       }}>
-        <ButtonGroup>
+        <ButtonGroup >
           <ViewToggleButton
               active={viewMode === "monthly"}
               onClick={() => handleViewChange("monthly")}
@@ -190,7 +191,7 @@ function SalaryListCon() {
         totalPages={totalPages}
         onPageChange={setPage}
       />
-    </div>
+    </PageWrapper>
   );
 }
 

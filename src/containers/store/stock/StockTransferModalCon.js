@@ -1,4 +1,3 @@
-// src/containers/store/stock/StockTransferModalCon.js
 import React, { useState, useEffect } from "react";
 import StockTransferModalCom from "../../../components/store/stock/StockTransferModalCom";
 import { requestStockTransfer } from "../../../service/store/StockService";

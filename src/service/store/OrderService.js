@@ -79,7 +79,8 @@ export const removeOrder = (orderId) =>
     );
 
 /** ✅ [11] 매장 목록 조회 (드롭다운용) */
-export const fetchStoreList = () => 
-    handleRequest(() => 
-        axios.get('/api/stores')
-    );
+export const fetchStoreList = () =>
+    handleRequest(async () => {
+        const res = await axios.get('/api/stores');
+        return res.data || [];
+    });

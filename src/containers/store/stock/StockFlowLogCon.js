@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import StockFlowLogCom from "../../../components/store/stock/StockFlowLogCom";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import { searchStockFlows } from "../../../service/store/StockFlowService";
-import {PageTitle} from "../../../features/store/styles/common/PageLayout";
+import {PageTitle, PageWrapper} from "../../../features/store/styles/common/PageLayout";
 
 function StockFlowLogCon() {
   const [logs, setLogs] = useState([]);
@@ -68,10 +68,10 @@ function StockFlowLogCon() {
   ];
 
   return (
-      <>
-        <div>
+      <PageWrapper>
+      <div>
         <PageTitle>🎞 입출고 날짜 로그</PageTitle>
-          <div style={{ display: "flex", justifyContent: "flex-end", marginRight: "1rem" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginRight: "1rem",marginBottom: "-1.5rem" }}>
             <StoreSearchBar filterOptions={filterOptions} onSearch={handleSearch} />
           </div>
         </div>
@@ -80,7 +80,7 @@ function StockFlowLogCon() {
             pageInfo={pageInfo}
             onPageChange={handlePageChange}
         />
-      </>
+      </PageWrapper>
   );
 }
 

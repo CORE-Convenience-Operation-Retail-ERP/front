@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import TransactionTable from "../../components/store/sales/TransactionTable";
 import Pagination from "../../components/store/common/Pagination";
 import { fetchTransactionsByStore } from "../../service/store/TransactionService";
-import { PageTitle } from "../../features/store/styles/common/PageLayout";
+import {PageTitle, PageWrapper, TableSection} from "../../features/store/styles/common/PageLayout";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -71,26 +71,26 @@ const TransactionCon = () => {
   const currentData = filteredTransactions.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
 
-  return (
-      <>
-        <PageTitle>거래내역</PageTitle>
-
-        <TransactionTable
-            rows={currentData}
-            filterOptions={filterOptions}
-            onSearch={handleSearch}
-            currentPage={currentPage - 1}
-            totalPages={totalPages}
-            onPageChange={(page) => setCurrentPage(page + 1)}
-        />
-
-        <Pagination
-            currentPage={currentPage - 1}
-            totalPages={totalPages}
-            onPageChange={(page) => setCurrentPage(page + 1)}
-        />
-      </>
-  );
+    return (
+        <PageWrapper>
+            <PageTitle>거래내역</PageTitle>
+            <TableSection>
+                <TransactionTable
+                    rows={currentData}
+                    filterOptions={filterOptions}
+                    onSearch={handleSearch}
+                    currentPage={currentPage - 1}
+                    totalPages={totalPages}
+                    onPageChange={(page) => setCurrentPage(page + 1)}
+                />
+                <Pagination
+                    currentPage={currentPage - 1}
+                    totalPages={totalPages}
+                    onPageChange={(page) => setCurrentPage(page + 1)}
+                />
+            </TableSection>
+        </PageWrapper>
+    );
 };
 
 export default TransactionCon;

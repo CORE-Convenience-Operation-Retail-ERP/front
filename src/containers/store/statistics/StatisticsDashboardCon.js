@@ -49,6 +49,9 @@ function StatisticsDashboardCon() {
 
     return (
         <>
+
+            <PageTitle>통계 관리</PageTitle>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginRight: "1rem" }}>
             <StoreSearchBar
                 filterOptions={[
                     { key: "date", label: "날짜(단일)", type: "date" },
@@ -56,7 +59,7 @@ function StatisticsDashboardCon() {
                 ]}
                 onSearch={handleSearch}
             />
-            <PageTitle>통계 관리</PageTitle>
+            </div>
 
 
             {/*  통계 시각화 */}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { cancelDisposalById, fetchDisposalHistory, fetchExpiredDisposals } from "../../../service/store/DisposalService";
 import DisposalCom from "../../../components/store/disposal/DisposalCom";
+import {PageTitle} from "../../../features/store/styles/common/PageLayout";
 
 const DisposalCon = () => {
   const [expiredList, setExpiredList] = useState([]);
@@ -50,7 +51,9 @@ const DisposalCon = () => {
   );
 
   return (
-      <DisposalCom
+      <>
+        <PageTitle>🗑 폐기 관리</PageTitle>
+        <DisposalCom
           expiredList={paginatedExpired}
           disposalList={paginatedDisposal}
           loading={loading}
@@ -62,6 +65,7 @@ const DisposalCon = () => {
           disposalTotalPages={Math.ceil(disposalList.length / pageSize)}
           onDisposalPageChange={setDisposalPage}
       />
+      </>
   );
 };
 

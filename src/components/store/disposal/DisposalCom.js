@@ -23,7 +23,6 @@ const SectionInner = styled.div`
 function DisposalCom({
                        expiredList,
                        disposalList,
-                       loading,
                        onCancel,
                        expiredPage,
                        expiredTotalPages,
@@ -40,7 +39,6 @@ function DisposalCom({
 
   return (
       <PageWrapper>
-        <PageTitle>🗑️ 폐기 관리</PageTitle>
         <PageSection>
           <FlexSectionWrapper>
             {/* 좌측: 폐기 대상 자동 조회 */}

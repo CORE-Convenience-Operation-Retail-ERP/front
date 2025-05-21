@@ -4,7 +4,7 @@ import OrderListCom from "../../../components/store/order/OrderListCom";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import Pagination from "../../../components/store/common/Pagination";
 import { useNavigate } from "react-router-dom";
-import {PageTitle} from "../../../features/store/styles/common/PageLayout";
+import {PageTitle, PageWrapper} from "../../../features/store/styles/common/PageLayout";
 
 // 공통: Null, 빈 값 제거
 const cleanParams = (params) =>
@@ -88,10 +88,9 @@ function OrderListCon() {
   };
 
   return (
-    <>
+    <PageWrapper>
       <PageTitle>📦 발주 목록</PageTitle>
-
-      <div style={{ display: "flex", justifyContent: "flex-end" , marginRight: "1rem" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end" , marginRight: "1rem",marginBottom: "-1.5rem" }}>
         <StoreSearchBar filterOptions={filterOptions} onSearch={handleSearch} />
       </div>
       <OrderListCom
@@ -105,7 +104,7 @@ function OrderListCon() {
           totalPages={totalPages}
           onPageChange={setPage}
       />
-    </>
+    </PageWrapper>
   );
 }
 
