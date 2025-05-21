@@ -67,18 +67,17 @@ const SalesAnalyticsFilter = ({
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        매출 분석 필터
-      </Typography>
+      
       <Grid container spacing={2} alignItems="center">
         {/* 지점 선택 */}
         <Grid xs={12} sm={6} md={4}>
-          <FormControl fullWidth size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>지점</InputLabel>
+          <FormControl fullWidth size="small" sx={{ minWidth: 120, maxWidth: 180 }}>
+            <InputLabel sx={{ height: 36, lineHeight: '36px' }}>지점</InputLabel>
             <Select
               value={selectedStore === null || selectedStore === '' ? 'ALL' : selectedStore}
               onChange={(e) => setSelectedStore(e.target.value === 'ALL' ? null : e.target.value)}
               label="지점"
+              sx={{ height: 37, minHeight: 36, '& .MuiSelect-select': { height: 36, minHeight: 36, display: 'flex', alignItems: 'center' } }}
             >
               <MenuItem value="ALL">전체 지점</MenuItem>
               {stores.map(store => (
@@ -91,12 +90,13 @@ const SalesAnalyticsFilter = ({
         </Grid>
         {/* 날짜 범위 선택 */}
         <Grid xs={12} sm={6} md={3}>
-          <FormControl fullWidth size="small">
-            <InputLabel>기간</InputLabel>
+          <FormControl fullWidth size="small" sx={{ minWidth: 100, maxWidth: 140 }}>
+            <InputLabel sx={{ height: 36, lineHeight: '36px' }}>기간</InputLabel>
             <Select
               value={selectedDateRangePreset}
               onChange={(e) => setSelectedDateRangePreset(e.target.value)}
               label="기간"
+              sx={{ height: 37, minHeight: 36, '& .MuiSelect-select': { height: 36, minHeight: 36, display: 'flex', alignItems:'center' } }}
             >
               {dateRangeOptions.map(option => (
                 <MenuItem key={option.value} value={option.value}>
@@ -114,7 +114,24 @@ const SalesAnalyticsFilter = ({
                 label="시작일"
                 value={customStartDate}
                 onChange={(date) => setCustomStartDate(date)}
-                renderInput={(params) => <TextField {...params} size="small" fullWidth />}
+                slotProps={{
+                  textField: {
+                    size: 'small',
+                    fullWidth: true,
+                    InputProps: {
+                      sx: {
+                        height: 37,
+                        fontSize: 15,
+                      }
+                    },
+                    inputProps: {
+                      style: {
+                        height: 37,
+                        fontSize: 15,
+                      }
+                    }
+                  }
+                }}
               />
             </Grid>
             <Grid xs={6} md={2}>
@@ -122,7 +139,24 @@ const SalesAnalyticsFilter = ({
                 label="종료일"
                 value={customEndDate}
                 onChange={(date) => setCustomEndDate(date)}
-                renderInput={(params) => <TextField {...params} size="small" fullWidth />}
+                slotProps={{
+                  textField: {
+                    size: 'small',
+                    fullWidth: true,
+                    InputProps: {
+                      sx: {
+                        height: 37,
+                        fontSize: 15,
+                      }
+                    },
+                    inputProps: {
+                      style: {
+                        height: 37,
+                        fontSize: 15,
+                      }
+                    }
+                  }
+                }}
               />
             </Grid>
           </LocalizationProvider>

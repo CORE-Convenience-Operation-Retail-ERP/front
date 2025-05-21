@@ -52,7 +52,7 @@ export default function useLogin() {
         token: token
       };
     } catch (e) {
-      const errorMessage = e.response?.data?.message || "로그인 실패";
+      const errorMessage = e.response?.data?.message || "아이디,비밀번호를 다시 확인해주세요.";
       setError(errorMessage);
       console.error("로그인 에러:", errorMessage);
       throw e;

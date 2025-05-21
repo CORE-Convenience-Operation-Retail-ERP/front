@@ -283,33 +283,49 @@ const SalesAnalysis = () => {
           
           {/* 오른쪽: 탭 버튼 */}
           <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: 1.5,
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 0,
             minWidth: { xs: '100%', sm: 180 },
             mt: { xs: 0, md: 1 }
           }}>
-            <Button 
-              variant={tab === 0 ? 'contained' : 'outlined'} 
+            <Button
+              variant={tab === 0 ? 'contained' : 'outlined'}
               onClick={() => setTab(0)}
-              sx={{ 
-                fontWeight: 500, 
-                py: 1.2,
-                boxShadow: tab === 0 ? 2 : 0
+              sx={{
+                borderRadius: '20px 0 0 20px',
+                backgroundColor: tab === 0 ? '#2563A6' : 'transparent',
+                color: tab === 0 ? 'white' : '#2563A6',
+                borderColor: '#2563A6',
+                fontWeight: 500,
+                px: 3,
+                boxShadow: 0,
+                '&:hover': {
+                  backgroundColor: tab === 0 ? '#1E5187' : 'rgba(37, 99, 166, 0.1)',
+                },
+                minWidth: 0
               }}
             >
-              매출 상세 분석
+              매출 분석
             </Button>
-            <Button 
-              variant={tab === 1 ? 'contained' : 'outlined'} 
+            <Button
+              variant={tab === 1 ? 'contained' : 'outlined'}
               onClick={() => setTab(1)}
-              sx={{ 
-                fontWeight: 500, 
-                py: 1.2,
-                boxShadow: tab === 1 ? 2 : 0
+              sx={{
+                borderRadius: '0 20px 20px 0',
+                backgroundColor: tab === 1 ? '#2563A6' : 'transparent',
+                color: tab === 1 ? 'white' : '#2563A6',
+                borderColor: '#2563A6',
+                fontWeight: 500,
+                px: 3,
+                boxShadow: 0,
+                '&:hover': {
+                  backgroundColor: tab === 1 ? '#1E5187' : 'rgba(37, 99, 166, 0.1)',
+                },
+                minWidth: 0
               }}
             >
-              매출 요인 분석
+              요인 분석
             </Button>
           </Box>
         </Box>
