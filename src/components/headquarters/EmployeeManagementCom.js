@@ -227,164 +227,72 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
             </Button>
           </Grid>
 
-          {/* 정보 섹션 */}
+          {/* 정보 섹션 - 점주일 때만 순서 변경 */}
           <Grid item xs={12} md={9}>
-            {/* 1. 기본 정보 섹션 */}
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
-                fontWeight: 'bold', 
-                mb: 2,
-                color: '#2563A6'
-              }}
-            >
-              기본 정보
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label={employeeType === '본사' ? "이름" : "점주명"}
-                  name="empName"
-                  value={formData.empName}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label={employeeType === '본사' ? "사번" : "점주번호"}
-                  name="empId"
-                  value={formData.empId}
-                  onChange={handleChange}
-                  disabled={!!employee?.empId}
-                  variant="outlined"
-                  size="small"
-                  required
-                />
-              </Grid>
-            </Grid>
-
-            <Divider sx={{ my: 3 }} />
-
-            {/* 2. 입사 정보 섹션 */}
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
-                fontWeight: 'bold', 
-                mb: 2,
-                color: '#2563A6'
-              }}
-            >
-              {employeeType === '본사' ? '입사 정보' : '계약 정보'}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label={employeeType === '본사' ? "입사일" : "계약일"}
-                  name="hireDate"
-                  type="date"
-                  value={formData.hireDate}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              {employeeType === '본사' ? (
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
-                    <InputLabel>부서</InputLabel>
-                    <Select
-                      name="deptCode"
-                      value={formData.deptCode || ''}
-                      label="부서"
+            {employeeType === '점주' ? (
+              <>
+                {/* 1. 기본 정보 */}
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{ fontWeight: 'bold', mb: 2, color: '#2563A6' }}
+                >
+                  기본 정보
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="점주명"
+                      name="empName"
+                      value={formData.empName}
                       onChange={handleChange}
+                      variant="outlined"
+                      size="small"
                       required
-                    >
-                      {departments?.length > 0 ? 
-                        departments.map(dept => (
-                          <MenuItem key={dept.deptCode} value={dept.deptCode}>
-                            {dept.deptName}
-                          </MenuItem>
-                        )) : 
-                        [
-                          <MenuItem key="HQ_HRM" value="HQ_HRM">인사팀</MenuItem>,
-                          <MenuItem key="HQ_BR" value="HQ_BR">지점관리팀</MenuItem>,
-                          <MenuItem key="HQ_PRO" value="HQ_PRO">상품관리팀</MenuItem>
-                        ]
-                      }
-                    </Select>
-                  </FormControl>
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="점주번호"
+                      name="empId"
+                      value={formData.empId}
+                      onChange={handleChange}
+                      disabled={!!employee?.empId}
+                      variant="outlined"
+                      size="small"
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
+                      <InputLabel>상태</InputLabel>
+                      <Select
+                        name="empStatus"
+                        value={formData.empStatus || '재직'}
+                        label="상태"
+                        onChange={handleChange}
+                        required
+                      >
+                        <MenuItem value="재직">재직</MenuItem>
+                        <MenuItem value="휴직">휴직</MenuItem>
+                        <MenuItem value="퇴사">퇴사</MenuItem>
+                        <MenuItem value="미승인">미승인</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
                 </Grid>
-              ) : null}
-              <Grid item xs={12} sm={employeeType === '본사' ? 6 : 6}>
-                <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
-                  <InputLabel>상태</InputLabel>
-                  <Select
-                    name="empStatus"
-                    value={formData.empStatus || '재직'}
-                    label="상태"
-                    onChange={handleChange}
-                    required
-                  >
-                    <MenuItem value="재직">재직</MenuItem>
-                    <MenuItem value="휴직">휴직</MenuItem>
-                    <MenuItem value="퇴사">퇴사</MenuItem>
-                    <MenuItem value="미승인">미승인</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
 
-            <Divider sx={{ my: 3 }} />
+                <Divider sx={{ my: 3 }} />
 
-            {/* 3. 연락처 정보 섹션 */}
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
-                fontWeight: 'bold', 
-                mb: 2,
-                color: '#2563A6'
-              }}
-            >
-              연락처 정보
-            </Typography>
-            <Grid container spacing={2}>
-              {employeeType === '본사' ? (
-                // 본사 직원용 연락처 필드
-                <>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="휴대전화"
-                      name="empPhone"
-                      value={formData.empPhone}
-                      onChange={handleChange}
-                      variant="outlined"
-                      size="small"
-                      placeholder="010-0000-0000"
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="내선번호"
-                      name="empExt"
-                      value={formData.empExt}
-                      onChange={handleChange}
-                      variant="outlined"
-                      size="small"
-                    />
-                  </Grid>
-                </>
-              ) : (
-                // 점주용 연락처 필드
-                <>
+                {/* 2. 연락처 정보 */}
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{ fontWeight: 'bold', mb: 2, color: '#2563A6' }}
+                >
+                  연락처 정보
+                </Typography>
+                <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
@@ -400,6 +308,85 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
+                      label="이메일"
+                      name="empEmail"
+                      value={formData.empEmail}
+                      onChange={handleChange}
+                      variant="outlined"
+                      size="small"
+                      type="email"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="주소"
+                      name="empAddr"
+                      value={formData.empAddr}
+                      onChange={handleChange}
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                </Grid>
+
+                <Divider sx={{ my: 3 }} />
+
+                {/* 3. 지점 정보 */}
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{ fontWeight: 'bold', mb: 2, color: '#2563A6' }}
+                >
+                  지점 정보
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    {/* 지점 선택 드롭다운 또는 정보 표시 */}
+                    {(() => {
+                      const isStoreAlreadyAssigned = 
+                        (employee && employee.storeId && employee.storeId > 0) || 
+                        (formData.storeId && formData.storeId > 0);
+                      return isStoreAlreadyAssigned ? (
+                        <TextField
+                          fullWidth
+                          label="지점명"
+                          value={employee?.storeName || formData.storeName || '(지정된 지점)'}
+                          variant="outlined"
+                          size="small"
+                          disabled
+                          helperText={`매장 ID: ${employee?.storeId || formData.storeId || '알 수 없음'} - 이 점주에게 매장이 할당되어 있습니다.`}
+                        />
+                      ) : (
+                        <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
+                          <InputLabel>지점 선택</InputLabel>
+                          <Select
+                            name="storeId"
+                            value={formData.storeId || ''}
+                            label="지점 선택"
+                            onChange={handleChange}
+                          >
+                            <MenuItem value="">
+                              <em>지점 미지정</em>
+                            </MenuItem>
+                            {stores?.length > 0 ? 
+                              stores.map(store => (
+                                <MenuItem key={store.storeId} value={store.storeId}>
+                                  {store.storeName}
+                                </MenuItem>
+                              )) : 
+                              <MenuItem disabled>가용 지점이 없습니다</MenuItem>
+                            }
+                          </Select>
+                          <FormHelperText>
+                            {stores?.length > 0 ? '할당할 지점을 선택하세요' : '현재 할당 가능한 지점이 없습니다'}
+                          </FormHelperText>
+                        </FormControl>
+                      );
+                    })()}
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
                       label="지점 연락처"
                       name="storeTel"
                       value={formData.storeTel || ''}
@@ -409,149 +396,325 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
                       placeholder="02-0000-0000"
                     />
                   </Grid>
-                </>
-              )}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="주소"
-                  name="empAddr"
-                  value={formData.empAddr}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="이메일"
-                  name="empEmail"
-                  value={formData.empEmail}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
-                  type="email"
-                />
-              </Grid>
-            </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="계약일"
+                      name="hireDate"
+                      type="date"
+                      value={formData.hireDate}
+                      onChange={handleChange}
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Grid>
+                </Grid>
 
-            <Divider sx={{ my: 3 }} />
+                <Divider sx={{ my: 3 }} />
 
-            {/* 4. 급여 계좌 정보 섹션 */}
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
-                fontWeight: 'bold', 
-                mb: 2,
-                color: '#2563A6'
-              }}
-            >
-              급여 계좌 정보
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
-                  <InputLabel>급여 은행</InputLabel>
-                  <Select
-                    name="empBank"
-                    value={formData.empBank || 0}
-                    label="급여 은행"
-                    onChange={handleChange}
-                  >
-                    <MenuItem value={0}>선택 안함</MenuItem>
-                    <MenuItem value={1}>국민은행</MenuItem>
-                    <MenuItem value={2}>하나은행</MenuItem>
-                    <MenuItem value={3}>신한은행</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="계좌번호"
-                  name="empAcount"
-                  value={formData.empAcount}
-                  onChange={handleAccountChange}
-                  variant="outlined"
-                  size="small"
-                  placeholder="0000-0000-0000"
-                  disabled={formData.empBank === 0}
-                  inputProps={{
-                    maxLength: 20
-                  }}
-                />
-              </Grid>
-            </Grid>
-
-            {/* 점주일 경우 지점 정보 섹션 추가 */}
-            {employeeType === '점주' && (() => {
-                // 이미 지점이 할당되었는지 여부 확인
-                const isStoreAlreadyAssigned = 
-                  (employee && employee.storeId && employee.storeId > 0) || 
-                  (formData.storeId && formData.storeId > 0);
-
-                return (
-                  <>
-                    <Divider sx={{ my: 3 }} />
-                    <Typography 
-                      variant="subtitle1" 
-                      sx={{ 
-                        fontWeight: 'bold', 
-                        mb: 2,
-                        color: '#2563A6'
+                {/* 4. 급여 계좌 정보 (기존 구성 그대로) */}
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{ fontWeight: 'bold', mb: 2, color: '#2563A6' }}
+                >
+                  급여 계좌 정보
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
+                      <InputLabel>급여 은행</InputLabel>
+                      <Select
+                        name="empBank"
+                        value={formData.empBank || 0}
+                        label="급여 은행"
+                        onChange={handleChange}
+                      >
+                        <MenuItem value={0}>선택 안함</MenuItem>
+                        <MenuItem value={1}>국민은행</MenuItem>
+                        <MenuItem value={2}>하나은행</MenuItem>
+                        <MenuItem value={3}>신한은행</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="계좌번호"
+                      name="empAcount"
+                      value={formData.empAcount}
+                      onChange={handleAccountChange}
+                      variant="outlined"
+                      size="small"
+                      placeholder="0000-0000-0000"
+                      disabled={formData.empBank === 0}
+                      inputProps={{
+                        maxLength: 20
                       }}
-                    >
-                      지점 정보
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12}>
-                        {isStoreAlreadyAssigned ? (
-                          // 이미 지점이 할당된 점주인 경우 지점 정보 표시 (수정 불가)
-                          <TextField
-                            fullWidth
-                            label="지점명"
-                            value={employee?.storeName || formData.storeName || '(지정된 지점)'}
-                            variant="outlined"
-                            size="small"
-                            disabled
-                            helperText={`매장 ID: ${employee?.storeId || formData.storeId || '알 수 없음'} - 이 점주에게 매장이 할당되어 있습니다.`}
-                          />
-                        ) : (
-                          // 지점이 할당되지 않은 경우만 드롭다운으로 선택 가능
-                          <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
-                            <InputLabel>지점 선택</InputLabel>
-                            <Select
-                              name="storeId"
-                              value={formData.storeId || ''}
-                              label="지점 선택"
-                              onChange={handleChange}
-                            >
-                              <MenuItem value="">
-                                <em>지점 미지정</em>
+                    />
+                  </Grid>
+                </Grid>
+              </>
+            ) : (
+              <>
+                {/* 1. 기본 정보 섹션 */}
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    mb: 2,
+                    color: '#2563A6'
+                  }}
+                >
+                  기본 정보
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label={employeeType === '본사' ? "이름" : "점주명"}
+                      name="empName"
+                      value={formData.empName}
+                      onChange={handleChange}
+                      variant="outlined"
+                      size="small"
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label={employeeType === '본사' ? "사번" : "점주번호"}
+                      name="empId"
+                      value={formData.empId}
+                      onChange={handleChange}
+                      disabled={!!employee?.empId}
+                      variant="outlined"
+                      size="small"
+                      required
+                    />
+                  </Grid>
+                </Grid>
+
+                <Divider sx={{ my: 3 }} />
+
+                {/* 2. 입사 정보 섹션 */}
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    mb: 2,
+                    color: '#2563A6'
+                  }}
+                >
+                  {employeeType === '본사' ? '입사 정보' : '계약 정보'}
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label={employeeType === '본사' ? "입사일" : "계약일"}
+                      name="hireDate"
+                      type="date"
+                      value={formData.hireDate}
+                      onChange={handleChange}
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Grid>
+                  {employeeType === '본사' ? (
+                    <Grid item xs={12} sm={6}>
+                      <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
+                        <InputLabel>부서</InputLabel>
+                        <Select
+                          name="deptCode"
+                          value={formData.deptCode || ''}
+                          label="부서"
+                          onChange={handleChange}
+                          required
+                        >
+                          {departments?.length > 0 ? 
+                            departments.map(dept => (
+                              <MenuItem key={dept.deptCode} value={dept.deptCode}>
+                                {dept.deptName}
                               </MenuItem>
-                              {stores?.length > 0 ? 
-                                stores.map(store => (
-                                  <MenuItem key={store.storeId} value={store.storeId}>
-                                    {store.storeName}
-                                  </MenuItem>
-                                )) : 
-                                <MenuItem disabled>가용 지점이 없습니다</MenuItem>
-                              }
-                            </Select>
-                            <FormHelperText>
-                              {stores?.length > 0 ? '할당할 지점을 선택하세요' : '현재 할당 가능한 지점이 없습니다'}
-                            </FormHelperText>
-                          </FormControl>
-                        )}
-                      </Grid>
+                            )) : 
+                            [
+                              <MenuItem key="HQ_HRM" value="HQ_HRM">인사팀</MenuItem>,
+                              <MenuItem key="HQ_BR" value="HQ_BR">지점관리팀</MenuItem>,
+                              <MenuItem key="HQ_PRO" value="HQ_PRO">상품관리팀</MenuItem>
+                            ]
+                          }
+                        </Select>
+                      </FormControl>
                     </Grid>
-                  </>
-                );
-              })()
-            }
-            </Grid>
+                  ) : null}
+                  <Grid item xs={12} sm={employeeType === '본사' ? 6 : 6}>
+                    <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
+                      <InputLabel>상태</InputLabel>
+                      <Select
+                        name="empStatus"
+                        value={formData.empStatus || '재직'}
+                        label="상태"
+                        onChange={handleChange}
+                        required
+                      >
+                        <MenuItem value="재직">재직</MenuItem>
+                        <MenuItem value="휴직">휴직</MenuItem>
+                        <MenuItem value="퇴사">퇴사</MenuItem>
+                        <MenuItem value="미승인">미승인</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+
+                <Divider sx={{ my: 3 }} />
+
+                {/* 3. 연락처 정보 섹션 */}
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    mb: 2,
+                    color: '#2563A6'
+                  }}
+                >
+                  연락처 정보
+                </Typography>
+                <Grid container spacing={2}>
+                  {employeeType === '본사' ? (
+                    // 본사 직원용 연락처 필드
+                    <>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="휴대전화"
+                          name="empPhone"
+                          value={formData.empPhone}
+                          onChange={handleChange}
+                          variant="outlined"
+                          size="small"
+                          placeholder="010-0000-0000"
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="내선번호"
+                          name="empExt"
+                          value={formData.empExt}
+                          onChange={handleChange}
+                          variant="outlined"
+                          size="small"
+                        />
+                      </Grid>
+                    </>
+                  ) : (
+                    // 점주용 연락처 필드
+                    <>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="점주 연락처"
+                          name="empPhone"
+                          value={formData.empPhone}
+                          onChange={handleChange}
+                          variant="outlined"
+                          size="small"
+                          placeholder="010-0000-0000"
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="지점 연락처"
+                          name="storeTel"
+                          value={formData.storeTel || ''}
+                          onChange={handleChange}
+                          variant="outlined"
+                          size="small"
+                          placeholder="02-0000-0000"
+                        />
+                      </Grid>
+                    </>
+                  )}
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="주소"
+                      name="empAddr"
+                      value={formData.empAddr}
+                      onChange={handleChange}
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="이메일"
+                      name="empEmail"
+                      value={formData.empEmail}
+                      onChange={handleChange}
+                      variant="outlined"
+                      size="small"
+                      type="email"
+                    />
+                  </Grid>
+                </Grid>
+
+                <Divider sx={{ my: 3 }} />
+
+                {/* 4. 급여 계좌 정보 섹션 */}
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    mb: 2,
+                    color: '#2563A6'
+                  }}
+                >
+                  급여 계좌 정보
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth size="small" sx={{ minWidth: 180 }}>
+                      <InputLabel>급여 은행</InputLabel>
+                      <Select
+                        name="empBank"
+                        value={formData.empBank || 0}
+                        label="급여 은행"
+                        onChange={handleChange}
+                      >
+                        <MenuItem value={0}>선택 안함</MenuItem>
+                        <MenuItem value={1}>국민은행</MenuItem>
+                        <MenuItem value={2}>하나은행</MenuItem>
+                        <MenuItem value={3}>신한은행</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="계좌번호"
+                      name="empAcount"
+                      value={formData.empAcount}
+                      onChange={handleAccountChange}
+                      variant="outlined"
+                      size="small"
+                      placeholder="0000-0000-0000"
+                      disabled={formData.empBank === 0}
+                      inputProps={{
+                        maxLength: 20
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </>
+            )}
           </Grid>
+        </Grid>
 
         {/* 저장 버튼 - 오른쪽 하단으로 이동 */}
         <Box sx={{ 
