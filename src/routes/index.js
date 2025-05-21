@@ -10,8 +10,6 @@ import OrderListPage from "../pages/store/order/OrderListPage";
 import PartTimerPage from "../pages/store/partTimer/PartTimerPage";
 import PartTimerSchedulePage from "../pages/store/partTimer/PartTimerSchedulePage";
 import SalaryPage from "../pages/store/salary/SalaryPage";
-import StatsOrderPage from "../pages/store/Statistic/StatsOrderPage";
-import StatsSalesPage from "../pages/store/Statistic/StatsSalesPage";
 import HeadquartersLayout from '../layouts/HeadquartersLayout';
 import ProductsAllPage from '../pages/headquarters/ProductsAllPage';
 import ProductsDetailPage from '../pages/headquarters/ProductsDetailPage';
@@ -58,6 +56,11 @@ import ForbiddenErrorPage from '../components/common/ForbiddenErrorPage';
 import NotFoundErrorPage from '../components/common/NotFoundErrorPage';
 import NetworkErrorPage from '../components/common/NetworkErrorPage';
 import ServerErrorPage from '../components/common/ServerErrorPage';
+import ProductSalesDetailPage from '../pages/store/Statistic/ProductSalesDetailPage.js';
+import CategorySalesDetailPage from '../pages/store/Statistic/CategorySalesDetailPage.js';
+import HourlySalesDetailPage from '../pages/store/Statistic/HourlySalesDetailPage.js';
+import OrderTopProductsDetailPage from '../pages/store/Statistic/OrderTopProductsDetailPage.js';
+
 
 const AppRoutes = () => {
   const { isLoading } = useLoading();
@@ -120,14 +123,16 @@ const AppRoutes = () => {
           <Route path="hr/schedule" element={<PartTimerSchedulePage/>} />
           <Route path="hr/salary/:id/detail" element={<SalaryBreakdownPage/>} />
           <Route path="statistics" element={<StatisticsPage/>} />
-          <Route path="stats/order" element={<StatsOrderPage/>} />
-          <Route path="stats/sales" element={<StatsSalesPage/>} />
           <Route path="sales/transactions" element={<TransactionPage />} />
           <Route path="sales/summary" element={<SettlementListPage />} />
           <Route path="attendance" element={<AttendancePage />} />
+          <Route path="stats/time" element={<HourlySalesDetailPage />} />
+          <Route path="stats/product" element={<ProductSalesDetailPage />} />
+          <Route path="stats/category" element={<CategorySalesDetailPage />} />
+          <Route path="stats/order" element={<OrderTopProductsDetailPage />} />
         </Route>
         {/* 고객 관련 라우트 */}
-        <Route path="/customer" element={<CustomerInquiryPage />} />
+        <Route path="/customer" element={<CustomerInquiryPage />} /> 
         {/* 채팅 관련 라우트 추가 (다른 라우트와 함께 설정) */}
         <Route path="/chat" element={<ChatRoomList />} />
         <Route path="/chat/room/:roomId" element={<ChatRoom />} />

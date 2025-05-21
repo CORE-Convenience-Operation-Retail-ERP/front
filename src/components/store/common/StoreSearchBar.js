@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   SearchWrap,
   Input,
@@ -8,12 +8,32 @@ import {
 } from '../../../features/store/styles/common/StoreSearchBar.styled';
 import CustomCalendar from './CustomCalendar';
 
-function StoreSearchBar({ filterOptions = [], onSearch }) {
+function StoreSearchBar({ filterOptions = [], onSearch, initialValues = {} }) {
   const [criteria, setCriteria] = useState(filterOptions[0]?.key || '');
   const [value, setValue] = useState('');
   const [range, setRange] = useState([null, null]);
 
   const selectedOption = filterOptions.find(opt => opt.key === criteria) || {};
+
+  // 초기값 세팅 로직
+  useEffect(() => {
+    if (!criteria) return;
+
+    const type = selectedOption.type;
+    if (type === 'text' || type === 'number' || type === 'select' || type === 'date') {
+      setValue(initialValues[criteria] || '');
+    }
+
+    if (type === 'date-range') {
+      if (initialValues.startDate && initialValues.endDate) {
+        setRange([
+          new Date(initialValues.startDate),
+          new Date(initialValues.endDate)
+        ]);
+      }
+    }
+  }, [criteria, initialValues, selectedOption.type]);
+
 
   const handleSelectChange = (e) => {
     const v = e.target.value;
@@ -41,6 +61,13 @@ function StoreSearchBar({ filterOptions = [], onSearch }) {
     }
   };
 
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleSearch = async () => {
     if (!criteria) return;
 
@@ -54,8 +81,8 @@ function StoreSearchBar({ filterOptions = [], onSearch }) {
       const [start, end] = range;
       if (start && end) {
         onSearch({
-          startDate: start.toISOString().split('T')[0],
-          endDate: end.toISOString().split('T')[0],
+          startDate: formatDate(start), 
+          endDate: formatDate(end),
         });
       }
       return;

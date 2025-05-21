@@ -19,7 +19,6 @@ function ProductSalesTableCom({ data, loading }) {
             <th style={thStyle}>상품명</th>
             <th style={thStyle}>판매 수량</th>
             <th style={thStyle}>총 매출액</th>
-            <th style={thStyle}>프로모션</th>
           </tr>
         </thead>
         <tbody>
@@ -29,7 +28,6 @@ function ProductSalesTableCom({ data, loading }) {
               <td style={tdStyle}>{item.productName}</td>
               <td style={tdStyle}>{item.quantity.toLocaleString()}개</td>
               <td style={tdStyle}>{item.totalAmount.toLocaleString()}원</td>
-              <td style={tdStyle}>{item.promo ? "✅" : "-"}</td>
             </tr>
           ))}
         </tbody>
