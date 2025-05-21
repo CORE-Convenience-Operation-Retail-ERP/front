@@ -194,9 +194,9 @@ const MyCon = forwardRef(({ info, type }, ref) => {
   const openDialog = (options) => {
     // 기본 색상 설정 - 홈페이지 UI 색상에 맞춤
     let backgroundColor = options.backgroundColor || '#FFFFFF';
-    let titleColor = options.titleColor || '#1EACB5';
+    let titleColor = options.titleColor || '#1E90FF';
     let messageColor = options.messageColor || '#333333';
-    let buttonColor = options.buttonColor || '#015D70';
+    let buttonColor = options.buttonColor || '#1E90FF';
     
     setDialog({
       ...dialog,
@@ -222,7 +222,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
     message, 
     title = '알림', 
     type = 'info', 
-    {backgroundColor = '#FFFFFF', titleColor = '#1EACB5', messageColor = '#333333', buttonColor = '#015D70'} = {}
+    {backgroundColor = '#FFFFFF', titleColor = '#1E90FF', messageColor = '#333333', buttonColor = '#1E90FF'} = {}
   ) => {
     openDialog({
       title,
@@ -243,7 +243,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
     onConfirm, 
     title = '확인', 
     type = 'warning',
-    {backgroundColor = '#FFFFFF', titleColor = '#1EACB5', messageColor = '#333333', buttonColor = '#015D70'} = {}
+    {backgroundColor = '#FFFFFF', titleColor = '#1E90FF', messageColor = '#333333', buttonColor = '#1E90FF'} = {}
   ) => {
     openDialog({
       title,
@@ -292,9 +292,9 @@ const MyCon = forwardRef(({ info, type }, ref) => {
     // setAlert 대신 커스텀 Dialog 사용
     showAlert(errorMessage, '오류', 'error', {
       backgroundColor: '#FFFFFF',
-      titleColor: '#1EACB5',
+      titleColor: '#1E90FF',
       messageColor: '#333333',
-      buttonColor: '#015D70'
+      buttonColor: '#1E90FF'
     });
   };
   
@@ -326,9 +326,9 @@ const MyCon = forwardRef(({ info, type }, ref) => {
         isLate ? 'warning' : 'success',
         {
           backgroundColor: '#FFFFFF',
-          titleColor: '#1EACB5',
+          titleColor: '#1E90FF',
           messageColor: isLate ? '#333333' : '#333333', 
-          buttonColor: '#015D70'
+          buttonColor: '#1E90FF'
         }
       );
       
@@ -344,9 +344,9 @@ const MyCon = forwardRef(({ info, type }, ref) => {
         'error',
         {
           backgroundColor: '#FFFFFF',
-          titleColor: '#1EACB5',
+          titleColor: '#1E90FF',
           messageColor: '#333333',
-          buttonColor: '#015D70'
+          buttonColor: '#1E90FF'
         }
       );
       
@@ -381,9 +381,9 @@ const MyCon = forwardRef(({ info, type }, ref) => {
       isEarlyLeave ? 'warning' : 'success',
       {
         backgroundColor: '#FFFFFF',
-        titleColor: '#1EACB5',
+        titleColor: '#1E90FF',
         messageColor: '#333333',
-        buttonColor: '#015D70'
+        buttonColor: '#1E90FF'
       }
     );
   };
@@ -482,9 +482,9 @@ const MyCon = forwardRef(({ info, type }, ref) => {
           'success',
           {
             backgroundColor: '#FFFFFF',
-            titleColor: '#2563A6',
+            titleColor: '#1E90FF',
             messageColor: '#333333',
-            buttonColor: '#6FC3ED'
+            buttonColor: '#1E90FF'
           }
         );
         
@@ -762,7 +762,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
               variant="contained"
               autoFocus
               sx={{ 
-                backgroundColor: dialog.buttonColor || '#015D70',
+                backgroundColor: dialog.buttonColor || '#1E90FF',
                 color: '#ffffff',
                 borderRadius: '8px',
                 fontWeight: 'medium',
@@ -770,7 +770,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
                 padding: '8px 20px',
                 boxShadow: '0px 3px 6px rgba(1, 93, 112, 0.2)',
                 '&:hover': {
-                  backgroundColor: '#014D5E',
+                  backgroundColor: '#4b6beb',
                   boxShadow: '0px 4px 8px rgba(1, 93, 112, 0.3)',
                 }
               }}

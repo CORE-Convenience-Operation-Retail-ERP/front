@@ -5,8 +5,10 @@ import MyCon from '../../containers/headquarters/MyCon';
 import CalendarBox from '../../containers/headquarters/CalendarBox';
 import EventIcon from '@mui/icons-material/Event';
 import axios from '../../service/axiosInstance';
+import { useParams } from 'react-router-dom';
 
 const MyPage = () => {
+  const { empId } = useParams();
   const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,7 +49,8 @@ const MyPage = () => {
       accountInfo: "123-456-78910 국민"
     };
 
-    axios.get("/api/hr/my-page")
+    const url = empId ? `/api/hr/my-page/${empId}` : "/api/hr/my-page";
+    axios.get(url)
       .then(res => {
         console.log("사용자 정보 응답:", res.data);
         console.log("근무일수 확인:", res.data.attendanceDays, typeof res.data.attendanceDays);
@@ -70,7 +73,7 @@ const MyPage = () => {
         setError(`서버에서 정보를 불러오는데 실패했습니다. (${err.response?.status || "네트워크 오류"}) 임시 데이터를 사용합니다.`);
         setLoading(false);
       });
-  }, []);
+  }, [empId]);
 
   // 연차 신청 모달 열기 함수
   const handleOpenLeaveModal = () => {
