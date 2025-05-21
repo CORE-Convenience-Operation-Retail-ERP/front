@@ -459,7 +459,7 @@ const StoreInquiryCom = ({
               letterSpacing: '-1px',
               ml: 15
             }}>
-              지점 문의 관리
+              {showRankings ? '지점 평가 순위' : '지점 문의 관리'}
             </Typography>
           </Box>
         </Box>
