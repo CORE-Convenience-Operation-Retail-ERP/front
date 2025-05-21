@@ -326,7 +326,7 @@ const RoundButton = styled(Button)({
 const RoundSelectButton = styled(Button)(({ selected }) => ({
   borderRadius: '30px',
   fontWeight: 700,
-  border: '1.5px solid #2563A6',
+  border: '1px solid #2563A6',
   color: selected ? '#fff' : '#2563A6',
   backgroundColor: selected ? '#2563A6' : '#fff',
   minWidth: 64,

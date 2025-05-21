@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import BranchesStockMonitoringCom from '../../components/headquarters/BranchesStockMonitoringCom';
 import axios from 'axios';
-import { useLoading } from '../../components/common/LoadingContext.tsx';
+import { loadingManager } from '../../components/common/LoadingManager';
 
 const BranchesStockMonitoringCon = () => {
-  const { setIsLoading: setGlobalLoading } = useLoading();
   // API 연동을 위한 상태값들
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   
   // 데이터 상태값들
@@ -45,34 +43,25 @@ const BranchesStockMonitoringCon = () => {
   // 데이터 로딩 함수
   const loadAllData = async () => {
     try {
-      setIsLoading(true);
+      loadingManager.show();
       setError(null);
-      
-      // 순차적으로 필수 데이터부터 로딩하여 UI가 단계적으로 업데이트되도록 함
-      // 먼저 필수적인 참조 데이터 로드
-      await loadBranches();
-      await loadCategories();
-      
-      // 다음으로 차트에 필요한 데이터 로드
-      await loadStockSummary();
-      await loadCategoryStats();
-      await loadBranchComparison();
-      
-      // 마지막으로 목록 데이터 로드
-      await loadStockList();
-      
-      setIsLoading(false);
+      await Promise.all([
+        loadBranches(),
+        loadCategories(),
+        loadStockSummary(),
+        loadCategoryStats(),
+        loadBranchComparison(),
+        loadStockList()
+      ]);
+      loadingManager.hide();
     } catch (err) {
       console.error('Error loading data:', err);
-      
-      // 권한 오류 특별 처리
+      loadingManager.hide();
       if (err.response && err.response.status === 403) {
         setError('접근 권한이 없습니다. 지점별 재고 모니터링 기능을 사용하려면 적절한 권한이 필요합니다.');
       } else {
         setError(`데이터를 불러오는 중 오류가 발생했습니다: ${err.message}`);
       }
-      
-      setIsLoading(false);
     }
   };
   
@@ -206,62 +195,39 @@ const BranchesStockMonitoringCon = () => {
   
   // 필터 변경 처리
   const handleFilterChange = async (newFilters) => {
-    // 필터를 먼저 업데이트하고
     const updatedFilters = { 
       ...filters, 
       ...newFilters, 
       page: 'page' in newFilters ? newFilters.page : 0 
     };
-    
-    // 바코드와 상품명 검색은 배타적으로 동작
     if ('productName' in newFilters && newFilters.productName) {
       updatedFilters.barcode = null;
     }
-    
     if ('barcode' in newFilters && newFilters.barcode) {
       updatedFilters.productName = null;
     }
-    
     setFilters(updatedFilters);
-    
     try {
-      setIsLoading(true);
-      setError(null); // 새 요청 시작 시 이전 오류 초기화
-      
-      // 지점 선택이 변경된 경우 즉시 관련 데이터를 모두 업데이트
+      loadingManager.show();
+      setError(null);
       if ('storeId' in newFilters) {
-        // 순차적으로 데이터를 로드하여 UI 업데이트 지연 방지
-        await loadStockSummary(updatedFilters.storeId);
-        await loadCategoryStats(updatedFilters.storeId);
-        await loadStockList(updatedFilters);
+        await Promise.all([
+          loadStockSummary(updatedFilters.storeId),
+          loadCategoryStats(updatedFilters.storeId),
+          loadStockList(updatedFilters)
+        ]);
       } else if ('page' in newFilters || 'productName' in newFilters || 'categoryId' in newFilters || 'barcode' in newFilters) {
-        // 검색 관련 필터가 변경된 경우, 해당 데이터만 업데이트
         await loadStockList(updatedFilters);
       }
-      
-      setIsLoading(false);
+      loadingManager.hide();
     } catch (err) {
       console.error('필터 변경 중 오류 발생:', err);
-      // 오류 메시지는 이미 loadStockList 내부에서 설정됨
-      setIsLoading(false);
+      loadingManager.hide();
     }
   };
   
   useEffect(() => {
-    const loadAll = async () => {
-      setGlobalLoading(true);
-      try {
-        await loadBranches();
-        await loadCategories();
-        await loadStockSummary();
-        await loadCategoryStats();
-        await loadBranchComparison();
-        await loadStockList();
-      } finally {
-        setGlobalLoading(false);
-      }
-    };
-    loadAll();
+    loadAllData();
     // eslint-disable-next-line
   }, []);
   
@@ -299,21 +265,17 @@ const BranchesStockMonitoringCon = () => {
   return (
     <>
       {error && <div style={{ color: 'red', padding: '10px', margin: '10px 0' }}>{error}</div>}
-      {isLoading && !branches.length ? (
-        <div>데이터를 불러오는 중...</div>
-      ) : (
-        <BranchesStockMonitoringCom 
-          branches={branches}
-          categories={categories}
-          stockSummary={stockSummary}
-          categoryStats={categoryStats}
-          branchComparison={branchComparison}
-          stockList={stockList}
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          isLoading={isLoading}
-        />
-      )}
+      <BranchesStockMonitoringCom 
+        branches={branches}
+        categories={categories}
+        stockSummary={stockSummary}
+        categoryStats={categoryStats}
+        branchComparison={branchComparison}
+        stockList={stockList}
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        isLoading={false}
+      />
     </>
   );
 };
