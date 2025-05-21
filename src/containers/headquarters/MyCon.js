@@ -476,7 +476,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
         
         // 확인 버튼을 누르면 연차 신청 관리 페이지로 이동하도록 수정
         showConfirm(
-          '연차 신청이 완료되었습니다.\n연차 신청 관리 페이지로 이동하시겠습니까?',
+          '연차 신청이 완료되었습니다. \n연차 신청 관리 페이지로 이동하시겠습니까?',
           () => navigate('/headquarters/hr/annual-leave'),
           '신청 완료',
           'success',
@@ -731,7 +731,8 @@ const MyCon = forwardRef(({ info, type }, ref) => {
               color: dialog.messageColor || '#333333',
               fontWeight: 'medium',
               fontSize: '1rem',
-              lineHeight: 1.5
+              lineHeight: 1.5,
+              whiteSpace: 'pre-line'
             }}>
               {dialog.message}
             </DialogContentText>
@@ -869,6 +870,53 @@ const MyCon = forwardRef(({ info, type }, ref) => {
   
   // 급여 정보 영역
   if (type === "salary") {
+    // 은행 ID에 따른 은행명 매핑
+    const getBankName = (bankId) => {
+      const bankMap = {
+        1: '국민',
+        2: '하나', // 수정: 2는 하나은행
+        3: '신한'
+      };
+      return bankMap[bankId] || '기타';
+    };
+
+    // 계좌정보 포맷팅
+    const formatAccountInfo = () => {
+      if (info?.accountInfo) {
+        // 계좌번호와 은행명 분리
+        const parts = info.accountInfo.split(' ');
+        if (parts.length >= 2) {
+          let bankName = parts[1];
+          if (bankName.includes('우리')) bankName = '하나';
+          // 국민, 신한은 그대로, 하나/우리만 하나로 강제
+          return `${parts[0]} ${bankName}`;
+        }
+        return info.accountInfo;
+      }
+      return '-';
+    };
+
+    // 급여일 포맷팅 (매월 5일 형태로 변환)
+    const formatSalaryDay = () => {
+      if (!info?.salaryDay) return '-';
+      // 이미 '매월'이 포함되어 있으면 그대로
+      if (String(info.salaryDay).includes('매월')) return info.salaryDay;
+      // 날짜 형식(ISO 등)인 경우
+      if (String(info.salaryDay).includes('T') || String(info.salaryDay).includes('-')) {
+        try {
+          const date = new Date(info.salaryDay);
+          if (!isNaN(date.getDate())) {
+            return `매월 ${date.getDate()}일`;
+          }
+        } catch (e) {}
+      }
+      // 숫자만 있는 경우
+      if (/^\d+$/.test(String(info.salaryDay))) {
+        return `매월 ${info.salaryDay}일`;
+      }
+      return info.salaryDay;
+    };
+
     return (
       <Box>
         <Box sx={{ 
@@ -900,19 +948,18 @@ const MyCon = forwardRef(({ info, type }, ref) => {
           </Button>
         </Box>
         <Divider sx={{ mb: 3 }} />
-        
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Box sx={{ mb: 2 }}>
               <Typography variant="caption" color="text.secondary">급여일</Typography>
-              <Typography variant="h6" fontWeight="medium">{info?.salaryDay || '-'}</Typography>
+              <Typography variant="h6" fontWeight="medium">{formatSalaryDay()}</Typography>
             </Box>
           </Grid>
           <Grid item xs={12} md={6}>
             <Box>
               <Typography variant="caption" color="text.secondary">계좌/은행</Typography>
               <Typography variant="h6" fontWeight="medium">
-                {info?.accountInfo || '-'}
+                {formatAccountInfo()}
               </Typography>
             </Box>
           </Grid>
@@ -927,7 +974,7 @@ const MyCon = forwardRef(({ info, type }, ref) => {
       <>
         {leaveHistory.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-            신청한 연차 내역이 없습니다.
+            연차 신청에 대한 문의는 인사팀에게 문의하세요.
           </Typography>
         ) : (
           <TableContainer component={Box} sx={{ boxShadow: 'none' }}>

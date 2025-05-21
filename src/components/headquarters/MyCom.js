@@ -23,6 +23,26 @@ const IconBox = ({ icon: Icon }) => (
 );
 
 const MyCom = ({ info }) => {
+  // 부서 코드에 따른 한글 부서명 매핑
+  const getDeptName = (deptCode) => {
+    if (!deptCode) return '-';
+    const code = String(deptCode).toUpperCase();
+    if (code === 'HQ_PRO') return '상품관리팀';
+    if (code === 'HQ_BR') return '지점관리팀';
+    if (code === 'HQ_HR') return '인사관리팀';
+    if (code === 'MASTER') return '관리자';
+    return deptCode;
+  };
+
+  // 역할 및 부서 텍스트 생성
+  const getRoleText = () => {
+    // 본사/점주 여부
+    const role = info?.empRole || '-';
+    // 부서명 코드
+    const dept = info?.deptName || '-';
+    return `${role} | ${getDeptName(dept)}`;
+  };
+
   return (
       <Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -57,7 +77,7 @@ const MyCom = ({ info }) => {
               }}
             >
               <Typography variant="body2" fontWeight="medium">
-                {info?.empRole || '-'} | {info?.deptName || '-'}
+                {getRoleText()}
               </Typography>
             </Box>
             

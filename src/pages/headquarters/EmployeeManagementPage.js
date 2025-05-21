@@ -7,9 +7,9 @@ const EmployeeManagementPage = () => {
 
   return (
     <div>
-      <EmployeeManagementCon />
+    <EmployeeManagementCon />
     </div>
-  );
+);
 };
 
 export default EmployeeManagementPage; 

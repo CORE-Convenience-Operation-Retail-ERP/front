@@ -158,17 +158,17 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
       <Box sx={{ width: '90%', maxWidth: 2200, mx: 'auto', mt: 4, mb: 7 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography sx={{
-            fontWeight: 'bold',
+          fontWeight: 'bold', 
             fontSize: 30,
-            color: '#2563A6',
+          color: '#2563A6', 
             letterSpacing: '-1px',
             ml: 15
           }}>
             사원 정보 관리
-          </Typography>
+      </Typography>
         </Box>
       </Box>
-    
+
       {/* 오류 메시지 */}
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -550,26 +550,26 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
                 );
               })()
             }
+            </Grid>
           </Grid>
-        </Grid>
-        
+
         {/* 저장 버튼 - 오른쪽 하단으로 이동 */}
         <Box sx={{ 
           display: 'flex', 
           justifyContent: 'flex-end', 
           mt: 4 
         }}>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={loading}
-            sx={{
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              sx={{
               width: '200px', 
               height: '45px',
-              borderRadius: '20px',
-              backgroundColor: '#2563A6',
-              '&:hover': {
-                backgroundColor: '#1E5187',
+                borderRadius: '20px',
+                backgroundColor: '#2563A6',
+                '&:hover': {
+                  backgroundColor: '#1E5187',
               },
               fontSize: '16px',
               fontWeight: 'bold',
@@ -579,10 +579,10 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
               maxWidth: '200px',
               flexShrink: 0,
               flexGrow: 0
-            }}
-          >
-            {loading ? <CircularProgress size={24} color="inherit" /> : '저장하기'}
-          </Button>
+              }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : '저장하기'}
+            </Button>
         </Box>
       </Paper>
     </Box>
