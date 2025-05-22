@@ -71,13 +71,14 @@ export const LogoutIcon = styled(FiLogOut)`
 `;
 
 export const Header = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 2rem;
-  height: 80px;
-  background-color: #f9fafb;
-  position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    height: 80px;
+    background-color: #f9fafb;
+    position: relative;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.05);
 `;
 
 export const LogoImage = styled.img`

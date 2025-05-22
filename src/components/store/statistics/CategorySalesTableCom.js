@@ -10,7 +10,7 @@ function CategorySalesTableCom({ data }) {
   
     return (
       <div style={{ marginTop: "2rem" }}>
-        <h4>📋 카테고리별 매출 상세</h4>
+        <h4>| 카테고리별 매출 상세</h4>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>

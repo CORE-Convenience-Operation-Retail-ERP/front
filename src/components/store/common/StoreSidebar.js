@@ -35,11 +35,11 @@ function StoreSidebar({ menus, hoverMenu, onMouseEnter, onMouseLeave, onNavigate
                                 }}
                             >
                                 {menu.icon && (
-                                    <MenuIcon>
+                                    <MenuIcon size={10}>
                                         {menu.icon}
                                     </MenuIcon>
                                 )}
-                                <span>{menu.name}</span>
+                                  <span>{menu.name}</span>
                             </MenuButton>
 
                             {menu.submenu && (
@@ -68,7 +68,7 @@ function StoreSidebar({ menus, hoverMenu, onMouseEnter, onMouseLeave, onNavigate
 
             {/* Footer */}
             <SidebarFooter>
-                <FooterContent>
+                <FooterContent size={8}>
                     @ CORE ERP
                     <FooterLine />
                 </FooterContent>

@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-    FormWrap,
+    FormWrapper,
+    Title,
+    InputGroup,
     Label,
     Input,
     Select,
     FileInput,
-    SubmitButton
-} from '../../../features/store/styles/partTimer/StorePatTimerRegister.styled';
+    SubmitButton,
+    PhoneRow,
+    OutlineButton,
+    VerifiedMessage,
+    ProfileImage
+} from '../../../features/store/styles/partTimer/StorePatTimerForm.styled';
 import CustomCalendar from '../../../components/store/common/CustomCalendar';
-import {PageTitle} from "../../../features/store/styles/common/PageLayout";
 
 function PartTimerRegisterCom({
                                   form,
@@ -21,96 +26,143 @@ function PartTimerRegisterCom({
                                   code,
                                   verified
                               }) {
+    const [showCodeInput, setShowCodeInput] = useState(false);
+
     return (
-        <FormWrap>
-            <PageTitle>직원 등록 </PageTitle>
-            <Label>이름</Label>
-            <Input name="partName" value={form.partName} onChange={onChange} placeholder="이름" />
+        <FormWrapper>
+            <Title>직원 등록</Title>
 
-            <Label>직책</Label>
-            <Select name="position" value={form.position} onChange={onChange}>
-                <option value="">직책 선택</option>
-                <option value="아르바이트">아르바이트</option>
-                <option value="매니저">매니저</option>
-                <option value="점장">점장</option>
-            </Select>
+            <InputGroup>
+                <Label required>이름</Label>
+                <Input name="partName" value={form.partName} onChange={onChange} placeholder="이름" />
+            </InputGroup>
 
-            <Label>근무 형태</Label>
-            <Select name="workType" value={form.workType} onChange={onChange}>
-                <option value="">근무시간 선택</option>
-                <option value="평일주간">평일주간</option>
-                <option value="평일야간">평일야간</option>
-                <option value="주말주간">주말주간</option>
-                <option value="주말야간">주말야간</option>
-            </Select>
+            <InputGroup>
+                <Label required>직책</Label>
+                <Select name="position" value={form.position} onChange={onChange}>
+                    <option value="">직책 선택</option>
+                    <option value="아르바이트">아르바이트</option>
+                    <option value="매니저">매니저</option>
+                    <option value="점장">점장</option>
+                </Select>
+            </InputGroup>
 
-            <Label>성별</Label>
-            <Select name="partGender" value={form.partGender} onChange={onChange}>
-                <option value="">선택</option>
-                <option value="0">남</option>
-                <option value="1">여</option>
-            </Select>
+            <InputGroup>
+                <Label required>근무 형태</Label>
+                <Select name="workType" value={form.workType} onChange={onChange}>
+                    <option value="">근무시간 선택</option>
+                    <option value="평일주간">평일주간</option>
+                    <option value="평일야간">평일야간</option>
+                    <option value="주말주간">주말주간</option>
+                    <option value="주말야간">주말야간</option>
+                </Select>
+            </InputGroup>
 
-            <Label>전화번호</Label>
-            <Input name="partPhone" value={form.partPhone} onChange={onChange} placeholder="010-1234-5678" />
-            {!verified && <>
-                <button type="button" onClick={onSendCode}>인증번호 전송</button>
-                <Input value={code} onChange={onCodeChange} placeholder="인증번호 입력" />
-                <button type="button" onClick={onVerifyCode}>인증 완료</button>
-            </>}
+            <InputGroup>
+                <Label required>성별</Label>
+                <Select name="partGender" value={form.partGender} onChange={onChange}>
+                    <option value="">선택</option>
+                    <option value="0">남</option>
+                    <option value="1">여</option>
+                </Select>
+            </InputGroup>
 
-            <Label>주소</Label>
-            <Input name="partAddress" value={form.partAddress} onChange={onChange} placeholder="주소" />
+            <InputGroup>
+                <Label required>전화번호</Label>
+                <PhoneRow>
+                    <Input name="partPhone" value={form.partPhone} onChange={onChange} placeholder="010-1234-5678" />
+                    <OutlineButton
+                        type="button"
+                        onClick={() => {
+                            onSendCode();
+                            setShowCodeInput(true);
+                        }}
+                    >
+                        인증번호 전송
+                    </OutlineButton>
+                </PhoneRow>
+            </InputGroup>
 
-            <Label>생년월일</Label>
-            <CustomCalendar
-                selected={form.birthDate}
-                onChange={(date) => onDateChange('birthDate', date)}
-                placeholder="생년월일 선택"
-            />
+            {!verified && showCodeInput && (
+                <InputGroup>
+                    <Label required>인증번호</Label>
+                    <PhoneRow>
+                        <Input value={code} onChange={onCodeChange} placeholder="인증번호 입력" />
+                        <OutlineButton type="button" onClick={onVerifyCode}>확인</OutlineButton>
+                    </PhoneRow>
+                    {verified && <VerifiedMessage>✅ 인증 완료</VerifiedMessage>}
+                </InputGroup>
+            )}
 
-            <Label>입사일</Label>
-            <CustomCalendar
-                selected={form.hireDate}
-                onChange={(date) => onDateChange('hireDate', date)}
-                placeholder="입사일 선택"
-            />
+            <InputGroup>
+                <Label required>주소</Label>
+                <Input name="partAddress" value={form.partAddress} onChange={onChange} placeholder="주소" />
+            </InputGroup>
 
-            <Label>급여 형태</Label>
-            <Select name="salaryType" value={form.salaryType} onChange={onChange}>
-                <option value="">선택</option>
-                <option value="0">시급</option>
-                <option value="1">월급</option>
-            </Select>
+            <InputGroup>
+                <Label required>생년월일</Label>
+                <CustomCalendar
+                    selected={form.birthDate}
+                    onChange={(date) => onDateChange('birthDate', date)}
+                    placeholder="생년월일 선택"
+                />
+            </InputGroup>
 
-            <Label>시급</Label>
-            <Input name="hourlyWage" value={form.hourlyWage} onChange={onChange} placeholder="시급" />
+            <InputGroup>
+                <Label required>입사일</Label>
+                <CustomCalendar
+                    selected={form.hireDate}
+                    onChange={(date) => onDateChange('hireDate', date)}
+                    placeholder="입사일 선택"
+                />
+            </InputGroup>
 
-            <Label>은행</Label>
-            <Select name="accountBank" value={form.accountBank || ''} onChange={onChange}>
-                <option value="">선택</option>
-                <option value={1}>국민</option>
-                <option value={2}>하나</option>
-                <option value={3}>신한</option>
-            </Select>
+            <InputGroup>
+                <Label required>급여 형태</Label>
+                <Select name="salaryType" value={form.salaryType} onChange={onChange}>
+                    <option value="">선택</option>
+                    <option value="0">시급</option>
+                    <option value="1">월급</option>
+                </Select>
+            </InputGroup>
 
-            <Label>계좌번호</Label>
-            <Input name="accountNumber" value={form.accountNumber} onChange={onChange} placeholder="계좌번호" />
+            <InputGroup>
+                <Label required>시급</Label>
+                <Input name="hourlyWage" value={form.hourlyWage} onChange={onChange} placeholder="시급" />
+            </InputGroup>
 
-            <Label>재직 상태</Label>
-            <Select name="partStatus" value={form.partStatus} onChange={onChange}>
-                <option value="">선택</option>
-                <option value="1">재직</option>
-                <option value="0">퇴사</option>
-            </Select>
+            <InputGroup>
+                <Label required>은행</Label>
+                <Select name="accountBank" value={form.accountBank || ''} onChange={onChange}>
+                    <option value="">선택</option>
+                    <option value={1}>국민</option>
+                    <option value={2}>하나</option>
+                    <option value={3}>신한</option>
+                </Select>
+            </InputGroup>
 
-            <Label>사진 업로드</Label>
-            <FileInput type="file" name="file" onChange={onChange} accept="image/*" />
+            <InputGroup>
+                <Label required>계좌번호</Label>
+                <Input name="accountNumber" value={form.accountNumber} onChange={onChange} placeholder="계좌번호" />
+            </InputGroup>
 
-            {form.partImg && <img src={form.partImg} alt="미리보기" width="100" />}
+            <InputGroup>
+                <Label required>재직 상태</Label>
+                <Select name="partStatus" value={form.partStatus} onChange={onChange}>
+                    <option value="">선택</option>
+                    <option value="1">재직</option>
+                    <option value="0">퇴사</option>
+                </Select>
+            </InputGroup>
 
-            <SubmitButton onClick={onSubmit}>등록</SubmitButton>
-        </FormWrap>
+            <InputGroup>
+                <Label required>사진 업로드</Label>
+                <FileInput type="file" name="file" onChange={onChange} accept="image/*" />
+                {form.partImg && <ProfileImage src={form.partImg} alt="미리보기" />}
+            </InputGroup>
+
+            <SubmitButton type="button" onClick={onSubmit}>등록</SubmitButton>
+        </FormWrapper>
     );
 }
 

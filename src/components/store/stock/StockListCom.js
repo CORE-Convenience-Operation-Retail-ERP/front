@@ -32,9 +32,7 @@ function StockListCom({
                           onParentChange,
                           onChildChange,
                           onSubChildChange,
-                          onApplyCheck,
                           onApplyChecks,
-                          onRollbackCheck,
                           onRollbackChecks,
                       }) {
     const [selectedIds, setSelectedIds] = useState([]);
@@ -93,7 +91,7 @@ function StockListCom({
         <PageWrapper>
             <PageSection>
                 <FilterActionRow>
-                    <PageTitle>재고 현황</PageTitle>
+                    <PageTitle>| 재고 현황</PageTitle>
                 </FilterActionRow>
             </PageSection>
             <SearchBarRow style={{
@@ -139,7 +137,7 @@ function StockListCom({
                 <div style={{ minWidth: 380, display: "flex", justifyContent: "flex-end" }}>
                     <ActionGroup>
                         <PrimaryButton onClick={handleDownload}>엑셀 다운로드</PrimaryButton>
-                        <PrimaryButton onClick={() => window.location.href = '/store/inventory/check/register'}>실사 등록</PrimaryButton>
+                        <PrimaryButton onClick={() => window.location.href = '/store/inventory/check/register'}>재고 등록</PrimaryButton>
                         <PrimaryButton onClick={() => {
                             if (selectedIds.length > 0) {
                                 onApplyChecks(selectedIds);
@@ -220,15 +218,7 @@ function StockListCom({
                                 <td>{r.realQuantity ?? '-'}</td>
                                 <td>{renderDifference(r.realQuantity, r.totalQuantity, r.isApplied)}</td>
                                 <td>{r.latestInDate?.split('T')[0] || '-'}</td>
-                                <td>
-                                    {r.checkItemId ? (
-                                        r.isApplied ? (
-                                            <PrimaryButton onClick={() => onRollbackCheck(r.checkItemId)}>복원</PrimaryButton>
-                                        ) : (
-                                            <PrimaryButton onClick={() => onApplyCheck(r.checkItemId)}>반영</PrimaryButton>
-                                        )
-                                    ) : null}
-                                </td>
+                                <td>{r.checkItemId ? (r.isApplied ? `복원 가능` : `반영 가능`) : null}</td>
                             </tr>
                         ))}
                         </tbody>

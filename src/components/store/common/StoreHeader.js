@@ -19,7 +19,6 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
     const [hoveredIcon, setHoveredIcon] = useState(null);
     const navigate = useNavigate();
 
-    // if (!userInfo) return null;
 
     return (
         <Header>
@@ -52,7 +51,7 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
                         onMouseLeave={() => setHoveredIcon(null)}
                         onClick={() => navigate('/headquarters/dashboard')}
                     >
-                     
+
                         <BuildingIcon $hovered={hoveredIcon === 'hq'} />
                     </IconWrap>
                 )}

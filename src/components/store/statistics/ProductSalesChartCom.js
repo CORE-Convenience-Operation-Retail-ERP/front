@@ -31,7 +31,7 @@ export function ProductSalesChartCom({ data, loading, mode = "summary" }) {
 
     return (
         <div style={{ marginTop: "3.5rem" }}>
-            <h3>💰 상품별 매출 순위</h3>
+            <h3>상품별 매출 순위</h3>
             <ResponsiveContainer width="100%" height={400}>
                 <BarChart
                     data={chartData}

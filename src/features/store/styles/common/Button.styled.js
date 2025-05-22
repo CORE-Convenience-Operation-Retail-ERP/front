@@ -12,7 +12,7 @@ const baseButton = css`
 
 export const PrimaryButton = styled.button`
     ${baseButton}
-    background-color: #3b82f6;
+    background-color: #007eff;
     color: white;
 
     &:hover {
@@ -33,27 +33,6 @@ export const DangerButton = styled(PrimaryButton)`
     }
 `;
 
-export const OutlineButton = styled(PrimaryButton)`
-  background-color: transparent;
-  color: #374151;
-  border: 1px solid #d1d5db;
-
-  &:hover {
-    background-color: #f3f4f6;
-  }
-`;
-
-export const SmallButton = styled(PrimaryButton)`
-  padding: 4px 10px;
-  font-size: 12px;
-  border-radius: 4px;
-`;
-
-export const FullWidthButton = styled(PrimaryButton)`
-  display: block;
-  width: 100%;
-  text-align: center;
-`;
 
 export const IconButton = styled(PrimaryButton)`
   display: flex;
@@ -65,6 +44,29 @@ export const IconButton = styled(PrimaryButton)`
   }
 `;
 
+
+
+export const NavigationWrapper = styled.div`
+    display: flex;
+    gap: 0.5rem;
+    margin-right: 1rem;
+
+    button {
+        padding: 6px 12px;
+        min-width: 50px;
+        width: 70px;
+        white-space: nowrap;
+        font-size: 14px;
+    }
+`;
+
+export const ButtonRow = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+`;
+
 export const ViewToggleButton = styled.button`
   ${baseButton}
   background-color: ${({ selected }) => (selected ? "#3b82f6" : "#f3f4f6")};
@@ -73,16 +75,5 @@ export const ViewToggleButton = styled.button`
 
   &:hover {
     background-color: ${({ selected }) => (selected ? "#2563eb" : "#e5e7eb")};
-  }
-`;
-
-
-export const WhiteButton = styled(PrimaryButton)`
-  background-color: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
-
-  &:hover {
-    background-color: #f9fafb;
   }
 `;

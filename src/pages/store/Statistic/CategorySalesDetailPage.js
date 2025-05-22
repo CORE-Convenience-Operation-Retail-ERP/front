@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import CategorySalesDonutCon from "../../../containers/store/statistics/CategorySalesDonutCon";
+import {FiCalendar} from "react-icons/fi";
 
 function CategorySalesDetailPage() {
     const location = useLocation();
@@ -42,7 +43,11 @@ function CategorySalesDetailPage() {
 
     return (
         <div style={{ padding: "30px" }}>
-            <h2>📂 카테고리별 매출 상세 통계</h2>
+            <h2 style={{ marginBottom: "1rem", fontSize: "20px", fontWeight: "600" }}>
+                <span style={{ marginRight: "8px" }}>|</span>
+                카테고리별 매출 상세 통계
+            </h2>
+
             <p style={{ marginBottom: "20px", color: "#666" }}>
                 날짜 또는 기간을 선택하면 카테고리별 총 매출 데이터를 확인할 수 있습니다.
             </p>
@@ -60,8 +65,9 @@ function CategorySalesDetailPage() {
             />
 
             {!filters && (
-                <p style={{ marginTop: "20px", color: "#999" }}>
-                    📅 날짜를 선택하면 통계가 표시됩니다.
+                <p style={{ marginTop: "20px", color: "#999", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <FiCalendar size={16} />
+                    날짜를 선택하면 통계가 표시됩니다.
                 </p>
             )}
 

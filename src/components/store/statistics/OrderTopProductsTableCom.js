@@ -8,7 +8,7 @@ function OrderTopProductsTableCom({ data = [], metric = "quantity" }) {
   
     return (
       <div style={{ marginTop: "2rem" }}>
-        <h4>📋 상위 발주 상품 상세</h4>
+        <h4>상위 발주 상품 상세</h4>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>

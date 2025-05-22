@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { cancelDisposalById, fetchDisposalHistory, fetchExpiredDisposals } from "../../../service/store/DisposalService";
 import DisposalCom from "../../../components/store/disposal/DisposalCom";
-import {PageTitle} from "../../../features/store/styles/common/PageLayout";
+import {PageTitle, PageWrapper} from "../../../features/store/styles/common/PageLayout";
+import {FiTrash, FiTrash2} from "react-icons/fi";
 
 const DisposalCon = () => {
   const [expiredList, setExpiredList] = useState([]);
@@ -51,8 +52,10 @@ const DisposalCon = () => {
   );
 
   return (
-      <>
-        <PageTitle>🗑 폐기 관리</PageTitle>
+      <PageWrapper>
+        <PageTitle>
+          | 폐기 관리
+        </PageTitle>
         <DisposalCom
           expiredList={paginatedExpired}
           disposalList={paginatedDisposal}
@@ -65,7 +68,7 @@ const DisposalCon = () => {
           disposalTotalPages={Math.ceil(disposalList.length / pageSize)}
           onDisposalPageChange={setDisposalPage}
       />
-      </>
+      </PageWrapper>
   );
 };
 

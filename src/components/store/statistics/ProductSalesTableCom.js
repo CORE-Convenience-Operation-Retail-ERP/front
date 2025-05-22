@@ -11,7 +11,7 @@ function ProductSalesTableCom({ data, loading }) {
 
   return (
     <div style={{ marginTop: "2rem" }}>
-      <h3>📋 상품별 매출 상세 테이블</h3>
+      <h3>상품별 매출 상세 테이블</h3>
       <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
         <thead>
           <tr style={{ backgroundColor: "#f8f8f8" }}>

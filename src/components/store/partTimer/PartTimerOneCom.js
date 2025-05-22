@@ -1,107 +1,102 @@
-import { format } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import {
-    FormWrap,
-    InfoRow,
+    FormWrapper,
+    Title,
+    InputGroup,
     Label,
-    Value,
-    ImgPreview,
-    ButtonGroup,
-    ActionButton
-  } from '../../../features/store/styles/partTimer/StorePartTimerOne.styled';
-import {PageTitle} from "../../../features/store/styles/common/PageLayout";
+    ProfileImage,
+    ActionButton, ReadonlyText
+} from '../../../features/store/styles/partTimer/StorePatTimerForm.styled';
 
-function PartTimerOneCom({ form, onEdit, onResign , onRejoin }){
-  const navigate = useNavigate();
+function PartTimerOneCom({ form, onEdit, onResign, onRejoin }) {
+    return (
+        <FormWrapper>
+            <Title>직원 상세 정보</Title>
 
-    return(
-        <FormWrap>
-            <PageTitle>직원 상세 정보 </PageTitle>
-  
-        {/* 프로필 이미지 */}
-        {form.partImg && (
-            <ImgPreview src={form.partImg} alt="프로필" />
-        )}
-  
-        <InfoRow>
-          <Label>이름</Label>
-          <Value>{form.partName}</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>직책</Label>
-          <Value>{form.position}</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>근무형태</Label>
-          <Value>{form.workType}</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>전화번호</Label>
-          <Value>{form.partPhone}</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>주소</Label>
-          <Value>{form.partAddress}</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>성별</Label>
-          <Value>{form.partGender === 0 ? '남' : '여'}</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>입사일</Label>
-          <Value>{form.hireDate ? format(new Date(form.hireDate), 'yyyy-MM-dd HH:mm') : '-'}</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>퇴사일</Label>
-          <Value>{form.resignDate ? format(new Date(form.resignDate), 'yyyy-MM-dd HH:mm') : '-'}</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>급여형태</Label>
-          <Value>{form.salaryType === 0 ? '시급' : '월급'}</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>시급</Label>
-          <Value>{form.hourlyWage?.toLocaleString()} 원</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>은행</Label>
-          <Value>{form.accountBank}</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>계좌번호</Label>
-          <Value>{form.accountNumber}</Value>
-        </InfoRow>
-  
-        <InfoRow>
-          <Label>상태</Label>
-          <Value>{form.partStatus === 1 ? '재직' : '퇴사'}</Value>
-        </InfoRow>
-  
-        <ButtonGroup>
-  <ActionButton onClick={onEdit}>수정</ActionButton>
+            {form.partImg && <ProfileImage src={form.partImg} alt="프로필" />}
 
-      {form.partStatus === 1 && (
-        <ActionButton danger onClick={onResign}>퇴사 처리</ActionButton>
-      )}
+            <InputGroup>
+                <Label>이름</Label>
+                <p>{form.partName}</p>
+            </InputGroup>
 
-      {form.partStatus === 0 && (
-        <ActionButton onClick={onRejoin}>재직 처리</ActionButton> 
-      )}
+            <InputGroup>
+                <Label>직책</Label>
+                <p>{form.position}</p>
+            </InputGroup>
 
-  <ActionButton onClick={() => navigate(-1)}>목록으로</ActionButton>
-</ButtonGroup>
-      </FormWrap>
+            <InputGroup>
+                <Label>근무형태</Label>
+                <p>{form.workType}</p>
+            </InputGroup>
+
+            <InputGroup>
+                <Label>전화번호</Label>
+                <p>{form.partPhone}</p>
+            </InputGroup>
+
+            <InputGroup>
+                <Label>주소</Label>
+                <p>{form.partAddress}</p>
+            </InputGroup>
+
+            <InputGroup>
+                <Label>성별</Label>
+                <p>{form.partGender === 0 ? '남' : '여'}</p>
+            </InputGroup>
+
+            <InputGroup>
+                <Label>입사일</Label>
+                <p>{form.hireDate ? new Date(form.resignDate).toISOString().slice(0, 10) : '-'}</p>
+            </InputGroup>
+
+            <InputGroup>
+                <Label>퇴사일</Label>
+                <p>{form.resignDate ? new Date(form.resignDate).toISOString().slice(0, 10) : '-'}</p>
+            </InputGroup>
+
+            <InputGroup>
+                <Label>급여형태</Label>
+                <p>{form.salaryType === 0 ? '시급' : '월급'}</p>
+            </InputGroup>
+
+            <InputGroup>
+                <Label>시급</Label>
+                <p>{form.hourlyWage?.toLocaleString()} 원</p>
+            </InputGroup>
+
+            <InputGroup>
+                <Label>은행</Label>
+                <p>
+                    {{
+                        1: "국민",
+                        2: "하나",
+                        3: "신한"
+                    }[form.accountBank] || "-"}
+                </p>
+            </InputGroup>
+
+            <InputGroup>
+                <Label>계좌번호</Label>
+                <p>{form.accountNumber}</p>
+            </InputGroup>
+
+            <InputGroup>
+                <Label>상태</Label>
+                <p>{form.partStatus === 1 ? '재직 중' : '퇴사'}</p>
+            </InputGroup>
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
+                <ActionButton onClick={onEdit}>수정</ActionButton>
+                {form.partStatus === 1 && (
+                    <ActionButton danger onClick={onResign}>퇴사 처리</ActionButton>
+                )}
+                {form.partStatus === 0 && (
+                    <ActionButton onClick={onRejoin}>재직 처리</ActionButton>
+                )}
+            </div>
+        </FormWrapper>
     );
-  }
-export default PartTimerOneCom
+}
+
+export default PartTimerOneCom;

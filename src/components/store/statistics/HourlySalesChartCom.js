@@ -16,7 +16,7 @@ function HourlySalesTable({ data }) {
 
     return (
         <div style={{ marginTop: "20px" }}>
-            <h4>📋 상세 테이블</h4>
+            <h4>상세 테이블</h4>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                     <tr>

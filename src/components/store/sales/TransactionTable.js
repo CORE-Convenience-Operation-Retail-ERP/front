@@ -15,6 +15,9 @@ import {
 import { PrimaryButton } from "../../../features/store/styles/common/Button.styled";
 import TransactionDetailModal from "./TransactionDetailModal";
 import StoreSearchBar from "../common/StoreSearchBar";
+import {AiOutlineSearch} from "react-icons/ai";
+import {FiSearch} from "react-icons/fi";
+import {IoIosSearch} from "react-icons/io";
 
 const TransactionTable = ({
                             rows = [],
@@ -90,7 +93,9 @@ const TransactionTable = ({
                   </td>
                   <td>{row.items?.length || 0}건</td>
                   <td>
-                    <button onClick={() => handleOpenModal(row)}>🔍</button>
+                    <button onClick={() => handleOpenModal(row)}>
+                      <IoIosSearch />
+                    </button>
                   </td>
                 </tr>
             ))}

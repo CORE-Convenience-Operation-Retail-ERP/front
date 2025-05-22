@@ -73,7 +73,7 @@ const TransactionCon = () => {
 
     return (
         <PageWrapper>
-            <PageTitle>거래내역</PageTitle>
+            <PageTitle>| 거래내역</PageTitle>
             <TableSection>
                 <TransactionTable
                     rows={currentData}

@@ -89,7 +89,7 @@ function OrderListCon() {
 
   return (
     <PageWrapper>
-      <PageTitle>📦 발주 목록</PageTitle>
+      <PageTitle>| 발주 목록</PageTitle>
       <div style={{ display: "flex", justifyContent: "flex-end" , marginRight: "1rem",marginBottom: "-1.5rem" }}>
         <StoreSearchBar filterOptions={filterOptions} onSearch={handleSearch} />
       </div>

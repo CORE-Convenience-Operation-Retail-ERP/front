@@ -34,7 +34,7 @@ export function OrderTopProductsCom({ data, loading, mode = "summary" }) {
     return (
         <div style={{ marginTop: mode === "detail" ? "2rem" : "8rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <h3>📦 상위 발주 상품 {mode === "detail" && "(상세)"}</h3>
+                <h3>상위 발주 상품 {mode === "detail" && "(상세)"}</h3>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                     <button
                         onClick={() => setMetric("quantity")}

@@ -70,7 +70,7 @@ function StockFlowLogCon() {
   return (
       <PageWrapper>
       <div>
-        <PageTitle>🎞 입출고 날짜 로그</PageTitle>
+        <PageTitle>| 입출고 날짜 로그</PageTitle>
           <div style={{ display: "flex", justifyContent: "flex-end", marginRight: "1rem",marginBottom: "-1.5rem" }}>
             <StoreSearchBar filterOptions={filterOptions} onSearch={handleSearch} />
           </div>

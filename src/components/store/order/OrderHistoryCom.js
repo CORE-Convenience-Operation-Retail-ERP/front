@@ -37,7 +37,7 @@ function OrderHistoryCom({
 
     return (
         <PageWrapper>
-            <PageTitle>입고 처리</PageTitle>
+            <PageTitle>| 입고 처리</PageTitle>
 
             <PageSection style={{ maxWidth: "300px", marginBottom: "2rem" }}>
                 <SelectBox

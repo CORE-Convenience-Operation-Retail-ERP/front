@@ -17,7 +17,7 @@ export default function StockDetailCon() {
   const [selectedLocationCode, setSelectedLocationCode] = useState(null);
   const [showLocationEdit, setShowLocationEdit] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [version, setVersion] = useState(0); // 🔄 강제 리렌더링 트리거용
+  const [version, setVersion] = useState(0); // 강제 리렌더링 트리거용
 
   const loadData = useCallback(async () => {
     try {
@@ -34,7 +34,7 @@ export default function StockDetailCon() {
       const warehouse = mapped?.warehouse || [];
       const codes = [...shelf, ...warehouse].map(loc => loc.locationCode);
       setHighlightLocationCodes(codes);
-      setVersion(v => v + 1); // 🔄 리렌더링 트리거 증가
+      setVersion(v => v + 1); // 리렌더링 트리거 증가
     } catch (err) {
       console.error("데이터 조회 실패:", err);
       alert("상품 또는 입출고 로그를 불러오는 데 실패했습니다.");

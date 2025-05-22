@@ -12,6 +12,7 @@ import InputBox from "../../../features/store/styles/common/InputBox";
 import SelectBox from "../../../features/store/styles/common/SelectBox";
 import Pagination from "../common/Pagination";
 import StoreSearchBar from "../common/StoreSearchBar";
+import {MdShoppingCart} from "react-icons/md";
 
 function OrderFormCom({
                           productList = [],
@@ -83,7 +84,7 @@ function OrderFormCom({
 
     return (
         <PageWrapper>
-            <PageTitle>{isEdit ? "발주 수정" : "발주 등록"}</PageTitle>
+            <PageTitle>{isEdit ? "| 발주 수정" : "| 발주 등록"}</PageTitle>
 
             {/* 검색바 영역: 카테고리 + 검색바 */}
             <div style={{ marginBottom: "1.5rem" }}>
@@ -197,8 +198,9 @@ function OrderFormCom({
                         marginLeft: "2.5rem"
                     }}
                 >
-                    <h3 style={{ marginBottom: "1rem", fontSize: "1.1rem", fontWeight: "bold", color: "#333" }}>
-                        🛒 상품 요약
+                    <h3 style={{ marginBottom: "1rem", fontSize: "1.1rem", fontWeight: "bold", color: "#333", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <MdShoppingCart size={20} />
+                        상품 요약
                     </h3>
                     <ul style={{ listStyle: "none", padding: 0, marginBottom: "1.5rem" }}>
                         {selectedItems.map((item) => (

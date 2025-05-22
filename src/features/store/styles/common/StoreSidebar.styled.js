@@ -1,9 +1,9 @@
 import styled from 'styled-components';
- 
+
 export const Sidebar = styled.aside`
   width: 240px;
   height: 100vh;
-  background-color: #f9fafb;
+  background-color: #dcebff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -21,19 +21,26 @@ export const MenuItem = styled.div`
   flex-direction: column;
 `;
 
-export const MenuButton = styled.div.withConfig({
-    shouldForwardProp: (prop) => prop !== 'isActive' && prop !== 'isHover'
-})`
+export const MenuButton = styled.div`
     display: flex;
     align-items: center;
     gap: 1rem;
-    color: ${({ isActive, isHover }) =>
-            isActive || isHover ? '#3B6FAE' : '#6b7280'};
+    color: #699adb;
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 8px;
     font-size: 16px;
     transition: color 0.3s ease;
+
+    ${({ isActive }) =>
+            isActive &&
+            `
+    color: #314663;
+  `}
+
+    &:hover {
+        color: #314663;
+    }
 `;
 
 export const Submenu = styled.div.withConfig({
@@ -54,16 +61,16 @@ export const Submenu = styled.div.withConfig({
 export const SubmenuItem = styled.div.withConfig({
     shouldForwardProp: (prop) => prop !== 'isActive'
 })`
-    color: ${({ isActive }) => (isActive ? '#3B6FAE' : '#9ca3af')};
+    color: ${({ isActive }) => (isActive ? '#314663' : '#314663')};
     font-size: 14px;
     cursor: pointer;
     padding: 0.4rem 0.8rem;
     border-radius: 6px;
-    background-color: ${({ isActive }) => (isActive ? '#e0e7ff' : 'transparent')};
+    background-color: ${({ isActive }) => (isActive ? '#b5d4fe' : 'transparent')};
     transition: background-color 0.3s ease, color 0.3s ease;
 
     &:hover {
-        background-color: #e0e7ff;
+        background-color: #b5d4fe;
         color: #3B6FAE;
     }
 `;
@@ -135,4 +142,8 @@ export const MenuIcon = styled.div`
     justify-content: center;
     color: inherit;
     transition: color 0.3s ease;
+
+    svg {
+        font-size: 18px; // 사이즈 조정
+    }
 `;

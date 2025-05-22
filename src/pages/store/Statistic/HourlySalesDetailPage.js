@@ -2,6 +2,7 @@ import { useState } from "react";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import HourlySalesChartCon from "../../../containers/store/statistics/HourlySalesChartCon";
 import { useLocation } from "react-router-dom";
+import {FiCalendar} from "react-icons/fi";
 
 function HourlySalesDetailPage() {
     const location = useLocation();
@@ -42,10 +43,14 @@ function HourlySalesDetailPage() {
   
     return (
       <div style={{ padding: "30px" }}>
-        <h2>⏱️ 시간대별 매출 상세 통계</h2>
-        <p style={{ marginBottom: "20px", color: "#666" }}>
-          날짜 또는 기간을 선택하면 해당 시간대의 매출 통계를 확인할 수 있습니다.
-        </p>
+          <h2 style={{ marginBottom: "1rem", fontSize: "20px", fontWeight: "600" }}>
+              <span style={{ marginRight: "8px" }}>|</span>
+              시간대별 매출 상세 통계
+          </h2>
+
+          <p style={{ color: "#666", marginBottom: "20px" }}>
+              날짜 또는 기간을 선택하면 해당 시간대의 매출 통계를 확인할 수 있습니다.
+          </p>
   
         <StoreSearchBar
           filterOptions={[
@@ -58,12 +63,13 @@ function HourlySalesDetailPage() {
             endDate: filters?.endDate,
           }}
         />
-  
-        {!filters && (
-          <p style={{ marginTop: "20px", color: "#999" }}>
-            📅 날짜를 선택하면 통계가 표시됩니다.
-          </p>
-        )}
+
+          {!filters && (
+              <p style={{ marginTop: "20px", color: "#999", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <FiCalendar size={16} />
+                  날짜를 선택하면 통계가 표시됩니다.
+              </p>
+          )}
   
         {filters && (
             <HourlySalesChartCon filters={filters} mode="detail" height={300} />

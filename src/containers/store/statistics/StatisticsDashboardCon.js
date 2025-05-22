@@ -11,18 +11,18 @@ import {PageTitle} from "../../../features/store/styles/common/PageLayout";
 
 function StatisticsDashboardCon() {
     const navigate = useNavigate();
-    // 기본값: 어제 날짜
+    const today = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(today.getMonth() - 1);
 
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const defaultDate = yesterday.toISOString().slice(0, 10);
+    const defaultStartDate = oneMonthAgo.toISOString().slice(0, 10);
+    const defaultEndDate = today.toISOString().slice(0, 10);
     const storeId = Number(localStorage.getItem("storeId") || 1);
-
 
     const [filters, setFilters] = useState({
         storeId,
-        startDate: defaultDate,
-        endDate: defaultDate,
+        startDate: defaultStartDate,
+        endDate: defaultEndDate,
         productName: "",
         categoryIds: [],
     });
@@ -34,23 +34,19 @@ function StatisticsDashboardCon() {
                 startDate: newFilter.date,
                 endDate: newFilter.date,
             }));
-        }
-
-        // 날짜 범위 필터가 들어온 경우
-        else if (newFilter.startDate && newFilter.endDate) {
+        } else if (newFilter.startDate && newFilter.endDate) {
             setFilters((prev) => ({
                 ...prev,
                 startDate: newFilter.startDate,
                 endDate: newFilter.endDate,
             }));
         }
-
     };
 
     return (
         <>
 
-            <PageTitle>통계 관리</PageTitle>
+            <PageTitle>| 통계 관리</PageTitle>
             <div style={{ display: "flex", justifyContent: "flex-end", marginRight: "1rem" }}>
             <StoreSearchBar
                 filterOptions={[

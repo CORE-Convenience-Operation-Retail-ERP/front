@@ -52,19 +52,6 @@ function StockListCon() {
     load();
   }, [searchParams]);
 
-  const handleApplyCheck = async (checkItemId) => {
-    if (!checkItemId) return;
-    if (!window.confirm("해당 실사를 반영하시겠습니까?")) return;
-
-    try {
-      await applyInventoryCheck(checkItemId);
-      alert("실사 반영이 완료되었습니다.");
-      setSearchParams(prev => ({ ...prev }));
-    } catch (err) {
-      console.error("실사 반영 실패:", err);
-      alert("실사 반영 중 오류가 발생했습니다.");
-    }
-  };
 
   const handleApplyChecks = async (checkItemIds = []) => {
     try {
@@ -84,29 +71,17 @@ function StockListCon() {
     }
   };
 
-  const handleRollbackCheck = async (checkItemId) => {
-    if (!window.confirm("해당 실사를 롤백하시겠습니까?")) return;
-
-    try {
-      await rollbackInventoryCheck(checkItemId);
-      alert("실사 롤백이 완료되었습니다.");
-      setSearchParams(prev => ({ ...prev }));
-    } catch (err) {
-      console.error("실사 롤백 실패:", err);
-      alert("실사 롤백 중 오류가 발생했습니다.");
-    }
-  };
 
   const handleRollbackChecks = async (checkItemIds = []) => {
     try {
       if (checkItemIds.length > 0) {
-        if (!window.confirm("선택된 실사를 롤백하시겠습니까?")) return;
+        if (!window.confirm("선택된 재고를 복원 하시겠습니까?")) return;
         await rollbackInventoryCheckBulk(checkItemIds);
-        alert("선택 항목 롤백 완료");
+        alert("선택 항목 복원 완료");
       } else {
-        if (!window.confirm("전체 반영된 실사를 롤백하시겠습니까?")) return;
+        if (!window.confirm("전체 반영된 재고를 복원 하시겠습니까?")) return;
         await rollbackInventoryCheckAll();
-        alert("전체 롤백 완료");
+        alert("전체 복원 완료");
       }
       setSearchParams(prev => ({ ...prev }));
     } catch (err) {
@@ -174,9 +149,7 @@ function StockListCon() {
           parentCategories={parentCategories}
           childCategories={childCategories}
           grandChildCategories={grandChildCategories}
-          onApplyCheck={handleApplyCheck}
           onApplyChecks={handleApplyChecks}
-          onRollbackCheck={handleRollbackCheck}
           onRollbackChecks={handleRollbackChecks}
           filters={filters}
           onParentChange={handleParentChange}

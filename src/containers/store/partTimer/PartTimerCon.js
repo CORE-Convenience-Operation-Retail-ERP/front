@@ -107,7 +107,7 @@ function PartTimerCon() {
 
     return (
         <PageWrapper>
-                <PageTitle>인사관리</PageTitle>
+                <PageTitle>| 인사관리</PageTitle>
             <TopBar>
 
                 <SearchBar

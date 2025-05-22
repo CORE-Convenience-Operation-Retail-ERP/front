@@ -149,7 +149,7 @@ function SalaryListCon() {
 
   return (
     <PageWrapper>
-      <PageTitle>급여 관리</PageTitle>
+      <PageTitle>| 급여 관리</PageTitle>
       <div style={{
         display: "flex",
         justifyContent: "space-between",

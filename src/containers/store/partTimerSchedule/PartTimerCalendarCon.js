@@ -16,6 +16,7 @@ import {
 } from '../../../features/store/styles/partTimerSchedule/PartTimerSchedule.styled';
 import { generateCalendarMatrix } from '../../../utils/calendarUtils';
 import {PageTitle, PageWrapper} from "../../../features/store/styles/common/PageLayout";
+import {PrimaryButton, NavigationWrapper} from "../../../features/store/styles/common/Button.styled";
 
 const WeekHeader = styled.div`
   display: grid;
@@ -198,21 +199,21 @@ function PartTimerCalendarCon() {
 
   return (
     <PageWrapper>
-      <PageTitle>스케줄 관리</PageTitle>
+      <PageTitle>| 스케줄 관리</PageTitle>
       <CalendarNav>
         <div style={{ fontSize: '20px', fontWeight: 'bold', marginRight: 'auto', display: 'flex', gap: '1.5rem' }}>
           {formatDateToYearMonth(currentDate)}
           <TabContainer style={{ justifyContent: 'flex-start' }}>
-            <button className={view === 'month' ? 'active' : ''} onClick={() => setView('month')}>월간 보기</button>
-            <button className={view === 'week' ? 'active' : ''} onClick={() => setView('week')}>주간 보기</button>
+            <PrimaryButton className={view === 'month' ? 'active' : ''} onClick={() => setView('month')}>월간 보기</PrimaryButton>
+            <PrimaryButton className={view === 'week' ? 'active' : ''} onClick={() => setView('week')}>주간 보기</PrimaryButton>
           </TabContainer>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', marginRight: '1rem' }}>
-          <button onClick={goPrev}>← 이전</button>
-          <button onClick={goToday}>오늘</button>
-          <button onClick={goNext}>다음 →</button>
-        </div>
+        <NavigationWrapper>
+          <PrimaryButton onClick={goPrev}>← 이전</PrimaryButton>
+          <PrimaryButton onClick={goToday}>오늘</PrimaryButton>
+          <PrimaryButton onClick={goNext}>다음 →</PrimaryButton>
+        </NavigationWrapper>
       </CalendarNav>
 
       {view === 'month' ? (

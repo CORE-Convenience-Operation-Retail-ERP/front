@@ -57,7 +57,7 @@ const handleSearch = (newFilters) => {
 
   return (
       <PageWrapper>
-  <PageTitle>근태 관리</PageTitle>
+  <PageTitle>| 근태 관리</PageTitle>
   <AttendanceCom
       data={attendanceList}
       onSearch={handleSearch}
