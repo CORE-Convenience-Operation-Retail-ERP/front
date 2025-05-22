@@ -293,16 +293,11 @@ const AnnualLeaveCon = () => {
         
         // 안전한 데이터 변환 함수 (수정)
         const formattedRequests = Array.isArray(res.data) ? res.data.map(req => {
-          // 원본 데이터 로깅
-          console.log('처리 중인 레코드:', req);
-          
-          // 모든 필드에 대해 null/undefined 체크
           const item = {
             reqId: req.reqId || 0,
-            requestDate: '',
-            startDate: '',
-            endDate: '',
-            days: 1,
+            startDate: req.startDate,
+            endDate: req.endDate,
+            days: req.days,
             reason: req.reqReason || '',
             status: '대기중',
             empName: ''
@@ -319,26 +314,11 @@ const AnnualLeaveCon = () => {
             item.empName = '알 수 없음';
           }
           
-          // 날짜 형식 안전하게 변환
-          try {
-            if (req.createdAt) {
-              item.requestDate = new Date(req.createdAt).toISOString().split('T')[0];
-            } else if (req.created_at) {
-              item.requestDate = new Date(req.created_at).toISOString().split('T')[0];
-            }
-            
-            if (req.reqDate) {
-              item.startDate = item.endDate = new Date(req.reqDate).toISOString().split('T')[0];
-            } else if (req.date) {
-              item.startDate = item.endDate = new Date(req.date).toISOString().split('T')[0];
-            }
-          } catch (e) {
-            console.error('날짜 변환 오류:', e, '원본 데이터:', req.createdAt, req.reqDate);
-            // 오류 발생 시 현재 날짜 사용
-            const today = new Date().toISOString().split('T')[0];
-            item.requestDate = item.requestDate || today;
-            item.startDate = item.startDate || today;
-            item.endDate = item.endDate || today;
+          // createdAt만 별도 변환
+          if (req.createdAt) {
+            item.requestDate = new Date(req.createdAt).toISOString().split('T')[0];
+          } else if (req.created_at) {
+            item.requestDate = new Date(req.created_at).toISOString().split('T')[0];
           }
           
           // 상태 변환 - 문자열/숫자 모두 처리
@@ -575,10 +555,10 @@ const AnnualLeaveCon = () => {
     // 백엔드 API 형식에 맞게 데이터 구조 변경
     const requestData = {
       empId: currentUserId,
-      reqDate: startDate.format('YYYY-MM-DD'),
-      reqReason: reason,
-      reason: reason, // 추가 - 백엔드가 이 필드명을 사용할 수도 있음
-      reqStatus: 0
+      reason: reason,
+      startDate: startDate.format('YYYY-MM-DD'),
+      endDate: endDate.format('YYYY-MM-DD'),
+      days: days
     };
     
     console.log('연차 신청 데이터:', requestData);

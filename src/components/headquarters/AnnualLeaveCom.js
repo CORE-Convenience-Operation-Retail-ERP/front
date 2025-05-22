@@ -103,6 +103,14 @@ const highlightText = (text, searchTerm) => {
   );
 };
 
+// 안전한 날짜 포맷 함수 추가
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-';
+  const safeStr = dateStr.replace(/-/g, '/');
+  const d = new Date(safeStr);
+  return isNaN(d) ? '-' : d.toLocaleDateString();
+};
+
 const AnnualLeaveCom = ({ 
   leaveRequests, 
   onNewRequest, 
@@ -250,8 +258,8 @@ const AnnualLeaveCom = ({
               <TableRow>
                 <StyledTableCell>번호</StyledTableCell>
                 <StyledTableCell>신청자</StyledTableCell>
-                <StyledTableCell>신청일</StyledTableCell>
-                <StyledTableCell>연차일</StyledTableCell>
+                <StyledTableCell>연차 시작일</StyledTableCell>
+                <StyledTableCell>연차 종료일</StyledTableCell>
                 <StyledTableCell>일수</StyledTableCell>
                 <StyledTableCell>사유</StyledTableCell>
                 <StyledTableCell>상태</StyledTableCell>
@@ -275,13 +283,13 @@ const AnnualLeaveCom = ({
                       {highlightText(request.empName || '-', search)}
                     </StyledTableDataCell>
                     <StyledTableDataCell onClick={() => onDetailView(request)}>
-                      {request.requestDate ? new Date(request.requestDate).toLocaleDateString() : '-'}
+                      {formatDate(request.startDate)}
                     </StyledTableDataCell>
                     <StyledTableDataCell onClick={() => onDetailView(request)}>
-                      {request.startDate ? new Date(request.startDate).toLocaleDateString() : '-'}
+                      {formatDate(request.endDate)}
                     </StyledTableDataCell>
                     <StyledTableDataCell onClick={() => onDetailView(request)}>
-                      {request.days}
+                      {request.days != null ? request.days : '-'}
                     </StyledTableDataCell>
                     <StyledTableDataCell onClick={() => onDetailView(request)}>
                       {request.reason && request.reason.length > 15 

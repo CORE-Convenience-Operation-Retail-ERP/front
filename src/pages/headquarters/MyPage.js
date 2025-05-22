@@ -6,6 +6,14 @@ import CalendarBox from '../../containers/headquarters/CalendarBox';
 import EventIcon from '@mui/icons-material/Event';
 import axios from '../../service/axiosInstance';
 import { useParams } from 'react-router-dom';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 
 const MyPage = () => {
   const { empId } = useParams();
@@ -14,6 +22,12 @@ const MyPage = () => {
   const [error, setError] = useState(null);
   const myConRef = useRef(null);
   const calendarRef = useRef(null);
+  // 연차신청 상태
+  const [startDate, setStartDate] = useState(dayjs());
+  const [endDate, setEndDate] = useState(dayjs());
+  const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     // 로그인한 사용자 정보 가져오기
@@ -75,16 +89,35 @@ const MyPage = () => {
       });
   }, [empId]);
 
-  // 연차 신청 모달 열기 함수
-  const handleOpenLeaveModal = () => {
-    console.log("연차 신청 모달 열기 함수 호출됨");
-    
-    if (myConRef.current && myConRef.current.handleOpenLeaveModal) {
-      // 날짜 정보 전달 없이 단순히 모달 열기
-      myConRef.current.handleOpenLeaveModal();
-    } else {
-      console.error("연차 신청 모달을 열 수 없습니다. myConRef:", myConRef.current);
+  // 연차신청 함수
+  const handleLeaveRequest = () => {
+    if (!reason.trim()) {
+      alert('연차 신청 사유를 입력해주세요.');
+      return;
     }
+    setSubmitting(true);
+    const days = endDate.diff(startDate, 'day') + 1;
+    const data = {
+      empId: info?.empId,
+      reason,
+      startDate: startDate.format('YYYY-MM-DD'),
+      endDate: endDate.format('YYYY-MM-DD'),
+      days
+    };
+    axios.post('/api/hr/annual-leave/request', data, { headers: { 'Content-Type': 'application/json' } })
+      .then(() => {
+        setReason('');
+        setSubmitting(false);
+        setOpenDialog(true);
+      })
+      .catch(err => {
+        let errorMessage = '연차 신청 중 오류가 발생했습니다.';
+        if (err.response && err.response.data && err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+        alert(errorMessage);
+        setSubmitting(false);
+      });
   };
 
   if (loading) return (
@@ -121,140 +154,167 @@ const MyPage = () => {
       {info && (
         <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto' }}>
           <Grid container spacing={4}>
-            {/* 왼쪽: 사원 프로필 */}
+            {/* 프로필 */}
             <Grid item xs={12} md={4} lg={3}>
-              <Paper 
-                elevation={0} 
-                sx={{ 
-                  borderRadius: 3, 
+              <Paper
+                sx={{
                   p: 3,
-                  height: '100%',
+                  borderRadius: 3,
                   border: '1px solid #eaeef3',
                   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)',
-                  backgroundColor: '#fff'
+                  backgroundColor: '#fff',
+                  minHeight: 577,
                 }}
               >
                 <MyCom info={info} />
               </Paper>
             </Grid>
-            
-            {/* 오른쪽: 컨텐츠 영역 */}
-            <Grid item xs={12} md={8} lg={9}>
-              <Grid container spacing={4} sx={{ height: '100%' }}>
-                {/* 왼쪽 컬럼: 근무 이력 관리 + 급여 정보 */}
-                <Grid item xs={12} lg={6} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <Grid container direction="column" spacing={3} sx={{ height: '100%' }}>
-                    {/* 근무 이력 관리 */}
-                    <Grid item sx={{ flex: '0 0 auto' }}>
-                      <Paper 
-                        elevation={0} 
-                        sx={{ 
-                          p: 3, 
-                          borderRadius: 3,
-                          backgroundColor: '#fff',
-                          border: '1px solid #eaeef3',
-                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)',
-                          height: '100%'
-                        }}
-                      >
-                        <MyCon ref={myConRef} info={info} type="attendance" />
-                      </Paper>
-                    </Grid>
-                    
-                    {/* 급여 정보 */}
-                    <Grid item sx={{ flex: '1 1 auto' }}>
-                      <Paper 
-                        elevation={0} 
-                        sx={{ 
-                          p: 3, 
-                          borderRadius: 3,
-                          backgroundColor: '#fff',
-                          border: '1px solid #eaeef3',
-                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)',
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column'
-                        }}
-                      >
-                        <MyCon info={info} type="salary" />
-                      </Paper>
-                    </Grid>
-                  </Grid>
+            {/* 근무/급여 */}
+            <Grid item xs={12} md={8} lg={6}>
+              <Grid container spacing={3} direction="column" sx={{ height: '100%' }}>
+                <Grid item>
+                  <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #eaeef3', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)', backgroundColor: '#fff' }}>
+                    <MyCon ref={myConRef} info={info} type="attendance" />
+                  </Paper>
                 </Grid>
-                
-                {/* 오른쪽 컬럼: 연차 신청 캘린더 + 연차 신청 내역 */}
-                <Grid item xs={12} lg={6} sx={{ height: '100%' }}>
-                  <Paper 
-                    elevation={0} 
-                    sx={{ 
-                      p: 3, 
-                      borderRadius: 3,
-                      backgroundColor: '#fff',
-                      border: '1px solid #eaeef3',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)',
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column'
-                    }}
-                  >
-                    <Typography variant="h6" fontWeight="bold" color="#2563A6" sx={{ mb: 2 }}>
-                      연차 신청
-                    </Typography>
-                    
-                    {/* 연차 신청 캘린더 */}
-                    <Box sx={{ mb: 3 }}>
-                      <CalendarBox ref={calendarRef} />
-                      
-                      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                        <Button 
-                          variant="contained"
-                          startIcon={<EventIcon />}
-                          onClick={handleOpenLeaveModal}
-                          sx={{ 
-                            bgcolor: '#6FC3ED',
-                            '&:hover': {
-                              bgcolor: '#5DB3DD',
-                            },
-                            borderRadius: '8px',
-                            textTransform: 'none',
-                            fontWeight: 'medium',
-                            padding: '8px 16px',
-                            boxShadow: '0px 3px 6px rgba(111, 195, 237, 0.3)',
-                            width: '100%',
-                          }}
-                        >
-                          연차 신청하기
-                        </Button>
-                      </Box>
-                    </Box>
-                    
-                    {/* 신청한 연차 정보 */}
-                    <Box sx={{ mt: 1, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                      <Typography variant="h6" fontWeight="bold" color="#2563A6" sx={{ mb: 2 }}>
-                        연차 신청 내역
-                      </Typography>
-                      
-                      <Box 
-                        sx={{ 
-                          border: '1px solid #e0e0e0', 
-                          borderRadius: 2, 
-                          p: 2,
-                          backgroundColor: '#F8FAFB',
-                          flex: 1,
-                          overflow: 'auto'
-                        }}
-                      >
-                        {/* 여기에 연차 신청 내역 표시 - 수정 */}
-                        <MyCon ref={myConRef} info={info} type="leave-history" />
-                      </Box>
-                    </Box>
+                <Grid item>
+                  <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #eaeef3', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)', backgroundColor: '#fff' }}>
+                    <MyCon info={info} type="salary" />
                   </Paper>
                 </Grid>
               </Grid>
             </Grid>
+            {/* 연차신청 */}
+            <Grid item xs={12} md={12} lg={3}>
+              <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #eaeef3', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)', backgroundColor: '#fff' }}>
+                <Box
+                  sx={{
+                    width: '100%',
+                    maxWidth: 380,
+                    margin: '0 auto',
+                    background: '#f6fbff',
+                    borderRadius: 2,
+                    border: '1px solid #e5f3ff',
+                    p: 3,
+                    minHeight: 525,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start',
+                  }}
+                >
+                  <Typography variant="h6" fontWeight="bold" color="#2563A6" sx={{ mb: 3, textAlign: 'center' }}>
+                    연차 신청
+                  </Typography>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                      <DatePicker
+                        label="시작일"
+                        value={startDate}
+                        onChange={date => setStartDate(date)}
+                        disablePast
+                        sx={{ flex: 1, background: '#fff', borderRadius: 1 }}
+                      />
+                      <DatePicker
+                        label="종료일"
+                        value={endDate}
+                        onChange={date => setEndDate(date)}
+                        disablePast
+                        minDate={startDate}
+                        sx={{ flex: 1, background: '#fff', borderRadius: 1 }}
+                      />
+                    </Box>
+                  </LocalizationProvider>
+                  {/* 총 연차 사용일수 박스 */}
+                  <Box
+                    sx={{
+                      background: '#fff',
+                      border: '1px solid #e5eaf2',
+                      borderRadius: 2,
+                      p: 1.2,
+                      mb: 2,
+                      mt: 0.5,
+                      textAlign: 'center',
+                      boxShadow: '0 0 0 1px #e5eaf2',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center', mb: 0.7 }}>
+                      <EventIcon sx={{ color: '#3b5998', fontSize: 19 }} />
+                      <Typography fontWeight="bold" color="#2563A6" sx={{ fontSize: 15 }}>
+                        선택한 연차 기간
+                      </Typography>
+                    </Box>
+                    <Typography sx={{ color: '#222', fontSize: 14, mb: 0.7 }}>
+                      {startDate && endDate ? `${startDate.format('YYYY년 MM월 DD일')} ~ ${endDate.format('YYYY년 MM월 DD일')}` : '기간을 선택하세요'}
+                    </Typography>
+                    <Box sx={{
+                      background: '#e9eef6',
+                      borderRadius: 1.5,
+                      fontWeight: 'bold',
+                      color: '#3b5998',
+                      py: 0.4,
+                      mt: 0.7,
+                      fontSize: 15,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      총 {startDate && endDate ? `${endDate.diff(startDate, 'day') + 1}일` : '0일'}
+                    </Box>
+                  </Box>
+                  {/* 연차 사유 입력란 */}
+                  <Typography variant="subtitle2" color="text.secondary" fontWeight="bold" sx={{ mb: 1, mt: 1 }}>
+                    연차 사유
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={2}
+                    value={reason}
+                    onChange={e => setReason(e.target.value)}
+                    placeholder="연차 신청 사유를 입력하세요"
+                    sx={{ mb: 2, background: '#fff', borderRadius: 1 }}
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={handleLeaveRequest}
+                    disabled={submitting}
+                    startIcon={<EventIcon sx={{ fontSize: 22 }} />}
+                    sx={{
+                      backgroundColor: '#6FC3ED',
+                      color: '#fff',
+                      borderRadius: '12px',
+                      fontWeight: 'bold',
+                      fontSize: 18,
+                      mt: 2,
+                      width: '100%',
+                      boxShadow: '0 2px 8px 0 #e5eaf2',
+                      py: 1.5,
+                      px: 3,
+                      '&:hover': {
+                        backgroundColor: '#5DB3DD',
+                      }
+                    }}
+                  >
+                    {submitting ? '신청 중...' : '연차 신청하기'}
+                  </Button>
+                </Box>
+              </Paper>
+            </Grid>
           </Grid>
         </Box>
       )}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle sx={{ fontWeight: 'bold', color: '#2563A6' }}>연차 신청 완료</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mt: 1, mb: 1 }}>
+            연차 신청이 완료 되었습니다.<br />신청 내역으로 이동하시겠습니까?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="inherit">취소</Button>
+          <Button onClick={() => { setOpenDialog(false); window.location.href = 'http://localhost:3000/headquarters/hr/annual-leave'; }} color="primary" variant="contained">이동</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
