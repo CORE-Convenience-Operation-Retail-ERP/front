@@ -1,96 +1,137 @@
 import React, { useEffect, useState } from "react";
 import { fetchSettlementList } from "../../service/store/settlementService";
-import SettlementFilter from "../../components/store/settlement/SettlementFilter";
+import CustomCalendar from "../../components/store/common/CustomCalendar";
+import { formatLocalDate } from "../../utils/calendarUtils";
 import SettlementTable from "../../components/store/settlement/SettlementTable";
+import Pagination from "../../components/store/common/Pagination";
+import { ViewToggleButton, PrimaryButton } from "../../features/store/styles/common/Button.styled";
+
+const TYPES = [
+  { value: "ALL", label: "전체" },
+  { value: "DAILY", label: "일별" },
+  { value: "SHIFT", label: "교대" },
+  { value: "MONTHLY", label: "월별" },
+  { value: "YEARLY", label: "연별" },
+];
+
+const ITEMS_PER_PAGE = 10;
 
 const SettlementCon = () => {
+  const [typeFilter, setTypeFilter] = useState("ALL");
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [allSettlements, setAllSettlements] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
-    // 기본 날짜 계산(최근 7일)
-    const today = new Date().toISOString().split("T")[0];
-    const sevenDaysAgo = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
+  // 페이로드 조합 함수
+  const buildPayload = () => {
+    const storeId = Number(localStorage.getItem("storeId"));
+    const payload: any = { storeId };
 
-    const [filters, setFilters] = useState({
-      startDate: sevenDaysAgo,
-      endDate: today,
-      type: "ALL"
-    });
+    if (typeFilter !== "ALL") {
+      payload.type = typeFilter;
+      let [start, end] = dateRange;
 
-    const [data, setData] = useState([]);
-
-    // 컴포넌트 마운트 시 자동 조회
-    useEffect(() => {
-        handleSearch();
-    }, []);
-
-    // 필터 변경경
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-    
-      setFilters((prev) => ({
-        ...prev,
-        [name]: value
-      }));
-    
-      // 정산 유형(type) 바뀔 때 결과 초기화
-      if (name === "type") {
-        setData([]);
+      if (typeFilter === "MONTHLY") {
+        const [year, month] = start.split("-");
+        start = `${year}-${month}-01`;
+        const lastDay = new Date(+year, +month, 0).getDate();
+        end = `${year}-${month}-${String(lastDay).padStart(2, "0")}`;
+      } else if (typeFilter === "YEARLY") {
+        const year = start.split("-")[0];
+        start = `${year}-01-01`;
+        end = `${year}-12-31`;
       }
-    };
+      payload.startDate = start;
+      payload.endDate = end;
+    }
+    return payload;
+  };
 
-    // 정산 데이터 조회회
-    const handleSearch = async () => {
-        const storeId = localStorage.getItem("storeId");
-      
-        if (!storeId) {
-          alert("로그인 정보에 storeId가 없습니다.");
-          return;
-        }
-      
-        let start, end;
-        const type = filters.type.toUpperCase();
-      
-        if (["DAILY", "SHIFT", "ALL"].includes(type)) {
-          start = filters.startDate?.split("T")[0];  
-          end = filters.endDate?.split("T")[0];
-        } else if (filters.type === "MONTHLY") {
-          start = `${filters.startDate}-01`;
-          const [year, month] = filters.endDate.split("-");
-          const lastDay = new Date(year, month, 0).getDate();
-          end = `${filters.endDate}-${lastDay}`;
-        } else if (filters.type === "YEARLY") {
-          start = `${filters.startDate}-01-01`;
-          end = `${filters.endDate}-12-31`;
-        }
-      
-        try {
-          const payload =
-            type === "ALL"
-              ? { storeId: Number(storeId) } // ✅ 전체 조회 시 날짜, type 모두 생략
-              : {
-                  storeId: Number(storeId),
-                  startDate: start,
-                  endDate: end,
-                  type: type
-                };
+  // 조회 실행 핸들러
+  const handleSearch = async () => {
+    if (typeFilter !== "ALL" && (!dateRange[0] || !dateRange[1])) {
+      alert("기간을 선택해주세요.");
+      return;
+    }
+    const payload = buildPayload();
+    try {
+      const result = await fetchSettlementList(payload);
+      // 날짜 오름차순 정렬
+      result.sort(
+        (a, b) => new Date(a.settlementDate) - new Date(b.settlementDate)
+      );
+      setAllSettlements(result);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("정산 이력 조회 실패:", error);
+      alert("정산 데이터를 불러오는 데 실패했습니다.");
+    }
+  };
 
-          console.log("📦 [프론트 payload 확인]", payload);
-          
-          const result = await fetchSettlementList(payload);
-          console.log("정산 응답:", result);
-          setData(result);
-        } catch (error) {
-          console.error("정산 이력 조회 실패:", error);
-          alert("정산 데이터를 불러오는 데 실패했습니다.");
-        }
-      };
+  // 마운트 시 최초 조회
+  useEffect(() => {
+    handleSearch();
+    
+  }, []);
+
+  // 페이징 계산
+  const indexOfLast = currentPage * ITEMS_PER_PAGE;
+  const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
+  const currentData = allSettlements.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(allSettlements.length / ITEMS_PER_PAGE);
 
   return (
-    <div>
-      <SettlementFilter filters={filters} onChange={handleChange} onSearch={handleSearch}/>
-      <SettlementTable data={data} />
-    </div>
+    <>
+      {/* 필터 바: 정산유형 + 날짜 범위 */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 16,
+        }}
+      >
+        {TYPES.map((t) => (
+          <ViewToggleButton
+            key={t.value}
+            selected={typeFilter === t.value}
+            onClick={() => setTypeFilter(t.value)}
+          >
+            {t.label}
+          </ViewToggleButton>
+        ))}
+
+        {typeFilter !== "ALL" && (
+          <>
+            <CustomCalendar
+              selected={dateRange[0] ? new Date(dateRange[0]) : null}
+              onChange={(date) =>
+                setDateRange([formatLocalDate(date), dateRange[1]])
+              }
+              placeholder="시작일"
+            />
+            <span>~</span>
+            <CustomCalendar
+              selected={dateRange[1] ? new Date(dateRange[1]) : null}
+              onChange={(date) =>
+                setDateRange([dateRange[0], formatLocalDate(date)])
+              }
+              placeholder="종료일"
+            />
+          </>
+        )}
+
+        <PrimaryButton onClick={handleSearch}>검색</PrimaryButton>
+      </div>
+
+      <SettlementTable data={currentData} />
+      <Pagination
+        currentPage={currentPage - 1}
+        totalPages={totalPages}
+        onPageChange={(p) => setCurrentPage(p + 1)}
+      />
+    </>
   );
 };
 
