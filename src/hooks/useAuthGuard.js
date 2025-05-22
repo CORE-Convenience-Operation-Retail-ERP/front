@@ -21,7 +21,8 @@ const useAuthGuard = () => {
         const forbiddenMenus = ['product', 'hr', 'branchManagement'];
 
         if (forbiddenMenus.includes(menu)) {
-          alert('권한이 없습니다.');
+          // alert('권한이 없습니다.');
+          navigate('/forbidden'); // ForbiddenErrorPage로 이동
           return;
         }
       }

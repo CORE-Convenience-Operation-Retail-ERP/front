@@ -1,62 +1,47 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ErrorPage from './ErrorPage';
-import styled, { keyframes } from 'styled-components';
 import { ErrorPageContainer, HeaderText, IconCircle, MessageText } from './ErrorPageStyles';
+import forbiddenImg from '../../assets/error/forbidden.png';
+import { useNavigate } from 'react-router-dom';
 
-const pulse = keyframes`
-  0% {
-    box-shadow: 0 0 0 0 rgba(30, 172, 181, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(30, 172, 181, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(30, 172, 181, 0);
-  }
-`;
-
-const StatusIndicator = styled.div`
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #1EACB5;
-  position: absolute;
-  top: 25px;
-  left: -8px;
-  animation: ${pulse} 2s infinite;
-`;
-
+// 접근 제한 에러페이지
 const ForbiddenErrorPage = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate(-1);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   return (
     <ErrorPage
       message="해당 페이지에 접근할 권한이 없습니다."
       code="403"
       customHeader={
-        <ErrorPageContainer 
-          bgColor="#f5fbfc" 
-          borderColor="#1EACB5" 
-          textColor="#015D70"
-        >
-          <StatusIndicator />
-          <HeaderText color="#015D70">
-            <IconCircle 
-              bgColor="rgba(30, 172, 181, 0.1)" 
-              color="#015D70" 
-              borderColor="rgba(30, 172, 181, 0.3)"
-            >
-              403
-            </IconCircle>
-            접근 제한
-          </HeaderText>
-          <MessageText 
-            color="#1976d2" 
-            borderColor="#e0f2f3"
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <img 
+            src={forbiddenImg} 
+            alt="403 Forbidden 아이콘" 
+            style={{ width: 350, height: 350, objectFit: 'contain' }} 
+          />
+          <ErrorPageContainer
+            bgColor="#f7faff"
+            borderColor="#3f51b5"
+            textColor="#283593"
           >
-            현재 계정으로는 이 페이지를 볼 수 없습니다.
-          </MessageText>
-        </ErrorPageContainer>
+            <HeaderText color="#283593">
+              접근 제한
+            </HeaderText>
+            <MessageText
+              color="#3f51b5"
+              borderColor="#e8eaf6"
+            >
+              현재 계정으로는 이 페이지를 볼 수 없습니다.
+            </MessageText>
+          </ErrorPageContainer>
+        </div>
       }
-      details="접근 권한을 확인하시거나 관리자에게 권한 요청을 해주세요."
     />
   );
 };

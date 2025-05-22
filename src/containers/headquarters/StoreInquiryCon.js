@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import StoreInquiryCom from '../../components/headquarters/StoreInquiryCom';
 import axiosInstance from '../../service/axiosInstance';
+import { useNavigate } from 'react-router-dom';
 
 const StoreInquiryCon = () => {
   const [inquiries, setInquiries] = useState([]);
@@ -10,6 +11,7 @@ const StoreInquiryCon = () => {
   const [showRankings, setShowRankings] = useState(false);
   const [storeRankings, setStoreRankings] = useState([]);
   const [statusCounts, setStatusCounts] = useState({ waiting: 0, completed: 0, canceled: 0 });
+  const navigate = useNavigate();
   
   // 모든 지점 문의 조회 (페이징 처리)
   const fetchInquiries = async (pageNum = 0, type = null, status = null) => {
@@ -39,8 +41,12 @@ const StoreInquiryCon = () => {
         console.log('Error status:', error.response.status);
         console.log('Error data:', error.response.data);
         console.log('Error headers:', error.response.headers);
+        // 권한 에러만 ForbiddenErrorPage로 이동
+        if (error.response.status === 401 || error.response.status === 403) {
+          navigate('/forbidden');
+          return;
+        }
       }
-      
       alert('지점 문의 데이터를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);

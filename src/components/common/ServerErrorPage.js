@@ -1,37 +1,38 @@
+// 서버 내부 에러페이지
 import React from 'react';
 import ErrorPage from './ErrorPage';
 import { ErrorPageContainer, HeaderText, IconCircle, MessageText } from './ErrorPageStyles';
+import serverErrorImg from '../../assets/error/servererror.png';
 
 const ServerErrorPage = () => {
   return (
     <ErrorPage
-      message="서버 내부 오류가 발생했습니다."
+      message="서버 오류가 발생했습니다."
       code="500"
       customHeader={
-        <ErrorPageContainer
-          bgColor="#FFF4F4"
-          borderColor="#F44336"
-          textColor="#D32F2F"
-        >
-          <HeaderText color="#D32F2F">
-            <IconCircle
-              bgColor="rgba(244, 67, 54, 0.1)"
-              color="#D32F2F"
-              borderColor="rgba(244, 67, 54, 0.3)"
-            >
-              500
-            </IconCircle>
-            서버 오류
-          </HeaderText>
-          <MessageText
-            color="#F44336"
-            borderColor="#FFEBEE"
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <img 
+            src={serverErrorImg} 
+            alt="500 Server Error 아이콘" 
+            style={{ width: 400, height: 400, objectFit: 'contain' }} 
+          />
+          <ErrorPageContainer
+            bgColor="#f7fbff"
+            borderColor="#1976d2"
+            textColor="#1565c0"
           >
-            요청을 처리하는 동안 서버에 문제가 발생했습니다.
-          </MessageText>
-        </ErrorPageContainer>
+            <HeaderText color="#1565c0">
+              서버 오류
+            </HeaderText>
+            <MessageText
+              color="#1976d2"
+              borderColor="#e3f2fd"
+            >
+              서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.
+            </MessageText>
+          </ErrorPageContainer>
+        </div>
       }
-      details="잠시 후 다시 시도하시거나 관리자에게 문의해주세요."
     />
   );
 };

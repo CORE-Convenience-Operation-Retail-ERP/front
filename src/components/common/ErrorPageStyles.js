@@ -28,14 +28,14 @@ export const ErrorPageContainer = styled.div`
   position: relative;
   margin-bottom: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  max-width: 500px;
+  max-width: 900px;
   width: 100%;
   animation: ${fadeInUp} 0.5s ease-out;
 `;
 
 // 헤더 텍스트 스타일
 export const HeaderText = styled.div`
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 600;
   color: ${props => props.color || '#1565c0'};
   margin-bottom: 8px;
@@ -60,7 +60,7 @@ export const IconCircle = styled.div`
 
 // 메시지 텍스트 스타일
 export const MessageText = styled.div`
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: ${props => props.color || '#1976d2'};
   margin-top: 12px;
   margin-left: 8px;

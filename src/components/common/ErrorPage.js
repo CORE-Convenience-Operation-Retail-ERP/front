@@ -133,18 +133,6 @@ const ErrorPage = ({
     }
   };
 
-  const handleGoHome = () => {
-    // 홈으로 이동
-    const userRole = localStorage.getItem('userRole');
-    if (userRole === 'ROLE_ADMIN') {
-      navigate('/headquarters/dashboard');
-    } else if (userRole === 'ROLE_MANAGER') {
-      navigate('/store/home');
-    } else {
-      navigate('/login');
-    }
-  };
-
   return (
     <ErrorContainer>
       {customHeader ? (
@@ -171,10 +159,7 @@ const ErrorPage = ({
       
       <ButtonContainer>
         <Button onClick={handleGoBack}>
-          이전 페이지로 돌아가기
-        </Button>
-        <Button primary onClick={handleGoHome}>
-          홈으로 이동
+          이전 페이지
         </Button>
       </ButtonContainer>
     </ErrorContainer>
