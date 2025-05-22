@@ -102,7 +102,7 @@ const ProductsEditCom = ({ detail, categoryTree, onSubmit, onImageUpload, onCanc
   return (
     <Box>
       {/* 헤더 */}
-      <Box sx={{ width: '90%', maxWidth: 2200, mx: 'auto', mt: 4, mb: 7, display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ width: '90%', maxWidth: 1100, mx: 'auto', mt: 4, mb: 7, display: 'flex' }}>
         <Typography sx={{
           fontWeight: 'bold',
           fontSize: 30,
