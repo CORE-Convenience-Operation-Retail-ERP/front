@@ -135,7 +135,7 @@ const NotificationIcon = () => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotification();
-  console.log('[Icon] notifications', notifications, unreadCount);
+  console.log('[NotificationIcon] 렌더링, notifications:', notifications, 'unreadCount:', unreadCount);
 
   // 바깥 영역 클릭 시 드롭다운 닫기
   React.useEffect(() => {

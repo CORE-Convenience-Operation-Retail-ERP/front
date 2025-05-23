@@ -21,8 +21,8 @@ const WebSocketInitializer = () => {
   useEffect(() => {
     // deptId를 localStorage에서 가져옴(로그인 시 저장되어 있다고 가정)
     const deptId = parseInt(localStorage.getItem('deptId'), 10);
-    // 본사 직원(4~10)만 웹소켓 서비스 초기화
-    if (deptId >= 4 && deptId <= 10) {
+    // 본사 직원(3~10)만 웹소켓 서비스 초기화
+    if (deptId >= 3 && deptId <= 10) {
       console.log('앱 시작 - 웹소켓 서비스 초기화');
       webSocketService.init();
     } else {

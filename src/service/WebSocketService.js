@@ -14,9 +14,9 @@ class WebSocketService {
     this.maxReconnectAttempts = 5;
     this.userRoomIds = []; // 사용자가 속한 채팅방 ID 목록 캐시
     
-    // deptId 체크: 본사 직원(4~10)만 웹소켓 사용
+    // deptId 체크: 점주(3)~본사(10) 모두 웹소켓 사용
     const deptId = parseInt(localStorage.getItem('deptId'), 10);
-    this.isAllowed = deptId >= 4 && deptId <= 10;
+    this.isAllowed = deptId >= 3 && deptId <= 10;
 
     if (this.isAllowed) {
       // 페이지 로드 시 자동 연결 시도
