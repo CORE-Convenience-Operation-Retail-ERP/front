@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import HourlySalesChartCom from "../../../components/store/statistics/HourlySalesChartCom";
 import { fetchHourlySales } from "../../../service/store/StatisticsService";
+import LoadingLottie from '../../../components/common/LoadingLottie.tsx';
 
 function HourlySalesChartCon({ filters, mode = "detail", height = 300  }) {
     const [data, setData] = useState([]);
@@ -33,6 +34,8 @@ function HourlySalesChartCon({ filters, mode = "detail", height = 300  }) {
 
         load();
     }, [filters]);
+
+    if (loading) return <LoadingLottie />;
 
     return (
         <HourlySalesChartCom

@@ -3,6 +3,7 @@ import { cancelDisposalById, fetchDisposalHistory, fetchExpiredDisposals } from 
 import DisposalCom from "../../../components/store/disposal/DisposalCom";
 import {PageTitle, PageWrapper} from "../../../features/store/styles/common/PageLayout";
 import {FiTrash, FiTrash2} from "react-icons/fi";
+import LoadingLottie from '../../../components/common/LoadingLottie.tsx';
 
 const DisposalCon = () => {
   const [expiredList, setExpiredList] = useState([]);
@@ -50,6 +51,8 @@ const DisposalCon = () => {
       disposalPage * pageSize,
       (disposalPage + 1) * pageSize
   );
+
+  if (loading) return <LoadingLottie />;
 
   return (
       <PageWrapper>

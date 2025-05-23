@@ -114,8 +114,10 @@ function StoreNotificationIcon() {
 
   const handleNotificationClick = (notification) => {
     markAsRead(notification.id);
-    // 본사 board로 이동
-    window.location.href = '/headquarters/board';
+    // 알림의 link로 이동
+    if (notification.link) {
+      window.location.href = notification.link;
+    }
     setShowDropdown(false);
   };
 

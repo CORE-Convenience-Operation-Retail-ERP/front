@@ -3,6 +3,7 @@ import TransactionTable from "../../components/store/sales/TransactionTable";
 import Pagination from "../../components/store/common/Pagination";
 import { fetchTransactionsByStore } from "../../service/store/TransactionService";
 import {PageTitle, PageWrapper, TableSection} from "../../features/store/styles/common/PageLayout";
+import LoadingLottie from '../../components/common/LoadingLottie.tsx';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -10,6 +11,7 @@ const TransactionCon = () => {
   const [allTransactions, setAllTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   const storeId = localStorage.getItem("storeId");
 
@@ -37,11 +39,14 @@ const TransactionCon = () => {
   useEffect(() => {
     const loadTransactions = async () => {
       try {
+        setLoading(true);
         const data = await fetchTransactionsByStore(storeId);
         setAllTransactions(data);
         setFilteredTransactions(data);
       } catch (error) {
         console.error("❌ 거래내역 불러오기 실패:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -70,6 +75,8 @@ const TransactionCon = () => {
   const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
   const currentData = filteredTransactions.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
+
+  if (loading) return <LoadingLottie />;
 
     return (
         <PageWrapper>

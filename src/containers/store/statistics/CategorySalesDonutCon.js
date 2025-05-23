@@ -10,6 +10,7 @@ import {
     fetchChildCategories
 } from "../../../service/store/CategoryService";
 import { selectStyle } from "../../../features/store/styles/statistics/CategorySalesDonut.styled";
+import LoadingLottie from '../../../components/common/LoadingLottie.tsx';
 
 function CategorySalesDonutCon({ filters, mode = "summary", showTable = false }) {
     const [data, setData] = useState([]);
@@ -104,6 +105,8 @@ function CategorySalesDonutCon({ filters, mode = "summary", showTable = false })
             load();
         }
     }, [filters, categoryFilter]);
+
+    if (loading) return <LoadingLottie />;
 
     return (
         <div>

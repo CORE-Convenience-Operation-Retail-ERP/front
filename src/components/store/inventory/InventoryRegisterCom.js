@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   PageWrapper,
   FilterActionRow,
@@ -11,6 +11,7 @@ import StoreSearchBar from "../common/StoreSearchBar";
 import styled from "styled-components";
 import { MdPlaylistAddCheck } from "react-icons/md";
 import Pagination from "../common/Pagination";
+import LoadingLottie from '../../common/LoadingLottie.tsx';
 
 const Input = styled.input`
   padding: 4px 8px;
@@ -42,6 +43,7 @@ const StyledSearchBar = styled.div`
 `;
 
 const InventoryRegisterCom = ({
+  loading,
   products = [],
   realQuantities = {},
   onQuantityChange,
@@ -66,6 +68,10 @@ const InventoryRegisterCom = ({
       delete window.handleSearchInventory;
     };
   }, [onSearch]);
+
+  if (loading) {
+    return <LoadingLottie />;
+  }
 
   return (
     <PageWrapper>

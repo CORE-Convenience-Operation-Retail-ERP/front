@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import KpiStatsCom from "../../../components/store/statistics/KpiStatsCom";
 import { fetchKpiStats } from "../../../service/store/StatisticsService";
+import LoadingLottie from '../../../components/common/LoadingLottie.tsx';
 
 function KpiStatsCon({ filters }) {
     const [data, setData] = useState(null);
@@ -30,6 +31,8 @@ function KpiStatsCon({ filters }) {
 
         load();
     }, [filters]);
+
+    if (loading) return <LoadingLottie />;
 
     return (
         <KpiStatsCom data={data} loading={loading} />

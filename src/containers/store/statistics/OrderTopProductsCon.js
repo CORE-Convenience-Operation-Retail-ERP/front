@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import OrderTopProductsCom from "../../../components/store/statistics/OrderTopProductsCom";
 import { fetchOrderTopProducts } from "../../../service/store/StatisticsService";
 import OrderTopProductsTableCom from "../../../components/store/statistics/OrderTopProductsTableCom";
+import LoadingLottie from '../../../components/common/LoadingLottie.tsx';
 
 function OrderTopProductsCon({ filters, mode = "summary", showTable = false  }) {
     const [data, setData] = useState([]);
@@ -30,6 +31,8 @@ function OrderTopProductsCon({ filters, mode = "summary", showTable = false  }) 
 
         load();
     }, [filters, mode]);
+
+    if (loading) return <LoadingLottie />;
 
     return (
         <>

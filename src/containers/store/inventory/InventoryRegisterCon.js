@@ -5,6 +5,7 @@ import InventoryRegisterCom from "../../../components/store/inventory/InventoryR
 import Pagination from "../../../components/store/common/Pagination";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import { useNavigate } from "react-router-dom";
+import { loadingManager } from '../../../components/common/LoadingManager';
 
 function InventoryRegisterCon() {
     const [products, setProducts] = useState([]);
@@ -14,6 +15,7 @@ function InventoryRegisterCon() {
     const [reason, setReason] = useState("");
     const [totalPages, setTotalPages] = useState(0);
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
 
     const [searchParams, setSearchParams] = useState({
         productName: "",
@@ -25,8 +27,11 @@ function InventoryRegisterCon() {
     const storeId = parseInt(localStorage.getItem("storeId"));
 
     useEffect(() => {
-        fetchProducts(searchParams);
-        fetchPartTimersList();
+        setLoading(true);
+        Promise.all([
+            fetchProducts(searchParams),
+            fetchPartTimersList()
+        ]).finally(() => setLoading(false));
     }, [searchParams]);
 
     const fetchProducts = async (params) => {
@@ -129,6 +134,7 @@ function InventoryRegisterCon() {
 
     return (
     <InventoryRegisterCom
+        loading={loading}
         products={products}
         realQuantities={realQuantities}
         onQuantityChange={handleQuantityChange}

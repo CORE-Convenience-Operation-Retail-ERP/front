@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import ProductSalesChartCom from "../../../components/store/statistics/ProductSalesChartCom";
 import { fetchProductSales } from "../../../service/store/StatisticsService";
 import ProductSalesTableCom from "../../../components/store/statistics/ProductSalesTableCom";
+import LoadingLottie from '../../../components/common/LoadingLottie.tsx';
 
 function ProductSalesChartCon({ filters, mode = "summary" }) {
     const [data, setData] = useState([]);
@@ -34,6 +35,8 @@ function ProductSalesChartCon({ filters, mode = "summary" }) {
 
         load();
     }, [filters]);
+
+    if (loading) return <LoadingLottie />;
 
     return (
         <>

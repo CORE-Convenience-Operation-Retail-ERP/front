@@ -5,6 +5,7 @@ import { formatLocalDate } from "../../utils/calendarUtils";
 import SettlementTable from "../../components/store/settlement/SettlementTable";
 import Pagination from "../../components/store/common/Pagination";
 import { ViewToggleButton, PrimaryButton } from "../../features/store/styles/common/Button.styled";
+import LoadingLottie from '../../components/common/LoadingLottie.tsx';
 
 const TYPES = [
   { value: "ALL", label: "전체" },
@@ -21,11 +22,12 @@ const SettlementCon = () => {
   const [dateRange, setDateRange] = useState([null, null]);
   const [allSettlements, setAllSettlements] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   // 페이로드 조합 함수
   const buildPayload = () => {
     const storeId = Number(localStorage.getItem("storeId"));
-    const payload: any = { storeId };
+    const payload = { storeId };
 
     if (typeFilter !== "ALL") {
       payload.type = typeFilter;
@@ -55,6 +57,7 @@ const SettlementCon = () => {
     }
     const payload = buildPayload();
     try {
+      setLoading(true);
       const result = await fetchSettlementList(payload);
       // 날짜 오름차순 정렬
       result.sort(
@@ -65,13 +68,14 @@ const SettlementCon = () => {
     } catch (error) {
       console.error("정산 이력 조회 실패:", error);
       alert("정산 데이터를 불러오는 데 실패했습니다.");
+    } finally {
+      setLoading(false);
     }
   };
 
   // 마운트 시 최초 조회
   useEffect(() => {
     handleSearch();
-    
   }, []);
 
   // 페이징 계산
@@ -79,6 +83,8 @@ const SettlementCon = () => {
   const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
   const currentData = allSettlements.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(allSettlements.length / ITEMS_PER_PAGE);
+
+  if (loading) return <LoadingLottie />;
 
   return (
     <>
