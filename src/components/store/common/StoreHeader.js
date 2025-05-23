@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useNotification } from '../../../contexts/NotificationContext';
 
 import {
     Header,
@@ -7,17 +8,18 @@ import {
     IconWrap,
     LogoImage,
     MailIcon,
-    BellIcon,
     LogoutIcon,
     BuildingIcon,
 } from '../../../features/store/styles/common/StoreHeader.styled';
 
+import StoreNotificationIcon from './StoreNotificationIcon';
 
 function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
 
 
     const [hoveredIcon, setHoveredIcon] = useState(null);
     const navigate = useNavigate();
+    const { unreadCount } = useNotification();
 
 
     return (
@@ -34,14 +36,8 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
                     <MailIcon $hovered={hoveredIcon === 'mail'} />
                 </IconWrap>
 
-                {/* Bell */}
-                <IconWrap
-                    $hoverbg="#fef9c3" // 연노랑
-                    onMouseEnter={() => setHoveredIcon('bell')}
-                    onMouseLeave={() => setHoveredIcon(null)}
-                >
-                    <BellIcon $hovered={hoveredIcon === 'bell'} />
-                </IconWrap>
+                {/* Bell - 점주 알림 아이콘 (실시간, 뱃지+드롭박스) */}
+                <StoreNotificationIcon />
 
                 {/* 본사 이동 아이콘 (점주만 보임)  */}
                 {userInfo?.workType === 3 && (
