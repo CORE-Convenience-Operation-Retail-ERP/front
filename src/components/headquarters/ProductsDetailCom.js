@@ -40,7 +40,7 @@ const ProductsDetailCom = ({ detail, onBack, onEdit }) => {
       alert("본사 재고가 업데이트되었습니다.");
       setShowHQStockEditor(false);
     } catch (error) {
-      alert(`재고 업데이트 실패: ${error.response?.data?.message || error.message}`);
+    
     } finally {
       setIsUpdatingHQStock(false);
     }
@@ -58,7 +58,7 @@ const ProductsDetailCom = ({ detail, onBack, onEdit }) => {
       );
       alert("정기 입고 설정이 업데이트되었습니다.");
     } catch (error) {
-      alert("정기 입고 설정 업데이트에 실패했습니다.");
+      
     } finally {
       setIsUpdatingRegularIn(false);
     }
@@ -72,7 +72,7 @@ const ProductsDetailCom = ({ detail, onBack, onEdit }) => {
       alert(`${regularInDay}일자 정기 입고가 즉시 처리되었습니다. 페이지를 새로고침하면 재고 변화를 확인할 수 있습니다.`);
       window.location.reload();
     } catch (error) {
-      alert("정기 입고 테스트에 실패했습니다.");
+    
     } finally {
       setIsTestingRegularIn(false);
     }

@@ -120,8 +120,7 @@ const StoreInquiryCon = () => {
       // 랭킹 정보 새로고침
       fetchStoreRankings();
     } catch (error) {
-      console.error('문의 상태 변경에 실패했습니다:', error);
-      alert('문의 상태 변경에 실패했습니다.');
+      
     } finally {
       setLoading(false);
     }
@@ -167,8 +166,7 @@ const StoreInquiryCon = () => {
       // 평가 변경 성공 메시지 (한 번만 표시)
       alert("평가가 완료되었습니다.");
     } catch (error) {
-      console.error('문의 평가 변경에 실패했습니다:', error);
-      alert('문의 평가 변경에 실패했습니다.');
+      
     } finally {
       setLoading(false);
     }
@@ -189,8 +187,7 @@ const StoreInquiryCon = () => {
       
       alert("문의가 완료 처리되었습니다.");
     } catch (error) {
-      console.error('문의 상태 변경에 실패했습니다:', error);
-      alert('문의 상태 변경에 실패했습니다.');
+      
     } finally {
       setLoading(false);
     }
