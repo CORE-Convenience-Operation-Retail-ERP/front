@@ -17,7 +17,11 @@ import {
 } from '../../../features/store/styles/common/PageLayout';
 import { Table } from '../../../features/store/styles/common/Table.styled';
 import SelectBox from '../../../features/store/styles/common/SelectBox';
-import { PrimaryButton } from '../../../features/store/styles/common/Button.styled';
+import {IconButton, PrimaryButton} from '../../../features/store/styles/common/Button.styled';
+import {AiOutlineDownload} from "react-icons/ai";
+import {BsFiletypeXml} from "react-icons/bs";
+import {MdPostAdd, MdRestore} from "react-icons/md";
+import {BiWrench} from "react-icons/bi";
 
 function StockListCom({
                           stockList,
@@ -136,24 +140,39 @@ function StockListCom({
                 {/* 오른쪽: 액션 버튼 */}
                 <div style={{ minWidth: 380, display: "flex", justifyContent: "flex-end" }}>
                     <ActionGroup>
-                        <PrimaryButton onClick={handleDownload}>엑셀 다운로드</PrimaryButton>
-                        <PrimaryButton onClick={() => window.location.href = '/store/inventory/check/register'}>재고 등록</PrimaryButton>
-                        <PrimaryButton onClick={() => {
+                        <IconButton onClick={handleDownload}>
+                            Excel
+                            <BsFiletypeXml />
+                        </IconButton>
+
+                        <IconButton onClick={() => window.location.href = '/store/inventory/check/register'}>
+                            재고 등록
+                            <MdPostAdd />
+                        </IconButton>
+
+                        <IconButton onClick={() => {
                             if (selectedIds.length > 0) {
                                 onApplyChecks(selectedIds);
                                 setSelectedIds([]);
                             } else {
                                 onApplyChecks();
                             }
-                        }}>실사 반영(선택/전체)</PrimaryButton>
-                        <PrimaryButton onClick={() => {
+                        }}>
+                            반영
+                            <BiWrench />
+                        </IconButton>
+
+                        <IconButton onClick={() => {
                             if (selectedIds.length > 0) {
                                 onRollbackChecks(selectedIds);
                                 setSelectedIds([]);
                             } else {
                                 onRollbackChecks();
                             }
-                        }}>실사 복원(선택/전체)</PrimaryButton>
+                        }}>
+                            복원
+                            <MdRestore />
+                        </IconButton>
                     </ActionGroup>
                 </div>
             </SearchBarRow>

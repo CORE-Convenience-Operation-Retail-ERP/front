@@ -35,4 +35,15 @@ export const Table = styled.table`
     td:last-child, th:last-child {
         padding-right: 12px;
     }
+    
+    tfoot {
+        background-color: #fcfcfc;
+        font-weight: bold;
+        border-top: 2px solid #dcdcdc;
+
+        td {
+            background-color: #fafafa;
+            color: #333;
+        }
+    }
 `;

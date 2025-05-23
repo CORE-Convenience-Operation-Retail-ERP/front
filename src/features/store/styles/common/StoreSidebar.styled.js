@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, {css, keyframes} from 'styled-components';
 
 export const Sidebar = styled.aside`
   width: 240px;
@@ -77,64 +77,73 @@ export const SubmenuItem = styled.div.withConfig({
 
 export const SidebarFooter = styled.div`
     position: relative;
+    padding: 12px;
     text-align: center;
-    font-size: 18px;
-    color: #9ca3af;
-    padding: 1rem 0;
-    cursor: pointer;
-    overflow: hidden;
-    height: 160px;
+`;
+
+const spinY = keyframes`
+    from { transform: rotateY(0deg); }
+    to   { transform: rotateY(360deg); }
 `;
 
 export const FooterContent = styled.div`
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%; 
-    padding: 0 20px; 
-    display: flex;
-    flex-direction: column;
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    gap: 4px;
+    cursor: pointer;
+    font-size: ${({size}) => size || 14}px;
+    user-select: none;
 
-    ${SidebarFooter}:hover & {
-        opacity: 0;
-        visibility: hidden;
-    }
-`;
-
-export const FooterLine = styled.div`
-    width: 80%;
-    height: 1px;
-    background-color: #e0e0e0;
+    ${({spinning}) =>
+            spinning &&
+            css`
+      animation: ${spinY} 0.5s ease;
+    `}
 `;
 
 export const FooterDetail = styled.div`
     position: absolute;
-    top: 50%;
+    bottom: 80px; 
     left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    opacity: 0;
-    visibility: hidden;
-    font-size: 14px;
-    color: #1A237E;
-    background-color: #f9fafb; 
+    transform: translateX(-50%);
+    width: 240px;
+    height: 150px;
     border-radius: 8px;
-    padding: 16px 20px;
-    text-align: center;
-    line-height: 1.4;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #374151;
+    padding: 12px;
+    z-index: 999;
+    align-content: center;
+    animation: riseUp 0.25s ease-out;
 
-    ${SidebarFooter}:hover & {
-        opacity: 1;
-        visibility: visible;
+    &::after {
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
     }
+
+    @keyframes riseUp {
+        from {
+            transform: translate(-50%, 10px);
+            opacity: 0;
+        }
+        to {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+    }
+
+    ${({ open }) =>
+            !open &&
+            css`
+                display: none;
+            `}
 `;
+
+
 
 export const MenuIcon = styled.div`
     display: flex;
@@ -147,3 +156,4 @@ export const MenuIcon = styled.div`
         font-size: 18px; // 사이즈 조정
     }
 `;
+

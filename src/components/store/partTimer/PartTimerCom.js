@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { Table } from '../../../features/store/styles/common/Table.styled';
-import { PrimaryButton } from '../../../features/store/styles/common/Button.styled';
+import {AttendanceButton, IconButton, PrimaryButton} from '../../../features/store/styles/common/Button.styled';
 import Pagination from '../common/Pagination';
 import styled from 'styled-components';
 import {PageTitle} from "../../../features/store/styles/common/PageLayout";
+import {MdLogin, MdLogout} from "react-icons/md";
 
 const Checkbox = styled.input.attrs({ type: 'checkbox' })`
   width: 16px;
@@ -35,7 +36,7 @@ function PartTimerCom({
                           onPageChange
                       }) {
     const navigate = useNavigate();
-
+console.log("data",data)
     if (loading) return <p>불러오는 중...</p>;
     if (!data || data.length === 0) return <p>검색 결과가 없습니다.</p>;
 
@@ -95,12 +96,14 @@ function PartTimerCom({
                                 </Td>
                                 <Td>
                                     {!pt.isCheckedInToday ? (
-                                        <PrimaryButton onClick={() => onOpenQRModal(pt.partTimerId, 'check-in')}>
+                                        <AttendanceButton onClick={() => onOpenQRModal(pt.partTimerId, 'check-in')}>
                                             출근
-                                        </PrimaryButton>
+                                            <MdLogin size={18} style={{ marginRight: "6px" }} />
+                                        </AttendanceButton>
                                     ) : (
                                         <PrimaryButton onClick={() => onOpenQRModal(pt.partTimerId, 'check-out')}>
                                             퇴근
+                                            <MdLogout size={18} style={{ marginRight: "6px" }} />
                                         </PrimaryButton>
                                     )}
                                 </Td>

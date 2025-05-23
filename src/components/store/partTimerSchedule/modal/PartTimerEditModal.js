@@ -42,8 +42,8 @@ function PartTimerEditModal({ onClose, onUpdate, onDelete, schedule, colorOption
             id: schedule.id,
             title: form.selected.partName,
             partTimerId: form.selected.partTimerId,
-            start: form.startTime,
-            end: form.endTime,
+            startTime: form.startTime,
+            endTime: form.endTime,
             bgColor: form.bgColor
         });
     };
@@ -97,7 +97,7 @@ function PartTimerEditModal({ onClose, onUpdate, onDelete, schedule, colorOption
                     <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>시작 시간</label>
                     <DateTimePicker
                         value={dayjs(form.startTime)}
-                        onChange={(v) => handleChange('startTime', v.toISOString())}
+                        onChange={(v) => handleChange('startTime', v.format('YYYY-MM-DDTHH:mm'))}
                         minutesStep={30}
                         ampm={false}
                         format="YYYY-MM-DD HH:mm"
@@ -109,7 +109,7 @@ function PartTimerEditModal({ onClose, onUpdate, onDelete, schedule, colorOption
                     <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>종료 시간</label>
                     <DateTimePicker
                         value={dayjs(form.endTime)}
-                        onChange={(v) => handleChange('endTime', v.toISOString())}
+                        onChange={(v) => handleChange('endTime', v.format('YYYY-MM-DDTHH:mm'))}
                         minutesStep={30}
                         ampm={false}
                         format="YYYY-MM-DD HH:mm"

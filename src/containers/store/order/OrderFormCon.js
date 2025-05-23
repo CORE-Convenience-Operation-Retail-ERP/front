@@ -14,6 +14,7 @@ import {
 import OrderFormCom from "../../../components/store/order/OrderFormCom";
 
 const PAGE_SIZE = 10;
+const SUMMARY_PAGE_SIZE = 5;
 
 export default function OrderFormCon() {
   const { id: orderId } = useParams();
@@ -26,6 +27,7 @@ export default function OrderFormCon() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [summaryPage, setSummaryPage] = useState(0);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [storeOptions, setStoreOptions] = useState([]);
@@ -50,48 +52,36 @@ export default function OrderFormCon() {
     setFilters({ parentCategoryId: id, categoryId: '', subCategoryId: '' });
     setChildCategories([]);
     setGrandChildCategories([]);
-
-    if (id) {
-      fetchChildCategories(id).then(data => setChildCategories(data || [])).catch(console.error);
-    }
-
-    setSearchParams(prev => ({
-      ...prev,
-      categoryId: id || null,
-      page: 0,
-    }));
+    if (id) fetchChildCategories(id).then(data => setChildCategories(data || [])).catch(console.error);
+    setSearchParams(prev => ({ ...prev, categoryId: id || null, page: 0 }));
   };
 
-  const handleChildChange = (id) => {
+  const handleChildChange = id => {
     setFilters(f => ({ ...f, categoryId: id, subCategoryId: '' }));
     setGrandChildCategories([]);
     if (id) fetchChildCategories(id).then(data => setGrandChildCategories(data || []));
     updateCategoryFilter(id);
   };
 
-  const handleSubChildChange = (id) => {
+  const handleSubChildChange = id => {
     setFilters(f => ({ ...f, subCategoryId: id }));
     updateCategoryFilter(id);
   };
 
-  const updateCategoryFilter = (categoryId) => {
-    const finalCategoryId = categoryId || filters.subCategoryId || filters.categoryId || filters.parentCategoryId || null;
+  const updateCategoryFilter = categoryId => {
+    const finalCategoryId =
+        categoryId || filters.subCategoryId || filters.categoryId || filters.parentCategoryId || null;
     setSearchParams(prev => ({ ...prev, categoryId: finalCategoryId, page: 0 }));
   };
 
-  const cleanParams = (params) =>
-      Object.fromEntries(
-          Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== "")
-      );
+  const cleanParams = params =>
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ""));
 
-  const handleSearch = useCallback(
-      (params) => {
-        const baseStoreId = role === "ROLE_MASTER" ? params.storeId || defaultStoreId : defaultStoreId;
-        setSearchParams({ storeId: baseStoreId, ...params, page: 0, size: PAGE_SIZE });
-        setPage(0);
-      },
-      [role, defaultStoreId]
-  );
+  const handleSearch = useCallback(params => {
+    const baseStoreId = role === "ROLE_MASTER" ? params.storeId || defaultStoreId : defaultStoreId;
+    setSearchParams({ storeId: baseStoreId, ...params, page: 0, size: PAGE_SIZE });
+    setPage(0);
+  }, [role, defaultStoreId]);
 
   const handleSubmit = useCallback(async () => {
     const items = selectedItems
@@ -193,6 +183,9 @@ export default function OrderFormCon() {
           onParentChange={handleParentChange}
           onChildChange={handleChildChange}
           onSubChildChange={handleSubChildChange}
+          summaryPage={summaryPage}
+          setSummaryPage={setSummaryPage}
+          summaryPageSize={SUMMARY_PAGE_SIZE}
       />
   );
 }

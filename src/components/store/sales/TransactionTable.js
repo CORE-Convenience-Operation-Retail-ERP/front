@@ -12,12 +12,13 @@ import {
   FilterGroup
 } from "../../../features/store/styles/common/PageLayout";
 
-import { PrimaryButton } from "../../../features/store/styles/common/Button.styled";
+import {IconButton, IconOnlyButton, PrimaryButton} from "../../../features/store/styles/common/Button.styled";
 import TransactionDetailModal from "./TransactionDetailModal";
 import StoreSearchBar from "../common/StoreSearchBar";
 import {AiOutlineSearch} from "react-icons/ai";
 import {FiSearch} from "react-icons/fi";
 import {IoIosSearch} from "react-icons/io";
+import {BsFiletypeXlsx} from "react-icons/bs";
 
 const TransactionTable = ({
                             rows = [],
@@ -64,8 +65,10 @@ const TransactionTable = ({
             />
           </FilterGroup>
           <ActionGroup>
-            <PrimaryButton onClick={handleDownloadExcel}>엑셀 다운로드</PrimaryButton>
-          </ActionGroup>
+            <IconButton onClick={handleDownloadExcel}>
+              Excel
+              <BsFiletypeXlsx />
+            </IconButton>          </ActionGroup>
         </FilterActionRow>
 
         <TableWrapper>
@@ -93,9 +96,9 @@ const TransactionTable = ({
                   </td>
                   <td>{row.items?.length || 0}건</td>
                   <td>
-                    <button onClick={() => handleOpenModal(row)}>
-                      <IoIosSearch />
-                    </button>
+                    <IconOnlyButton onClick={() => handleOpenModal(row)}>
+                      <FiSearch size={18} />
+                    </IconOnlyButton>
                   </td>
                 </tr>
             ))}

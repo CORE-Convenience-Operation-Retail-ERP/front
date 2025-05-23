@@ -14,7 +14,7 @@ import {
 
 import StoreNotificationIcon from './StoreNotificationIcon';
 
-function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
+function StoreHeader({ userInfo, onLogout }) {
 
 
     const [hoveredIcon, setHoveredIcon] = useState(null);
@@ -32,6 +32,7 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
                     $hoverbg="#dbeafe" // 연파랑
                     onMouseEnter={() => setHoveredIcon('mail')}
                     onMouseLeave={() => setHoveredIcon(null)}
+                    onClick={() => navigate('/headquarters/board/store-inquiries')}
                 >
                     <MailIcon $hovered={hoveredIcon === 'mail'} />
                 </IconWrap>
@@ -45,7 +46,7 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
                         $hoverbg="#ede9fe" // 연보라
                         onMouseEnter={() => setHoveredIcon('hq')}
                         onMouseLeave={() => setHoveredIcon(null)}
-                        onClick={() => navigate('/headquarters/dashboard')}
+                        onClick={() => navigate('/headquarters/board/notice')}
                     >
 
                         <BuildingIcon $hovered={hoveredIcon === 'hq'} />
@@ -55,7 +56,7 @@ function StoreHeader({ userInfo, onLogout, onToggleNotifications }) {
                  {/* 직급 */}
                  <div style={{ fontSize: "14px", color: "#6b7280" }}>
                     {userInfo.workType === 3
-                        ? `${userInfo.branchName || "지점명 없음"} 점주`
+                        ? `${userInfo.branchName || "지점명 없음"}`
                         : "관리자"}
                 </div>
 

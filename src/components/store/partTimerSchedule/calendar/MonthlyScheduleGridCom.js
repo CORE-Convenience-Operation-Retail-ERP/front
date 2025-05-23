@@ -89,14 +89,21 @@ function MonthlyScheduleGridCom({ calendarMatrix, schedules, onClickDate, onClic
     const effectiveStart = start < firstDay ? firstDay : start;
     const effectiveEnd = end > lastDay ? lastDay : end;
 
-    const startIdx = (effectiveStart.getDay() + 7 - firstDay.getDay()) % 7;
-    const span = (effectiveEnd - effectiveStart) / (1000 * 60 * 60 * 24) + 1;
+    const startIdx = week.findIndex(
+        d => d.toDateString() === effectiveStart.toDateString()
+    );
+    const endIdx = week.findIndex(
+        d => d.toDateString() === effectiveEnd.toDateString()
+    );
+
+    const span = endIdx - startIdx + 1;
 
     return {
       startOffset: (startIdx / dayCount) * 100,
       spanWidth: (span / dayCount) * 100,
     };
   };
+
 
   return (
     <GridWrapper>

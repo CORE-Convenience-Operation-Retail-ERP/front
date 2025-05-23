@@ -9,6 +9,7 @@ import {
 } from '../../../features/store/styles/partTimer/StorePatTimerForm.styled';
 
 function PartTimerOneCom({ form, onEdit, onResign, onRejoin }) {
+    console.log("form", form)
     return (
         <FormWrapper>
             <Title>직원 상세 정보</Title>
@@ -47,7 +48,7 @@ function PartTimerOneCom({ form, onEdit, onResign, onRejoin }) {
 
             <InputGroup>
                 <Label>입사일</Label>
-                <p>{form.hireDate ? new Date(form.resignDate).toISOString().slice(0, 10) : '-'}</p>
+                <p>{form.hireDate ? new Date(form.hireDate).toISOString().slice(0, 10) : '-'}</p>
             </InputGroup>
 
             <InputGroup>

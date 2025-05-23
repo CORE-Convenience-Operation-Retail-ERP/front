@@ -76,6 +76,8 @@ function PartTimerUpdateCon() {
   };
 
   const handleSubmit = async () => {
+    console.log("deviceId =", form.deviceId);
+    console.log("deviceName =", form.deviceName);
     const phoneChanged = form.partPhone !== initialPhone;
     if (phoneChanged && !verified) {
       alert('전화번호를 변경한 경우 기기 인증이 필요합니다.');
@@ -129,7 +131,7 @@ function PartTimerUpdateCon() {
           onSendCode={handleSendCode}
           onVerifyCode={handleVerifyCode}
           verified={verified}
-          showVerification={form.partPhone !== initialPhone}
+          originalPhone={initialPhone}
       />
   );
 }

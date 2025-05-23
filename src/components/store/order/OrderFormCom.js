@@ -4,7 +4,7 @@ import {
     PageTitle,
     PageSection,
     TableWrapper,
-    HighlightId
+    HighlightId,
 } from "../../../features/store/styles/common/PageLayout";
 import { Table } from "../../../features/store/styles/common/Table.styled";
 import { PrimaryButton } from "../../../features/store/styles/common/Button.styled";
@@ -12,7 +12,7 @@ import InputBox from "../../../features/store/styles/common/InputBox";
 import SelectBox from "../../../features/store/styles/common/SelectBox";
 import Pagination from "../common/Pagination";
 import StoreSearchBar from "../common/StoreSearchBar";
-import {MdShoppingCart} from "react-icons/md";
+import { MdShoppingCart } from "react-icons/md";
 
 function OrderFormCom({
                           productList = [],
@@ -34,7 +34,10 @@ function OrderFormCom({
                           filters = {},
                           onParentChange,
                           onChildChange,
-                          onSubChildChange
+                          onSubChildChange,
+                          summaryPage,
+                          setSummaryPage,
+                          summaryPageSize = 5,
                       }) {
     const getQuantity = (productId) =>
         selectedItems.find((item) => item.productId === productId)?.quantity || "";
@@ -53,7 +56,7 @@ function OrderFormCom({
                 productId: product.productId,
                 productName: product.productName,
                 quantity,
-                unitPrice: product.unitPrice
+                unitPrice: product.unitPrice,
             };
 
             return exists
@@ -68,7 +71,7 @@ function OrderFormCom({
         return selectedItems.reduce(
             (acc, item) => ({
                 totalQty: acc.totalQty + item.quantity,
-                totalAmount: acc.totalAmount + item.quantity * item.unitPrice
+                totalAmount: acc.totalAmount + item.quantity * item.unitPrice,
             }),
             { totalQty: 0, totalAmount: 0 }
         );
@@ -82,11 +85,24 @@ function OrderFormCom({
         }
     };
 
+    const summaryPageCount = Math.ceil(selectedItems.length / summaryPageSize);
+    const pagedSummaryItems = selectedItems.slice(
+        summaryPage * summaryPageSize,
+        (summaryPage + 1) * summaryPageSize
+    );
+
+    const handlePrev = () => {
+        if (summaryPage > 0) setSummaryPage(summaryPage - 1);
+    };
+
+    const handleNext = () => {
+        if (summaryPage < summaryPageCount - 1) setSummaryPage(summaryPage + 1);
+    };
+
     return (
         <PageWrapper>
             <PageTitle>{isEdit ? "| 발주 수정" : "| 발주 등록"}</PageTitle>
 
-            {/* 검색바 영역: 카테고리 + 검색바 */}
             <div style={{ marginBottom: "1.5rem" }}>
                 <div style={{ display: "flex", gap: "1rem", marginBottom: "0.5rem" }}>
                     <SelectBox
@@ -108,18 +124,12 @@ function OrderFormCom({
                         options={[{ label: "소분류 선택", value: "" }, ...grandChildCategories.map(c => ({ label: c.name, value: c.id }))]}
                     />
                     <div style={{ display: "flex", marginLeft: "28rem", marginTop: "2rem" }}>
-                    <StoreSearchBar
-                        filterOptions={filterOptions}
-                        onSearch={onSearch}
-                    />
+                        <StoreSearchBar filterOptions={filterOptions} onSearch={onSearch} />
+                    </div>
                 </div>
-                </div>
-
             </div>
 
-            {/* 상품 테이블 + 요약 */}
             <PageSection style={{ display: "flex", alignItems: "flex-start", gap: "0" }}>
-                {/* 상품 목록 */}
                 <div style={{ flex: 1 }}>
                     <TableWrapper>
                         <Table>
@@ -145,7 +155,7 @@ function OrderFormCom({
                                         <tr
                                             key={product.productId}
                                             style={{
-                                                backgroundColor: isSelected ? "#f5fffa" : "transparent"
+                                                backgroundColor: isSelected ? "#f5fffa" : "transparent",
                                             }}
                                         >
                                             <td><HighlightId>{product.productId}</HighlightId></td>
@@ -159,9 +169,7 @@ function OrderFormCom({
                                                 <InputBox
                                                     type="number"
                                                     value={getQuantity(product.productId)}
-                                                    onChange={(e) =>
-                                                        handleQuantityChange(product, e.target.value)
-                                                    }
+                                                    onChange={(e) => handleQuantityChange(product, e.target.value)}
                                                 />
                                             </td>
                                         </tr>
@@ -177,62 +185,84 @@ function OrderFormCom({
                             </tbody>
                         </Table>
                     </TableWrapper>
-                    <Pagination
-                        currentPage={page}
-                        totalPages={totalPages}
-                        onPageChange={onPageChange}
-                    />
+                    <Pagination currentPage={page} totalPages={totalPages} onPageChange={onPageChange} />
                 </div>
 
-                {/* 상품 요약 */}
-                <div
-                    style={{
-                        backgroundColor: "#ffffff",
-                        borderRadius: "12px",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.06)",
-                        padding: "1.5rem",
-                        minWidth: "300px",
-                        maxWidth: "360px",
-                        fontSize: "0.95rem",
-                        fontFamily: "'Noto Sans KR', sans-serif",
-                        marginLeft: "2.5rem"
-                    }}
-                >
+                <div style={{
+                    backgroundColor: "#ffffff",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.06)",
+                    padding: "1.5rem",
+                    minWidth: "300px",
+                    maxWidth: "360px",
+                    fontSize: "0.95rem",
+                    fontFamily: "'Noto Sans KR', sans-serif",
+                    marginLeft: "2.5rem"
+                }}>
                     <h3 style={{ marginBottom: "1rem", fontSize: "1.1rem", fontWeight: "bold", color: "#333", display: "flex", alignItems: "center", gap: "6px" }}>
                         <MdShoppingCart size={20} />
                         상품 요약
                     </h3>
+
                     <ul style={{ listStyle: "none", padding: 0, marginBottom: "1.5rem" }}>
-                        {selectedItems.map((item) => (
-                            <li
-                                key={item.productId}
-                                style={{
-                                    marginBottom: "0.8rem",
-                                    padding: "0.75rem",
-                                    backgroundColor: "#f9f9f9",
-                                    borderRadius: "8px",
-                                    border: "1px solid #eee"
-                                }}
-                            >
-                                <div style={{ fontWeight: "500", marginBottom: "0.3rem" }}>
-                                    {item.productName}
-                                </div>
+                        {pagedSummaryItems.map((item) => (
+                            <li key={item.productId} style={{
+                                marginBottom: "0.8rem",
+                                padding: "0.75rem",
+                                backgroundColor: "#f9f9f9",
+                                borderRadius: "8px",
+                                border: "1px solid #eee"
+                            }}>
+                                <div style={{ fontWeight: "500", marginBottom: "0.3rem" }}>{item.productName}</div>
                                 <div style={{ fontSize: "0.88rem", color: "#555" }}>
-                                    수량: <strong>{item.quantity}</strong> / 금액: {" "}
-                                    <strong>{(item.unitPrice * item.quantity).toLocaleString()}원</strong>
+                                    수량: <strong>{item.quantity}</strong> / 금액: <strong>{(item.unitPrice * item.quantity).toLocaleString()}원</strong>
                                 </div>
                             </li>
                         ))}
                     </ul>
+
+                    {selectedItems.length > summaryPageSize && (
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "1.5rem"
+                        }}>
+                            <button
+                                onClick={handlePrev}
+                                disabled={summaryPage === 0}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    fontSize: "1.2rem"
+                                }}
+                            >
+                                ◀
+                            </button>
+                            <span style={{ fontSize: "0.9rem", color: "#777" }}>
+                              {summaryPage + 1} / {summaryPageCount || 1}
+                            </span>
+                            <button
+                                onClick={handleNext}
+                                disabled={summaryPage >= summaryPageCount - 1}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    fontSize: "1.2rem"
+                                }}
+                            >
+                                ▶
+                            </button>
+                        </div>
+                    )}
+
+
                     <div style={{ borderTop: "1px solid #ddd", paddingTop: "1rem", marginTop: "1rem" }}>
-                        <p style={{ marginBottom: "0.3rem" }}>
-                            <strong>총 수량:</strong> {totalQty}
-                        </p>
+                        <p style={{ marginBottom: "0.3rem" }}><strong>총 수량:</strong> {totalQty}</p>
                         <p style={{ marginBottom: "1rem" }}>
-                            <strong>총 금액:</strong> {" "}
-                            <span style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#007BFF" }}>
-        {totalAmount.toLocaleString()}원
-      </span>
+                            <strong>총 금액:</strong> <span style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#007BFF" }}>{totalAmount.toLocaleString()}원</span>
                         </p>
                         <PrimaryButton style={{ width: "100%" }} onClick={handleSubmitClick}>
                             {isEdit ? "수정 완료" : "발주 등록"}

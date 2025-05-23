@@ -11,8 +11,21 @@ import {
     FooterDetail,
     FooterLine
 } from '../../../features/store/styles/common/StoreSidebar.styled';
+import {useState} from "react";
+import {IoIosArrowDown} from "react-icons/io";
 
 function StoreSidebar({ menus, hoverMenu, onMouseEnter, onMouseLeave, onNavigate, activeMenu }) {
+    const [open, setOpen] = useState(false);
+    const [spinning, setSpinning] = useState(false);
+    const handleClick = () => {
+        setSpinning(true);
+        setOpen(o => !o);
+    };
+
+    const handleAnimationEnd = () => {
+        setSpinning(false);
+    };
+
     return (
         <Sidebar>
             <SidebarMenu>
@@ -68,18 +81,22 @@ function StoreSidebar({ menus, hoverMenu, onMouseEnter, onMouseLeave, onNavigate
 
             {/* Footer */}
             <SidebarFooter>
-                <FooterContent size={8}>
-                    @ CORE ERP
-                    <FooterLine />
-                </FooterContent>
-
-                <FooterDetail>
-                    <span style={{ fontWeight: 700 }}>CORE ERP 시스템 v1.0</span><br />
-                    문의 : core@company.com<br />
-                    전화 : 1234-5678<br />
-                    주소 : 서울특별시 강남구 테헤란로 123<br />
+                <FooterDetail open={open}>
+                    <strong>CORE ERP 시스템 v1.0</strong><br/>
+                    문의 : core@company.com<br/>
+                    전화 : 1234-5678<br/>
+                    주소 : 서울특별시 강남구 테헤란로 123<br/>
                     운영시간: 월-금 09:00-18:00
                 </FooterDetail>
+                <FooterContent
+                    size={15}
+                    onClick={handleClick}
+                    spinning={spinning}
+                    onAnimationEnd={handleAnimationEnd}
+                >
+                    @ CORE ERP <IoIosArrowDown />
+                </FooterContent>
+
             </SidebarFooter>
         </Sidebar>
     );

@@ -32,6 +32,15 @@ function OrderHistoryCom({
         onSelectAllChange(e.target.checked);
     };
 
+    const totalOrderQty = itemList.reduce((sum, item) => sum + item.orderQuantity, 0);
+    const totalReceivedQty = itemList.reduce((sum, item) => sum + item.receivedQuantity, 0);
+    const totalInputQty = partialItems.reduce((sum, item) => sum + (Number(item.inQuantity) || 0), 0);
+    const totalEffectiveQty = totalReceivedQty + totalInputQty;
+    const totalInputAmount = partialItems.reduce((sum, item) => {
+    const matchedItem = itemList.find(i => i.itemId === item.itemId);
+        return sum + ((Number(item.inQuantity) || 0) * (matchedItem?.unitPrice || 0));
+    }, 0);
+
     const getPartialItem = (itemId) =>
         partialItems.find((i) => i.itemId === itemId) || {};
 
@@ -39,8 +48,13 @@ function OrderHistoryCom({
         <PageWrapper>
             <PageTitle>| 입고 처리</PageTitle>
 
-            <PageSection style={{ maxWidth: "300px", marginBottom: "2rem" }}>
-                <SelectBox
+            <PageSection style={{
+                width: "180%",
+                display: "flex",
+                justifyContent: "flex-start",
+                marginBottom: "2rem",
+            }}>
+            <SelectBox
                     label="입고 담당자 선택"
                     id="partTimer"
                     value={selectedPartTimerId || ""}
@@ -49,6 +63,10 @@ function OrderHistoryCom({
                         value: pt.partTimerId,
                         label: `${pt.partName} (${pt.position})`
                     }))}
+                    style={{
+                        minWidth: "300px",
+                        textAlign: "left",
+                    }}
                 />
             </PageSection>
 
@@ -128,6 +146,18 @@ function OrderHistoryCom({
                         );
                     })}
                     </tbody>
+                    <tfoot>
+                    <tr>
+                        <td></td>
+                        <td style={{ fontWeight: "bold", textAlign: "center" }}>합계</td>
+                        <td>{totalOrderQty}</td>
+                        <td>{totalReceivedQty}</td>
+                        <td></td>
+                        <td>{totalInputAmount.toLocaleString()}원</td>
+                        <td>{totalInputQty}</td>
+                        <td></td>
+                    </tr>
+                    </tfoot>
                 </Table>
             </TableWrapper>
 

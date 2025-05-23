@@ -1,7 +1,7 @@
 import React from "react";
 import { Table } from "../../../features/store/styles/common/Table.styled";
 import Pagination from "../common/Pagination";
-import { PrimaryButton } from "../../../features/store/styles/common/Button.styled";
+import {DangerButton, PrimaryButton} from "../../../features/store/styles/common/Button.styled";
 import {
   PageWrapper,
   PageTitle,
@@ -108,9 +108,9 @@ function DisposalCom({
                             <td>{item.processedBy}</td>
                             <td>{item.disposalDate?.slice(0, 16).replace("T", " ")}</td>
                             <td>
-                              <PrimaryButton onClick={() => handleCancelClick(item.disposalId)}>
+                              <DangerButton onClick={() => handleCancelClick(item.disposalId)}>
                                 취소
-                              </PrimaryButton>
+                              </DangerButton>
                             </td>
                           </tr>
                       ))
