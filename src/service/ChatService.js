@@ -37,6 +37,26 @@ class ChatService {
   getChatRooms() {
     return axios.get(`${API_URL}/rooms`, {
       headers: this.getAuthHeader()
+    }).then(response => {
+      // === [추가] 존재하지 않는 roomId의 알림 카운트 자동 정리 ===
+      try {
+        const validRoomIds = response.data.map(room => room.roomId);
+        let unread = JSON.parse(localStorage.getItem('chat_unread_by_room') || '{}');
+        let changed = false;
+        Object.keys(unread).forEach(roomId => {
+          if (!validRoomIds.includes(Number(roomId))) {
+            delete unread[roomId];
+            changed = true;
+          }
+        });
+        if (changed) {
+          localStorage.setItem('chat_unread_by_room', JSON.stringify(unread));
+        }
+      } catch (e) {
+        // 무시
+      }
+      // === [추가 끝] ===
+      return response;
     });
   }
 
