@@ -543,122 +543,129 @@ const StoreInquiryCom = ({
         {/* 테이블/페이징 중앙정렬 및 maxWidth */}
         <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto' }}>
           {showRankings ? (
-            // 랭킹 테이블만 단독으로 표시 (Card/Box 등 래핑 제거, 텍스트 제거)
-            <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.08)', border: '1px solid #eee' }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell>순위</StyledTableCell>
-                    <StyledTableCell>지점명</StyledTableCell>
-                    <StyledTableCell>컴플레인 건수</StyledTableCell>
-                    <StyledTableCell>컴플레인 점수</StyledTableCell>
-                    <StyledTableCell>칭찬 건수</StyledTableCell>
-                    <StyledTableCell>칭찬 점수</StyledTableCell>
-                    <StyledTableCell>종합 점수</StyledTableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {storeRankings.length > 0 ? (
-                    storeRankings.map((store, index) => (
-                      <TableRow
-                        key={index}
-                        sx={{
-                          backgroundColor: index === 0 ? '#FFF9E1' : '#fff',
-                          '&:hover': { backgroundColor: '#F0F5FF' }
-                        }}
-                      >
-                        <StyledTableDataCell>{store.rank}</StyledTableDataCell>
-                        <StyledTableDataCell>{store.storeName}</StyledTableDataCell>
-                        <StyledTableDataCell>{store.complaintCount}</StyledTableDataCell>
-                        <StyledTableDataCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {store.complaintCount > 0 ? (
-                              <>
-                                <Box sx={{
-                                  display: 'flex',
-                                  width: '60px',
-                                  height: '8px',
-                                  bgcolor: 'rgba(0,0,0,0.08)',
-                                  borderRadius: '4px',
-                                  overflow: 'hidden'
-                                }}>
-                                  <Box sx={{
-                                    width: `${Math.min(100, (store.complaintScore / store.complaintCount / 5) * 100)}%`,
-                                    height: '100%',
-                                    bgcolor: (store.complaintScore / store.complaintCount) <= 2 ?
-                                      'warning.light' :
-                                      (store.complaintScore / store.complaintCount) <= 4 ?
-                                        'warning.main' :
-                                        'error.main',
-                                  }} />
-                                </Box>
-                                <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                                  ({(store.complaintScore / store.complaintCount).toFixed(1)})
-                                </Typography>
-                              </>
-                            ) : (
-                              <Typography variant="body2" color="text.secondary">-</Typography>
-                            )}
-                          </Box>
-                        </StyledTableDataCell>
-                        <StyledTableDataCell>{store.praiseCount}</StyledTableDataCell>
-                        <StyledTableDataCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {store.praiseCount > 0 ? (
-                              <>
-                                <Box sx={{
-                                  display: 'flex',
-                                  width: '60px',
-                                  height: '8px',
-                                  bgcolor: 'rgba(0,0,0,0.08)',
-                                  borderRadius: '4px',
-                                  overflow: 'hidden'
-                                }}>
-                                  <Box sx={{
-                                    width: `${Math.min(100, (store.praiseScore / store.praiseCount / 5) * 100)}%`,
-                                    height: '100%',
-                                    bgcolor: (store.praiseScore / store.praiseCount) <= 2 ?
-                                      '#81c784' :
-                                      (store.praiseScore / store.praiseCount) <= 4 ?
-                                        '#66bb6a' :
-                                        '#4caf50',
-                                  }} />
-                                </Box>
-                                <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                                  ({(store.praiseScore / store.praiseCount).toFixed(1)})
-                                </Typography>
-                              </>
-                            ) : (
-                              <Typography variant="body2" color="text.secondary">-</Typography>
-                            )}
-                          </Box>
-                        </StyledTableDataCell>
-                        <StyledTableDataCell
+            <>
+              <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.08)', border: '1px solid #eee' }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <StyledTableCell>순위</StyledTableCell>
+                      <StyledTableCell>지점명</StyledTableCell>
+                      <StyledTableCell>컴플레인 건수</StyledTableCell>
+                      <StyledTableCell>컴플레인 점수</StyledTableCell>
+                      <StyledTableCell>칭찬 건수</StyledTableCell>
+                      <StyledTableCell>칭찬 점수</StyledTableCell>
+                      <StyledTableCell>종합 점수</StyledTableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {storeRankings.length > 0 ? (
+                      storeRankings.map((store, index) => (
+                        <TableRow
+                          key={index}
                           sx={{
-                            color: (100 + store.totalScore) >= 100 ? 'green' : (100 + store.totalScore) < 80 ? 'red' : '#f57c00',
-                            fontWeight: 'bold',
-                            fontSize: '1.1rem',
-                            textAlign: 'center'
+                            backgroundColor: index === 0 ? '#FFF9E1' : '#fff',
+                            '&:hover': { backgroundColor: '#F0F5FF' }
                           }}
                         >
-                          {(100 + store.totalScore).toFixed(1)}
+                          <StyledTableDataCell>{store.rank}</StyledTableDataCell>
+                          <StyledTableDataCell>{store.storeName}</StyledTableDataCell>
+                          <StyledTableDataCell>{store.complaintCount}</StyledTableDataCell>
+                          <StyledTableDataCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              {store.complaintCount > 0 ? (
+                                <>
+                                  <Box sx={{
+                                    display: 'flex',
+                                    width: '60px',
+                                    height: '8px',
+                                    bgcolor: 'rgba(0,0,0,0.08)',
+                                    borderRadius: '4px',
+                                    overflow: 'hidden'
+                                  }}>
+                                    <Box sx={{
+                                      width: `${Math.min(100, (store.complaintScore / store.complaintCount / 5) * 100)}%`,
+                                      height: '100%',
+                                      bgcolor: (store.complaintScore / store.complaintCount) <= 2 ?
+                                        'warning.light' :
+                                        (store.complaintScore / store.complaintCount) <= 4 ?
+                                          'warning.main' :
+                                          'error.main',
+                                    }} />
+                                  </Box>
+                                  <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                                    ({(store.complaintScore / store.complaintCount).toFixed(1)})
+                                  </Typography>
+                                </>
+                              ) : (
+                                <Typography variant="body2" color="text.secondary">-</Typography>
+                              )}
+                            </Box>
+                          </StyledTableDataCell>
+                          <StyledTableDataCell>{store.praiseCount}</StyledTableDataCell>
+                          <StyledTableDataCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              {store.praiseCount > 0 ? (
+                                <>
+                                  <Box sx={{
+                                    display: 'flex',
+                                    width: '60px',
+                                    height: '8px',
+                                    bgcolor: 'rgba(0,0,0,0.08)',
+                                    borderRadius: '4px',
+                                    overflow: 'hidden'
+                                  }}>
+                                    <Box sx={{
+                                      width: `${Math.min(100, (store.praiseScore / store.praiseCount / 5) * 100)}%`,
+                                      height: '100%',
+                                      bgcolor: (store.praiseScore / store.praiseCount) <= 2 ?
+                                        '#81c784' :
+                                        (store.praiseScore / store.praiseCount) <= 4 ?
+                                          '#66bb6a' :
+                                          '#4caf50',
+                                    }} />
+                                  </Box>
+                                  <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                                    ({(store.praiseScore / store.praiseCount).toFixed(1)})
+                                  </Typography>
+                                </>
+                              ) : (
+                                <Typography variant="body2" color="text.secondary">-</Typography>
+                              )}
+                            </Box>
+                          </StyledTableDataCell>
+                          <StyledTableDataCell
+                            sx={{
+                              color: (100 + store.totalScore) >= 100 ? 'green' : (100 + store.totalScore) < 80 ? 'red' : '#f57c00',
+                              fontWeight: 'bold',
+                              fontSize: '1.1rem',
+                              textAlign: 'center'
+                            }}
+                          >
+                            {(100 + store.totalScore).toFixed(1)}
+                          </StyledTableDataCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <StyledTableDataCell colSpan={7} align="center" sx={{ py: 5 }}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#94A3B8', py: 4 }}>
+                            <Typography variant="h6" sx={{ color: '#64748B', mb: 1 }}>
+                              평가 데이터가 없습니다.
+                            </Typography>
+                          </Box>
                         </StyledTableDataCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <StyledTableDataCell colSpan={7} align="center" sx={{ py: 5 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#94A3B8', py: 4 }}>
-                          <Typography variant="h6" sx={{ color: '#64748B', mb: 1 }}>
-                            평가 데이터가 없습니다.
-                          </Typography>
-                        </Box>
-                      </StyledTableDataCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <Box sx={{ mt: 2, mb: 2, textAlign: 'left' }}>
+                <Typography variant="body2" sx={{ color: '#2563A6', fontWeight: 600, fontSize: 15 }}>
+                  종합 점수 = 칭찬점수 - 컴플레인점수 + 100 방식으로 산정됩니다.<br />
+                  <span style={{ fontWeight: 400, fontSize: 14, color: '#1E5187' }}>(각 점수는 평가등급 합산값, 종합점수는 100을 기준으로 가감)</span>
+                </Typography>
+              </Box>
+            </>
           ) : (
             loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>

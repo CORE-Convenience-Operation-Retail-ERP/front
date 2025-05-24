@@ -548,6 +548,47 @@ const MyCon = forwardRef(({ info, type }, ref) => {
     }
   };
 
+  // 사원정보 표시 영역에서 순서: 사원번호 -> 연락처 -> 이메일 -> 주소 순으로, 내선번호는 본사|소속부서 뱃지 아래에 별도 표시
+  // 사원정보 표시 영역
+  if (type === "employee-info") {
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6" fontWeight="bold" color="#2563A6">
+            사원정보
+          </Typography>
+        </Box>
+        <Divider sx={{ mb: 3 }} />
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="caption" color="text.secondary">사원번호</Typography>
+              <Typography variant="h6" fontWeight="medium">{info?.empId || '-'}</Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Box>
+              <Typography variant="caption" color="text.secondary">연락처</Typography>
+              <Typography variant="h6" fontWeight="medium">{info?.empExt || '-'}</Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Box>
+              <Typography variant="caption" color="text.secondary">이메일</Typography>
+              <Typography variant="h6" fontWeight="medium">{info?.empEmail || '-'}</Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Box>
+              <Typography variant="caption" color="text.secondary">주소</Typography>
+              <Typography variant="h6" fontWeight="medium">{info?.empAddress || '-'}</Typography>
+            </Box>
+          </Grid>
+        </Grid>
+      </Box>
+    );
+  }
+  
   // 출근/퇴근 전체 영역
   if (type === "attendance") {
     return (

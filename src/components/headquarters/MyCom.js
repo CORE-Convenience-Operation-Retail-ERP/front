@@ -74,18 +74,11 @@ const MyCom = ({ info }) => {
                 py: 0.5,
                 px: 2,
                 borderRadius: 2,
-                mb: 2
+                mb: 1
               }}
             >
               <Typography variant="body2" fontWeight="medium">
                 {getRoleText()}
-              </Typography>
-            </Box>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
-              <PhoneIcon fontSize="small" sx={{ color: '#2563A6' }} />
-              <Typography variant="body2">
-                {info?.empPhone || '-'}
               </Typography>
             </Box>
           </Box>
@@ -93,8 +86,29 @@ const MyCom = ({ info }) => {
 
         <Divider sx={{ my: 2 }} />
         
-        {/* 연락처 및 주소 정보 */}
+        {/* 사원번호 -> 연락처 -> 이메일 -> 주소 순으로 재배치 */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {/* 사원번호 */}
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+            <IconBox icon={LocationOnIcon} />
+            <Box>
+              <Typography variant="caption" color="text.secondary">사원번호</Typography>
+              <Typography variant="body2" fontWeight="medium">
+                {info?.empId || '-'}
+              </Typography>
+            </Box>
+          </Box>
+          {/* 연락처 */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <IconBox icon={PhoneIcon} />
+            <Box>
+              <Typography variant="caption" color="text.secondary">연락처</Typography>
+              <Typography variant="body2" fontWeight="medium">
+                {info?.empPhone || '-'}
+              </Typography>
+            </Box>
+          </Box>
+          {/* 이메일 */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <IconBox icon={EmailIcon} />
             <Box>
@@ -104,23 +118,13 @@ const MyCom = ({ info }) => {
               </Typography>
             </Box>
           </Box>
-          
+          {/* 주소 */}
           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
             <IconBox icon={HomeIcon} />
             <Box>
               <Typography variant="caption" color="text.secondary">주소</Typography>
               <Typography variant="body2" fontWeight="medium">
                 {info?.empAddr || '-'}
-              </Typography>
-            </Box>
-          </Box>
-          
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-            <IconBox icon={LocationOnIcon} />
-            <Box>
-              <Typography variant="caption" color="text.secondary">사원번호</Typography>
-              <Typography variant="body2" fontWeight="medium">
-                {info?.empId || '-'}
               </Typography>
             </Box>
           </Box>

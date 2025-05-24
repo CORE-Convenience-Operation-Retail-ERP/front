@@ -24,7 +24,14 @@ export const NotificationProvider = ({ children }) => {
     const handleRealtime = (notification) => {
       console.log('[NotificationContext] 실시간 알림 수신:', notification);
       setNotifications(prev => {
-        if (prev.some(n => n.id === notification.id)) return prev;
+        if (
+          prev.some(n =>
+            n.content === notification.content &&
+            n.userId === notification.userId &&
+            n.eventType === notification.eventType &&
+            n.createdAt === notification.createdAt
+          )
+        ) return prev;
         return [notification, ...prev];
       });
     };
@@ -46,7 +53,10 @@ export const NotificationProvider = ({ children }) => {
       console.log(`[NotificationContext] 부서 알림 구독 시작: ${deptDestination}`);
       webSocketService.subscribe(deptDestination, (notification) => {
         console.log('[NotificationContext] 부서 알림 수신:', notification);
-        handleRealtime(notification);
+        // 내 알림만 처리
+        if (notification.userId === myEmpId) {
+          handleRealtime(notification);
+        }
       });
     }
 
