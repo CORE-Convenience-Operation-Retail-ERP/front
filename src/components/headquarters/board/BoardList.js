@@ -318,7 +318,7 @@ const BoardList = ({
             onClick={() => onAddPost(boardType)}
             sx={{
               backgroundColor: '#2563A6',
-              '&:hover': { backgroundColor: '#F0F5FF' },
+              '&:hover': { backgroundColor: '#1E5187' },
               borderRadius: '30px',
               px: 3,
               height: 40

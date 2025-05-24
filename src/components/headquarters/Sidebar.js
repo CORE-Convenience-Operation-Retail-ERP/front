@@ -66,7 +66,6 @@ const menuItems = [
       { text: '지점 문의 관리', path: '/headquarters/branches/inquiry' },
       { text: '지점 매출 분석', path: '/headquarters/branches/sales-analysis' },
       { text: '지점 재고 현황', path: '/headquarters/branches/stock-monitering' },
-      { text: '지점 통계', path: '/headquarters/branches/statistics' }
     ],
     hoverBoxBottom: { bottom: -88, width: 88  , height: 40 },
   },
