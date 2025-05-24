@@ -10,6 +10,8 @@ import ChatModal from '../chat/ChatModal';
 import chatService from '../../service/ChatService';
 import NotificationIcon from '../common/NotificationIcon';
 import adminNotificationService from '../../service/AdminNotificationService';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import Tooltip from '@mui/material/Tooltip';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -30,6 +32,9 @@ const Header = () => {
 
   // userName 설정 부분 
   const userName = name || "로그인 해주세요";
+
+  const deptId = parseInt(localStorage.getItem('deptId'), 10);
+  const isStoreOwner = deptId === 3;
 
   // 채팅 알림 구독 - 웹소켓 관련이므로 유지
   useEffect(() => {
@@ -133,6 +138,30 @@ const Header = () => {
 
           {/* 오른쪽: 아이콘 그룹 */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, marginLeft: 'auto' }}>
+            {/* 점주일 때만 store 버튼 노출 */}
+            {isHeadquartersPage && isStoreOwner && (
+              <Tooltip title="Store" arrow>
+                <IconButton
+                  color="primary"
+                  onClick={() => navigate('/store/home')}
+                  sx={{ mr: 1, ml: 1}}
+                >
+                  <Box
+                    sx={{
+                      backgroundColor: '#222',
+                      borderRadius: '50%',
+                      width: 26,
+                      height: 26,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <StorefrontIcon sx={{ color: 'white', fontSize: 18 }} />
+                  </Box>
+                </IconButton>
+              </Tooltip>
+            )}
             {/* 채팅 아이콘 (본사 페이지일 때만 표시) */}
             {isHeadquartersPage && (
               <IconButton onClick={toggleChat}>
