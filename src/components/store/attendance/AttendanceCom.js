@@ -6,12 +6,14 @@ import styled from "styled-components";
 
 const StatusTag = styled.span`
   display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 12px;
   font-size: 12px;
   color: white;
   background-color: ${({ status }) =>
       status === 0 ? "#10b981" : status === 1 ? "#f59e0b" : "#9ca3af"};
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-weight: bold;
 `;
 
 function AttendanceCom({

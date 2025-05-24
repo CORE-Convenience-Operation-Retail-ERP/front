@@ -88,11 +88,37 @@ const TransactionTable = ({
             {rows.map((row) => (
                 <tr key={row.transactionId}>
                   <td>{new Date(row.paidAt).toLocaleString()}</td>
-                  <td>{row.paymentMethod?.toUpperCase()}</td>
+                  <td>
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '4px 10px',
+                        borderRadius: '12px',
+                        backgroundColor: row.paymentMethod?.toUpperCase() === 'CARD' ? '#e9ecef' : row.paymentMethod?.toUpperCase() === 'CASH' ? '#adb5bd' : '#ced4da',
+                        color: '#495057',
+                        fontWeight: 'bold',
+                        fontSize: '12px'
+                      }}
+                    >
+                      {row.paymentMethod?.toUpperCase()}
+                    </span>
+                  </td>
                   <td style={{ fontWeight: "bold" }}>{row.finalAmount?.toLocaleString()}원</td>
                   <td>{row.discountTotal?.toLocaleString()}원</td>
-                  <td style={{ color: row.transactionStatus === 1 ? "red" : "#111" }}>
-                    {row.transactionStatus === 1 ? "환불" : "정상"}
+                  <td>
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '4px 10px',
+                        borderRadius: '12px',
+                        backgroundColor: row.transactionStatus === 1 ? '#fee2e2' : '#dbeafe',
+                        color: row.transactionStatus === 1 ? '#ef4444' : '#1d4ed8',
+                        fontWeight: 'bold',
+                        fontSize: '12px'
+                      }}
+                    >
+                      {row.transactionStatus === 1 ? '환불' : '정상'}
+                    </span>
                   </td>
                   <td>{row.items?.length || 0}건</td>
                   <td>

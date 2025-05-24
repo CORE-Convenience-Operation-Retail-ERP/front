@@ -170,11 +170,14 @@ function StoreSearchBar({ filterOptions = [], onSearch, initialValues = {} }) {
         )}
 
         {selectedOption.type === 'date' && (
-            <CustomCalendar
-                selected={value ? new Date(value) : null}
-                onChange={(date) => setValue(date.toISOString().split('T')[0])}
-                placeholder="날짜 선택"
-            />
+          <CustomCalendar
+            selected={value ? new Date(value) : null}
+            onChange={(date) => {
+              const formatted = date.toLocaleDateString('sv-SE');
+              setValue(formatted);
+            }}
+            placeholder="날짜 선택"
+          />
         )}
 
         {selectedOption.type === 'date-range' && (

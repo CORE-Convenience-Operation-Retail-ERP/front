@@ -24,7 +24,8 @@ function StoreHeader({ userInfo, onLogout }) {
 
     return (
         <Header>
-            <LogoImage src="/core_logo.png" alt="Core 로고" />
+            <LogoImage src="/core_logo.png" alt="Core 로고" 
+                onClick={() => navigate('/store/home')} style={{ cursor: 'pointer' }}/>
             <RightSection>
 
                 {/* Mail */}

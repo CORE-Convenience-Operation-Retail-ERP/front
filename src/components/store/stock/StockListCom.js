@@ -237,7 +237,21 @@ function StockListCom({
                                 <td>{r.realQuantity ?? '-'}</td>
                                 <td>{renderDifference(r.realQuantity, r.totalQuantity, r.isApplied)}</td>
                                 <td>{r.latestInDate?.split('T')[0] || '-'}</td>
-                                <td>{r.checkItemId ? (r.isApplied ? `복원 가능` : `반영 가능`) : null}</td>
+                                <td>{r.checkItemId ? (
+                                    <span
+                                        style={{
+                                            display: 'inline-block',
+                                            padding: '4px 10px',
+                                            borderRadius: '12px',
+                                            backgroundColor: r.isApplied ? '#dbeafe' : '#f3f4f6',
+                                            color: r.isApplied ? '#1d4ed8' : '#6b7280',
+                                            fontWeight: 'bold',
+                                            fontSize: '12px'
+                                        }}
+                                    >
+                                        {r.isApplied ? '복원 가능' : '반영 가능'}
+                                    </span>
+                                ) : null}</td>
                             </tr>
                         ))}
                         </tbody>

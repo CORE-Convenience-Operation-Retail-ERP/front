@@ -83,7 +83,9 @@ function CategorySalesDonutCom({ data, loading, colorOverrides, onColorChange, m
     return (
         <ChartWrapper>
             <div>
-                <h3>카테고리별 매출 비율</h3>
+            <h3 style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "0.5em"}}>
+                시간대별 매출 차트
+            </h3>
 
                 {!isEmpty && (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "1rem" }}>

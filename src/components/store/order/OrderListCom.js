@@ -23,8 +23,49 @@ function OrderListCom({
 
   const userRole = localStorage.getItem("role");
 
-  const renderCell = (order, content) => (
-      <td onClick={() => onRowClick(order.orderId)}>{content}</td>
+  const getStatusBadgeStyle = (status) => {
+    // 예시: 0=대기, 1=완료, 2=취소 등 상황에 맞게 색상 지정
+    if (status === 0) {
+      return {
+        backgroundColor: '#dbeafe',
+        color: '#1d4ed8',
+      };
+    } else if (status === 1) {
+      return {
+        backgroundColor: '#f3f4f6',
+        color: '#6b7280',
+      };
+    } else if (status === 2) {
+      return {
+        backgroundColor: '#fee2e2',
+        color: '#ef4444',
+      };
+    }
+    return {
+      backgroundColor: '#f3f4f6',
+      color: '#6b7280',
+    };
+  };
+
+  const renderCell = (order, content, col) => (
+      col === 'status' ? (
+        <td onClick={() => onRowClick(order.orderId)}>
+          <span
+            style={{
+              display: 'inline-block',
+              padding: '4px 10px',
+              borderRadius: '12px',
+              fontWeight: 'bold',
+              fontSize: '12px',
+              ...getStatusBadgeStyle(order.orderStatus)
+            }}
+          >
+            {content}
+          </span>
+        </td>
+      ) : (
+        <td onClick={() => onRowClick(order.orderId)}>{content}</td>
+      )
   );
 
   const renderActionButtons = (order) => {
@@ -64,7 +105,7 @@ function OrderListCom({
                     {renderCell(order, order.totalQuantity)}
                     {renderCell(order, `${order.totalAmount?.toLocaleString() || 0}원`)}
                     {renderCell(order, order.orderDate ? new Date(order.orderDate).toLocaleString() : '-')}
-                    {renderCell(order, getOrderStatusLabel(order.orderStatus))}
+                    {renderCell(order, getOrderStatusLabel(order.orderStatus), 'status')}
                     <td>{renderActionButtons(order)}</td>
                   </tr>
               ))}

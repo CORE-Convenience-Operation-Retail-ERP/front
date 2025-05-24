@@ -71,7 +71,9 @@ export function HourlySalesChartCom({ data, loading, mode = "detail" }) {
 
     return (
         <div style={{ marginTop: "3rem" }}>
-            <h3>시간대별 매출 차트</h3>
+            <h3 style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "0.5em", marginLeft: "100px" }}>
+                시간대별 매출 차트
+            </h3>
             <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={filledData} margin={{ top: 20, right: 40, bottom: 5, left: 60 }}>
                     <CartesianGrid strokeDasharray="3 3" />

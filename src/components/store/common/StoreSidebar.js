@@ -94,7 +94,7 @@ function StoreSidebar({ menus, hoverMenu, onMouseEnter, onMouseLeave, onNavigate
                     spinning={spinning}
                     onAnimationEnd={handleAnimationEnd}
                 >
-                    @ CORE ERP <IoIosArrowDown />
+                    @ CORE ERP 
                 </FooterContent>
 
             </SidebarFooter>

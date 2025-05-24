@@ -63,7 +63,7 @@ function DisposalCom({
                             <td>{item.proName}</td>
                             <td>{item.quantity}</td>
                             <td>{item.lastInDate?.slice(0, 10)}</td>
-                            <td>{item.expiredDate?.slice(0, 10)}</td>
+                            <td>{item.expirationDate?.slice(0, 10)}</td>
                           </tr>
                       ))
                   ) : (
@@ -102,7 +102,7 @@ function DisposalCom({
                       disposalList.map((item) => (
                           <tr key={item.disposalId}>
                             <td>{item.disposalId}</td>
-                            <td>{item.productName}</td>
+                            <td>{item.proName}</td>
                             <td>{item.disposalQuantity}</td>
                             <td>{item.disposalReason}</td>
                             <td>{item.processedBy}</td>

@@ -58,46 +58,75 @@ function StatisticsDashboardCon() {
             </div>
 
 
-            {/*  통계 시각화 */}
-            <KpiStatsCon filters={filters} />
+            {/* KPI 통계 */}
+            <KpiStatsCon filters={filters} variant="statistics" />
+
+            {/* 시간별 매출 차트 */}
             <div
                 className="card"
                 onClick={() => navigate("/store/stats/time", { state: filters })}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer", maxWidth: "1500px", margin: "0 auto" }}
             >
                 <HourlySalesChartCon filters={filters} mode="full" height={300} />
             </div>
-            <div style={{
-                display: "flex",
-                gap: "3rem",
-                alignItems: "flex-start",
-                flexWrap: "wrap",
-                minHeight: "400px",
-            }}>
-                <div style={{marginTop:"3rem", display: "flex", gap: "2rem", alignItems: "flex-start" }}>
-                    <div 
-                        style={{ flex: 1, minWidth: "480px", height: "340px" }}
-                        onClick={() => navigate("/store/stats/category", { state: filters })}
-                    >
-                        <CategorySalesDonutCon filters={filters} mode="summary" />
-                    </div>
-                    <div 
-                        style={{ flex: 1, minWidth: "480px", height: "340px" }}
-                        onClick={() => navigate("/store/stats/product", { state: filters })}
-                    >
-                        <ProductSalesChartCon filters={filters} mode="summary" />
-                    </div>
-                </div>
 
-            </div>
+            {/* 카테고리 & 상품 차트 */}
             <div
-                className="card"
-                onClick={() => navigate("/store/stats/order", { state: filters })}
-                style={{ cursor: "pointer" }}
+                style={{
+                    width: "100%",
+                    maxWidth: "1200px",
+                    margin: "0 auto",
+                    display: "flex",
+                    gap: "20rem",
+                    alignItems: "flex-start",
+                    flexWrap: "nowrap",
+                    minHeight: "400px",
+                }}
             >
-                <OrderTopProductsCon filters={filters} mode="mini" height={180} />
+                <div
+                    style={{
+                        flex: 1,
+                        minWidth: "350px",
+                        height: "340px",
+                        cursor: "pointer",
+                        marginTop: "3rem",
+                    }}
+                    onClick={(e) => {
+                        const isInsideSelect = e.target.tagName === "SELECT" || e.target.closest("select");
+                        if (!isInsideSelect) {
+                            navigate("/store/stats/category", { state: filters });
+                        }
+                    }}
+                >
+                    <CategorySalesDonutCon filters={filters} mode="summary" />
+                </div>
+                <div
+                    style={{
+                        flex: 2,
+                        minWidth: "600px",
+                        height: "340px",
+                        cursor: "pointer",
+                        marginTop: "-1em",
+                    }}
+                    onClick={() => navigate("/store/stats/product", { state: filters })}
+                >
+                    <ProductSalesChartCon filters={filters} mode="summary" />
+                </div>
             </div>
 
+            {/* 발주 상위 */}
+            <div
+              className="card"
+              onClick={(e) => {
+                const isInsideButton = e.target.tagName === "BUTTON" || e.target.closest("button");
+                if (!isInsideButton) {
+                  navigate("/store/stats/order", { state: filters });
+                }
+              }}
+              style={{ cursor: "pointer", maxWidth: "1500px", margin: "0 auto" }}
+            >
+              <OrderTopProductsCon filters={filters} mode="mini" height={180} />
+            </div>
         </>
     );
 }
