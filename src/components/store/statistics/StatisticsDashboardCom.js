@@ -1,3 +1,4 @@
+import { PageWrapper } from "../../../features/store/styles/common/PageLayout";
 import CategorySalesDonutCom from "./CategorySalesDonutCom";
 import HourlySalesChartCom from "./HourlySalesChartCom";
 import KpiStatsCom from "./KpiStatsCom";

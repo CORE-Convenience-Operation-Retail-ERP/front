@@ -6,6 +6,7 @@ import SettlementTable from "../../components/store/settlement/SettlementTable";
 import Pagination from "../../components/store/common/Pagination";
 import { ViewToggleButton, PrimaryButton } from "../../features/store/styles/common/Button.styled";
 import LoadingLottie from '../../components/common/LoadingLottie.tsx';
+import { PageTitle, PageWrapper } from "../../features/store/styles/common/PageLayout.js";
 
 const TYPES = [
   { value: "ALL", label: "전체" },
@@ -87,7 +88,8 @@ const SettlementCon = () => {
   if (loading) return <LoadingLottie />;
 
   return (
-    <>
+    <PageWrapper>
+      <PageTitle>| 정산 이력 조회</PageTitle>
       {/* 필터 바: 정산유형 + 날짜 범위 */}
       <div
         style={{
@@ -137,7 +139,7 @@ const SettlementCon = () => {
         totalPages={totalPages}
         onPageChange={(p) => setCurrentPage(p + 1)}
       />
-    </>
+    </PageWrapper>
   );
 };
 

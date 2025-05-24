@@ -7,7 +7,7 @@ import ProductSalesChartCon from "./ProductSalesChartCon";
 import CategorySalesDonutCon from "./CategorySalesDonutCon";
 import OrderTopProductsCon from "./OrderTopProductsCon";
 import { useNavigate } from "react-router-dom";
-import {PageTitle} from "../../../features/store/styles/common/PageLayout";
+import {PageTitle, PageWrapper} from "../../../features/store/styles/common/PageLayout";
 
 function StatisticsDashboardCon() {
     const navigate = useNavigate();
@@ -44,7 +44,7 @@ function StatisticsDashboardCon() {
     };
 
     return (
-        <>
+        <PageWrapper>
 
             <PageTitle>| 통계 관리</PageTitle>
             <div style={{ display: "flex", justifyContent: "flex-end", marginRight: "1rem" }}>
@@ -127,7 +127,7 @@ function StatisticsDashboardCon() {
             >
               <OrderTopProductsCon filters={filters} mode="mini" height={180} />
             </div>
-        </>
+        </PageWrapper>
     );
 }
 

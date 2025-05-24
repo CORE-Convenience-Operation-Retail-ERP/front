@@ -38,7 +38,6 @@ function DisposalCom({
   };
 
   return (
-      <PageWrapper>
         <PageSection>
           <FlexSectionWrapper>
             {/* 좌측: 폐기 대상 자동 조회 */}
@@ -130,7 +129,6 @@ function DisposalCom({
             </section>
           </FlexSectionWrapper>
         </PageSection>
-      </PageWrapper>
   );
 }
 

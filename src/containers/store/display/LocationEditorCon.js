@@ -1,126 +1,134 @@
-import React, { useState, useEffect } from 'react';
-import LocationEditorCom from '../../../components/store/display/LocationEditorCom';
-import {
-  fetchDisplayLocations,
-  saveDisplayLocations,
-} from '../../../service/store/DisplayLocationService';
-import { saveProductLocationMapping } from '../../../service/store/StockService';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import LocationEditorCom from '../../../components/store/display/LocationEditorCom';
+import { fetchDisplayLocations, saveDisplayLocations } from '../../../service/store/DisplayLocationService';
+import { saveProductLocationMapping } from '../../../service/store/StockService';
 
-function LocationEditorCon({
-  onClose,
-  isEditMode,
-  productLocationCode = [],     
-  onConfirmSave,
-}) {
+// 초기 생성 크기 상수 (픽셀 단위)
+const DEFAULT_SIZE = {
+  width: 200,
+  height: 200,
+};
+
+// 새로운 레이아웃 아이템 생성 함수
+const createNewItem = ({ x, y }) => ({
+  i: Date.now().toString(),
+  x,
+  y,
+  width: DEFAULT_SIZE.width,
+  height: DEFAULT_SIZE.height,
+  locationCode: '',
+  label: '',
+  type: 0,
+});
+
+export default function LocationEditorCon({ onClose, isEditMode, productLocationCode = [], onConfirmSave }) {
   const { productId } = useParams();
   const [layouts, setLayouts] = useState([]);
   const [selectedLocationCodes, setSelectedLocationCodes] = useState([]);
 
+  // 1) 초기 로딩
   useEffect(() => {
-    fetchDisplayLocations().then((data) => {
-      const initialLayouts = data.map((loc, i) => ({
-        ...loc,
-        i: loc.i || `${i}`,
+    (async () => {
+      const data = await fetchDisplayLocations();
+      const initial = data.map((loc, idx) => ({
+        i: loc.i?.toString() || `${idx}`,
+        x: loc.x ?? loc.positionX ?? 0,
+        y: loc.y ?? loc.positionY ?? 0,
+        width: loc.width ?? loc.w ?? DEFAULT_SIZE.width,
+        height: loc.height ?? loc.h ?? DEFAULT_SIZE.height,
+        locationCode: loc.locationCode,
+        label: loc.label,
+        type: loc.type,
+        locationId: loc.locationId,
       }));
-      setLayouts(initialLayouts);
+      setLayouts(initial);
+    })();
+  }, []);
+
+  // 2) 레이아웃 변경 (드래그/리사이즈 완료 시)
+  const handleLayoutChange = useCallback(newLayout => {
+    setLayouts(prev =>
+      prev.map(item => {
+        const match = newLayout.find(l => l.i === item.i);
+        return match
+          ? { ...item, x: match.x, y: match.y, width: match.w, height: match.h }
+          : item;
+      })
+    );
+  }, []);
+
+  // 3) 입력 필드 변경
+  const handleInputChange = useCallback((idx, field, value) => {
+    setLayouts(prev => {
+      const out = [...prev];
+      out[idx] = { ...out[idx], [field]: value };
+      return out;
     });
   }, []);
 
-  const handleLayoutChange = (newLayout) => {
-    setLayouts((prevLayouts) =>
-      prevLayouts.map((loc) => {
-        const matched = newLayout.find((l) => l.i === loc.i);
-        return matched
-          ? { ...loc, x: matched.x, y: matched.y, width: matched.w, height: matched.h }
-          : loc;
-      })
-    );
-  };
-
-  const handleInputChange = (index, field, value) => {
-    const updated = [...layouts];
-    updated[index][field] = value;
-    setLayouts(updated);
-  };
-
-  const handleAdd = () => {
-    const maxY = layouts.reduce((max, item) => Math.max(max, item.y || 0), 0);
-    const newLoc = {
-      i: `${Date.now()}`,
-      x: 0,
-      y: maxY + 1,
-      width: 2,
-      height: 1,
-      locationCode: '',
-      label: '',
-      type: 0,
-    };
-    setLayouts((prev) => [...prev, newLoc]);
-  };
-
-  const handleDelete = (index) => {
-    setLayouts((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSaveLayout = async () => {
-    try {
-      for (let loc of layouts) {
-        const code = loc.locationCode?.trim();
-        if (!code) {
-          alert(`"${loc.label || '이름 없는 위치'}"의 위치 코드는 비워둘 수 없습니다.`);
-          return;
-        }
+  // 4) 첫 빈 공간 찾기
+  const findFirstEmpty = useCallback(() => {
+    const occupied = new Set(layouts.map(l => `${l.x},${l.y}`));
+    for (let row = 0; row < 50; row++) {
+      for (let col = 0; col < 12; col++) {
+        if (!occupied.has(`${col},${row}`)) return { x: col, y: row };
       }
-      const fixed = layouts.map((l) => ({
-        ...l,
-        x: l.x ?? 0,
-        y: l.y ?? 0,
-        width: l.width ?? 2,
-        height: l.height ?? 1,
-      }));
-      await saveDisplayLocations(fixed);
-      alert('진열 구조 저장 완료');
-      if (onConfirmSave) onConfirmSave();
-      onClose();
-    } catch (err) {
-      alert('저장 실패: ' + err);
     }
-  };
+    return { x: 0, y: (Math.max(...layouts.map(l => l.y)) || 0) + 1 };
+  }, [layouts]);
 
-  const handleSelectLocation = (locationCode) => {
-    setSelectedLocationCodes((prev) =>
-      prev.includes(locationCode)
-        ? prev.filter((code) => code !== locationCode)
-        : [...prev, locationCode]
+  // 5) 새 위치 추가
+  const handleAdd = useCallback(() => {
+    const { x, y } = findFirstEmpty();
+    setLayouts(prev => [...prev, createNewItem({ x, y })]);
+  }, [findFirstEmpty]);
+
+  // 6) 위치 삭제
+  const handleDelete = useCallback(idx => {
+    setLayouts(prev => prev.filter((_, i) => i !== idx));
+  }, []);
+
+  // 7) 매핑 모드 선택/해제
+  const handleSelectLocation = useCallback(code => {
+    setSelectedLocationCodes(prev =>
+      prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]
     );
-  };
+  }, []);
 
-  const handleSaveMapping = async () => {
-    try {
-      if (!selectedLocationCodes.length) {
-        alert('위치를 선택해주세요.');
-        return;
+  // 8) 유효성 검사
+  const validate = useCallback(() => {
+    for (const loc of layouts) {
+      if (!loc.locationCode.trim()) {
+        alert(`위치 코드가 비어 있습니다: ${loc.label || '(미입력)'}`);
+        return false;
       }
-
-      const selectedIds = layouts
-        .filter((l) => selectedLocationCodes.includes(l.locationCode))
-        .map((l) => l.locationId)
-        .filter((id) => !!id);
-
-      if (!selectedIds.length) {
-        alert('선택한 위치의 ID를 찾을 수 없습니다.');
-        return;
-      }
-
-      await saveProductLocationMapping(Number(productId), selectedIds);
-      alert('위치 매핑 저장 완료!');
-      if (onConfirmSave) onConfirmSave();
-      onClose();
-    } catch (err) {
-      alert('매핑 실패: ' + err);
     }
-  };
+    return true;
+  }, [layouts]);
+
+  // 9) 진열 구조 저장
+  const handleSaveLayout = useCallback(async () => {
+    if (!validate()) return;
+    await saveDisplayLocations(layouts);
+    alert('진열 구조 저장 완료');
+    onConfirmSave?.();
+    onClose();
+  }, [layouts, validate, onConfirmSave, onClose]);
+
+  // 10) 상품-위치 매핑 저장
+  const handleSaveMapping = useCallback(async () => {
+    if (!selectedLocationCodes.length) { alert('위치를 선택해주세요.'); return; }
+    const ids = layouts
+      .filter(l => selectedLocationCodes.includes(l.locationCode))
+      .map(l => l.locationId)
+      .filter(Boolean);
+    if (!ids.length) { alert('선택한 위치의 ID가 없습니다.'); return; }
+    await saveProductLocationMapping(Number(productId), ids);
+    alert('위치 매핑 저장 완료');
+    onConfirmSave?.();
+    onClose();
+  }, [layouts, selectedLocationCodes, productId, onConfirmSave, onClose]);
 
   return (
     <LocationEditorCom
@@ -137,5 +145,3 @@ function LocationEditorCon({
     />
   );
 }
-
-export default LocationEditorCon;

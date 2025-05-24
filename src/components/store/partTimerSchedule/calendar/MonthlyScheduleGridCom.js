@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import {PageTitle} from "../../../../features/store/styles/common/PageLayout";
 
 const daysKor = ['일', '월', '화', '수', '목', '금', '토'];
 

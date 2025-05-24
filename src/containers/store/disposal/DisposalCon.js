@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { cancelDisposalById, fetchDisposalHistory, fetchExpiredDisposals } from "../../../service/store/DisposalService";
 import DisposalCom from "../../../components/store/disposal/DisposalCom";
 import {PageTitle, PageWrapper} from "../../../features/store/styles/common/PageLayout";
-import {FiTrash, FiTrash2} from "react-icons/fi";
 import LoadingLottie from '../../../components/common/LoadingLottie.tsx';
 
 const DisposalCon = () => {
@@ -55,10 +54,11 @@ const DisposalCon = () => {
   if (loading) return <LoadingLottie />;
 
   return (
-      <PageWrapper>
-        <PageTitle>
+        <>
+        <PageTitle style={{ marginTop: '8px' }}>
           | 폐기 관리
         </PageTitle>
+        <PageWrapper>
         <DisposalCom
           expiredList={paginatedExpired}
           disposalList={paginatedDisposal}
@@ -72,6 +72,7 @@ const DisposalCon = () => {
           onDisposalPageChange={setDisposalPage}
       />
       </PageWrapper>
+      </>
   );
 };
 
