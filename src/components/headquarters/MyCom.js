@@ -29,8 +29,9 @@ const MyCom = ({ info }) => {
     const code = String(deptCode).toUpperCase();
     if (code === 'HQ_PRO') return '상품관리팀';
     if (code === 'HQ_BR') return '지점관리팀';
-    if (code === 'HQ_HR') return '인사관리팀';
+    if (code === 'HQ_HR' || code === 'HQ_HRM') return '인사관리팀';
     if (code === 'MASTER') return '관리자';
+
     return deptCode;
   };
 
