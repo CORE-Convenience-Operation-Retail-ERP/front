@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import ProductSalesChartCon from "../../../containers/store/statistics/ProductSalesChartCon";
 import { FiCalendar } from "react-icons/fi";
+import { PageTitle, PageWrapper } from "../../../features/store/styles/common/PageLayout";
 
 function ProductSalesDetailPage() {
   const location = useLocation();
@@ -38,26 +39,8 @@ function ProductSalesDetailPage() {
   };
 
   return (
-    <div style={{ padding: "40px 60px", maxWidth: "1200px", margin: "0 auto" }}>
-      {/* 타이틀 */}
-      <h2 style={{
-        fontSize: "22px",
-        fontWeight: 700,
-        color: "#1f2937",
-        marginBottom: "8px",
-        display: "flex",
-        alignItems: "center",
-      }}>
-        <span style={{
-          display: "inline-block",
-          width: "6px",
-          height: "18px",
-          background: "#111827",
-          marginRight: "10px",
-          borderRadius: "2px"
-        }}></span>
-        상품별 매출 순위 상세 통계
-      </h2>
+    <PageWrapper>
+      <PageTitle>| 상품별 매출</PageTitle>
 
       <p style={{
         fontSize: "15px",
@@ -105,28 +88,20 @@ function ProductSalesDetailPage() {
       {/* 통계 결과 */}
       {filters && (
         <div style={{
-          display: "flex",
-          justifyContent: "center",
-          marginTop: "24px"
+          border: "1px solid #e5e7eb",
+          borderRadius: "12px",
+          padding: "28px",
+          background: "#ffffff",
+          boxShadow: "0 3px 10px rgba(0,0,0,0.03)"
         }}>
-          <div style={{
-            border: "1px solid #e5e7eb",
-            borderRadius: "12px",
-            padding: "28px",
-            background: "#ffffff",
-            boxShadow: "0 3px 10px rgba(0,0,0,0.03)",
-            width: "100%",
-            maxWidth: "1000px"
-          }}>
-            <ProductSalesChartCon
-              filters={filters}
-              mode="detail"
-              height={300}
-            />
-          </div>
+          <ProductSalesChartCon
+            filters={filters}
+            mode="detail"
+            height={300}
+          />
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 }
 

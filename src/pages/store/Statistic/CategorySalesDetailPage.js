@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import CategorySalesDonutCon from "../../../containers/store/statistics/CategorySalesDonutCon";
 import { FiCalendar } from "react-icons/fi";
+import { PageTitle, PageWrapper } from "../../../features/store/styles/common/PageLayout";
 
 function CategorySalesDetailPage() {
   const location = useLocation();
@@ -42,26 +43,9 @@ function CategorySalesDetailPage() {
   };
 
   return (
-    <div style={{ padding: "40px 60px", maxWidth: "1200px", margin: "0 auto" }}>
-      {/* 타이틀 */}
-      <h2 style={{
-        fontSize: "22px",
-        fontWeight: 700,
-        color: "#1f2937",
-        marginBottom: "8px",
-        display: "flex",
-        alignItems: "center",
-      }}>
-        <span style={{
-          display: "inline-block",
-          width: "6px",
-          height: "18px",
-          background: "#111827",
-          marginRight: "10px",
-          borderRadius: "2px"
-        }}></span>
-        카테고리별 매출 상세 통계
-      </h2>
+    <PageWrapper>
+      <PageTitle>| 카테고리별 매출</PageTitle>
+
       <p style={{
         fontSize: "15px",
         color: "#6b7280",
@@ -118,7 +102,7 @@ function CategorySalesDetailPage() {
           />
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 }
 

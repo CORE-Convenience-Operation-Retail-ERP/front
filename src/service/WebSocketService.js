@@ -11,7 +11,7 @@ class WebSocketService {
     this.connectCallback = null;
     this.errorCallback = null;
     this.reconnectCount = 0;
-    this.maxReconnectAttempts = 5;
+    this.maxReconnectAttempts = 1;
     this.userRoomIds = []; // 사용자가 속한 채팅방 ID 목록 캐시
     
     // deptId 체크: 점주(3)~본사(10) 모두 웹소켓 사용
@@ -27,17 +27,17 @@ class WebSocketService {
         document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
       }
     } else {
-      console.log('WebSocketService: deptId', deptId, '웹소켓 미사용');
+      // console.log('WebSocketService: deptId', deptId, '웹소켓 미사용');
     }
   }
   
   // 앱 초기화 시 호출되는 함수
   init() {
     if (!this.isAllowed) {
-      console.log('WebSocketService.init: deptId 미허용, 초기화 중단');
+      // console.log('WebSocketService.init: deptId 미허용, 초기화 중단');
       return;
     }
-    console.log('WebSocketService 초기화 중...');
+    // console.log('WebSocketService 초기화 중...');
     this.autoConnect();
   }
   
@@ -47,13 +47,13 @@ class WebSocketService {
     // 토큰이 있으면 자동 연결
     const token = localStorage.getItem('token');
     if (token && !this.connected) {
-      console.log('자동 웹소켓 연결 시도...');
+      // console.log('자동 웹소켓 연결 시도...');
       this.connect(token, 
         () => {
-          console.log('자동 웹소켓 연결 성공');
+          // console.log('자동 웹소켓 연결 성공');
         }, 
         (error) => {
-          console.error('자동 웹소켓 연결 실패:', error);
+          // console.error('자동 웹소켓 연결 실패:', error);
         }
       );
     }
@@ -63,19 +63,19 @@ class WebSocketService {
   handleVisibilityChange() {
     if (!this.isAllowed) return;
     if (!document.hidden && !this.connected) {
-      console.log('페이지 가시성 변경으로 연결 재시도');
+      // console.log('페이지 가시성 변경으로 연결 재시도');
       this.autoConnect();
     }
   }
 
   connect(token, onConnectCallback, onErrorCallback) {
     if (!this.isAllowed) {
-      console.log('WebSocketService.connect: deptId 미허용, 연결 중단');
+      // console.log('WebSocketService.connect: deptId 미허용, 연결 중단');
       return;
     }
     // 토큰이 없는 경우 연결을 시도하지 않음
     if (!token) {
-      console.log('토큰이 없어 웹소켓 연결을 시도하지 않습니다.');
+      // console.log('토큰이 없어 웹소켓 연결을 시도하지 않습니다.');
       if (onErrorCallback) onErrorCallback(new Error('토큰이 없습니다.'));
       return;
     }
@@ -84,7 +84,7 @@ class WebSocketService {
     this.requestNotificationPermission();
 
     if (this.connected && this.stompClient && this.stompClient.connected) {
-      console.log('이미 웹소켓에 연결되어 있습니다.');
+      // console.log('이미 웹소켓에 연결되어 있습니다.');
       if (onConnectCallback) onConnectCallback();
       return;
     }
@@ -97,7 +97,7 @@ class WebSocketService {
       try {
         this.stompClient.deactivate();
       } catch (e) {
-        console.warn('이전 웹소켓 연결 해제 중 오류:', e);
+        // console.warn('이전 웹소켓 연결 해제 중 오류:', e);
       }
     }
 
@@ -110,7 +110,7 @@ class WebSocketService {
         Authorization: `Bearer ${token}`
       },
       debug: function (str) {
-        console.log("STOMP: " + str);
+        // console.log("STOMP: " + str);
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
@@ -120,7 +120,7 @@ class WebSocketService {
     this.stompClient.onConnect = (frame) => {
       this.connected = true;
       this.reconnectCount = 0;
-      console.log('웹소켓 서버에 연결됨:', frame);
+      // console.log('웹소켓 서버에 연결됨:', frame);
       
       // 사용자의 채팅방 목록 캐시 업데이트
       this.updateUserRoomsCache();
@@ -141,12 +141,12 @@ class WebSocketService {
     };
 
     this.stompClient.onStompError = (frame) => {
-      console.error('STOMP 오류:', frame);
+      // console.error('STOMP 오류:', frame);
       if (this.errorCallback) this.errorCallback(frame);
     };
 
     this.stompClient.onWebSocketClose = (event) => {
-      console.log('웹소켓 연결이 닫힘:', event);
+      // console.log('웹소켓 연결이 닫힘:', event);
       this.connected = false;
       
       // 재연결 시도
@@ -164,17 +164,17 @@ class WebSocketService {
   requestNotificationPermission() {
     if (!this.isAllowed) return;
     if (!("Notification" in window)) {
-      console.log("이 브라우저는 알림을 지원하지 않습니다.");
+      // console.log("이 브라우저는 알림을 지원하지 않습니다.");
       return;
     }
 
     if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-      console.log("알림 권한 요청 중...");
+      // console.log("알림 권한 요청 중...");
       Notification.requestPermission().then(permission => {
-        console.log("알림 권한 결과:", permission);
+        // console.log("알림 권한 결과:", permission);
       });
     } else {
-      console.log("현재 알림 권한:", Notification.permission);
+      // console.log("현재 알림 권한:", Notification.permission);
     }
   }
 
@@ -184,11 +184,11 @@ class WebSocketService {
     return chatService.getChatRooms()
       .then(response => {
         this.userRoomIds = response.data.map(room => room.roomId);
-        console.log('사용자 채팅방 캐시 업데이트됨:', this.userRoomIds);
+        // console.log('사용자 채팅방 캐시 업데이트됨:', this.userRoomIds);
         return this.userRoomIds;
       })
       .catch(error => {
-        console.error('채팅방 목록 캐시 업데이트 오류:', error);
+        // console.error('채팅방 목록 캐시 업데이트 오류:', error);
         return [];
       });
   }
@@ -197,7 +197,7 @@ class WebSocketService {
   subscribeToChatRoomUpdates() {
     if (!this.isAllowed) return;
     this._subscribe('/topic/chat/rooms/update', (updatedRoom) => {
-      console.log('채팅방 정보 업데이트됨:', updatedRoom);
+      // console.log('채팅방 정보 업데이트됨:', updatedRoom);
       // 채팅방 목록 캐시 갱신
       this.updateUserRoomsCache();
     });
@@ -209,7 +209,7 @@ class WebSocketService {
     // 메시지 구독 (모든 메시지를 수신하는 토픽)
     try {
       this._subscribe('/topic/chat/messages', (message) => {
-        console.log('글로벌 채팅 메시지 수신:', message);
+        // console.log('글로벌 채팅 메시지 수신:', message);
         
         // 본인이 보낸 메시지인지 확인
         const userEmpId = parseInt(localStorage.getItem('empId') || '0');
@@ -221,16 +221,16 @@ class WebSocketService {
           const hasFocus = document.hasFocus();
           const isActive = window.location.href.includes(`/chat/room/${message.roomId}`);
           
-          console.log('메시지 알림 조건:', { 
-            isSentByMe, 
-            hasFocus, 
-            isActive,
-            messageContent: message.content
-          });
+          // console.log('메시지 알림 조건:', { 
+          //   isSentByMe, 
+          //   hasFocus, 
+          //   isActive,
+          //   messageContent: message.content
+          // });
           
           // 캐시가 비어 있는 경우 새로 로드
           if (this.userRoomIds.length === 0) {
-            console.log('채팅방 캐시가 비어 있어 다시 로드합니다.');
+            // console.log('채팅방 캐시가 비어 있어 다시 로드합니다.');
             this.updateUserRoomsCache()
               .then(() => this.processMessageNotification(message, isSentByMe));
           } else {
@@ -239,7 +239,7 @@ class WebSocketService {
         }
       });
     } catch (error) {
-      console.error('글로벌 메시지 구독 오류:', error);
+      // console.error('글로벌 메시지 구독 오류:', error);
     }
   }
   
@@ -248,13 +248,13 @@ class WebSocketService {
     if (!this.isAllowed) return;
     // 사용자가 속한 채팅방인지 확인 (캐시된 목록 사용)
     const isUserInRoom = this.userRoomIds.includes(message.roomId);
-    console.log(`사용자가 채팅방 ${message.roomId}에 속해있는지: ${isUserInRoom}`, this.userRoomIds);
+    // console.log(`사용자가 채팅방 ${message.roomId}에 속해있는지: ${isUserInRoom}`, this.userRoomIds);
     
     // 사용자가 속한 채팅방일 경우에만 알림 추가
     if (isUserInRoom) {
       chatService.addUnreadMessage(message.roomId);
     } else {
-      console.log(`채팅방 ${message.roomId}은 사용자의 채팅방이 아니므로 알림을 표시하지 않습니다.`);
+      // console.log(`채팅방 ${message.roomId}은 사용자의 채팅방이 아니므로 알림을 표시하지 않습니다.`);
     }
   }
 
@@ -269,7 +269,7 @@ class WebSocketService {
             subscription.unsubscribe();
           }
         } catch (e) {
-          console.warn(`구독 해제 중 오류 (${destination}):`, e);
+          // console.warn(`구독 해제 중 오류 (${destination}):`, e);
         }
       });
       
@@ -277,7 +277,7 @@ class WebSocketService {
       this.connected = false;
       this.subscriptions = {};
       this.stompSubscriptions = {};
-      console.log('웹소켓 연결 해제됨');
+      // console.log('웹소켓 연결 해제됨');
     }
   }
 
@@ -289,7 +289,7 @@ class WebSocketService {
     if (this.connected && this.stompClient && this.stompClient.connected) {
       return this._subscribe(destination, callback);
     } else {
-      console.warn(`웹소켓 연결이 없어 나중에 구독 예정: ${destination}`);
+      // console.warn(`웹소켓 연결이 없어 나중에 구독 예정: ${destination}`);
     }
   }
 
@@ -298,40 +298,40 @@ class WebSocketService {
     try {
       // 이미 구독 중인지 확인
       if (this.stompSubscriptions[destination]) {
-        console.log(`이미 구독 중: ${destination}`);
+        // console.log(`이미 구독 중: ${destination}`);
         return;
       }
       
-      console.log(`구독 시작: ${destination}`);
+      // console.log(`구독 시작: ${destination}`);
       const subscription = this.stompClient.subscribe(destination, (message) => {
         try {
-          console.log(`메시지 수신 (${destination}):`, message.body);
+          // console.log(`메시지 수신 (${destination}):`, message.body);
           const parsedMessage = JSON.parse(message.body);
           callback(parsedMessage);
         } catch (e) {
-          console.error(`메시지 처리 중 오류 (${destination}):`, e, message.body);
+          // console.error(`메시지 처리 중 오류 (${destination}):`, e, message.body);
         }
       });
       
       this.stompSubscriptions[destination] = subscription;
-      console.log(`구독 성공: ${destination}`);
+      // console.log(`구독 성공: ${destination}`);
       return subscription;
     } catch (error) {
-      console.error(`구독 오류 (${destination}):`, error);
+      // console.error(`구독 오류 (${destination}):`, error);
     }
   }
 
   unsubscribe(destination) {
     if (!this.isAllowed) return;
-    console.log(`구독 해제 시도: ${destination}`);
+    // console.log(`구독 해제 시도: ${destination}`);
     
     if (this.stompSubscriptions[destination]) {
       try {
         const subscription = this.stompSubscriptions[destination];
         subscription.unsubscribe();
-        console.log(`구독 해제 성공: ${destination}`);
+        // console.log(`구독 해제 성공: ${destination}`);
       } catch (e) {
-        console.warn(`구독 해제 중 오류 (${destination}):`, e);
+        // console.warn(`구독 해제 중 오류 (${destination}):`, e);
       }
       
       delete this.stompSubscriptions[destination];
@@ -345,14 +345,14 @@ class WebSocketService {
   sendMessage(destination, message) {
     if (!this.isAllowed) return;
     if (this.connected && this.stompClient && this.stompClient.connected) {
-      console.log(`메시지 전송 (${destination}):`, message);
+      // console.log(`메시지 전송 (${destination}):`, message);
       this.stompClient.publish({
         destination: destination,
         body: JSON.stringify(message),
         headers: { 'content-type': 'application/json' }
       });
     } else {
-      console.error('웹소켓이 연결되어 있지 않아 메시지를 보낼 수 없습니다.');
+      // console.error('웹소켓이 연결되어 있지 않아 메시지를 보낼 수 없습니다.');
     }
   }
 

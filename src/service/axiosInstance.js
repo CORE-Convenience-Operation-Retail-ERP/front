@@ -16,9 +16,9 @@ instance.interceptors.request.use(
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
       // 디버깅용 토큰 정보 로깅
-      console.log('요청 URL:', config.url);
-      console.log('요청 메서드:', config.method);
-      console.log('인증 토큰 존재:', !!token);
+      // console.log('요청 URL:', config.url);
+      // console.log('요청 메서드:', config.method);
+      // console.log('인증 토큰 존재:', !!token);
       
       try {
         // JWT 디코딩
@@ -31,13 +31,13 @@ instance.interceptors.request.use(
             .join('')
         );
         const decoded = JSON.parse(jsonPayload);
-        console.log('토큰 페이로드:', decoded);
-        console.log('사용자 권한:', decoded.role || decoded.roles || decoded.authorities || '권한 정보 없음');
+        // console.log('토큰 페이로드:', decoded);
+        // console.log('사용자 권한:', decoded.role || decoded.roles || decoded.authorities || '권한 정보 없음');
       } catch (e) {
-        console.warn('토큰 디코딩 실패:', e);
+        // console.warn('토큰 디코딩 실패:', e);
       }
     } else {
-      console.warn('인증 토큰이 없습니다!');
+      // console.warn('인증 토큰이 없습니다!');
     }
     return config;
   },
@@ -55,13 +55,13 @@ instance.interceptors.response.use(
   (error) => {
     loadingManager.hide();
     if (error.response) {
-      console.log('응답 에러 상태:', error.response.status);
-      console.log('응답 에러 데이터:', error.response.data);
+      // console.log('응답 에러 상태:', error.response.status);
+      // console.log('응답 에러 데이터:', error.response.data);
       
       if (error.response.status === 403) {
-        console.log('접근 권한이 없음 (403 Forbidden)');
-        console.log('현재 사용자 정보:', localStorage.getItem('loginUser'));
-        console.log('현재 역할:', localStorage.getItem('userRole'));
+        // console.log('접근 권한이 없음 (403 Forbidden)');
+        // console.log('현재 사용자 정보:', localStorage.getItem('loginUser'));
+        // console.log('현재 역할:', localStorage.getItem('userRole'));
         
         // 403 에러 페이지로 리다이렉션
         if (window.location.pathname !== "/error/403") {
@@ -110,11 +110,11 @@ instance.interceptors.response.use(
       // 네트워크 상태에 따라 다른 에러 메시지 제공
       if (!navigator.onLine) {
         // 오프라인인 경우
-        console.log('인터넷 연결이 없습니다');
+        // console.log('인터넷 연결이 없습니다');
         error.customMessage = '인터넷 연결이 끊어졌습니다. 연결 상태를 확인해주세요.';
       } else {
         // 서버에 연결할 수 없는 경우
-        console.log('서버에 연결할 수 없습니다');
+        // console.log('서버에 연결할 수 없습니다');
         error.customMessage = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.';
       }
       
@@ -124,7 +124,7 @@ instance.interceptors.response.use(
       }
     } else {
       // 요청을 보내기 전에 발생한 오류
-      console.log('요청 설정 중 오류 발생:', error.message);
+      // console.log('요청 설정 중 오류 발생:', error.message);
       error.customMessage = '요청을 처리할 수 없습니다.';
       
       // 일반 오류 페이지로 리다이렉션

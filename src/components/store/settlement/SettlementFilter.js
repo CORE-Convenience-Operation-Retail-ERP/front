@@ -1,107 +1,61 @@
 import React from "react";
 
-const SettlementFilter = ({ filters, onChange, onSearch }) => {
-  const { type, startDate, endDate } = filters;
+import { formatLocalDate } from "../../../utils/calendarUtils";
+import { ViewToggleButton, PrimaryButton } from "../../../features/store/styles/common/Button.styled";
+import CustomCalendar from "../common/CustomCalendar";
 
+const TYPES = [
+  { value: "ALL", label: "전체" },
+  { value: "DAILY", label: "일별" },
+  { value: "SHIFT", label: "교대" },
+  { value: "MONTHLY", label: "월별" },
+  { value: "YEARLY", label: "연별" },
+];
+
+const SettlementFilterCom = ({ typeFilter, setTypeFilter, dateRange, setDateRange, onSearch }) => {
   return (
-    <div style={{ marginBottom: "20px" }}>
-      <label>정산 유형: </label>
-      <select name="type" value={type} onChange={onChange}>
-        <option value="ALL">전체</option>
-        <option value="DAILY">일별 정산</option>
-        <option value="SHIFT">교대 정산</option>
-        <option value="MONTHLY">월별 정산</option>
-        <option value="YEARLY">연별 정산</option>
-      </select>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        gap: 8,
+        marginBottom: 16,
+      }}
+    >
+      {TYPES.map((t) => (
+        <ViewToggleButton
+          key={t.value}
+          selected={typeFilter === t.value}
+          onClick={() => setTypeFilter(t.value)}
+        >
+          {t.label}
+        </ViewToggleButton>
+      ))}
 
-      {/* 일별 정산 */}
-      {type === "DAILY" && (
+      {typeFilter !== "ALL" && (
         <>
-          <label style={{ marginLeft: "10px" }}>시작일:</label>
-          <input
-            type="date"
-            name="startDate"
-            value={startDate}
-            onChange={onChange}
+          <CustomCalendar
+            selected={dateRange[0] ? new Date(dateRange[0]) : null}
+            onChange={(date) =>
+              setDateRange([formatLocalDate(date), dateRange[1]])
+            }
+            placeholder="시작일"
           />
-          <label style={{ marginLeft: "10px" }}>종료일:</label>
-          <input
-            type="date"
-            name="endDate"
-            value={endDate}
-            onChange={onChange}
+          <span>~</span>
+          <CustomCalendar
+            selected={dateRange[1] ? new Date(dateRange[1]) : null}
+            onChange={(date) =>
+              setDateRange([dateRange[0], formatLocalDate(date)])
+            }
+            placeholder="종료일"
           />
         </>
       )}
 
-      {/* 교대 정산 */}
-      {type === "SHIFT" && (
-        <>
-          <label style={{ marginLeft: "10px" }}>시작시간:</label>
-          <input
-            type="datetime-local"
-            name="startDate"
-            value={startDate}
-            onChange={onChange}
-          />
-          <label style={{ marginLeft: "10px" }}>종료시간:</label>
-          <input
-            type="datetime-local"
-            name="endDate"
-            value={endDate}
-            onChange={onChange}
-          />
-        </>
-      )}
-
-      {/* 월별 정산 */}
-      {type === "MONTHLY" && (
-        <>
-          <label style={{ marginLeft: "10px" }}>시작(YYYY-MM):</label>
-          <input
-            type="month"
-            name="startDate"
-            value={startDate}
-            onChange={onChange}
-          />
-          <label style={{ marginLeft: "10px" }}>종료(YYYY-MM):</label>
-          <input
-            type="month"
-            name="endDate"
-            value={endDate}
-            onChange={onChange}
-          />
-        </>
-      )}
-
-      {/* 연별 정산 */}
-      {type === "YEARLY" && (
-        <>
-          <label style={{ marginLeft: "10px" }}>시작 연도:</label>
-          <input
-            type="number"
-            name="startDate"
-            value={startDate}
-            onChange={onChange}
-            placeholder="예: 2024"
-          />
-          <label style={{ marginLeft: "10px" }}>종료 연도:</label>
-          <input
-            type="number"
-            name="endDate"
-            value={endDate}
-            onChange={onChange}
-            placeholder="예: 2025"
-          />
-        </>
-      )}
-
-      {/* 검색 버튼 */}
-      <button style={{ marginLeft: "10px" }} onClick={onSearch}>
-        조회
-      </button>
+      <PrimaryButton onClick={onSearch}>검색</PrimaryButton>
     </div>
   );
 };
 
-export default SettlementFilter;
+export default SettlementFilterCom;

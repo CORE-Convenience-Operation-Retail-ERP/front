@@ -2,6 +2,7 @@ import { useState } from "react";
 import StoreSearchBar from "../../../components/store/common/StoreSearchBar";
 import OrderTopProductsCon from "../../../containers/store/statistics/OrderTopProductsCon";
 import { FiCalendar } from "react-icons/fi";
+import { PageTitle, PageWrapper } from "../../../features/store/styles/common/PageLayout";
 
 function OrderTopProductsDetailPage() {
   const [filters, setFilters] = useState(null);
@@ -29,26 +30,8 @@ function OrderTopProductsDetailPage() {
   };
 
   return (
-    <div style={{ padding: "40px 60px", maxWidth: "1200px", margin: "0 auto" }}>
-      {/* 타이틀 */}
-      <h2 style={{
-        fontSize: "22px",
-        fontWeight: 700,
-        color: "#1f2937",
-        marginBottom: "8px",
-        display: "flex",
-        alignItems: "center",
-      }}>
-        <span style={{
-          display: "inline-block",
-          width: "6px",
-          height: "18px",
-          background: "#111827",
-          marginRight: "10px",
-          borderRadius: "2px"
-        }}></span>
-        발주 상품 통계
-      </h2>
+    <PageWrapper>
+      <PageTitle>| 발주 상품</PageTitle>
 
       <p style={{
         fontSize: "15px",
@@ -89,28 +72,20 @@ function OrderTopProductsDetailPage() {
       {/* 통계 결과 */}
       {filters && (
         <div style={{
-          display: "flex",
-          justifyContent: "center", // 가운데 정렬
-          marginTop: "24px"
+          border: "1px solid #e5e7eb",
+          borderRadius: "12px",
+          padding: "28px",
+          background: "#ffffff",
+          boxShadow: "0 3px 10px rgba(0,0,0,0.03)"
         }}>
-          <div style={{
-            border: "1px solid #e5e7eb",
-            borderRadius: "12px",
-            padding: "28px",
-            background: "#ffffff",
-            boxShadow: "0 3px 10px rgba(0,0,0,0.03)",
-            width: "100%",
-            maxWidth: "1000px"
-          }}>
-            <OrderTopProductsCon
-              filters={filters}
-              mode="detail"
-              showTable={true}
-            />
-          </div>
+          <OrderTopProductsCon
+            filters={filters}
+            mode="detail"
+            showTable={true}
+          />
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 }
 

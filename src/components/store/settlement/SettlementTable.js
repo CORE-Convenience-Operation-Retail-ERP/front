@@ -18,63 +18,53 @@ const SettlementTable = ({ data }) => {
   };
 
   return (
-    <Table>
-      <thead>
-        <tr>
-          <th>정산일</th>
-          <th>정산유형</th>
-          <th>총매출</th>
-          <th>할인</th>
-          <th>환불</th>
-          <th>실매출</th>
-          <th>거래건수</th>
-          <th>환불건수</th>
-          {/* <th>전송상태</th> */}
-          <th>정산방식</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.map(item => {
-          const manual = item.settlementType === 'SHIFT' || item.isManual === 1;
-          return (
-            <tr key={item.settlementId}>
-              <td>{item.settlementDate}</td>
-              <td>{typeLabelMap[item.settlementType] || item.settlementType}</td>
-              <td>{item.totalRevenue?.toLocaleString()}원</td>
-              <td>{item.discountTotal?.toLocaleString()}원</td>
-              <td>{item.refundTotal?.toLocaleString()}원</td>
-              <td>{item.finalAmount?.toLocaleString()}원</td>
-              <td>{item.transactionCount}</td>
-              <td>{item.refundCount}</td>
-              {/* <td>
-                {item.hqStatus === 'SENT' ? (
-                  <span style={{ color: '#10b981', fontWeight: 'bold' }}>전송됨</span>
-                ) : item.hqStatus === 'FAILED' ? (
-                  <span style={{ color: '#ef4444', fontWeight: 'bold' }}>실패</span>
-                ) : (
-                  <span style={{ color: '#9ca3af' }}>대기중</span>
-                )}
-              </td> */}
-              <td>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    padding: '4px 10px',
-                    borderRadius: '12px',
-                    backgroundColor: manual ? '#dbeafe' : '#f3f4f6',
-                    color: manual ? '#1d4ed8' : '#6b7280',
-                    fontWeight: 'bold',
-                    fontSize: '12px'
-                  }}
-                >
-                  {manual ? '수동' : '자동'}
-                </span>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </Table>
+      <Table>
+        <thead>
+          <tr>
+            <th>정산일</th>
+            <th>정산유형</th>
+            <th>총매출</th>
+            <th>할인</th>
+            <th>환불</th>
+            <th>실매출</th>
+            <th>거래건수</th>
+            <th>환불건수</th>
+            <th>정산방식</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map(item => {
+            const manual = item.settlementType === 'SHIFT' || item.isManual === 1;
+            return (
+              <tr key={item.settlementId}>
+                <td>{item.settlementDate}</td>
+                <td>{typeLabelMap[item.settlementType] || item.settlementType}</td>
+                <td>{item.totalRevenue?.toLocaleString()}원</td>
+                <td>{item.discountTotal?.toLocaleString()}원</td>
+                <td>{item.refundTotal?.toLocaleString()}원</td>
+                <td>{item.finalAmount?.toLocaleString()}원</td>
+                <td>{item.transactionCount}</td>
+                <td>{item.refundCount}</td>
+                <td>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      backgroundColor: manual ? '#dbeafe' : '#f3f4f6',
+                      color: manual ? '#1d4ed8' : '#6b7280',
+                      fontWeight: 'bold',
+                      fontSize: '12px'
+                    }}
+                  >
+                    {manual ? '수동' : '자동'}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </Table>
   );
 };
 
