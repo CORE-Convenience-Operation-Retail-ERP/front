@@ -9,10 +9,9 @@ import {
     SidebarFooter,
     FooterContent,
     FooterDetail,
-    FooterLine
+    
 } from '../../../features/store/styles/common/StoreSidebar.styled';
 import {useState} from "react";
-import {IoIosArrowDown} from "react-icons/io";
 
 function StoreSidebar({ menus, hoverMenu, onMouseEnter, onMouseLeave, onNavigate, activeMenu }) {
     const [open, setOpen] = useState(false);

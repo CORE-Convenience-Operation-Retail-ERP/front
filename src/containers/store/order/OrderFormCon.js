@@ -6,6 +6,7 @@ import {
   updateOrder,
   fetchOrderProductList,
   fetchStoreList,
+  fetchAllHQStocks
 } from "../../../service/store/OrderService";
 import {
   fetchParentCategories,
@@ -47,6 +48,7 @@ export default function OrderFormCon() {
   const [parentCategories, setParentCategories] = useState([]);
   const [childCategories, setChildCategories] = useState([]);
   const [grandChildCategories, setGrandChildCategories] = useState([]);
+  const [hqStockMap, setHqStockMap] = useState({});
 
   const handleParentChange = id => {
     setFilters({ parentCategoryId: id, categoryId: '', subCategoryId: '' });
@@ -143,6 +145,20 @@ export default function OrderFormCon() {
     loadProducts();
   }, [searchParams, page]);
 
+  useEffect(() => {
+  fetchAllHQStocks()
+    .then((list) => {
+      const map = {};
+      list.forEach(stock => {
+        map[stock.productId] = stock.quantity;
+      });
+      setHqStockMap(map);
+    })
+    .catch(() => {
+      alert("본사 재고 정보를 불러오지 못했습니다.");
+    });
+}, []);
+
   const filterOptions = [
     { key: "productName", label: "상품명", type: "text" },
     { key: "barcode", label: "바코드", type: "number" },
@@ -186,6 +202,8 @@ export default function OrderFormCon() {
           summaryPage={summaryPage}
           setSummaryPage={setSummaryPage}
           summaryPageSize={SUMMARY_PAGE_SIZE}
+          hqStockMap={hqStockMap}
+
       />
   );
 }

@@ -119,36 +119,79 @@ function PartTimerCalendarCon() {
     setModalMode('register');
   };
 
-  const handleSubmitModal = async (data) => {
-    try {
-      await createSchedule({
-        title: data.title,
-        startTime: data.start,
-        endTime: data.end,
-        partTimerId: data.partTimerId,
-        bgColor: data.bgColor || '#03bd9e'
-      });
-      await reloadSchedules();
-      clearCalendarSelection();
-    } catch (e) {
-      alert('등록 실패');
-    } finally {
-      setModalMode(null);
-    }
-  };
+    const handleSubmitModal = async (data) => {
 
-  const handleUpdateSchedule = async (updated) => {
-    if (!window.confirm('정말 이 스케줄을 수정하시겠습니까?')) return;
-    try {
-      await updateSchedule(updated.id, updated);
-      await reloadSchedules();
-    } catch (e) {
-      alert('수정 실패');
-    } finally {
-      setSelectedSchedule(null);
-      setModalMode(null);
-    }
-  };
+      if (!data.start || !data.end) {
+        alert("시작 시간과 종료 시간을 모두 선택해주세요.");
+        return;
+      }
+
+      // 2. 시간 형식 유효성 검사
+      const start = new Date(data.start);
+      const end = new Date(data.end);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        alert("시간 형식이 올바르지 않습니다.");
+        return;
+      }
+
+      // 3. 순서 유효성 검사
+      if (start >= end) {
+        alert("시작 시간은 종료 시간보다 앞서야 합니다.");
+        return;
+      }
+
+      // 4. 등록 처리
+      try {
+        await createSchedule({
+          title: data.title,
+          startTime: data.start,
+          endTime: data.end,
+          partTimerId: data.partTimerId,
+          bgColor: data.bgColor || '#03bd9e'
+        });
+        await reloadSchedules();
+        clearCalendarSelection();
+      } catch (e) {
+        alert('등록 실패');
+      } finally {
+        setModalMode(null);
+      }
+    };
+
+
+    const handleUpdateSchedule = async (updated) => {
+      if (!updated.startTime || !updated.endTime) {
+        alert("시작 시간과 종료 시간을 모두 입력해주세요.");
+        return;
+      }
+
+      const start = new Date(updated.startTime);
+      const end = new Date(updated.endTime);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        alert("시간 형식이 올바르지 않습니다.");
+        return;
+      }
+
+      if (start >= end) {
+        alert("시작 시간은 종료 시간보다 앞서야 합니다.");
+        return;
+      }
+
+      if (!window.confirm('정말 이 스케줄을 수정하시겠습니까?')) return;
+
+      try {
+        await updateSchedule(updated.id, updated);
+        await reloadSchedules();
+      } catch (e) {
+        alert('수정 실패');
+      } finally {
+        setSelectedSchedule(null);
+        setModalMode(null);
+      }
+    };
+
 
   const handleDeleteSchedule = async (id) => {
     if (!window.confirm('정말 이 스케줄을 삭제하시겠습니까?')) return;

@@ -73,7 +73,7 @@ function OrderListCom({
     return (
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           {isPending && <PrimaryButton onClick={() => onEditClick(order.orderId)}>수정</PrimaryButton>}
-          {userRole === "ROLE_HQ" && (
+          {userRole === "ROLE_MASTER" && (
               <PrimaryButton onClick={() => onCancleClick(order.orderId)}>취소</PrimaryButton>
           )}
           {isPending && userRole === "ROLE_STORE" && (
@@ -95,7 +95,7 @@ function OrderListCom({
                 <th>총 금액</th>
                 <th>입고 일자</th>
                 <th>상태</th>
-                <th>작업</th>
+                <th style={{ minWidth: "15px", textAlign: "center" }}>관리</th>
               </tr>
               </thead>
               <tbody>
@@ -106,7 +106,63 @@ function OrderListCom({
                     {renderCell(order, `${order.totalAmount?.toLocaleString() || 0}원`)}
                     {renderCell(order, order.orderDate ? new Date(order.orderDate).toLocaleString() : '-')}
                     {renderCell(order, getOrderStatusLabel(order.orderStatus), 'status')}
-                    <td>{renderActionButtons(order)}</td>
+                 <td>
+                  {order.orderStatus === 0 && (
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                      <button
+                        onClick={() => onEditClick(order.orderId)}
+                        style={{
+                          backgroundColor: '#ffffff',
+                          color: '#3b82f6',
+                          border: '1px solid #3b82f6',
+                          borderRadius: '6px',
+                          padding: '4px 10px',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        수정
+                      </button>
+
+                      {userRole === 'ROLE_HQ' && (
+                        <button
+                          onClick={() => onCancleClick(order.orderId)}
+                          style={{
+                            backgroundColor: '#fee2e2',
+                            color: '#dc2626',
+                            border: '1px solid #fecaca',
+                            borderRadius: '6px',
+                            padding: '4px 10px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          취소
+                        </button>
+                      )}
+
+                      {userRole === 'ROLE_STORE' && (
+                        <button
+                          onClick={() => onDeleteClick(order.orderId)}
+                          style={{
+                            backgroundColor: '#fee2e2',
+                            color: '#dc2626',
+                            border: '1px solid #fecaca',
+                            borderRadius: '6px',
+                            padding: '4px 10px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          삭제
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </td>
                   </tr>
               ))}
               </tbody>

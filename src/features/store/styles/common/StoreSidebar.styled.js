@@ -2,7 +2,7 @@ import styled, {css, keyframes} from 'styled-components';
 
 export const Sidebar = styled.aside`
   width: 240px;
-  height: 92vh;
+  height: 94vh;
   background-color: #dcebff;
   display: flex;
   flex-direction: column;

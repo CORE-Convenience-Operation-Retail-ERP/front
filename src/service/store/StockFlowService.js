@@ -29,4 +29,15 @@ export const fetchProductDetail = async (productId) => {
   return response.data;
 };
 
+// 5.  입고 이력조회
+export function fetchStockInHistory({ page = 0, size = 10 }) {
+  return axios.get('/api/stock/adjust/in-history', { params: { page, size } });
+}
+
+// 6.  입고 이력 상세 조회
+
+export function filterStockInHistory(filters) {
+  // filters: { from, to, status, isAbnormal, productName, barcode, page, size }
+  return axios.get('/api/stock/adjust/in-history/filter', { params: filters });
+}
 

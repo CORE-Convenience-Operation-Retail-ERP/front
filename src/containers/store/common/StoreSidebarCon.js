@@ -23,6 +23,7 @@ const sidebarMenus = [
         name: '발주 관리', icon: <ShoppingCartIcon />, submenu: [
             { name: '발주 등록', path: '/store/order/register' },
             { name: '발주 현황', path: '/store/order/list' },
+            { name: '입고 현황', path: '/store/stock/in-history' },
         ]
     },
     {

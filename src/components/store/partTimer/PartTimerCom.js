@@ -1,10 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { Table } from '../../../features/store/styles/common/Table.styled';
-import {AttendanceButton, IconButton, PrimaryButton} from '../../../features/store/styles/common/Button.styled';
+import {AttendanceButton, PrimaryButton} from '../../../features/store/styles/common/Button.styled';
 import Pagination from '../common/Pagination';
 import styled from 'styled-components';
-import {PageTitle} from "../../../features/store/styles/common/PageLayout";
 import {MdLogin, MdLogout} from "react-icons/md";
 
 const Checkbox = styled.input.attrs({ type: 'checkbox' })`

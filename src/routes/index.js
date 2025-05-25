@@ -60,6 +60,7 @@ import ProductSalesDetailPage from '../pages/store/Statistic/ProductSalesDetailP
 import CategorySalesDetailPage from '../pages/store/Statistic/CategorySalesDetailPage.js';
 import HourlySalesDetailPage from '../pages/store/Statistic/HourlySalesDetailPage.js';
 import OrderTopProductsDetailPage from '../pages/store/Statistic/OrderTopProductsDetailPage.js';
+import StrockInHistoryPage from '../pages/store/order/StockInHistoryPage.js';
 
 
 const AppRoutes = () => {
@@ -106,6 +107,7 @@ const AppRoutes = () => {
         <Route path="/store" element={<StoreLayout/>} >
           <Route path="home" element={<HomePage/>} />
           <Route path="stock/list" element={<StockListPage/>} />
+          <Route path="stock/in-history" element={<StrockInHistoryPage />} />
           <Route path="stock/flow/search" element={<StockFlowLogPage/>} />
           <Route path="inventory/check/history" element={<InventoryHistoryPage/>} />
           <Route path="inventory/check/register" element={<InventoryRegisterPage/>} />

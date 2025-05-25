@@ -40,12 +40,16 @@ function PartTimerOneCom({ form, onEdit, onResign, onRejoin }) {
                 <Label>주소</Label>
                 <p>{form.partAddress}</p>
             </InputGroup>
-
             <InputGroup>
-                <Label>성별</Label>
-                <p>{form.partGender === 0 ? '남' : '여'}</p>
+            <Label>성별</Label>
+            <p>
+                {form.partGender === 1
+                ? '남자'
+                : form.partGender === 2
+                ? '여자'
+                : '-'}
+            </p>
             </InputGroup>
-
             <InputGroup>
                 <Label>입사일</Label>
                 <p>{form.hireDate ? new Date(form.hireDate).toISOString().slice(0, 10) : '-'}</p>

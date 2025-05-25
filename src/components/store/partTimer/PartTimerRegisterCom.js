@@ -11,21 +11,27 @@ import {
     PhoneRow,
     OutlineButton,
     VerifiedMessage,
-    ProfileImage
+    ProfileImage,
+    ActionButton
 } from '../../../features/store/styles/partTimer/StorePatTimerForm.styled';
 import CustomCalendar from '../../../components/store/common/CustomCalendar';
+import { Navigate } from 'react-router-dom';
+import { ButtonRow } from '../../../features/store/styles/common/Button.styled';
+import AddressSearch from '../../common/AddressSearch';
+import AddressSearchCustom from '../common/AddressSearchCustom';
 
 function PartTimerRegisterCom({
-                                  form,
-                                  onChange,
-                                  onDateChange,
-                                  onSubmit,
-                                  onSendCode,
-                                  onVerifyCode,
-                                  onCodeChange,
-                                  code,
-                                  verified
-                              }) {
+    form,
+    onChange,
+    onDateChange,
+    onSubmit,
+    onSendCode,
+    onVerifyCode,
+    onCodeChange,
+    code,
+    verified,
+    inputRefs = {} // 추가된 ref 포커스용
+}) {
     const [showCodeInput, setShowCodeInput] = useState(false);
 
     return (
@@ -34,12 +40,18 @@ function PartTimerRegisterCom({
 
             <InputGroup>
                 <Label required>이름</Label>
-                <Input name="partName" value={form.partName} onChange={onChange} placeholder="이름" />
+                <Input
+                    name="partName"
+                    ref={inputRefs.partName}
+                    value={form.partName}
+                    onChange={onChange}
+                    placeholder="이름"
+                />
             </InputGroup>
 
             <InputGroup>
                 <Label required>직책</Label>
-                <Select name="position" value={form.position} onChange={onChange}>
+                <Select name="position" ref={inputRefs.position} value={form.position} onChange={onChange}>
                     <option value="">직책 선택</option>
                     <option value="아르바이트">아르바이트</option>
                     <option value="매니저">매니저</option>
@@ -49,7 +61,7 @@ function PartTimerRegisterCom({
 
             <InputGroup>
                 <Label required>근무 형태</Label>
-                <Select name="workType" value={form.workType} onChange={onChange}>
+                <Select name="workType" ref={inputRefs.workType} value={form.workType} onChange={onChange}>
                     <option value="">근무시간 선택</option>
                     <option value="평일주간">평일주간</option>
                     <option value="평일야간">평일야간</option>
@@ -60,24 +72,24 @@ function PartTimerRegisterCom({
 
             <InputGroup>
                 <Label required>성별</Label>
-                <Select name="partGender" value={form.partGender} onChange={onChange}>
+                <Select name="partGender" ref={inputRefs.partGender} value={form.partGender} onChange={onChange}>
                     <option value="">선택</option>
-                    <option value="0">남</option>
-                    <option value="1">여</option>
+                    <option value="1">남</option>
+                    <option value="2">여</option>
                 </Select>
             </InputGroup>
 
             <InputGroup>
                 <Label required>전화번호</Label>
                 <PhoneRow>
-                    <Input name="partPhone" value={form.partPhone} onChange={onChange} placeholder="010-1234-5678" />
-                    <OutlineButton
-                        type="button"
-                        onClick={() => {
-                            onSendCode();
-                            setShowCodeInput(true);
-                        }}
-                    >
+                    <Input
+                        name="partPhone"
+                        ref={inputRefs.partPhone}
+                        value={form.partPhone}
+                        onChange={onChange}
+                        placeholder="010-1234-5678"
+                    />
+                    <OutlineButton type="button" onClick={() => { onSendCode(); setShowCodeInput(true); }}>
                         인증번호 전송
                     </OutlineButton>
                 </PhoneRow>
@@ -93,16 +105,25 @@ function PartTimerRegisterCom({
                     {verified && <VerifiedMessage>✅ 인증 완료</VerifiedMessage>}
                 </InputGroup>
             )}
-
             <InputGroup>
-                <Label required>주소</Label>
-                <Input name="partAddress" value={form.partAddress} onChange={onChange} placeholder="주소" />
+            <Label required>주소</Label>
+            <AddressSearchCustom
+                value={form.partAddress}
+                onChange={onChange}
+                detailAddress={form.partAddressDetail}
+                onDetailAddressChange={(val) =>
+                onChange({ target: { name: 'partAddressDetail', value: val } })
+                }
+                onSelect={({ fullAddress }) =>
+                onChange({ target: { name: 'partAddress', value: fullAddress } })
+                }
+            />
             </InputGroup>
-
             <InputGroup>
                 <Label required>생년월일</Label>
                 <CustomCalendar
                     selected={form.birthDate}
+                    ref={inputRefs.birthDate}
                     onChange={(date) => onDateChange('birthDate', date)}
                     placeholder="생년월일 선택"
                 />
@@ -112,6 +133,7 @@ function PartTimerRegisterCom({
                 <Label required>입사일</Label>
                 <CustomCalendar
                     selected={form.hireDate}
+                    ref={inputRefs.hireDate}
                     onChange={(date) => onDateChange('hireDate', date)}
                     placeholder="입사일 선택"
                 />
@@ -119,7 +141,7 @@ function PartTimerRegisterCom({
 
             <InputGroup>
                 <Label required>급여 형태</Label>
-                <Select name="salaryType" value={form.salaryType} onChange={onChange}>
+                <Select name="salaryType" ref={inputRefs.salaryType} value={form.salaryType} onChange={onChange}>
                     <option value="">선택</option>
                     <option value="0">시급</option>
                     <option value="1">월급</option>
@@ -128,12 +150,17 @@ function PartTimerRegisterCom({
 
             <InputGroup>
                 <Label required>시급</Label>
-                <Input name="hourlyWage" value={form.hourlyWage} onChange={onChange} placeholder="시급" />
+                <Input
+                    name="hourlyWage"
+                    value={form.hourlyWage}
+                    onChange={onChange}
+                    placeholder="시급"
+                />
             </InputGroup>
 
             <InputGroup>
                 <Label required>은행</Label>
-                <Select name="accountBank" value={form.accountBank || ''} onChange={onChange}>
+                <Select name="accountBank" ref={inputRefs.accountBank} value={form.accountBank} onChange={onChange}>
                     <option value="">선택</option>
                     <option value={1}>국민</option>
                     <option value={2}>하나</option>
@@ -143,7 +170,13 @@ function PartTimerRegisterCom({
 
             <InputGroup>
                 <Label required>계좌번호</Label>
-                <Input name="accountNumber" value={form.accountNumber} onChange={onChange} placeholder="계좌번호" />
+                <Input
+                    name="accountNumber"
+                    ref={inputRefs.accountNumber}
+                    value={form.accountNumber}
+                    onChange={onChange}
+                    placeholder="계좌번호"
+                />
             </InputGroup>
 
             <InputGroup>
@@ -161,7 +194,10 @@ function PartTimerRegisterCom({
                 {form.partImg && <ProfileImage src={form.partImg} alt="미리보기" />}
             </InputGroup>
 
-            <SubmitButton type="button" onClick={onSubmit}>등록</SubmitButton>
+        <ButtonRow>
+            <ActionButton type="button" onClick={() => Navigate(-1)}>뒤로가기</ActionButton>
+            <ActionButton type="button" onClick={onSubmit}>등록</ActionButton>
+        </ButtonRow>
         </FormWrapper>
     );
 }
