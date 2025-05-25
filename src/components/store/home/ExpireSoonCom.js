@@ -12,7 +12,7 @@ export default function ExpireSoonCom({ list }) {
 
   return (
     <div className="info-card">
-      <div className="info-title">폐기 임박 상품</div>
+      <div className="info-title">| 폐기 임박 상품</div>
       <div className="info-value">
         {label}
         {count > 0 && (

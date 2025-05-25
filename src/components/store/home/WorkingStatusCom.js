@@ -5,7 +5,7 @@ export default function WorkingStatusCom({ value = [] }) {
 
   return (
     <div className="info-card">
-      <div className="info-title">근무자 일정</div>
+      <div className="info-title">| 근무자 일정</div>
       <div className="info-value">{label}</div>
     </div>
   );

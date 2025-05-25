@@ -1,4 +1,5 @@
 import axios from "axios";
+import { MdAttachMoney, MdInventory2, MdListAlt, MdPeople } from "react-icons/md";
 
 // 오늘 출근한 사람들 불러오기 (출근 완료자 기준)
 // export async function fetchTodayAttendees(storeId, today) {
@@ -112,9 +113,25 @@ export async function fetchDisposalTargets() {
 // 메뉴 목록 반환
 export function getMenus() {
   return [
-    { name: "발주 현황", path: "/store/order/list" },
-    { name: "재고 현황", path: "/store/stock/list" },
-    { name: "직원 관리", path: "/store/parttimer/list" },
-    { name: "매출 정산", path: "/store/sales/summary" }
+    {
+      name: "발주 현황",
+      path: "/store/order/list",
+      icon: <MdListAlt />,
+    },
+    {
+      name: "재고 현황",
+      path: "/store/stock/list",
+      icon: <MdInventory2 />,
+    },
+    {
+      name: "직원 관리",
+      path: "/store/parttimer/list",
+      icon: <MdPeople />,
+    },
+    {
+      name: "매출 정산",
+      path: "/store/sales/summary",
+      icon: <MdAttachMoney />,
+    },
   ];
 }

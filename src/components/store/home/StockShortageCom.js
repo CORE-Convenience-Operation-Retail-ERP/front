@@ -5,7 +5,7 @@ export default function StockShortageCom({ count }) {
 
   return (
     <div className="info-card">
-      <div className="info-title">재고 부족</div>
+      <div className="info-title">| 재고 부족</div>
       <div className="info-value">
         {label}
         {count > 0 && (

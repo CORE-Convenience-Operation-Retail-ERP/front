@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo } from "react";
 import KpiStatsCom from "../../../components/store/statistics/KpiStatsCom";
 import { fetchKpiStats } from "../../../service/store/StatisticsService";
-import StatRow from "../home/StatRow";
+import StatCard from "../../../components/store/home/StatCard";
+import { MdAttachMoney, MdLocalShipping, MdToday, MdInventory2 } from "react-icons/md";
 
-function KpiStatsCon({ filters, variant = "main" }) {
+export default function KpiStatsCon({ filters, variant = "main" }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -35,20 +36,24 @@ function KpiStatsCon({ filters, variant = "main" }) {
 
   if (loading) return <div>로딩 중...</div>;
 
-  // 카드 데이터 포맷
+  // 카드 데이터 포맷 (아이콘 추가)
   const stats = [
-    { label: "총 매출", value: `${data?.totalSales?.toLocaleString() || 0}원` },
-    { label: "발주 금액", value: `${data?.totalOrders?.toLocaleString() || 0}원` },
-    { label: "오늘 판매 수량", value: `${data?.todaySalesQuantity?.toLocaleString() || 0}개` },
-    { label: "입고 수량", value: `${data?.stockInCount?.toLocaleString() || 0}개` }
+    { icon: <MdAttachMoney />,   label: "총 매출",         value: `${data?.totalSales?.toLocaleString() || 0}원` },
+    { icon: <MdLocalShipping />, label: "발주 금액",       value: `${data?.totalOrders?.toLocaleString() || 0}원` },
+    { icon: <MdToday />,         label: "오늘 판매 수량",   value: `${data?.todaySalesQuantity?.toLocaleString() || 0}개` },
+    { icon: <MdInventory2 />,    label: "입고 수량",       value: `${data?.stockInCount?.toLocaleString() || 0}개` }
   ];
 
-  // 분기: variant가 main이면 StatRow, 아니면 KpiStatsCom
+  // 분기: variant가 main이면 StatCard, 아니면 KpiStatsCom
   if (variant === "main") {
-    return <StatRow stats={stats} />;
-} else {
+    return (
+      <div className="kpi-grid">
+        {stats.map((s, i) => (
+          <StatCard key={i} icon={s.icon} label={s.label} value={s.value} />
+        ))}
+      </div>
+    );
+  } else {
     return <KpiStatsCom data={data} loading={false} />;
+  }
 }
-}
-
-export default KpiStatsCon;
