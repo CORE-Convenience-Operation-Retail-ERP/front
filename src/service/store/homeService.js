@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosInstance from "../axiosInstance";
 import { MdAttachMoney, MdInventory2, MdListAlt, MdPeople } from "react-icons/md";
 
 // 오늘 출근한 사람들 불러오기 (출근 완료자 기준)
@@ -34,7 +34,7 @@ export async function fetchTodayScheduledPartTimers() {
   const { start, end } = getTodayRange();
 
   try {
-    const res = await axios.get("/api/parttimer-schedule", {
+    const res = await axiosInstance.get("/api/parttimer-schedule", {
       headers: {
         Authorization: `Bearer ${token}`
       },
@@ -73,7 +73,7 @@ function getTodayRange() {
 // 재고 요약 조회 후 부족 상품 필터링 (수량 <= minStock 또는 수량 <= 0)
 export async function fetchStockShortages(storeId) {
   const token = localStorage.getItem("token");
-  const res = await axios.get("/api/stock/summary", {
+  const res = await axiosInstance.get("/api/stock/summary", {
     headers: {
       Authorization: `Bearer ${token}`
     },
@@ -96,7 +96,7 @@ export async function fetchDisposalTargets() {
   const token = localStorage.getItem("token");
 
   try {
-    const res = await axios.get("/api/erp/disposal/expired", {
+    const res = await axiosInstance.get("/api/erp/disposal/expired", {
       headers: {
         Authorization: `Bearer ${token}`
       }

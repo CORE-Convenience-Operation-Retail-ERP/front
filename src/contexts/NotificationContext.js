@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import webSocketService from '../service/WebSocketService';
+import axiosInstance from '../api/axiosInstance';
 
 const NotificationContext = createContext();
 
@@ -8,7 +9,7 @@ export const NotificationProvider = ({ children }) => {
 
   // 전체 알림 fetch
   const fetchInitial = useCallback(async () => {
-    const res = await fetch('/api/notifications'); // 전체 알림 API로 변경
+    const res = await axiosInstance.get('/api/notifications'); // 전체 알림 API로 변경
     let all = [];
     if (res.ok) {
       const text = await res.text();
@@ -76,13 +77,13 @@ export const NotificationProvider = ({ children }) => {
 
   // 알림 읽음 처리
   const markAsRead = async (notificationId) => {
-    await fetch(`/api/notifications/${notificationId}/read`, { method: 'POST' });
+    await axiosInstance.post(`/api/notifications/${notificationId}/read`);
     setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, isRead: true, read: true } : n));
   };
 
   // 모두 읽음 처리
   const markAllAsRead = async () => {
-    await fetch('/api/notifications/read-all', { method: 'POST' });
+    await axiosInstance.post('/api/notifications/read-all');
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true, read: true })));
   };
 

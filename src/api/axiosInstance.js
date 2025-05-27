@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { loadingManager } from '../components/common/LoadingManager';
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const instance = axios.create({
-  // baseURL: 'http://localhost:8080', // 필요시 설정
+  baseURL: API_URL, // 환경변수에서 API 주소를 읽어옴
 });
 
 instance.interceptors.request.use(

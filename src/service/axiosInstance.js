@@ -1,8 +1,10 @@
 import axios from "axios";
 import { loadingManager } from '../components/common/LoadingManager';
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const instance = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: API_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
