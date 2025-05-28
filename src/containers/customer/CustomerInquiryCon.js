@@ -302,7 +302,7 @@ const CustomerInquiryCon = () => {
       };
       
       // 백엔드 서버 URL을 명시적으로 지정하고 withCredentials 옵션 추가
-      const response = await axios.post('http://localhost:8080/api/customer/inquiry', inquiryData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'https://api.corepos.store'}/api/customer/inquiry`, inquiryData, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'

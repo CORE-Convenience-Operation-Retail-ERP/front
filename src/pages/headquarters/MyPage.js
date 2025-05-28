@@ -312,7 +312,7 @@ const MyPage = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)} color="inherit">취소</Button>
-          <Button onClick={() => { setOpenDialog(false); window.location.href = 'http://localhost:3000/headquarters/hr/annual-leave'; }} color="primary" variant="contained">이동</Button>
+          <Button onClick={() => { setOpenDialog(false); window.location.href = 'https://corepos.store/headquarters/hr/annual-leave'; }} color="primary" variant="contained">이동</Button>
         </DialogActions>
       </Dialog>
     </Box>

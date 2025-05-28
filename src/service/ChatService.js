@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/chat';
+const API_URL = process.env.REACT_APP_API_URL || 'https://api.corepos.store/api/chat';
 
 // 채팅 알림 상태 저장소
 let unreadMessagesByRoom = {}; // 채팅방별 안 읽은 메시지 수 저장
