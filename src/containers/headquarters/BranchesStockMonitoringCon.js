@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BranchesStockMonitoringCom from '../../components/headquarters/BranchesStockMonitoringCom';
-import axios from 'axios';
+import axios from '../../service/axiosInstance';
 import { loadingManager } from '../../components/common/LoadingManager';
 
 const BranchesStockMonitoringCon = () => {
@@ -29,15 +29,6 @@ const BranchesStockMonitoringCon = () => {
     categoryId: null,
     page: 0,
     size: 10
-  });
-
-  // API 기본 설정
-  const api = axios.create({
-    baseURL: '/api',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : null
-    }
   });
   
   // 데이터 로딩 함수
@@ -68,7 +59,7 @@ const BranchesStockMonitoringCon = () => {
   // 지점 목록 로드
   const loadBranches = async () => {
     try {
-      const response = await api.get('/headquarters/branches/stock/branches');
+      const response = await axios.get('/api/headquarters/branches/stock/branches');
       setBranches(response.data);
     } catch (err) {
       console.error('Error loading branches:', err);
@@ -82,7 +73,7 @@ const BranchesStockMonitoringCon = () => {
   // 카테고리 목록 로드
   const loadCategories = async () => {
     try {
-      const response = await api.get('/headquarters/branches/stock/categories');
+      const response = await axios.get('/api/headquarters/branches/stock/categories');
       setCategories(response.data);
     } catch (err) {
       console.error('Error loading categories:', err);
@@ -101,7 +92,7 @@ const BranchesStockMonitoringCon = () => {
       
       if (targetStoreId) cleanParams.storeId = targetStoreId;
       
-      const response = await api.get('/headquarters/branches/stock/summary', { params: cleanParams });
+      const response = await axios.get('/api/headquarters/branches/stock/summary', { params: cleanParams });
       setStockSummary(response.data);
     } catch (err) {
       console.error('Error loading stock summary:', err);
@@ -120,7 +111,7 @@ const BranchesStockMonitoringCon = () => {
       
       if (targetStoreId) cleanParams.storeId = targetStoreId;
       
-      const response = await api.get('/headquarters/branches/stock/category-stats', { params: cleanParams });
+      const response = await axios.get('/api/headquarters/branches/stock/category-stats', { params: cleanParams });
       setCategoryStats(response.data);
     } catch (err) {
       console.error('Error loading category stats:', err);
@@ -134,7 +125,7 @@ const BranchesStockMonitoringCon = () => {
   // 지점별 재고 비교 로드
   const loadBranchComparison = async () => {
     try {
-      const response = await api.get('/headquarters/branches/stock/branch-comparison');
+      const response = await axios.get('/api/headquarters/branches/stock/branch-comparison');
       setBranchComparison(response.data);
     } catch (err) {
       console.error('Error loading branch comparison:', err);
@@ -163,7 +154,7 @@ const BranchesStockMonitoringCon = () => {
       cleanParams.page = targetFilters.page || 0;
       cleanParams.size = targetFilters.size || 10;
       
-      const response = await api.get('/headquarters/branches/stock/list', { params: cleanParams });
+      const response = await axios.get('/api/headquarters/branches/stock/list', { params: cleanParams });
       setStockList(response.data);
     } catch (err) {
       console.error('Error loading stock list:', err);
@@ -240,7 +231,7 @@ const BranchesStockMonitoringCon = () => {
         size: 100 // 자동완성을 위해 더 많은 상품 로드
       };
       
-      const response = await api.get('/headquarters/branches/stock/list', { params: cleanParams });
+      const response = await axios.get('/api/headquarters/branches/stock/list', { params: cleanParams });
       // 현재 데이터와 병합
       if (response.data && response.data.content) {
         setStockList(prevState => ({

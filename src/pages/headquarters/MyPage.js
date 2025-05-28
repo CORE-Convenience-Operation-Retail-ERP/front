@@ -5,7 +5,7 @@ import MyCon from '../../containers/headquarters/MyCon';
 import CalendarBox from '../../containers/headquarters/CalendarBox';
 import EventIcon from '@mui/icons-material/Event';
 import axios from '../../service/axiosInstance';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -28,6 +28,7 @@ const MyPage = () => {
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // 로그인한 사용자 정보 가져오기
@@ -312,7 +313,7 @@ const MyPage = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)} color="inherit">취소</Button>
-          <Button onClick={() => { setOpenDialog(false); window.location.href = 'https://corepos.store/headquarters/hr/annual-leave'; }} color="primary" variant="contained">이동</Button>
+          <Button onClick={() => { setOpenDialog(false); navigate('/headquarters/hr/annual-leave'); }} color="primary" variant="contained">이동</Button>
         </DialogActions>
       </Dialog>
     </Box>

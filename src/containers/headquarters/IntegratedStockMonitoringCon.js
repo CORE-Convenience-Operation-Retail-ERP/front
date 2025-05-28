@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import IntegratedStockMonitoringCom from '../../components/headquarters/IntegratedStockMonitoringCom';
-import axios from 'axios';
+import axios from '../../service/axiosInstance';
 import { useLoading } from '../../components/common/LoadingContext.tsx';
 
 const IntegratedStockMonitoringCon = () => {
