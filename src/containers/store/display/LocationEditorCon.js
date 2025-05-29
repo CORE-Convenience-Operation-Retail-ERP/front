@@ -118,17 +118,33 @@ export default function LocationEditorCon({ onClose, isEditMode, productLocation
 
   // 10) 상품-위치 매핑 저장
   const handleSaveMapping = useCallback(async () => {
-    if (!selectedLocationCodes.length) { alert('위치를 선택해주세요.'); return; }
+    if (!selectedLocationCodes.length) {
+      alert('위치를 선택해주세요.');
+      return;
+    }
+  
+    // 디버깅용 콘솔
+    console.log("선택된 locationCode:", selectedLocationCodes);
+    console.log("전체 layouts:", layouts);
+  
     const ids = layouts
       .filter(l => selectedLocationCodes.includes(l.locationCode))
       .map(l => l.locationId)
       .filter(Boolean);
-    if (!ids.length) { alert('선택한 위치의 ID가 없습니다.'); return; }
+  
+    console.log("추출된 locationId 목록:", ids); // 핵심 디버깅 포인트
+  
+    if (!ids.length) {
+      alert('선택한 위치의 ID가 없습니다.');
+      return;
+    }
+  
     await saveProductLocationMapping(Number(productId), ids);
     alert('위치 매핑 저장 완료');
     onConfirmSave?.();
     onClose();
   }, [layouts, selectedLocationCodes, productId, onConfirmSave, onClose]);
+  
 
   return (
     <LocationEditorCom
