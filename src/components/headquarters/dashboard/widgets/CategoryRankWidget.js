@@ -5,11 +5,11 @@ import WidgetWrapper from './WidgetWrapper';
 const CategoryRankWidget = () => {
   // 더미 데이터
   const dummyCategoryRanks = [
-    { id: 1, category: '의류', sales: 432000000, percentage: 35 },
-    { id: 2, category: '신발', sales: 287000000, percentage: 23 },
-    { id: 3, category: '액세서리', sales: 198000000, percentage: 16 },
-    { id: 4, category: '가방', sales: 165000000, percentage: 13 },
-    { id: 5, category: '화장품', sales: 123000000, percentage: 10 }
+    { id: 1, category: '주류', sales: 432000000, percentage: 35 },
+    { id: 2, category: '생활용품', sales: 287000000, percentage: 23 },
+    { id: 3, category: '신선식품', sales: 198000000, percentage: 16 },
+    { id: 4, category: '음료', sales: 165000000, percentage: 13 },
+    { id: 5, category: '냉동식품품', sales: 123000000, percentage: 10 }
   ];
 
   const formatSales = (sales) => {

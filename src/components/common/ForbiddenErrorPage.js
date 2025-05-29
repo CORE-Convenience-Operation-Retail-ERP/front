@@ -10,7 +10,7 @@ const ForbiddenErrorPage = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigate(-1);
-    }, 3000);
+    }, 5000);
     return () => clearTimeout(timer);
   }, [navigate]);
 
