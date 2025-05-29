@@ -28,6 +28,18 @@ const ChatModal = ({ isOpen, onClose }) => {
     onClose();
   };
 
+  // ESC 키로 모달 닫기
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen]);
+
   // 앱 초기화 시 웹소켓 연결 설정
   useEffect(() => {
     const token = localStorage.getItem('token');

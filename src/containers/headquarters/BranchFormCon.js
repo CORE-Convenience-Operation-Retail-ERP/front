@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from '../../services/axiosInstance';
+import axios from '../../service/axiosInstance';
 import BranchFormCom from '../../components/headquarters/BranchFormCom';
 
 const BranchFormCon = () => {
