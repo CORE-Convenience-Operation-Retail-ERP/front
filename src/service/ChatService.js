@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL || 'https://api.corepos.store/api/chat';
+import axios from './axiosInstance';
 
 // 채팅 알림 상태 저장소
 let unreadMessagesByRoom = {}; // 채팅방별 안 읽은 메시지 수 저장
@@ -35,7 +33,7 @@ class ChatService {
 
   // 채팅방 목록 조회
   getChatRooms() {
-    return axios.get(`${API_URL}/rooms`, {
+    return axios.get(`${process.env.REACT_APP_API_URL}/api/chat/rooms`, {
       headers: this.getAuthHeader()
     }).then(response => {
       // === [추가] 존재하지 않는 roomId의 알림 카운트 자동 정리 ===
@@ -62,7 +60,7 @@ class ChatService {
 
   // 채팅방 생성
   createChatRoom(roomName, roomType, memberIds) {
-    return axios.post(`${API_URL}/rooms`, {
+    return axios.post(`${process.env.REACT_APP_API_URL}/api/chat/rooms`, {
       roomName,
       roomType,
       memberIds
@@ -73,14 +71,14 @@ class ChatService {
 
   // 특정 채팅방 정보 조회
   getChatRoom(roomId) {
-    return axios.get(`${API_URL}/rooms/${roomId}`, {
+    return axios.get(`${process.env.REACT_APP_API_URL}/api/chat/rooms/${roomId}`, {
       headers: this.getAuthHeader()
     });
   }
 
   // 채팅방 메시지 목록 조회
   getChatMessages(roomId, page = 0, size = 50) {
-    return axios.get(`${API_URL}/rooms/${roomId}/messages`, {
+    return axios.get(`${process.env.REACT_APP_API_URL}/api/chat/rooms/${roomId}/messages`, {
       params: { page, size },
       headers: this.getAuthHeader()
     });
@@ -88,14 +86,14 @@ class ChatService {
 
   // 본사 직원 목록 조회
   getHeadquartersEmployees() {
-    return axios.get(`${API_URL}/employees`, {
+    return axios.get(`${process.env.REACT_APP_API_URL}/api/chat/employees`, {
       headers: this.getAuthHeader()
     });
   }
 
   // 채팅방 나가기
   leaveChatRoom(roomId) {
-    return axios.post(`${API_URL}/rooms/${roomId}/leave`, {}, {
+    return axios.post(`${process.env.REACT_APP_API_URL}/api/chat/rooms/${roomId}/leave`, {}, {
       headers: this.getAuthHeader()
     });
   }
@@ -113,7 +111,7 @@ class ChatService {
       return Promise.reject(new Error('초대할 멤버가 선택되지 않았습니다.'));
     }
     
-    return axios.post(`${API_URL}/rooms/${roomId}/invite`, {
+    return axios.post(`${process.env.REACT_APP_API_URL}/api/chat/rooms/${roomId}/invite`, {
       memberIds
     }, {
       headers: this.getAuthHeader()
