@@ -202,9 +202,9 @@ function StockListCom({
                             <th>상품명</th>
                             <th>바코드</th>
                             <th>카테고리</th>
-                            <th>매장 재고</th>
+                            <th>진열 재고</th>
                             <th>창고 재고</th>
-                            <th>총 재고</th>
+                            <th>매장 재고</th>
                             <th>실수량</th>
                             <th>오차</th>
                             <th>최근 입고일</th>

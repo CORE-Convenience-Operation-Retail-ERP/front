@@ -63,3 +63,19 @@ const CloseButton = styled.button`
   border: none;
   cursor: pointer;
 `;
+
+const ModalHeader = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 16px;
+
+    .actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+`;
+
+
