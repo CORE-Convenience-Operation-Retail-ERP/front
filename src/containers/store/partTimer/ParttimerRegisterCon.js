@@ -1,12 +1,12 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import PartTimerRegisterCom from "../../../components/store/partTimer/PartTimerRegisterCom";
 import { createPartTimer } from "../../../service/store/PartTimeService";
-import { sendVerificationCode, verifyDevice } from "../../../service/store/SmsService";
 
 function ParttimerRegisterCon() {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [form, setForm] = useState({
         partName: '',
@@ -27,7 +27,7 @@ function ParttimerRegisterCon() {
         deviceName: ''
     });
 
-      const inputRefs = {
+    const inputRefs = {
         partName: useRef(),
         position: useRef(),
         partPhone: useRef(),
@@ -41,16 +41,22 @@ function ParttimerRegisterCon() {
         accountNumber: useRef()
     };
 
-    const [code, setCode] = useState('');
     const [verified, setVerified] = useState(false);
 
     useEffect(() => {
+        // 최초 device 정보 설정
         setForm(prev => ({
             ...prev,
             deviceId: uuidv4(),
             deviceName: navigator.userAgent
         }));
     }, []);
+
+    useEffect(() => {
+        // QR 인증 페이지에서 돌아올 경우 인증 여부 확인
+        const isVerified = sessionStorage.getItem("verified");
+        if (isVerified === "true") setVerified(true);
+    }, [location]);
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
@@ -65,96 +71,79 @@ function ParttimerRegisterCon() {
         setForm({ ...form, [name]: value });
     };
 
-    const handleSendCode = async () => {
-        try {
-            await sendVerificationCode(form.partPhone);
-            alert("인증번호가 전송되었습니다.");
-        } catch (err) {
-            alert("인증번호 전송 실패");
+    const handleOpenQrAuth = () => {
+        if (!form.partPhone) {
+            alert("전화번호를 먼저 입력해주세요.");
+            inputRefs.partPhone.current?.focus();
+            return;
         }
+        const redirect = encodeURIComponent('/store/parttimer/register');
+        const url = `/device-auth?phone=${form.partPhone}&deviceId=${form.deviceId}&deviceName=${form.deviceName}&redirect=${redirect}`;
+        window.open(url, '_blank'); // 새 창 또는 QR로 유도
     };
 
-    const handleVerifyCode = async () => {
+    const handleSubmit = async () => {
+        if (!verified) {
+            alert("기기 인증을 먼저 완료해주세요.");
+            return;
+        }
+
+        const requiredFields = [
+            { key: 'partName', label: '이름' },
+            { key: 'position', label: '직책' },
+            { key: 'partPhone', label: '전화번호' },
+            { key: 'workType', label: '근무유형' },
+            { key: 'partGender', label: '성별' },
+            { key: 'partAddress', label: '주소' },
+            { key: 'birthDate', label: '생년월일' },
+            { key: 'hireDate', label: '입사일' },
+            { key: 'salaryType', label: '급여유형' },
+            { key: 'accountBank', label: '은행명' },
+            { key: 'accountNumber', label: '계좌번호' },
+        ];
+
+        for (let field of requiredFields) {
+            if (!form[field.key]) {
+                alert(`필수 항목 [${field.label}]을(를) 입력해주세요.`);
+                inputRefs[field.key]?.current?.focus();
+                return;
+            }
+        }
+
         try {
-            await verifyDevice({
-                phone: form.partPhone,
-                code,
-                deviceId: form.deviceId,
-                deviceName: form.deviceName
+            const formData = new FormData();
+            const birthDateFormatted = form.birthDate?.toISOString().split('T')[0];
+            const hireDateFormatted = form.hireDate?.toISOString().slice(0, 19);
+
+            const updatedForm = {
+                ...form,
+                birthDate: birthDateFormatted,
+                hireDate: hireDateFormatted
+            };
+
+            Object.entries(updatedForm).forEach(([key, value]) => {
+                if (value !== null && value !== undefined && value !== '') {
+                    formData.append(key, value);
+                }
             });
-            setVerified(true);
-            alert("기기 인증 및 저장 완료");
-        } catch (err) {
-            alert("인증 실패: " + (err.response?.data || '서버 오류'));
+
+            await createPartTimer(formData);
+            sessionStorage.removeItem("verified");
+            alert('아르바이트 등록 완료');
+            navigate('/store/parttimer/list');
+        } catch (error) {
+            alert('등록 실패');
         }
     };
-
-const handleSubmit = async () => {
-  if (!verified) {
-    alert("먼저 기기 인증을 완료해 주세요.");
-    return;
-  }
-
-  // 필수 입력 체크
-  const requiredFields = [
-    { key: 'partName', label: '이름' },
-    { key: 'position', label: '직책' },
-    { key: 'partPhone', label: '전화번호' },
-    { key: 'workType', label: '근무유형' },
-    { key: 'partGender', label: '성별' },
-    { key: 'partAddress', label: '주소' },
-    { key: 'birthDate', label: '생년월일' },
-    { key: 'hireDate', label: '입사일' },
-    { key: 'salaryType', label: '급여유형' },
-    { key: 'accountBank', label: '은행명' },
-    { key: 'accountNumber', label: '계좌번호' },
-  ];
-
- for (let field of requiredFields) {
-    if (!form[field.key]) {
-      alert(`필수 항목 [${field.label}]을(를) 입력해주세요.`);
-      inputRefs[field.key]?.current?.focus();
-      return;
-    }
-  }
-
-  try {
-    const formData = new FormData();
-    const birthDateFormatted = form.birthDate?.toISOString().split('T')[0];
-    const hireDateFormatted = form.hireDate?.toISOString().slice(0, 19);
-
-    const updatedForm = {
-      ...form,
-      birthDate: birthDateFormatted,
-      hireDate: hireDateFormatted
-    };
-
-    Object.entries(updatedForm).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
-        formData.append(key, value);
-      }
-    });
-
-    await createPartTimer(formData);
-    alert('아르바이트 등록 완료');
-    navigate('/store/parttimer/list');
-  } catch (error) {
-    alert('등록 실패');
-  }
-};
-
 
     return (
         <PartTimerRegisterCom
             form={form}
-            code={code}
             verified={verified}
             onChange={handleChange}
             onDateChange={handleDateChange}
             onSubmit={handleSubmit}
-            onSendCode={handleSendCode}
-            onVerifyCode={handleVerifyCode}
-            onCodeChange={(e) => setCode(e.target.value)}
+            onOpenQrAuth={handleOpenQrAuth}
             inputRefs={inputRefs}
         />
     );

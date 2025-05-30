@@ -13,6 +13,7 @@ import {
     ProfileImage
 } from '../../../features/store/styles/partTimer/StorePatTimerForm.styled';
 
+import AddressSearchCustom from '../common/AddressSearchCustom';
 import CustomCalendar from '../common/CustomCalendar';
 import {ButtonRow} from "../../../features/store/styles/common/Button.styled";
 
@@ -103,8 +104,18 @@ function PartTimerUpdateCom({
             </InputGroup>
 
             <InputGroup>
-                <Label>주소</Label>
-                <Input name="partAddress" value={form.partAddress || ''} onChange={onChange} />
+                <Label required>주소</Label>
+                <AddressSearchCustom
+                    value={form.partAddress}
+                    onChange={onChange}
+                    detailAddress={form.partAddressDetail}
+                    onDetailAddressChange={(val) =>
+                        onChange({ target: { name: 'partAddressDetail', value: val } })
+                    }
+                    onSelect={({ fullAddress }) =>
+                        onChange({ target: { name: 'partAddress', value: fullAddress } })
+                    }
+                />
             </InputGroup>
 
             <InputGroup>

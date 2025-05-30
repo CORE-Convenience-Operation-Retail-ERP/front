@@ -85,7 +85,7 @@ export const fetchStoreList = () =>
         return res.data || [];
     });
 
-/** [12] 매장 목록 조회 (드롭다운용) */
+/** [13] 본사 재고 조회 */
 
 export async function fetchAllHQStocks() {
   const res = await axios.get("/api/hq-stock");

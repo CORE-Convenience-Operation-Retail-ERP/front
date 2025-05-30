@@ -49,7 +49,10 @@ export default function OrderFormCon() {
     const [childCategories, setChildCategories] = useState([]);
     const [grandChildCategories, setGrandChildCategories] = useState([]);
     const [hqStockMap, setHqStockMap] = useState({});
-    const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
+    const [sortConfig, setSortConfig] = useState({
+        key: "productId",
+        direction: "asc"
+    });
 
     const handleSort = (key) => {
         setSortConfig(prev => {
@@ -144,7 +147,16 @@ export default function OrderFormCon() {
         async function loadProducts() {
             setLoading(true);
             try {
-                const params = cleanParams({ ...searchParams, page });
+                const sortBy = sortConfig.key || "productName";
+                const sortDir = sortConfig.direction || "asc";
+
+                const params = cleanParams({
+                    ...searchParams,
+                    page,
+                    sortBy,
+                    sortDir,
+                });
+
                 const res = await fetchOrderProductList(params);
                 setProducts(res.data.content || []);
                 setTotalPages(res.data.totalPages || 1);
@@ -154,8 +166,9 @@ export default function OrderFormCon() {
                 setLoading(false);
             }
         }
+
         loadProducts();
-    }, [searchParams, page]);
+    }, [searchParams, page, sortConfig]);
 
     useEffect(() => {
         fetchAllHQStocks()

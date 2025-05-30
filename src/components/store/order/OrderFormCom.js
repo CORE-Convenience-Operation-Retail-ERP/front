@@ -80,18 +80,7 @@ function OrderFormCom({
         });
     };
 
-    const sortedProductList = useMemo(() => {
-        if (!sortConfig?.key) return productList;
-
-        return [...productList].sort((a, b) => {
-            const valA = a[sortConfig.key];
-            const valB = b[sortConfig.key];
-
-            if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
-            if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
-            return 0;
-        });
-    }, [productList, sortConfig]);
+    const sortedProductList = productList;
 
     const { totalQty, totalAmount } = useMemo(() => {
         return selectedItems.reduce(
@@ -147,51 +136,66 @@ function OrderFormCom({
                         <Table>
                             <thead>
                             <tr>
-                                <th onClick={() => handleSort("productId")} style={{ cursor: "pointer", padding: "0 8px", verticalAlign: "middle" }}>
-                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "4px",height: "100%" }}>
-                                        <span style={{
-                                            fontSize: "14px",
-                                            color: sortConfig.key === "productId" ? "#007bff" : "#333",
-                                            fontWeight: sortConfig.key === "productId" ? "bold" : "normal",
-                                            lineHeight: "1.2"
-                                        }}>
-                                          ID
-                                        </span>
-                                        <div style={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            fontSize: "10px",
-                                            lineHeight: "1",
-                                            justifyContent: "center"
-                                        }}>
-                                            <span style={{ color: sortConfig.key === "productId" && sortConfig.direction === "asc" ? "#007bff" : "#ccc" }}>▲</span>
-                                            <span style={{ color: sortConfig.key === "productId" && sortConfig.direction === "desc" ? "#007bff" : "#ccc" }}>▼</span>
+                                <th
+                                    onClick={() => handleSort("productId")}
+                                    style={{
+                                        cursor: "pointer",
+                                        textAlign: "center",
+                                        verticalAlign: "middle",
+                                        fontWeight: "bold",
+                                        padding: "12px 8px",
+                                    }}
+                                >
+                                    <div style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "14px",
+                                        lineHeight: "1.2"
+                                    }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                                          <span style={{ color: sortConfig.key === "productId" ? "#007bff" : "#333" }}>
+                                            ID
+                                          </span>
+                                            <div style={{ fontSize: "10px", lineHeight: "1" }}>
+                                                <div style={{ color: sortConfig.key === "productId" && sortConfig.direction === "asc" ? "#007bff" : "#ccc" }}>▲</div>
+                                                <div style={{ color: sortConfig.key === "productId" && sortConfig.direction === "desc" ? "#007bff" : "#ccc" }}>▼</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </th>
 
-                                <th onClick={() => handleSort("productName")} style={{ cursor: "pointer", padding: "0 8px", verticalAlign: "middle" }}>
-                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "4px",height: "100%", marginLeft: "8px" }}>
-                                        <span style={{
-                                            fontSize: "14px",
-                                            color: sortConfig.key === "productName" ? "#007bff" : "#333",
-                                            fontWeight: sortConfig.key === "productName" ? "bold" : "normal",
-                                            lineHeight: "1.2"
-                                        }}>
-                                          상품명
-                                        </span>
-                                        <div style={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            fontSize: "10px",
-                                            lineHeight: "1",
-                                            justifyContent: "center"
-                                        }}>
-                                            <span style={{ color: sortConfig.key === "productName" && sortConfig.direction === "asc" ? "#007bff" : "#ccc" }}>▲</span>
-                                            <span style={{ color: sortConfig.key === "productName" && sortConfig.direction === "desc" ? "#007bff" : "#ccc" }}>▼</span>
+                                <th
+                                    onClick={() => handleSort("productName")}
+                                    style={{
+                                        cursor: "pointer",
+                                        textAlign: "center",
+                                        verticalAlign: "middle",
+                                        fontWeight: "bold",
+                                        padding: "12px 8px",
+                                    }}
+                                >
+                                    <div style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "14px",
+                                        lineHeight: "1.2"
+                                    }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                                          <span style={{ color: sortConfig.key === "productName" ? "#007bff" : "#333" }}>
+                                            상품명
+                                          </span>
+                                            <div style={{ fontSize: "10px", lineHeight: "1" }}>
+                                                <div style={{ color: sortConfig.key === "productName" && sortConfig.direction === "asc" ? "#007bff" : "#ccc" }}>▲</div>
+                                                <div style={{ color: sortConfig.key === "productName" && sortConfig.direction === "desc" ? "#007bff" : "#ccc" }}>▼</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </th>
+
 
                                 <th>바코드</th>
                                 <th>카테고리</th>
@@ -245,7 +249,43 @@ function OrderFormCom({
                     <Pagination currentPage={page} totalPages={totalPages} onPageChange={onPageChange} />
                 </div>
 
-                {/* 요약 카드 생략 (기존 코드 유지) */}
+
+                {/* 상품 요약 카드 */}
+                <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.06)", padding: "1.5rem", minWidth: "300px", maxWidth: "360px", fontSize: "0.95rem", fontFamily: "'Noto Sans KR', sans-serif", marginLeft: "2.5rem" }}>
+                    <h3 style={{ marginBottom: "1rem", fontSize: "1.1rem", fontWeight: "bold", color: "#333", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <MdShoppingCart size={20} />
+                        상품 요약
+                    </h3>
+
+                    <ul style={{ listStyle: "none", padding: 0, marginBottom: "1.5rem" }}>
+                        {pagedSummaryItems.map((item) => (
+                            <li key={item.productId} style={{ marginBottom: "0.8rem", padding: "0.75rem", backgroundColor: "#f9f9f9", borderRadius: "8px", border: "1px solid #eee" }}>
+                                <div style={{ fontWeight: "500", marginBottom: "0.3rem" }}>{item.productName}</div>
+                                <div style={{ fontSize: "0.88rem", color: "#555" }}>
+                                    수량: <strong>{item.quantity}</strong> / 금액: <strong>{(item.unitPrice * item.quantity).toLocaleString()}원</strong>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+
+                    {selectedItems.length > summaryPageSize && (
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+                            <button onClick={handlePrev} disabled={summaryPage === 0} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.2rem" }}>◀</button>
+                            <span style={{ fontSize: "0.9rem", color: "#777" }}>{summaryPage + 1} / {summaryPageCount || 1}</span>
+                            <button onClick={handleNext} disabled={summaryPage >= summaryPageCount - 1} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.2rem" }}>▶</button>
+                        </div>
+                    )}
+
+                    <div style={{ borderTop: "1px solid #ddd", paddingTop: "1rem", marginTop: "1rem" }}>
+                        <p style={{ marginBottom: "0.3rem" }}><strong>총 수량:</strong> {totalQty}</p>
+                        <p style={{ marginBottom: "1rem" }}>
+                            <strong>총 금액:</strong> <span style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#007BFF" }}>{totalAmount.toLocaleString()}원</span>
+                        </p>
+                        <PrimaryButton style={{ width: "100%" }} onClick={handleSubmitClick}>
+                            {isEdit ? "수정 완료" : "발주 등록"}
+                        </PrimaryButton>
+                    </div>
+                </div>
             </PageSection>
         </PageWrapper>
     );

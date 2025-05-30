@@ -253,9 +253,9 @@ function PartTimerCalendarCon() {
         </div>
 
         <NavigationWrapper>
-          <PrimaryButton onClick={goPrev}>← 이전</PrimaryButton>
-          <PrimaryButton onClick={goToday}>오늘</PrimaryButton>
-          <PrimaryButton onClick={goNext}>다음 →</PrimaryButton>
+          <PrimaryButton style={{ width: "84px", height: "34px" }} onClick={goPrev}>← 이전</PrimaryButton>
+          <PrimaryButton style={{ width: "84px", height: "34px" }} onClick={goToday}>오늘</PrimaryButton>
+          <PrimaryButton style={{ width: "84px", height: "34px" }} onClick={goNext}>다음 →</PrimaryButton>
         </NavigationWrapper>
       </CalendarNav>
 

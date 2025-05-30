@@ -14,6 +14,8 @@ export const PrimaryButton = styled.button`
     ${baseButton}
     background-color: #007eff;
     color: white;
+    
+    
 
     &:hover {
         background-color: #2563eb;

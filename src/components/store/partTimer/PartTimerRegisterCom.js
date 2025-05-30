@@ -25,14 +25,10 @@ function PartTimerRegisterCom({
     onChange,
     onDateChange,
     onSubmit,
-    onSendCode,
-    onVerifyCode,
-    onCodeChange,
-    code,
+    onOpenQrAuth,
     verified,
     inputRefs = {} // 추가된 ref 포커스용
 }) {
-    const [showCodeInput, setShowCodeInput] = useState(false);
 
     return (
         <FormWrapper>
@@ -89,20 +85,15 @@ function PartTimerRegisterCom({
                         onChange={onChange}
                         placeholder="010-1234-5678"
                     />
-                    <OutlineButton type="button" onClick={() => { onSendCode(); setShowCodeInput(true); }}>
-                        인증번호 전송
+                    <OutlineButton type="button" onClick={onOpenQrAuth}>
+                        기기 인증하기
                     </OutlineButton>
                 </PhoneRow>
             </InputGroup>
 
-            {!verified && showCodeInput && (
+            {verified && (
                 <InputGroup>
-                    <Label required>인증번호</Label>
-                    <PhoneRow>
-                        <Input value={code} onChange={onCodeChange} placeholder="인증번호 입력" />
-                        <OutlineButton type="button" onClick={onVerifyCode}>확인</OutlineButton>
-                    </PhoneRow>
-                    {verified && <VerifiedMessage>✅ 인증 완료</VerifiedMessage>}
+                    <VerifiedMessage>✅ 기기 인증 완료</VerifiedMessage>
                 </InputGroup>
             )}
             <InputGroup>
