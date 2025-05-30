@@ -33,6 +33,12 @@ class ChatService {
 
   // 채팅방 목록 조회
   getChatRooms() {
+    const token = localStorage.getItem('token');
+    const deptId = Number(localStorage.getItem('deptId'));
+    if (!token || isNaN(deptId) || deptId < 4 || deptId > 10) {
+      // 비로그인 또는 비허용 부서면 빈 배열 반환 (API 요청 X)
+      return Promise.resolve({ data: [] });
+    }
     return axios.get(`${process.env.REACT_APP_API_URL}/api/chat/rooms`, {
       headers: this.getAuthHeader()
     }).then(response => {

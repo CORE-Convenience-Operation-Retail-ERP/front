@@ -1184,7 +1184,7 @@ const IntegratedStockMonitoringCom = ({
                   <StatusItem $status="danger">
                     <StatusIcon $status="danger" />
                     <StatusContent>
-                      <StatusTitle>위험 재고</StatusTitle>
+                      <StatusTitle>긴급 재고</StatusTitle>
                       <StatusDescription>{stockStatusDescriptions.danger}</StatusDescription>
                     </StatusContent>
                     <StatusCount $status="danger">
@@ -1195,7 +1195,7 @@ const IntegratedStockMonitoringCom = ({
                   <StatusItem $status="warning">
                     <StatusIcon $status="warning" />
                     <StatusContent>
-                      <StatusTitle>부족 재고</StatusTitle>
+                      <StatusTitle>경고 재고</StatusTitle>
                       <StatusDescription>{stockStatusDescriptions.warning}</StatusDescription>
                     </StatusContent>
                     <StatusCount $status="warning">
@@ -1206,7 +1206,7 @@ const IntegratedStockMonitoringCom = ({
                   <StatusItem $status="normal">
                     <StatusIcon $status="normal" />
                     <StatusContent>
-                      <StatusTitle>적정 재고</StatusTitle>
+                      <StatusTitle>정상 재고</StatusTitle>
                       <StatusDescription>{stockStatusDescriptions.normal}</StatusDescription>
                     </StatusContent>
                     <StatusCount $status="normal">

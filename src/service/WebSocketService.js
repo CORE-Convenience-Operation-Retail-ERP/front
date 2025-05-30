@@ -16,7 +16,8 @@ class WebSocketService {
     
     // deptId 체크: 점주(3)~본사(10) 모두 웹소켓 사용
     const deptId = parseInt(localStorage.getItem('deptId'), 10);
-    this.isAllowed = deptId >= 3 && deptId <= 10;
+    const token = localStorage.getItem('token');
+    this.isAllowed = token && !isNaN(deptId) && deptId >= 3 && deptId <= 10;
 
     if (this.isAllowed) {
       // 페이지 로드 시 자동 연결 시도

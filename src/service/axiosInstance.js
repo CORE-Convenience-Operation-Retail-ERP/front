@@ -65,28 +65,52 @@ instance.interceptors.response.use(
         // console.log('현재 사용자 정보:', localStorage.getItem('loginUser'));
         // console.log('현재 역할:', localStorage.getItem('userRole'));
         
-        // 403 에러 페이지로 리다이렉션
-        if (window.location.pathname !== "/error/403") {
+        // 로그인 페이지나 에러 페이지에서는 403 리다이렉션하지 않음
+        const currentPath = window.location.pathname;
+        const isLoginPage = currentPath === "/login" || currentPath === "/register";
+        const isErrorPage = currentPath.startsWith("/error");
+        
+        // 403 에러 페이지로 리다이렉션 (로그인/에러 페이지가 아닌 경우만)
+        if (!isLoginPage && !isErrorPage && currentPath !== "/error/403") {
           window.location.href = "/error/403";
         }
       }
       
       if (error.response.status === 401) {
         console.log('인증되지 않음 (401 Unauthorized)');
-        // 인증 관련 데이터 초기화
-        localStorage.removeItem("token");
-        localStorage.removeItem("loginUser");
-        localStorage.removeItem("branchName");
-        localStorage.removeItem("userRole");
-        localStorage.removeItem("storeId");
-        localStorage.removeItem("name");
         
-        // 로그인 페이지로 리디렉션 비활성화
-        /* 401 에러 리다이렉트 비활성화
-        if (window.location.pathname !== "/login") {
+        // 로그인 페이지나 에러 페이지에서는 401 처리하지 않음
+        const currentPath = window.location.pathname;
+        const isLoginPage = currentPath === "/login" || currentPath === "/register";
+        const isErrorPage = currentPath.startsWith("/error");
+        
+        if (!isLoginPage && !isErrorPage) {
+          // 인증 관련 데이터 초기화 (통합된 방식)
+          const keysToRemove = [
+            'token',
+            'empId', 
+            'deptId',
+            'empName',
+            'deptName', 
+            'role',
+            'storeId',
+            'storeName',
+            'loginUser',
+            'branchName',
+            'userRole',
+            'name',
+            'admin_notifications',
+            'admin_unread_notifications',
+            'chat_unread_by_room'
+          ];
+          
+          keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+          });
+          
+          // 로그인 페이지로 리다이렉션
           window.location.href = "/login?error=session_expired";
         }
-        */
       }
       
       if (error.response.status === 404) {

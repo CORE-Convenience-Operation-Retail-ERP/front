@@ -12,10 +12,12 @@ import NotificationIcon from '../common/NotificationIcon';
 import adminNotificationService from '../../service/AdminNotificationService';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import Tooltip from '@mui/material/Tooltip';
+import useLogout from '../../hooks/useLogout';
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const logout = useLogout();
 
   const [anchorEl, setAnchorEl] = useState(null);
   // 기존 연차 알림 관련 상태 - 주석 처리
@@ -81,17 +83,7 @@ const Header = () => {
     navigate(location.pathname, { replace: true });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('empId');
-    localStorage.removeItem('deptId');
-    localStorage.removeItem('empName');
-    localStorage.removeItem('deptName');
-    localStorage.removeItem('role');
-    localStorage.removeItem('storeId');
-    localStorage.removeItem('storeName');
-    navigate('/login');
-  };
+  const handleLogout = logout;
 
   const handleNotificationClick = (event) => {
     setAnchorEl(event.currentTarget);

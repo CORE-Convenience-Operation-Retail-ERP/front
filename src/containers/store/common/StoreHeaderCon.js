@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import StoreHeader from '../../../components/store/common/StoreHeader';
 import axios from "../../../service/axiosInstance";
+import useLogout from '../../../hooks/useLogout';
 
 function HeaderContainer() {
   const loginUser = JSON.parse(localStorage.getItem("loginUser")) || {};
   const storeName = localStorage.getItem("storeName") || "";
+  const logout = useLogout();
 
   const [userInfo, setUserInfo] = useState({
     branchName: storeName,
@@ -33,24 +35,10 @@ function HeaderContainer() {
     fetchNotifications();
   }, []);
 
-
-    const handleLogout = () => {
-      localStorage.removeItem('token');
-      localStorage.removeItem('empId');
-      localStorage.removeItem('deptId');
-      localStorage.removeItem('empName');
-      localStorage.removeItem('deptName');
-      localStorage.removeItem('role');
-      localStorage.removeItem('storeId');
-      localStorage.removeItem('storeName');
-        window.location.href = "/login";
-    };
-
-
   return (
     <StoreHeader
       userInfo={userInfo}
-      onLogout={handleLogout}
+      onLogout={logout}
     />
   );
 }
