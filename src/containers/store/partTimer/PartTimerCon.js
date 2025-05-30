@@ -20,6 +20,7 @@ const TopBar = styled.div`
   margin: 10px 0;
 `;
 
+
 function PartTimerCon() {
     const navigate = useNavigate();
 

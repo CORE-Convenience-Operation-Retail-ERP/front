@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
     FormWrapper,
     Title,
@@ -7,7 +6,6 @@ import {
     Input,
     Select,
     FileInput,
-    SubmitButton,
     PhoneRow,
     OutlineButton,
     VerifiedMessage,
@@ -17,9 +15,7 @@ import {
 import CustomCalendar from '../../../components/store/common/CustomCalendar';
 import { Navigate } from 'react-router-dom';
 import { ButtonRow } from '../../../features/store/styles/common/Button.styled';
-import AddressSearch from '../../common/AddressSearch';
 import AddressSearchCustom from '../common/AddressSearchCustom';
-
 function PartTimerRegisterCom({
     form,
     onChange,

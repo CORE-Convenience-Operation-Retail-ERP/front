@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import PartTimerRegisterCom from "../../../components/store/partTimer/PartTimerRegisterCom";
+import QRAuthModal from "../../../components/store/partTimer/QrAuthModal";
 import { createPartTimer } from "../../../service/store/PartTimeService";
 
 function ParttimerRegisterCon() {
@@ -42,9 +43,9 @@ function ParttimerRegisterCon() {
     };
 
     const [verified, setVerified] = useState(false);
+    const [qrModalOpen, setQrModalOpen] = useState(false);
 
     useEffect(() => {
-        // 최초 device 정보 설정
         setForm(prev => ({
             ...prev,
             deviceId: uuidv4(),
@@ -53,7 +54,6 @@ function ParttimerRegisterCon() {
     }, []);
 
     useEffect(() => {
-        // QR 인증 페이지에서 돌아올 경우 인증 여부 확인
         const isVerified = sessionStorage.getItem("verified");
         if (isVerified === "true") setVerified(true);
     }, [location]);
@@ -73,14 +73,14 @@ function ParttimerRegisterCon() {
 
     const handleOpenQrAuth = () => {
         if (!form.partPhone) {
-            alert("전화번호를 먼저 입력해주세요.");
+            alert("전화번호를 입력해주세요.");
             inputRefs.partPhone.current?.focus();
             return;
         }
-        const redirect = encodeURIComponent('/store/parttimer/register');
-        const url = `/device-auth?phone=${form.partPhone}&deviceId=${form.deviceId}&deviceName=${form.deviceName}&redirect=${redirect}`;
-        window.open(url, '_blank'); // 새 창 또는 QR로 유도
+        console.log("모달 열기");
+        setQrModalOpen(true);
     };
+
 
     const handleSubmit = async () => {
         if (!verified) {
@@ -137,15 +137,27 @@ function ParttimerRegisterCon() {
     };
 
     return (
-        <PartTimerRegisterCom
-            form={form}
-            verified={verified}
-            onChange={handleChange}
-            onDateChange={handleDateChange}
-            onSubmit={handleSubmit}
-            onOpenQrAuth={handleOpenQrAuth}
-            inputRefs={inputRefs}
-        />
+        <>
+            <PartTimerRegisterCom
+                form={form}
+                verified={verified}
+                onChange={handleChange}
+                onDateChange={handleDateChange}
+                onSubmit={handleSubmit}
+                onOpenQrAuth={handleOpenQrAuth}
+                inputRefs={inputRefs}
+            />
+
+            {qrModalOpen && (
+                <QRAuthModal
+                    isOpen={qrModalOpen}
+                    onClose={() => setQrModalOpen(false)}
+                    phone={form.partPhone}
+                    deviceId={form.deviceId}
+                    deviceName={form.deviceName}
+                />
+            )}
+        </>
     );
 }
 

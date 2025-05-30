@@ -61,6 +61,7 @@ import CategorySalesDetailPage from '../pages/store/Statistic/CategorySalesDetai
 import HourlySalesDetailPage from '../pages/store/Statistic/HourlySalesDetailPage.js';
 import OrderTopProductsDetailPage from '../pages/store/Statistic/OrderTopProductsDetailPage.js';
 import StrockInHistoryPage from '../pages/store/order/StockInHistoryPage.js';
+import DeviceAuthPage from "../components/store/partTimer/DeviceAuthPage";
 
 
 const AppRoutes = () => {
@@ -107,6 +108,7 @@ const AppRoutes = () => {
         <Route path="/store" element={<StoreLayout/>} >
           <Route path="home" element={<HomePage/>} />
           <Route path="stock/list" element={<StockListPage/>} />
+          <Route path="device-auth" element={<DeviceAuthPage />} />
           <Route path="stock/in-history" element={<StrockInHistoryPage />} />
           <Route path="stock/flow/search" element={<StockFlowLogPage/>} />
           <Route path="inventory/check/history" element={<InventoryHistoryPage/>} />
