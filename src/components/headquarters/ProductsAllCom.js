@@ -6,6 +6,8 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { InputBase, IconButton, Paper } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
+import { FileDownload as FileDownloadIcon } from '@mui/icons-material';
+import axios from '../../service/axiosInstance';
 
 // 검색어 하이라이트 함수
 const highlightText = (text, searchTerm) => {
@@ -89,6 +91,39 @@ const ProductsAllCom = ({
     if (onSearch) onSearch('');
   };
 
+  // 엑셀 다운로드 핸들러
+  const handleExcelDownload = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/products/download/excel', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        responseType: 'blob'
+      });
+
+      // 파일 다운로드
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // 파일명 설정 (현재 날짜 포함)
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      link.setAttribute('download', `상품목록_${dateStr}.xlsx`);
+      
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      alert('엑셀 파일이 다운로드되었습니다.');
+    } catch (error) {
+      console.error('엑셀 다운로드 실패:', error);
+      alert('엑셀 다운로드에 실패했습니다.');
+    }
+  };
+
   return (
     <Box>
       {/* 헤더 */}
@@ -157,8 +192,27 @@ const ProductsAllCom = ({
           </IconButton>
         </Paper>
       </Box>
-      {/* 상품 등록 버튼 */}
-      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+      
+      {/* 상품 등록 및 엑셀 다운로드 버튼 */}
+      <Box sx={{ width: '90%', maxWidth: 1200, mx: 'auto', mb: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+        <Button
+          variant="outlined"
+          startIcon={<FileDownloadIcon />}
+          onClick={handleExcelDownload}
+          sx={{
+            borderColor: '#2563A6',
+            color: '#2563A6',
+            '&:hover': { 
+              borderColor: '#1E5187',
+              backgroundColor: 'rgba(37, 99, 166, 0.1)'
+            },
+            borderRadius: '30px',
+            px: 3,
+            height: 40
+          }}
+        >
+          엑셀 다운로드
+        </Button>
         <Button
           variant="contained"
           startIcon={<AddIcon />}

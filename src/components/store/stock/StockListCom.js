@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
+import axios from '../../../service/axiosInstance';
 
 import Pagination from '../common/Pagination';
 import StoreSearchBar from '../common/StoreSearchBar';
@@ -58,24 +59,36 @@ function StockListCom({
         setSelectedIds(checked ? selectable : []);
     };
 
-    const handleDownload = () => {
-        if (!stockList.length) return alert('데이터가 없습니다.');
-        const sheet = XLSX.utils.json_to_sheet(stockList.map(item => ({
-            상품명: item.productName,
-            바코드: item.barcode,
-            카테고리: item.categoryName,
-            매장재고: item.storeQuantity,
-            창고재고: item.warehouseQuantity,
-            총재고: item.totalQuantity,
-            실수량: item.realQuantity ?? '-',
-            오차: item.difference > 0 ? `+${item.difference}` : item.difference ?? '-',
-            최근입고일: item.latestInDate?.split('T')[0] || '-',
-            상태: item.promoStatus,
-            실사상태: item.isApplied ? '반영됨' : '미반영'
-        })));
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, sheet, '재고현황');
-        XLSX.writeFile(wb, `stock_${new Date().toISOString().split('T')[0]}.xlsx`);
+    const handleDownload = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('/api/stock/download/excel', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                responseType: 'blob'
+            });
+
+            // 파일 다운로드
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            
+            // 파일명 설정 (현재 날짜 포함)
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            link.setAttribute('download', `재고현황_${dateStr}.xlsx`);
+            
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            
+            alert('엑셀 파일이 다운로드되었습니다.');
+        } catch (error) {
+            console.error('엑셀 다운로드 실패:', error);
+            alert('엑셀 다운로드에 실패했습니다.');
+        }
     };
 
     const renderDifference = (real, total, applied) => {

@@ -36,7 +36,7 @@ const ProductsEditCon = () => {
     const res = await axios.post("/api/products/upload-image", formData, {
       headers: { "Content-Type": "multipart/form-data" }
     });
-    return res.data; // 업로드된 이미지 URL
+    return res.data.imageUrl;
   };
 
   return (

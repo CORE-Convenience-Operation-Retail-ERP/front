@@ -6,6 +6,7 @@ import axios from '../../service/axiosInstance';
 import { IconButton } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 // Chart.js 등록
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -558,6 +559,23 @@ const StatusText = styled.span`
   }};
 `;
 
+const ExcelButton = styled.button`
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  
+  &:hover {
+    background-color: #45a049;
+  }
+`;
+
 const IntegratedStockMonitoringCom = ({ 
   headquarters = [], // 본사 재고 데이터
   branches = [], 
@@ -939,8 +957,50 @@ const IntegratedStockMonitoringCom = ({
     },
   };
 
+  // 엑셀 다운로드 핸들러
+  const handleExcelDownload = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/stock/download/excel', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        params: {
+          storeId: filters.storeId,
+          categoryId: filters.categoryId,
+          productName: filters.productName,
+          barcode: filters.barcode
+        },
+        responseType: 'blob'
+      });
+
+      // 파일 다운로드
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // 파일명 설정 (현재 날짜 포함)
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      link.setAttribute('download', `재고현황_${dateStr}.xlsx`);
+      
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      alert('엑셀 파일이 다운로드되었습니다.');
+    } catch (error) {
+      console.error('엑셀 다운로드 실패:', error);
+      alert('엑셀 다운로드에 실패했습니다.');
+    }
+  };
+
   return (
     <Container>
+      <PageTitle>통합 재고 모니터링</PageTitle>
+      <PageSubtitle>본사와 지점의 재고 현황을 통합적으로 모니터링합니다.</PageSubtitle>
+      
       {/* 뷰 모드 전환 탭 */}
       <div style={{ display: 'flex', marginBottom: '20px' }}>
         <button 
@@ -1241,7 +1301,13 @@ const IntegratedStockMonitoringCom = ({
       
       {/* 재고 목록 테이블 */}
       <Card style={{ position: 'relative' }}>
-        <CardTitle>상품별 재고 상세 목록</CardTitle>
+        <CardTitle>
+          상품별 재고 상세 목록
+          <ExcelButton onClick={handleExcelDownload}>
+            <FileDownloadIcon style={{ fontSize: '16px' }} />
+            엑셀 다운로드
+          </ExcelButton>
+        </CardTitle>
         
         {isLoading && <LoadingOverlay>데이터를 불러오는 중...</LoadingOverlay>}
         
