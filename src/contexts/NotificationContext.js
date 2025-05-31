@@ -85,6 +85,20 @@ export const NotificationProvider = ({ children }) => {
       });
     };
 
+    // 웹소켓 연결 상태 확인 및 재연결 시도
+    const ensureWebSocketConnection = () => {
+      if (!webSocketService.isConnected()) {
+        console.log('[NotificationContext] 웹소켓 연결이 끊어짐 - 재연결 시도');
+        webSocketService.autoConnect();
+      }
+    };
+
+    // 초기 연결 상태 확인
+    ensureWebSocketConnection();
+
+    // 주기적으로 연결 상태 확인 (30초마다)
+    const connectionCheckInterval = setInterval(ensureWebSocketConnection, 30000);
+
     // 개인 알림 구독
     const myEmpId = parseInt(localStorage.getItem('empId'), 10);
     if (myEmpId) {
@@ -114,6 +128,7 @@ export const NotificationProvider = ({ children }) => {
     // 언마운트 시 구독 해제
     return () => {
       console.log('[NotificationContext] 웹소켓 구독 해제');
+      clearInterval(connectionCheckInterval);
       webSocketService.unsubscribe('/topic/notifications/admin');
       if (deptDestination) {
         webSocketService.unsubscribe(deptDestination);

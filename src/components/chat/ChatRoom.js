@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import chatService from '../../service/ChatService';
+import chatService, { markMessagesAsRead, searchMessages } from '../../service/ChatService';
 import webSocketService from '../../service/WebSocketService';
 import { FaEllipsisV, FaUserPlus, FaSignOutAlt, FaUsers } from 'react-icons/fa';
 
@@ -23,10 +23,20 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
   const roomId = propRoomId || routeRoomId;
   
   const navigate = useNavigate();
+  const location = useLocation();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const menuRef = useRef(null);
   const processedMessagesRef = useRef(new Set()); // 이미 처리된 메시지 ID를 추적
+
+  // 새로운 기능 상태들
+  const [typingUsers, setTypingUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearch, setShowSearch] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(null); // 어떤 메시지에 이모지 피커를 보여줄지
+  
+  const typingTimerRef = useRef(null);
 
   // 외부에서 호출할 함수 노출
   useImperativeHandle(ref, () => ({
@@ -100,6 +110,64 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
             console.log('중복 메시지 감지됨:', messageId);
           }
         });
+
+        // 읽음 상태 구독
+        webSocketService.subscribe(`/topic/chat/room/${roomId}/read`, (updatedMessage) => {
+          setMessages(prevMessages => 
+            prevMessages.map(msg => 
+              msg.messageId === updatedMessage.messageId ? updatedMessage : msg
+            )
+          );
+        });
+
+        // 타이핑 상태 구독
+        webSocketService.subscribe(`/topic/chat/room/${roomId}/typing`, (typingData) => {
+          if (typingData.senderId !== user.empId) {
+            if (typingData.isTyping) {
+              setTypingUsers(prev => {
+                if (!prev.includes(typingData.senderName)) {
+                  return [...prev, typingData.senderName];
+                }
+                return prev;
+              });
+            } else {
+              setTypingUsers(prev => prev.filter(name => name !== typingData.senderName));
+            }
+          }
+        });
+
+        // 이모지 반응 구독
+        webSocketService.subscribe(`/topic/chat/room/${roomId}/reaction`, (reactionData) => {
+          setMessages(prevMessages => 
+            prevMessages.map(msg => {
+              if (msg.messageId === reactionData.messageId) {
+                // 반응 업데이트 로직
+                const updatedReactions = { ...msg.reactions };
+                const emoji = reactionData.emoji;
+                const userId = reactionData.userId.toString();
+                
+                if (reactionData.action === 'add') {
+                  if (!updatedReactions[emoji]) {
+                    updatedReactions[emoji] = [];
+                  }
+                  if (!updatedReactions[emoji].includes(userId)) {
+                    updatedReactions[emoji].push(userId);
+                  }
+                } else if (reactionData.action === 'remove') {
+                  if (updatedReactions[emoji]) {
+                    updatedReactions[emoji] = updatedReactions[emoji].filter(id => id !== userId);
+                    if (updatedReactions[emoji].length === 0) {
+                      delete updatedReactions[emoji];
+                    }
+                  }
+                }
+                
+                return { ...msg, reactions: updatedReactions };
+              }
+              return msg;
+            })
+          );
+        });
       }, 
       (error) => {
         console.error('웹소켓 연결 실패:', error);
@@ -111,6 +179,9 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
     return () => {
       // 구독 해제
       webSocketService.unsubscribe(`/topic/chat/room/${roomId}`);
+      webSocketService.unsubscribe(`/topic/chat/room/${roomId}/read`);
+      webSocketService.unsubscribe(`/topic/chat/room/${roomId}/typing`);
+      webSocketService.unsubscribe(`/topic/chat/room/${roomId}/reaction`);
     };
   }, [roomId, navigate, isInModal]);
 
@@ -195,6 +266,9 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
 
     // 웹소켓으로 메시지 전송
     webSocketService.sendMessage('/app/chat.sendMessage', messageData);
+    
+    // 타이핑 상태 중지
+    handleTypingStop();
     
     // 입력 필드 초기화
     setNewMessage('');
@@ -357,6 +431,82 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
   // 참여 인원 모달 닫기
   const handleCloseMembers = () => setShowMembers && setShowMembers(false);
 
+  // 타이핑 상태 처리
+  const handleInputChange = (e) => {
+    setNewMessage(e.target.value);
+    
+    // 타이핑 시작 알림
+    webSocketService.sendMessage('/app/chat.typing', {
+      roomId: Number(roomId),
+      isTyping: true
+    });
+    
+    // 기존 타이머 클리어
+    if (typingTimerRef.current) {
+      clearTimeout(typingTimerRef.current);
+    }
+    
+    // 3초 후 타이핑 중지
+    typingTimerRef.current = setTimeout(() => {
+      handleTypingStop();
+    }, 3000);
+  };
+
+  const handleTypingStop = () => {
+    webSocketService.sendMessage('/app/chat.typing', {
+      roomId: Number(roomId),
+      isTyping: false
+    });
+    
+    if (typingTimerRef.current) {
+      clearTimeout(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+  };
+
+  // 이모지 반응 처리
+  const handleEmojiReaction = (messageId, emoji) => {
+    const message = messages.find(m => m.messageId === messageId);
+    const currentUserReactions = message?.reactions?.[emoji] || [];
+    const hasReacted = currentUserReactions.includes(user.empId.toString());
+    
+    webSocketService.sendMessage('/app/chat.reaction', {
+      messageId: messageId,
+      emoji: emoji,
+      action: hasReacted ? 'remove' : 'add'
+    });
+    
+    setShowEmojiPicker(null);
+  };
+
+  // 메시지 검색
+  const handleSearch = async () => {
+    if (searchTerm.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    
+    try {
+      const results = await searchMessages(roomId, searchTerm);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('검색 실패:', error);
+    }
+  };
+
+  // 검색어 변경 시 자동 검색
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchTerm.trim().length >= 2) {
+        handleSearch();
+      } else {
+        setSearchResults([]);
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   if (loading) {
     return <Container $isInModal={isInModal}><p>로딩 중...</p></Container>;
   }
@@ -492,7 +642,48 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
                 )}
                 <MessageContent $isCurrentUser={user && message.senderId === user.empId}>
                   {message.content}
+                  <MessageActions>
+                    <EmojiButton onClick={() => setShowEmojiPicker(message.messageId)}>
+                      😊
+                    </EmojiButton>
+                    {user && message.senderId === user.empId && message.isRead && (
+                      <ReadStatus>✓✓</ReadStatus>
+                    )}
+                    {user && message.senderId === user.empId && !message.isRead && (
+                      <ReadStatus $unread>✓</ReadStatus>
+                    )}
+                  </MessageActions>
                 </MessageContent>
+                
+                {/* 이모지 반응 표시 */}
+                {message.reactions && Object.keys(message.reactions).length > 0 && (
+                  <ReactionsContainer>
+                    {Object.entries(message.reactions).map(([emoji, users]) => (
+                      <ReactionButton 
+                        key={emoji}
+                        onClick={() => handleEmojiReaction(message.messageId, emoji)}
+                        $hasReacted={users.includes(user.empId.toString())}
+                      >
+                        {emoji} {users.length}
+                      </ReactionButton>
+                    ))}
+                  </ReactionsContainer>
+                )}
+                
+                {/* 이모지 피커 */}
+                {showEmojiPicker === message.messageId && (
+                  <EmojiPicker>
+                    {['👍', '❤️', '😂', '😮', '😢', '😡'].map(emoji => (
+                      <EmojiOption 
+                        key={emoji}
+                        onClick={() => handleEmojiReaction(message.messageId, emoji)}
+                      >
+                        {emoji}
+                      </EmojiOption>
+                    ))}
+                  </EmojiPicker>
+                )}
+                
                 <MessageTime>
                   {new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </MessageTime>
@@ -500,6 +691,14 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
             )}
           </MessageItem>
         ))}
+        
+        {/* 타이핑 인디케이터 */}
+        {typingUsers.length > 0 && (
+          <TypingIndicator>
+            {typingUsers.join(', ')}님이 입력 중<TypingDots>...</TypingDots>
+          </TypingIndicator>
+        )}
+        
         <div ref={messagesEndRef} />
       </MessagesContainer>
 
@@ -507,7 +706,7 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
         <MessageInput 
           type="text" 
           value={newMessage} 
-          onChange={handleMessageChange} 
+          onChange={handleInputChange} 
           placeholder="메시지를 입력하세요"
         />
         <SendButton type="submit" disabled={!newMessage.trim()}>전송</SendButton>
@@ -993,6 +1192,105 @@ const ModalRoomHeader = styled.div`
   position: sticky;
   top: 0;
   z-index: 20;
+`;
+
+const TypingIndicator = styled.div`
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-style: italic;
+  font-size: 14px;
+  padding: 10px 0;
+`;
+
+const TypingDots = styled.span`
+  margin-left: 5px;
+  animation: blink 1.5s infinite;
+  
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+`;
+
+const MessageActions = styled.div`
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  display: flex;
+  gap: 5px;
+  opacity: 0;
+  transition: opacity 0.2s;
+`;
+
+const EmojiButton = styled.button`
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+`;
+
+const ReadStatus = styled.span`
+  font-size: 12px;
+  color: ${props => props.$unread ? '#6c757d' : '#28a745'};
+  margin-left: 5px;
+`;
+
+const ReactionsContainer = styled.div`
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+`;
+
+const ReactionButton = styled.button`
+  background-color: ${props => props.$hasReacted ? '#e3f2fd' : '#f8f9fa'};
+  border: 1px solid ${props => props.$hasReacted ? '#2196f3' : '#ddd'};
+  border-radius: 12px;
+  padding: 2px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  
+  &:hover {
+    background-color: ${props => props.$hasReacted ? '#bbdefb' : '#e9ecef'};
+  }
+`;
+
+const EmojiPicker = styled.div`
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 5px;
+  display: flex;
+  gap: 5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 100;
+`;
+
+const EmojiOption = styled.button`
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
 `;
 
 export default ChatRoom;
