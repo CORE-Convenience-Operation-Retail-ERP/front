@@ -97,6 +97,8 @@ function MonthlyScheduleGridCom({ calendarMatrix, schedules, onClickDate, onClic
 
     const span = endIdx - startIdx + 1;
 
+    console.log("bar",bar)
+
     return {
       startOffset: (startIdx / dayCount) * 100,
       spanWidth: (span / dayCount) * 100,

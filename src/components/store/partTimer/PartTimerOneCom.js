@@ -14,7 +14,7 @@ function PartTimerOneCom({ form, onEdit, onResign, onRejoin }) {
         <FormWrapper>
             <Title>직원 상세 정보</Title>
 
-            {form.partImg && <ProfileImage src={form.partImg} alt="프로필" />}
+            {form.partImg && <ProfileImage src={form.partImg} alt="프로필 이미지" />}
 
             <InputGroup>
                 <Label>이름</Label>

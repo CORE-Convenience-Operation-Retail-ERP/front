@@ -48,7 +48,7 @@ export const fetchStoreStockList = async ({
  */
 export const requestStockTransfer = async (transferData) => {
   return await handleRequest(() =>
-      axios.post("/api/stock/transfer", transferData)
+      axios.post("/api/store/stock/transfer", transferData)
   );
 };
 

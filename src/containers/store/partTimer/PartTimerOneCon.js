@@ -23,10 +23,7 @@ function PartTimerOneCon(){
         try {
           console.log("요청하는 아르바이트 ID:", id);
           const data = await fetchPartTimerById(id);
-
-          data.partImg = data.partImg ? `${process.env.REACT_APP_API_URL || 'https://api.corepos.store'}${data.partImg}` : null;
-
-            setForm(data);
+          setForm(data);
           setLoading(false);
         } catch (err) {
           alert('상세 정보를 불러오지 못했습니다.');

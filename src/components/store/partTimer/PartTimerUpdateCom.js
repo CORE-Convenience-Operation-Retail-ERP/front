@@ -15,22 +15,19 @@ import {
 
 import AddressSearchCustom from '../common/AddressSearchCustom';
 import CustomCalendar from '../common/CustomCalendar';
-import {ButtonRow} from "../../../features/store/styles/common/Button.styled";
+import { ButtonRow } from "../../../features/store/styles/common/Button.styled";
 
 function PartTimerUpdateCom({
-                                form,
-                                onChange,
-                                onDateChange,
-                                onSubmit,
-                                code,
-                                onCodeChange,
-                                onSendCode,
-                                onVerifyCode,
-                                verified,
-                                originalPhone
-                            }) {
+    form,
+    onChange,
+    onDateChange,
+    onSubmit,
+    onOpenQrAuth,
+    verified,
+    inputRefs,
+    originalPhone
+}) {
     const phoneChanged = form.partPhone !== originalPhone;
-
 
     return (
         <FormWrapper>
@@ -60,27 +57,19 @@ function PartTimerUpdateCom({
 
             <InputGroup>
                 <Label>전화번호</Label>
-                <Input name="partPhone" value={form.partPhone || ''} onChange={onChange} />
+                <PhoneRow>
+                    <Input
+                        name="partPhone"
+                        value={form.partPhone || ''}
+                        onChange={onChange}
+                        ref={inputRefs.partPhone}
+                    />
+                    {phoneChanged && (
+                        <OutlineButton type="button" onClick={onOpenQrAuth}>기기 인증</OutlineButton>
+                    )}
+                </PhoneRow>
+                {phoneChanged && verified && <VerifiedMessage>✅ 인증 완료</VerifiedMessage>}
             </InputGroup>
-
-            {phoneChanged && (
-                <>
-                    <InputGroup>
-                        <Label>인증번호</Label>
-                        <PhoneRow>
-                            <Input
-                                type="text"
-                                value={code}
-                                onChange={onCodeChange}
-                                placeholder="인증번호 입력"
-                            />
-                            <OutlineButton type="button" onClick={onSendCode}>전송</OutlineButton>
-                            <OutlineButton type="button" onClick={onVerifyCode} disabled={verified}>확인</OutlineButton>
-                        </PhoneRow>
-                        {verified && <VerifiedMessage>✅ 인증 완료</VerifiedMessage>}
-                    </InputGroup>
-                </>
-            )}
 
             <InputGroup>
                 <Label>직책</Label>
@@ -157,7 +146,10 @@ function PartTimerUpdateCom({
                 <ActionButton type="button" onClick={() => window.history.back()}>
                     뒤로가기
                 </ActionButton>
-                <ActionButton onClick={onSubmit} disabled={phoneChanged && !verified}>
+                <ActionButton
+                    onClick={onSubmit}
+                    disabled={phoneChanged && !verified}
+                >
                     수정 완료
                 </ActionButton>
             </ButtonRow>

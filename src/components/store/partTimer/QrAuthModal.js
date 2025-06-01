@@ -36,8 +36,8 @@ const QrImage = styled.img`
 export default function QrAuthModal({ phone, isOpen, onClose }) {
     if (!isOpen || !phone) return null;
 
-    const redirect = encodeURIComponent(window.location.pathname);
-    const qrUrl = `https://corepos.store/device-auth?phone=${phone}&redirect=${redirect}`;
+    const redirect = encodeURIComponent('/store/parttimer/register');
+    const qrUrl = `${origin}/store/device-auth?phone=${phone}&redirect=${redirect}`;
 
     return (
         <ModalWrapper onClick={onClose}>

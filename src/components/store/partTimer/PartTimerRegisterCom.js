@@ -13,7 +13,6 @@ import {
     ActionButton
 } from '../../../features/store/styles/partTimer/StorePatTimerForm.styled';
 import CustomCalendar from '../../../components/store/common/CustomCalendar';
-import { Navigate } from 'react-router-dom';
 import { ButtonRow } from '../../../features/store/styles/common/Button.styled';
 import AddressSearchCustom from '../common/AddressSearchCustom';
 function PartTimerRegisterCom({
@@ -23,7 +22,8 @@ function PartTimerRegisterCom({
     onSubmit,
     onOpenQrAuth,
     verified,
-    inputRefs = {} // 추가된 ref 포커스용
+    inputRefs = {},
+    onBack
 }) {
 
     return (
@@ -182,7 +182,7 @@ function PartTimerRegisterCom({
             </InputGroup>
 
         <ButtonRow>
-            <ActionButton type="button" onClick={() => Navigate(-1)}>뒤로가기</ActionButton>
+            <ActionButton type="button" onClick={onBack}>뒤로가기</ActionButton>
             <ActionButton type="button" onClick={onSubmit}>등록</ActionButton>
         </ButtonRow>
         </FormWrapper>

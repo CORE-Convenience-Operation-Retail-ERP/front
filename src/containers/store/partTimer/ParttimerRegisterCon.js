@@ -1,13 +1,12 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import PartTimerRegisterCom from "../../../components/store/partTimer/PartTimerRegisterCom";
 import QRAuthModal from "../../../components/store/partTimer/QrAuthModal";
 import { createPartTimer } from "../../../service/store/PartTimeService";
+import { fetchVerifiedDevice } from "../../../service/store/SmsService";
 
 function ParttimerRegisterCon() {
     const navigate = useNavigate();
-    const location = useLocation();
 
     const [form, setForm] = useState({
         partName: '',
@@ -45,18 +44,35 @@ function ParttimerRegisterCon() {
     const [verified, setVerified] = useState(false);
     const [qrModalOpen, setQrModalOpen] = useState(false);
 
+    // ✅ 전화번호 변경 시 서버에 인증된 디바이스 정보 조회
     useEffect(() => {
-        setForm(prev => ({
-            ...prev,
-            deviceId: uuidv4(),
-            deviceName: navigator.userAgent
-        }));
-    }, []);
+        const fetchDevice = async () => {
+            if (!form.partPhone) {
+                setVerified(false);
+                setForm(prev => ({
+                    ...prev,
+                    deviceId: '',
+                    deviceName: ''
+                }));
+                return;
+            }
 
-    useEffect(() => {
-        const isVerified = sessionStorage.getItem("verified");
-        if (isVerified === "true") setVerified(true);
-    }, [location]);
+            try {
+                const { verified, deviceId, deviceName } = await fetchVerifiedDevice(form.partPhone);
+                setVerified(verified);
+                setForm(prev => ({
+                    ...prev,
+                    deviceId: verified ? deviceId : '',
+                    deviceName: verified ? deviceName : ''
+                }));
+            } catch (err) {
+                console.error("기기 인증 조회 실패", err);
+                setVerified(false);
+            }
+        };
+
+        fetchDevice();
+    }, [form.partPhone]);
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
@@ -77,14 +93,24 @@ function ParttimerRegisterCon() {
             inputRefs.partPhone.current?.focus();
             return;
         }
-        console.log("모달 열기");
         setQrModalOpen(true);
     };
 
-
     const handleSubmit = async () => {
-        if (!verified) {
+        if (!verified || !form.deviceId) {
             alert("기기 인증을 먼저 완료해주세요.");
+            return;
+        }
+
+        try {
+            // 재확인 (혹시 모를 인증 취소 대비)
+            const { verified: reVerified } = await fetchVerifiedDevice(form.partPhone);
+            if (!reVerified) {
+                alert("기기 인증이 유효하지 않습니다. 다시 인증해주세요.");
+                return;
+            }
+        } catch (err) {
+            alert("기기 인증 확인 중 오류가 발생했습니다.");
             return;
         }
 
@@ -128,13 +154,14 @@ function ParttimerRegisterCon() {
             });
 
             await createPartTimer(formData);
-            sessionStorage.removeItem("verified");
             alert('아르바이트 등록 완료');
             navigate('/store/parttimer/list');
         } catch (error) {
             alert('등록 실패');
         }
     };
+
+    const handleBack = () => navigate(-1);
 
     return (
         <>
@@ -146,6 +173,7 @@ function ParttimerRegisterCon() {
                 onSubmit={handleSubmit}
                 onOpenQrAuth={handleOpenQrAuth}
                 inputRefs={inputRefs}
+                onBack={handleBack}
             />
 
             {qrModalOpen && (
@@ -153,8 +181,6 @@ function ParttimerRegisterCon() {
                     isOpen={qrModalOpen}
                     onClose={() => setQrModalOpen(false)}
                     phone={form.partPhone}
-                    deviceId={form.deviceId}
-                    deviceName={form.deviceName}
                 />
             )}
         </>

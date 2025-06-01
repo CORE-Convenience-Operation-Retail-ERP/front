@@ -15,7 +15,7 @@ export default function QRModal({ partTimerId, mode, onClose }) {
           return;
         }
 
-      const url = `${window.location.origin}/qr/${mode}?deviceId=${pt.deviceId}&storeId=${pt.storeId}`;
+        const url = `${window.location.origin}/store/qr/${mode}?deviceId=${pt.deviceId}&storeId=${pt.storeId}`;
         setQrUrl(url);
       } catch (e) {
         setError("❌ QR 생성 실패");
@@ -26,34 +26,85 @@ export default function QRModal({ partTimerId, mode, onClose }) {
   }, [partTimerId, mode]);
 
   return (
-  <div style={{ padding: "2rem", textAlign: "center" }}>
-    <h2>📲 {mode === "check-in" ? "출근" : "퇴근"} QR</h2>
-    {error ? (
-      <p>{error}</p>
-    ) : qrUrl ? (
-      <>
-        <QRCodeCanvas value={qrUrl} size={256} />
-        <p>📸 위 QR을 본인의 기기로 스캔하세요.</p>
-      </>
-    ) : (
-      <p>🔄 로딩 중...</p>
-    )}
+    <div style={overlayStyle}>
+      <div style={modalStyle}>
+        <h2 style={titleStyle}>
+          {mode === "check-in" ? "출근" : "퇴근"}
+        </h2>
+        {error ? (
+          <p style={errorStyle}>{error}</p>
+        ) : qrUrl ? (
+          <>
+            <QRCodeCanvas value={qrUrl} size={220} />
+            <p style={descStyle}> 본인 기기로 QR을 스캔하세요.</p>
+          </>
+        ) : (
+          <p style={loadingStyle}>🔄 QR 생성 중...</p>
+        )}
 
-    <button
-      onClick={onClose}
-      style={{
-        marginTop: "1.5rem",
-        padding: "0.5rem 1rem",
-        borderRadius: "6px",
-        border: "none",
-        backgroundColor: "#007BFF",
-        color: "#fff",
-        cursor: "pointer",
-      }}
-    >
-      닫기
-    </button>
-  </div>
-);
-
+        <button style={closeBtnStyle} onClick={onClose}>
+          닫기
+        </button>
+      </div>
+    </div>
+  );
 }
+
+const overlayStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  backgroundColor: "rgba(0, 0, 0, 0.35)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+};
+
+const modalStyle = {
+  backgroundColor: "#fff",
+  padding: "2rem",
+  borderRadius: "16px",
+  width: "100%",
+  maxWidth: "360px",
+  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+  textAlign: "center",
+  fontFamily: "'Noto Sans KR', sans-serif",
+};
+
+const titleStyle = {
+  fontSize: "1.5rem",
+  fontWeight: "600",
+  marginBottom: "1.2rem",
+  color: "#333",
+};
+
+const descStyle = {
+  marginTop: "1rem",
+  fontSize: "0.95rem",
+  color: "#555",
+};
+
+const loadingStyle = {
+  fontSize: "1rem",
+  color: "#888",
+};
+
+const errorStyle = {
+  fontSize: "1rem",
+  color: "#e74c3c",
+};
+
+const closeBtnStyle = {
+  marginTop: "1.8rem",
+  padding: "0.6rem 1.4rem",
+  border: "none",
+  borderRadius: "8px",
+  backgroundColor: "#4A90E2",
+  color: "#fff",
+  fontSize: "0.95rem",
+  cursor: "pointer",
+  transition: "background 0.2s ease-in-out",
+};

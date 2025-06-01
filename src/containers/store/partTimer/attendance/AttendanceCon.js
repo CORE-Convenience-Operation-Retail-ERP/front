@@ -13,7 +13,6 @@ function AttendanceCon() {
     const isHQ = localStorage.getItem("role") === "ROLE_MASTER";
     const userStoreId = parseInt(localStorage.getItem("storeId"));
 
-    // HQ일 경우 매장 목록 조회
     useEffect(() => {
         const init = async () => {
             if (isHQ) {

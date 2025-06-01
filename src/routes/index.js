@@ -62,6 +62,7 @@ import HourlySalesDetailPage from '../pages/store/Statistic/HourlySalesDetailPag
 import OrderTopProductsDetailPage from '../pages/store/Statistic/OrderTopProductsDetailPage.js';
 import StrockInHistoryPage from '../pages/store/order/StockInHistoryPage.js';
 import DeviceAuthPage from "../components/store/partTimer/DeviceAuthPage";
+import QRCheckPage from '../containers/store/partTimer/attendance/QRCheckPage.js';
 
 
 const AppRoutes = () => {
@@ -107,6 +108,8 @@ const AppRoutes = () => {
         {/* 지점 관련 라우트*/}
         <Route path="/store" element={<StoreLayout/>} >
           <Route path="home" element={<HomePage/>} />
+          <Route path="qr/check-in" element={<QRCheckPage mode="check-in" />} />
+          <Route path="qr/check-out" element={<QRCheckPage mode="check-out" />} />
           <Route path="stock/list" element={<StockListPage/>} />
           <Route path="device-auth" element={<DeviceAuthPage />} />
           <Route path="stock/in-history" element={<StrockInHistoryPage />} />
