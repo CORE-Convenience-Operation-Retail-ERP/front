@@ -16,7 +16,8 @@ const RegisterCom = ({
   sendVerificationEmail,
   verifyEmail,
   isVerificationSent,
-  isEmailVerified
+  isEmailVerified,
+  selectedFile
 }) => {
   const [birthAndGender, setBirthAndGender] = useState("");
   
@@ -260,7 +261,26 @@ const RegisterCom = ({
                   onChange={onFileChange}
                   required
                   className="file-input"
+                  accept="image/*"
                 />
+                {selectedFile && (
+                  <div className="file-preview">
+                    <img 
+                      src={URL.createObjectURL(selectedFile)} 
+                      alt="미리보기" 
+                      style={{
+                        maxWidth: '200px',
+                        maxHeight: '200px',
+                        marginTop: '10px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px'
+                      }}
+                    />
+                    <p style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
+                      {selectedFile.name}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>

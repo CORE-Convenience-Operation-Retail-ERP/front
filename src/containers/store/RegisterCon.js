@@ -233,6 +233,7 @@ const RegisterCon = () => {
       verifyEmail={verifyEmail}
       isVerificationSent={isVerificationSent}
       isEmailVerified={isEmailVerified}
+      selectedFile={file}
     />
   );
 };

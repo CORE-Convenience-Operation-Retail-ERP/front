@@ -15,7 +15,7 @@ const popupStyles = {
     width: '300px',
     maxHeight: '350px',
     overflowY: 'auto',
-    zIndex: 1000,
+    zIndex: 9999,
     border: '1px solid #facc15'
   },
   header: {

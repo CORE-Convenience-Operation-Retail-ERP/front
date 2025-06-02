@@ -50,7 +50,13 @@ const MyCom = ({ info }) => {
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
           {/* 프로필 이미지 */}
           <Avatar
-            src={info?.empImg || "/profile_default.png"}
+            src={
+              info?.empImg 
+                ? (info.empImg.startsWith('http') 
+                    ? info.empImg 
+                    : `/api/auth/uploads/${info.empImg}`)
+                : "/profile_default.png"
+            }
             alt="프로필"
             sx={{
               width: 120,

@@ -129,17 +129,38 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
   };
 
   // 이미지 업로드 처리
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          empImg: reader.result
-        }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        // FormData 생성
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        // 서버에 이미지 업로드
+        const response = await fetch(`/api/employee-management/${employee.empId}/upload-image`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: formData
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          // 업로드된 이미지 URL로 상태 업데이트
+          setFormData(prev => ({
+            ...prev,
+            empImg: result.imageUrl
+          }));
+        } else {
+          console.error('이미지 업로드 실패:', response.statusText);
+          alert('이미지 업로드에 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('이미지 업로드 중 오류:', error);
+        alert('이미지 업로드 중 오류가 발생했습니다.');
+      }
     }
   };
 
@@ -195,7 +216,13 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
           {/* 프로필 이미지 섹션 */}
           <Grid item xs={12} md={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Avatar
-              src={formData.empImg || "/profile_default.png"}
+              src={
+                formData.empImg 
+                  ? (formData.empImg.startsWith('http') 
+                      ? formData.empImg 
+                      : `/api/auth/uploads/${formData.empImg}`)
+                  : "/profile_default.png"
+              }
               alt="프로필 이미지"
               sx={{ 
                 width: 150, 

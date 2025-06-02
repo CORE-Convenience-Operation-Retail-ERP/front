@@ -416,7 +416,13 @@ const EmployeesListCom = ({
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <Box
                     component="img"
-                    src={selectedEmployee.empImg || "/profile_default.png"}
+                    src={
+                      selectedEmployee.empImg 
+                        ? (selectedEmployee.empImg.startsWith('http') 
+                            ? selectedEmployee.empImg 
+                            : `/api/auth/uploads/${selectedEmployee.empImg}`)
+                        : "/profile_default.png"
+                    }
                     alt="프로필"
                     sx={{
                       width: 120,
