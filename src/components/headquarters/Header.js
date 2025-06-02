@@ -165,19 +165,6 @@ const Header = () => {
             {/* 알림 아이콘 및 알림 목록 팝업(드롭다운) */}
             <NotificationIcon />
             <Box
-              component="img"
-              src="/profile_default.png"
-              alt="프로필"
-              sx={{
-                width: 24,
-                height: 24,
-                borderRadius: '50%',
-                cursor: 'pointer',
-                objectFit: 'cover'
-              }}
-              onClick={() => navigate('/headquarters/hr/my-page')}
-            />
-            <Box
               sx={{
                 cursor: 'pointer',
                 '&:hover': { textDecoration: 'underline' },

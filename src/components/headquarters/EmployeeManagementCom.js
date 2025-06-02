@@ -132,18 +132,25 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      // empId 확인
+      const empId = employee?.empId || formData.empId;
+      if (!empId) {
+        alert('사원 정보를 찾을 수 없습니다.');
+        return;
+      }
+
       try {
         // FormData 생성
-        const formData = new FormData();
-        formData.append('file', file);
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
         
         // 서버에 이미지 업로드
-        const response = await fetch(`/api/employee-management/${employee.empId}/upload-image`, {
+        const response = await fetch(`https://api.corepos.store/api/employee-management/${empId}/upload-image`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           },
-          body: formData
+          body: uploadFormData
         });
         
         if (response.ok) {
@@ -153,9 +160,12 @@ const EmployeeManagementCom = ({ employee, departments, stores, onSave, loading,
             ...prev,
             empImg: result.imageUrl
           }));
+          
+          alert('이미지가 성공적으로 업로드되었습니다.');
         } else {
-          console.error('이미지 업로드 실패:', response.statusText);
-          alert('이미지 업로드에 실패했습니다.');
+          const errorText = await response.text();
+          console.error('이미지 업로드 실패:', response.statusText, errorText);
+          alert(`이미지 업로드에 실패했습니다: ${response.statusText}`);
         }
       } catch (error) {
         console.error('이미지 업로드 중 오류:', error);
