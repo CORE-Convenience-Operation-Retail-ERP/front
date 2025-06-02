@@ -105,13 +105,16 @@ const AppRoutes = () => {
           <Route path="products/edit/:id" element={<ProductsEditPage />} />
           <Route path="products/register" element={<ProductsRegisterPage />} />
         </Route>
+
         {/* 지점 관련 라우트*/}
+        <Route path="/store/qr/check-in" element={<QRCheckPage mode="check-in" />} />
+        <Route path="/store/qr/check-out" element={<QRCheckPage mode="check-out" />} />
+        <Route path="/store/device-auth" element={<DeviceAuthPage />} />
+
+
         <Route path="/store" element={<StoreLayout/>} >
           <Route path="home" element={<HomePage/>} />
-          <Route path="qr/check-in" element={<QRCheckPage mode="check-in" />} />
-          <Route path="qr/check-out" element={<QRCheckPage mode="check-out" />} />
           <Route path="stock/list" element={<StockListPage/>} />
-          <Route path="device-auth" element={<DeviceAuthPage />} />
           <Route path="stock/in-history" element={<StrockInHistoryPage />} />
           <Route path="stock/flow/search" element={<StockFlowLogPage/>} />
           <Route path="inventory/check/history" element={<InventoryHistoryPage/>} />

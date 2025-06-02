@@ -18,20 +18,12 @@ const MoreLink = styled.div`
 export default function StockHistorySummaryCom({
   historyList = [],
   productId,
-  enableFilter = false,
   highlightDiff = false
 }) {
   const navigate = useNavigate();
 
   return (
     <div>
-      {enableFilter && (
-        <div style={{ marginBottom: '12px', display: 'flex', gap: '12px' }}>
-          <input type="text" placeholder="담당자 검색" style={{ padding: '6px', fontSize: '13px' }} />
-          <input type="date" style={{ padding: '6px' }} />
-        </div>
-      )}
-
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h4 style={{ margin: 0 }}>수량 변화 로그 (최근 10건)</h4>
         {productId && (
