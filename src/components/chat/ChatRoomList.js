@@ -292,7 +292,10 @@ const ChatRoomList = ({ isInModal = false, onRoomSelect }) => {
                 <LastMessage>{room.lastMessage || '새 채팅방'}</LastMessage>
                 <MemberCount>{room.members?.length || 0}명 참여</MemberCount>
                 <LastMessageTime>
-                  {room.lastMessageTime ? new Date(room.lastMessageTime).toLocaleString() : ''}
+                  {room.lastMessageTime ? 
+                    new Date(new Date(room.lastMessageTime).getTime() + (9 * 60 * 60 * 1000)).toLocaleString() : 
+                    ''
+                  }
                 </LastMessageTime>
               </RoomItem>
             ))

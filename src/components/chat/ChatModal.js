@@ -272,7 +272,10 @@ const ChatModal = ({ isOpen, onClose }) => {
               <LastMessageWrapper>
                 <LastMessage>{room.lastMessage || '새 채팅방'}</LastMessage>
                 <LastMessageTime>
-                  {room.lastMessageTime ? new Date(room.lastMessageTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
+                  {room.lastMessageTime ? 
+                    new Date(new Date(room.lastMessageTime).getTime() + (9 * 60 * 60 * 1000)).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 
+                    ''
+                  }
                 </LastMessageTime>
               </LastMessageWrapper>
               <RoomMembers>

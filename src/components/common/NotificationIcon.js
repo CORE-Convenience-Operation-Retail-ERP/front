@@ -97,11 +97,13 @@ const styles = {
   }
 };
 
-// 날짜 포맷팅 함수
+// 날짜 포맷팅 함수 (서버 시간에 +9시간 적용)
 const formatDate = (dateString) => {
   const date = new Date(dateString);
+  // 서버 시간에 +9시간 추가 (한국 시간으로 변환)
+  const kstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
   const now = new Date();
-  const diff = now - date;
+  const diff = now - kstDate;
   
   // 1분 이내
   if (diff < 60 * 1000) {
@@ -115,19 +117,19 @@ const formatDate = (dateString) => {
   }
   
   // 오늘
-  if (date.toDateString() === now.toDateString()) {
-    return `오늘 ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+  if (kstDate.toDateString() === now.toDateString()) {
+    return `오늘 ${kstDate.getHours()}:${String(kstDate.getMinutes()).padStart(2, '0')}`;
   }
   
   // 어제
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
-  if (date.toDateString() === yesterday.toDateString()) {
-    return `어제 ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+  if (kstDate.toDateString() === yesterday.toDateString()) {
+    return `어제 ${kstDate.getHours()}:${String(kstDate.getMinutes()).padStart(2, '0')}`;
   }
   
   // 그 이전
-  return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`;
+  return `${kstDate.getFullYear()}.${kstDate.getMonth() + 1}.${kstDate.getDate()}`;
 };
 
 const NotificationIcon = () => {

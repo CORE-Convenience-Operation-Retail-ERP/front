@@ -494,7 +494,7 @@ const ChatRoom = forwardRef(({ roomId: propRoomId, isInModal = false, onBackClic
                   {message.content}
                 </MessageContent>
                 <MessageTime>
-                  {new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(new Date(message.sentAt).getTime() + (9 * 60 * 60 * 1000)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </MessageTime>
               </>
             )}
